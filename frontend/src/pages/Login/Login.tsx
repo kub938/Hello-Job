@@ -1,6 +1,6 @@
-import useAuthStore from "../../store/authStore";
+import useAuthStore from "@/store/authStore";
 
-function Home() {
+function Login() {
   const { isLogin, login, logout } = useAuthStore();
 
   return (
@@ -15,4 +15,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default Login;
