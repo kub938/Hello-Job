@@ -6,6 +6,30 @@
 * {
   box-sizing: border-box;
 }
+.background::before {
+  content: "";
+  position: fixed;
+  inset: 0; /* 상단 절반만 적용 */
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.1) 0 0.125rem,
+    transparent 0.125rem 0.375rem
+  );
+  pointer-events: none;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 80%
+  );
+}
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -121,4 +145,34 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.login-background {
+  background: #606c88;
+  background: -webkit-linear-gradient(to bottom, #3f4c6b, #606c88);
+  background: linear-gradient(to bottom, #3f4c6b, #606c88);
+}
+
+.info-background {
+  background: #3a7bd5;
+  background: -webkit-linear-gradient(to bottom, #3a6073, #3a7bd5);
+  background: linear-gradient(to bottom, #3a6073, #3a7bd5);
+}
+
+.analysis-background {
+  background: #b993d6;
+  background: -webkit-linear-gradient(to top, #8ca6db, #b993d6);
+  background: linear-gradient(to top, #8ca6db, #b993d6);
+}
+
+.introdcution-background {
+  background: #9796f0;
+  background: -webkit-linear-gradient(to bottom, #fbc7d4, #9796f0);
+  background: linear-gradient(to bottom, #fbc7d4, #9796f0);
+}
+
+.interview-background {
+  background: #403a3e;
+  background: -webkit-linear-gradient(to top, #be5869, #403a3e);
+  background: linear-gradient(to top, #be5869, #403a3e);
 }
