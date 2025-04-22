@@ -3,6 +3,30 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("/LINESeedKR-Rg.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NEXONLv1Gothic";
+  src: url("/NEXONLv1GothicLight.woff2") format("truetype");
+  font-weight: light;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-line {
+  font-family: "LINESeedKR", sans-serif;
+}
+
+.font-gothic {
+  font-family: "NEXONLv1Gothic", sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
