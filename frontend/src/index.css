@@ -3,16 +3,99 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@font-face {
+  font-family: "LINESeedKR";
+  src: url("/LINESeedKR-Rg.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NEXONLv1Gothic";
+  src: url("/NEXONLv1GothicLight.woff2") format("truetype");
+  font-weight: light;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-line {
+  font-family: "LINESeedKR", sans-serif;
+}
+
+.font-gothic {
+  font-family: "NEXONLv1Gothic", sans-serif;
+}
+
 * {
   box-sizing: border-box;
 }
-.background::before {
+
+/* Ripple Animation */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(0);
+  animation: ripple-animation 1s ease-out forwards;
+  pointer-events: none;
+  z-index: -1;
+}
+
+@keyframes ripple-animation {
+  0% {
+    transform: scale(0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}
+.ripple-container {
+  position: relative;
+  overflow: hidden;
+}
+.ripple-container .ripple {
+  top: 50%;
+  left: calc(50% - 30px);
+  width: 60px;
+  height: 60px;
+  animation-delay: 0s;
+}
+
+/* 배경 그라데이션 */
+.background-dark::before {
   content: "";
   position: fixed;
   inset: 0; /* 상단 절반만 적용 */
   background-image: repeating-linear-gradient(
-    135deg,
-    rgba(0, 0, 0, 0.1) 0 0.125rem,
+    45deg,
+    rgba(0, 0, 0, 0.05) 0 0.125rem,
+    transparent 0.125rem 0.375rem
+  );
+  pointer-events: none;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 1) 50%,
+    rgba(0, 0, 0, 0) 80%
+  );
+}
+.background-light::before {
+  content: "";
+  position: fixed;
+  inset: 0; /* 상단 절반만 적용 */
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.05) 0 0.125rem,
     transparent 0.125rem 0.375rem
   );
   pointer-events: none;
@@ -154,25 +237,25 @@
 }
 
 .info-background {
-  background: #3a7bd5;
-  background: -webkit-linear-gradient(to bottom, #3a6073, #3a7bd5);
-  background: linear-gradient(to bottom, #3a6073, #3a7bd5);
+  background: #faaca8;
+  background: -webkit-linear-gradient(to bottom, #ddd6f3, #faaca8);
+  background: linear-gradient(to bottom, #ddd6f3, #faaca8);
 }
 
 .analysis-background {
-  background: #b993d6;
-  background: -webkit-linear-gradient(to top, #8ca6db, #b993d6);
-  background: linear-gradient(to top, #8ca6db, #b993d6);
-}
-
-.introdcution-background {
   background: #9796f0;
   background: -webkit-linear-gradient(to bottom, #fbc7d4, #9796f0);
   background: linear-gradient(to bottom, #fbc7d4, #9796f0);
 }
 
+.introdcution-background {
+  background: #b993d6;
+  background: -webkit-linear-gradient(to top, #8ca6db, #b993d6);
+  background: linear-gradient(to top, #8ca6db, #b993d6);
+}
+
 .interview-background {
-  background: #403a3e;
-  background: -webkit-linear-gradient(to top, #be5869, #403a3e);
-  background: linear-gradient(to top, #be5869, #403a3e);
+  background: #6f86d6;
+  background: -webkit-linear-gradient(to bottom, #48c6ef, #6f86d6);
+  background: linear-gradient(to bottom, #48c6ef, #6f86d6);
 }

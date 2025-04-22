@@ -1,4 +1,5 @@
 import useAuthStore from "@/store/authStore";
+import Logo from "./components/Logo";
 
 function Login() {
   const { isLogin, login, logout } = useAuthStore();
@@ -6,8 +7,9 @@ function Login() {
   return (
     <div className="flex flex-col items-center justify-between h-screen relative">
       <main className="w-screen h-full">
-        <div className="w-full h-full fixed z-[-2] background login-background"></div>
-        <div>
+        <div className="w-full h-full fixed z-[-2] background-dark login-background"></div>
+        <div className="w-full h-full flex flex-col items-center justify-center">
+          <Logo />
           <h1>라우터 테스트</h1>
           {isLogin ? (
             <button onClick={logout}>로그아웃</button>
