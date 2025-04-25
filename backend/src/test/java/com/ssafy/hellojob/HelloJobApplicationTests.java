@@ -1,10 +1,10 @@
-package com.ssafy.backend;
+package com.ssafy.hellojob;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BackendApplicationTests {
+class HelloJobApplicationTests {
 
 	@Test
 	void contextLoads() {
