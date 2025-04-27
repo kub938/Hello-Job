@@ -1,4 +1,4 @@
-function Home() {
+function JobSearch() {
   return (
     <div className="flex flex-col items-center justify-between h-screen">
       <main></main>
@@ -6,4 +6,4 @@ function Home() {
   );
 }
 
-export default Home;
+export default JobSearch;

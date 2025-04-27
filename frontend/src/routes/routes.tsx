@@ -2,6 +2,9 @@ import { createBrowserRouter } from "react-router";
 import App from "@/App";
 import Home from "@/pages/Home/Home";
 import Login from "@/pages/Login/Login";
+import CorporateSearch from "@/pages/CorporateSearch/CorporateSearch";
+import Mypage from "@/pages/Mypage/Mypage";
+import JobSearch from "@/pages/JobSearch/JobSearch";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +19,18 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <Login />,
+      },
+      {
+        path: "corporate-search",
+        element: <CorporateSearch />,
+      },
+      {
+        path: "mypage",
+        element: <Mypage />,
+      },
+      {
+        path: "job-search",
+        element: <JobSearch />,
       },
     ],
   },
