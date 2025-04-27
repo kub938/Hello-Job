@@ -1,5 +1,3 @@
-import { FadeLoader } from "react-spinners";
-
 function CoverLetter() {
   return (
     <>
