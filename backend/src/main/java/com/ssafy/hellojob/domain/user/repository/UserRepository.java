@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.user.reository;
+package com.ssafy.hellojob.domain.user.repository;
 
 import com.ssafy.hellojob.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;

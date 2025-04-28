@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.project.entity;
 
+import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,22 +21,22 @@ public class Project {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(name = "project_name", nullable = false)
+    @Column(name = "project_name", nullable = false, length = 100)
     private String projectName;
 
     @Column(name = "project_intro", nullable = false)
     private String projectIntro;
 
-    @Column(name = "project_role")
+    @Column(name = "project_role", length = 50)
     private String projectRole;
 
-    @Column(name = "project_skills")
+    @Column(name = "project_skills", columnDefinition = "TEXT")
     private String projectSkills;
 
-    @Column(name = "project_detail")
+    @Column(name = "project_detail", columnDefinition = "TEXT")
     private String projectDetail;
 
-    @Column(name = "project_client")
+    @Column(name = "project_client", length = 100)
     private String projectClient;
 
     @Column(name = "project_start_date")
