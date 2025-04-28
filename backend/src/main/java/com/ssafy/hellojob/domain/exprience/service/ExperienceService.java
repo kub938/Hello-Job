@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.exprience.service;
 
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceCreateResponseDto;
+import com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto;
 import com.ssafy.hellojob.domain.exprience.entity.Experience;
 import com.ssafy.hellojob.domain.exprience.repository.ExperienceRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -10,8 +11,11 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -42,5 +46,14 @@ public class ExperienceService {
         return ExperienceCreateResponseDto.builder()
                 .experienceId(experienceId)
                 .build();
+    }
+
+    public ResponseEntity<?> getExperiences(Integer userId) {
+        List<ExperiencesResponseDto> experiences = experienceRepository.findExperiencesByUserId(userId);
+
+        if (experiences.isEmpty())
+            return ResponseEntity.noContent().build();
+
+        return ResponseEntity.ok(experiences);
     }
 }
