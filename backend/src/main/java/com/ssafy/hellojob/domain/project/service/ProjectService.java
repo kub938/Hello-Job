@@ -2,7 +2,6 @@ package com.ssafy.hellojob.domain.project.service;
 
 import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectCreateResponseDto;
-import com.ssafy.hellojob.domain.project.dto.response.ProjectResponseDto;
 import com.ssafy.hellojob.domain.project.entity.Project;
 import com.ssafy.hellojob.domain.project.entity.User;
 import com.ssafy.hellojob.domain.project.repository.ProjectRepository;
