@@ -3,6 +3,8 @@ package com.ssafy.hellojob.domain.jobroleanalysis.service;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSaveResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
+import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysisBookmark;
+import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
@@ -16,6 +18,9 @@ public class JobRoleAnalysisService {
 
     @Autowired
     JobRoleAnalysisRepository jobRoleAnalysisRepository;
+
+    @Autowired
+    JobRoleAnalysisBookmarkRepository jobRoleAnalysisBookmarkRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -41,7 +46,13 @@ public class JobRoleAnalysisService {
                 .isPublic(requestDto.getIsPublic()) // 공개 여부
                 .build();
 
+        JobRoleAnalysisBookmark newJobRoleAnalysisBookmark = JobRoleAnalysisBookmark.builder()
+                .user(user)
+                .jobRoleAnalysis(newJobRoleAnalysis)
+                .build();
+
         jobRoleAnalysisRepository.save(newJobRoleAnalysis);
+        jobRoleAnalysisBookmarkRepository.save(newJobRoleAnalysisBookmark);
 
         return JobRoleAnalysisSaveResponseDto.builder()
                 .id(newJobRoleAnalysis.getJobRoleAnalysisId())
