@@ -3,6 +3,7 @@ package com.ssafy.hellojob.domain.project.service;
 import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectCreateResponseDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectResponseDto;
+import com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto;
 import com.ssafy.hellojob.domain.project.entity.Project;
 import com.ssafy.hellojob.domain.project.repository.ProjectRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -66,7 +67,7 @@ public class ProjectService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
 
-        if (project.getUser().getId() != userId) {
+        if (project.getUser().getUserId() != userId) {
             throw new BaseException(ErrorCode.PROJECT_MISMATCH);
         }
 

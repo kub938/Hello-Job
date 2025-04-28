@@ -37,8 +37,11 @@ public class ProjectController {
         return response;
     }
 
-    @GetMapping("/{projectId}/{userId}")
-    public ProjectResponseDto getProject(@PathVariable Integer projectId, @PathVariable Integer userId) {
+    @GetMapping("/{projectId}")
+    public ProjectResponseDto getProject(
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable Integer projectId) {
+        Integer userId = principal.getUserId();
+        log.debug("🌞 프로젝트 상세 조회 입력 id: " + userId);
         ProjectResponseDto response = projectService.getProject(userId, projectId);
         return response;
     }
