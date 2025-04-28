@@ -1,0 +1,11 @@
+{
+    "mcpServers": {
+        "dart-mcp": {
+            "command": "C:\\Users\\SSAFY\\Desktop\\workspace\\B105\\S12P31B105\\ai\\.venv\\Scripts\\uv.exe", 
+            "args": ["--directory", "C:\\Users\\SSAFY\\Desktop\\workspace\\B105\\S12P31B105\\ai\\app\\mcp\\dart-mcp", "run", "dart.py"],
+            "env": {
+                "DART_API_KEY": "DART_API_KEY"
+            }
+        }
+    }
+}
