@@ -59,4 +59,14 @@ public class ProjectController {
         return Map.of("message", "프로젝트가 수정되었습니다.");
     }
 
+    @DeleteMapping("/{projectId}")
+    public Map<String, String> removeProject(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer projectId) {
+        Integer userId = principal.getUserId();
+        projectService.removeProject(userId, projectId);
+
+        return Map.of("message", "프로젝트가 삭제되었습니다.");
+    }
+
 }
