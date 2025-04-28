@@ -14,8 +14,6 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class ExperienceRequestDto {
 
-    private Integer userId;
-
     @NotBlank(message = ValidationMessage.EXPERIENCE_NAME_NOT_EMPTY)
     private String experienceName;
 
