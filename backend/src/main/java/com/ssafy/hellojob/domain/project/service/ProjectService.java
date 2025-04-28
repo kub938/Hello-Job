@@ -13,6 +13,7 @@ import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,5 +84,25 @@ public class ProjectService {
                 .projectEndDate(project.getProjectEndDate())
                 .updatedAt(project.getUpdatedAt())
                 .build();
+    }
+
+    public void updateProject(Integer userId, Integer projectId, ProjectRequestDto projectRequestDto) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
+
+        if ( project.getUser().getUserId() != userId ) {
+            throw new BaseException(ErrorCode.PROJECT_MISMATCH);
+        }
+
+        project.updateProject(
+                projectRequestDto.getProjectName(),
+                projectRequestDto.getProjectIntro(),
+                projectRequestDto.getProjectRole(),
+                projectRequestDto.getProjectSkills(),
+                projectRequestDto.getProjectDetail(),
+                projectRequestDto.getProjectClient(),
+                projectRequestDto.getProjectStartDate(),
+                projectRequestDto.getProjectEndDate()
+        );
     }
 }
