@@ -6,3 +6,6 @@ colorlog
 requests
 openai-agents
 mcp
+uv
+pytest 
+pytest-asyncio
