@@ -6,6 +6,8 @@ import Home from "@/pages/Home/Home";
 import Login from "@/pages/Login/Login";
 import Loading from "@/components/Loading/Loading";
 import RouterErrorHandler from "@/components/Error/RouterErrorHandler";
+import RenderErrorFallback from "@/components/Error/RenderErrorHandler";
+import { ErrorBoundary } from "react-error-boundary";
 
 const CoverLetter = lazy(() => import("@/pages/CoverLetter/CoverLetter"));
 
@@ -32,7 +34,9 @@ const router = createBrowserRouter([
         path: "cover-letter",
         element: (
           <SuspenseWrapper>
-            <CoverLetter />
+            <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+              <CoverLetter />
+            </ErrorBoundary>
           </SuspenseWrapper>
         ),
       },
