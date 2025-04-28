@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
 import { Toaster } from "@/components/ui/sonner";
-import Header from "./components/Header";
+import Header from "./components/Common/Header";
 
 function App() {
   return (
