@@ -23,8 +23,8 @@ public class CompanyListDto {
 
     private String companyIndustry;
 
-    private boolean companyVisible;
-
+//    private boolean companyVisible;
+//
     private LocalDateTime updatedAt;
 
 }
