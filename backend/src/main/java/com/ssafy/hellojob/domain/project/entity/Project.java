@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.project.entity;
 
+import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
