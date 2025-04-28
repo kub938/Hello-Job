@@ -27,7 +27,7 @@ public enum ErrorCode {
 
     // 프로젝트
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 프로젝트를 찾을 수 없습니다."),
-    PROJECT_MISMATCH(HttpStatus.BAD_REQUEST, "조회 요청자와 프로젝트 입력자가 일치하지 않습니다."),
+    PROJECT_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 프로젝트 입력자가 일치하지 않습니다."),
 
 
     /**
