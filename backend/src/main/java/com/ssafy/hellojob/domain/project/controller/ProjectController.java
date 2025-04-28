@@ -29,8 +29,9 @@ public class ProjectController {
         return responseDto;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getProjects(@PathVariable Integer userId) {
+    @GetMapping
+    public ResponseEntity<?> getProjects(@AuthenticationPrincipal UserPrincipal principal) {
+        Integer userId = principal.getUser().getUserId();
         ResponseEntity<?> response = projectService.getProjects(userId);
         return response;
     }

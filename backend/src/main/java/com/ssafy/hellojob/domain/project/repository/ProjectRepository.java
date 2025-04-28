@@ -14,6 +14,6 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
 
     @Query("SELECT new com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto("+
     "p.projectId, p.projectName, p.projectStartDate, p.projectEndDate) " +
-    "FROM Project p WHERE p.user.id = :userId")
+    "FROM Project p WHERE p.user.userId = :userId")
     List<ProjectsResponseDto> findByUserId(@Param("userId") Integer userId);
 }
