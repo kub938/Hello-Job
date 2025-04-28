@@ -5,6 +5,7 @@ import com.ssafy.hellojob.domain.project.dto.response.ProjectCreateResponseDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectResponseDto;
 import com.ssafy.hellojob.domain.project.service.ProjectService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,8 @@ public class ProjectController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProjectCreateResponseDto createProject(
-            @AuthenticationPrincipal UserPrincipal principal, @RequestBody ProjectRequestDto projectRequestDto) {
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Valid @RequestBody ProjectRequestDto projectRequestDto) {
         Integer userId = principal.getUserId();
         log.debug("🌞 프로젝트 입력 userId: " + userId);
         ProjectCreateResponseDto responseDto = projectService.createProject(userId, projectRequestDto);
@@ -34,7 +36,7 @@ public class ProjectController {
 
     @GetMapping
     public ResponseEntity<?> getProjects(@AuthenticationPrincipal UserPrincipal principal) {
-        Integer userId = principal.getUser().getUserId();
+        Integer userId = principal.getUserId();
         ResponseEntity<?> response = projectService.getProjects(userId);
         return response;
     }
@@ -52,7 +54,7 @@ public class ProjectController {
     public Map<String, String> updateProject(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer projectId,
-            @RequestBody ProjectRequestDto projectRequestDto) {
+            @Valid @RequestBody ProjectRequestDto projectRequestDto) {
         Integer userId = principal.getUserId();
         projectService.updateProject(userId, projectId, projectRequestDto);
 
