@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.project.controller;
 
 import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectCreateResponseDto;
+import com.ssafy.hellojob.domain.project.dto.response.ProjectResponseDto;
 import com.ssafy.hellojob.domain.project.service.ProjectService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +34,15 @@ public class ProjectController {
     public ResponseEntity<?> getProjects(@AuthenticationPrincipal UserPrincipal principal) {
         Integer userId = principal.getUser().getUserId();
         ResponseEntity<?> response = projectService.getProjects(userId);
+        return response;
+    }
+
+    @GetMapping("/{projectId}")
+    public ProjectResponseDto getProject(
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable Integer projectId) {
+        Integer userId = principal.getUserId();
+        log.debug("🌞 프로젝트 상세 조회 입력 id: " + userId);
+        ProjectResponseDto response = projectService.getProject(userId, projectId);
         return response;
     }
 }

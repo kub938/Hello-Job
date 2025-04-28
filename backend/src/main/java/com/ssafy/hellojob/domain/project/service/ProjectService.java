@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.project.service;
 
 import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectCreateResponseDto;
+import com.ssafy.hellojob.domain.project.dto.response.ProjectResponseDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto;
 import com.ssafy.hellojob.domain.project.entity.Project;
 import com.ssafy.hellojob.domain.project.repository.ProjectRepository;
@@ -60,5 +61,27 @@ public class ProjectService {
         }
 
         return ResponseEntity.ok(projects);
+    }
+
+    public ProjectResponseDto getProject(Integer userId, Integer projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
+
+        if (project.getUser().getUserId() != userId) {
+            throw new BaseException(ErrorCode.PROJECT_MISMATCH);
+        }
+
+        return ProjectResponseDto.builder()
+                .projectId(project.getProjectId())
+                .projectName(project.getProjectName())
+                .projectIntro(project.getProjectIntro())
+                .projectRole(project.getProjectRole())
+                .projectSkills(project.getProjectSkills())
+                .projectDetail(project.getProjectDetail())
+                .projectClient(project.getProjectClient())
+                .projectStartDate(project.getProjectStartDate())
+                .projectEndDate(project.getProjectEndDate())
+                .updatedAt(project.getUpdatedAt())
+                .build();
     }
 }
