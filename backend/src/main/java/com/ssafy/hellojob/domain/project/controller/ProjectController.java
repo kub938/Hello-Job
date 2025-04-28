@@ -24,7 +24,7 @@ public class ProjectController {
     public ProjectCreateResponseDto createProject(
             @AuthenticationPrincipal UserPrincipal principal, @RequestBody ProjectRequestDto projectRequestDto) {
         Integer userId = principal.getUser().getUserId();
-        log.debug("🌞프로젝트 입력 userId: " + userId);
+        log.debug("🌞 프로젝트 입력 userId: " + userId);
         ProjectCreateResponseDto responseDto = projectService.createProject(userId, projectRequestDto);
         return responseDto;
     }

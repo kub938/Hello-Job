@@ -13,7 +13,8 @@ public interface ProjectRepository extends JpaRepository<Project, Integer> {
     Optional<Project> findById(Integer id);
 
     @Query("SELECT new com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto("+
-    "p.projectId, p.projectName, p.projectStartDate, p.projectEndDate) " +
-    "FROM Project p WHERE p.user.userId = :userId")
+    "p.projectId, p.projectName, p.projectIntro, p.projectSkills, p.updatedAt) " +
+    "FROM Project p WHERE p.user.userId = :userId " +
+    "ORDER BY p.updatedAt DESC")
     List<ProjectsResponseDto> findByUserId(@Param("userId") Integer userId);
 }
