@@ -6,11 +6,11 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JobRoleAnalysisSaveResponseDto {
 
-    private Long id;
+    private Long jobRoleAnalysisId;
 
     @Builder
-    public JobRoleAnalysisSaveResponseDto(Long id){
-        this.id = id;
+    public JobRoleAnalysisSaveResponseDto(Long jobRoleAnalysisId){
+        this.jobRoleAnalysisId = jobRoleAnalysisId;
     }
 
 }

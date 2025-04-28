@@ -1,5 +1,7 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.controller;
 
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSaveResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.service.JobRoleAnalysisService;
@@ -24,6 +26,12 @@ public class JobRoleAnalysisController {
 
         JobRoleAnalysisSaveResponseDto responseDto = jobRoleAnalysisService.createJobRoleAnalysis(userId, requestDto);
 
+        return responseDto;
+    }
+
+    @PostMapping("/bookmark")
+    public JobRoleAnalysisBookmarkSaveResponseDto jobRoleAnalysisBookmarkSave(@RequestBody JobRoleAnalysisBookmarkSaveRequestDto requestDto){
+        JobRoleAnalysisBookmarkSaveResponseDto responseDto = jobRoleAnalysisService.addJobRoleBookmark(userId, requestDto);
         return responseDto;
     }
 

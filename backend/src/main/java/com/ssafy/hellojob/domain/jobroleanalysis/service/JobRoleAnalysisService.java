@@ -1,5 +1,7 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.service;
 
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSaveResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
@@ -46,16 +48,32 @@ public class JobRoleAnalysisService {
                 .isPublic(requestDto.getIsPublic()) // 공개 여부
                 .build();
 
-        JobRoleAnalysisBookmark newJobRoleAnalysisBookmark = JobRoleAnalysisBookmark.builder()
-                .user(user)
-                .jobRoleAnalysis(newJobRoleAnalysis)
-                .build();
-
         jobRoleAnalysisRepository.save(newJobRoleAnalysis);
-        jobRoleAnalysisBookmarkRepository.save(newJobRoleAnalysisBookmark);
 
         return JobRoleAnalysisSaveResponseDto.builder()
-                .id(newJobRoleAnalysis.getJobRoleAnalysisId())
+                .jobRoleAnalysisId(newJobRoleAnalysis.getJobRoleAnalysisId())
+                .build();
+    }
+
+    public JobRoleAnalysisBookmarkSaveResponseDto addJobRoleBookmark(Integer userId, JobRoleAnalysisBookmarkSaveRequestDto requestDto){
+
+        JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
+                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));;
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        JobRoleAnalysisBookmark newJobRoleAnalysisBookmark = JobRoleAnalysisBookmark.builder()
+                .user(user)
+                .jobRoleAnalysis(jobRoleAnalysis)
+                .build();
+
+
+        jobRoleAnalysisBookmarkRepository.save(newJobRoleAnalysisBookmark);
+
+        return JobRoleAnalysisBookmarkSaveResponseDto.builder()
+                .jobRoleAnalysisBookmarkId(newJobRoleAnalysisBookmark.getJobRoleAnalysisBookmarkId())
+                .jobRoleAnalysisId(requestDto.getJobRoleAnalysisId())
                 .build();
     }
 
