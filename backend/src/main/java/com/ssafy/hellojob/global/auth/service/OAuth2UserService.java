@@ -2,7 +2,7 @@ package com.ssafy.hellojob.global.auth.service;
 
 import com.ssafy.hellojob.domain.user.entity.Provider;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.reository.UserRepository;
+import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.auth.entity.Auth;
 import com.ssafy.hellojob.global.auth.repository.AuthRepository;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;

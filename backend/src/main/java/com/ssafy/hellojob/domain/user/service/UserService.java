@@ -1,7 +1,7 @@
 package com.ssafy.hellojob.domain.user.service;
 
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.reository.UserRepository;
+import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
