@@ -105,4 +105,15 @@ public class ProjectService {
                 projectRequestDto.getProjectEndDate()
         );
     }
+
+    public void removeProject(Integer userId, Integer projectId) {
+        Project project = projectRepository.findById(projectId)
+                .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
+
+        if (project.getUser().getUserId() != userId) {
+            throw new BaseException(ErrorCode.PROJECT_MISMATCH);
+        }
+
+        projectRepository.deleteById(projectId);
+    }
 }
