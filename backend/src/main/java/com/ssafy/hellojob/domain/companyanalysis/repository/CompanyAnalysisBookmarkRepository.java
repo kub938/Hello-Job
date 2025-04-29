@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,5 +14,11 @@ public interface CompanyAnalysisBookmarkRepository extends JpaRepository<Company
 
     boolean existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(Integer userId, Long companyAnalysisId);
     Optional<CompanyAnalysisBookmark> findByUserAndCompanyAnalysis(User user, CompanyAnalysis companyAnalysis);
+
+    List<CompanyAnalysisBookmark> findAllByUser(User user);
+
+    List<CompanyAnalysisBookmark> findAllByUserAndCompanyAnalysis_Company_CompanyId(User user, Long companyId);
+
+
 
 }
