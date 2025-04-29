@@ -93,11 +93,18 @@ public class JobRoleAnalysisController {
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping("/{jobRoleAnalysisId}")
+    @DeleteMapping("/analysis/{jobRoleAnalysisId}")
     public void JobRoleAnalysisDelete(@PathVariable Long jobRoleAnalysisId, @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
-        jobRoleAnalysisService.
+        jobRoleAnalysisService.deleteJobRoleAnalysis(userId, jobRoleAnalysisId);
     }
 
+    @PutMapping()
+    public JobRoleAnalysisUpdateResponseDto JobRoleAnalysisUpdate(@RequestBody JobRoleAnalysisUpdateRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+
+        JobRoleAnalysisUpdateResponseDto result = jobRoleAnalysisService.updateJobRoleAnalysis(requestDto, userId);
+        return result;
+    }
 
 }

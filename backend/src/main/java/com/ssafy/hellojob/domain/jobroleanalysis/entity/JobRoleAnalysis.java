@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.entity;
 
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisUpdateRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -115,6 +116,18 @@ public class JobRoleAnalysis {
 
     public void setJobRoleViewCount(Integer jobRoleViewCount){
         this.jobRoleViewCount = jobRoleViewCount;
+    }
+
+    public void update(JobRoleAnalysisUpdateRequestDto requestDto) {
+        this.jobRoleName = requestDto.getJobRoleName();
+        this.jobRoleTitle = requestDto.getJobRoleTitle();
+        this.jobRoleWork = requestDto.getJobRoleWork();
+        this.jobRoleSkills = requestDto.getJobRoleSkills();
+        this.jobRoleRequirements = requestDto.getJobRoleRequirements();
+        this.jobRolePreferences = requestDto.getJobRolePreferences();
+        this.jobRoleEtc = requestDto.getJobRoleEtc();
+        this.jobRoleCategory = requestDto.getJobRoleCategory();
+        // 필요한 필드만 수정
     }
 
 

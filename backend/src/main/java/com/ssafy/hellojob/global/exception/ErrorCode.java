@@ -19,6 +19,7 @@ public enum ErrorCode {
 
     // 회원
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."),
+    INVALID_USER(HttpStatus.BAD_REQUEST, "접근 권한이 없습니다."),
 
     // 인증
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -33,8 +34,10 @@ public enum ErrorCode {
     // 경험
     EXPERIENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 경험을 찾을 수 없습니다."),
     EXPERIENCE_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 경험 입력자가 일치하지 않습니다."),
-    EXPERIENCE_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "경험 시작 날짜는 종료 날짜보다 먼저여야 합니다.")
+    EXPERIENCE_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "경험 시작 날짜는 종료 날짜보다 먼저여야 합니다."),
 
+    // 직무 분석
+    JOB_ROLE_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 레포트를 찾을 수 없습니다.");
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.

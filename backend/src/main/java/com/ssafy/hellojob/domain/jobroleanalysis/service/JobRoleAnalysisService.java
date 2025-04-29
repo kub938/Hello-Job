@@ -293,8 +293,35 @@ public class JobRoleAnalysisService {
         if(userId == jobRoleAnalysis.getUser().getUserId()){
             jobRoleAnalysisRepository.delete(jobRoleAnalysis);
         } else {
-
+            throw new BaseException(ErrorCode.INVALID_USER);
         }
     }
+
+    @Transactional
+    public JobRoleAnalysisUpdateResponseDto updateJobRoleAnalysis(JobRoleAnalysisUpdateRequestDto requestDto, Integer userId) {
+
+        // 2. 기존 엔티티 조회
+        JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
+
+        // 1. 요청한 유저가 수정하려는 데이터의 주인인지 검증
+        Integer jobRoleAnalysisUserId = jobRoleAnalysisRepository.findUserIdByJobRoleAnalysisId(requestDto.getJobRoleAnalysisId());
+        if (!userId.equals(jobRoleAnalysisUserId)) {
+            throw new BaseException(ErrorCode.INVALID_USER);
+        }
+
+
+
+        // 3. 수정할 필드만 업데이트 (setter 또는 별도 update 메서드 이용)
+        jobRoleAnalysis.update(requestDto);
+
+        // 4. save() 필요 없음! → JPA의 dirty checking이 알아서 update 쳐줌
+
+        // 5. 결과 반환
+        return JobRoleAnalysisUpdateResponseDto.builder()
+                .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
+                .build();
+    }
+
 
 }
