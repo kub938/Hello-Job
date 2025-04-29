@@ -93,4 +93,15 @@ public class ExperienceService {
 
         experience.updateExperience(experienceRequestDto);
     }
+
+    public void deleteExperience(Integer userId, Integer experienceId) {
+        Experience experience = experienceRepository.findByExperienceId(experienceId)
+                .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
+
+        if (!userId.equals(experience.getUser().getUserId())) {
+            throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
+        }
+
+        experienceRepository.deleteById(experienceId);
+    }
 }

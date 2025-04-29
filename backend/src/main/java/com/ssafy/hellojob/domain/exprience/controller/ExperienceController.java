@@ -48,7 +48,7 @@ public class ExperienceController {
         return experienceService.getExperience(userId, experienceId);
     }
 
-    @PutMapping("{experienceId}")
+    @PutMapping("/{experienceId}")
     public Map<String, String> updateExperience(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer experienceId,
@@ -57,5 +57,16 @@ public class ExperienceController {
         experienceService.updateExperience(userId, experienceId, experienceRequestDto);
 
         return Map.of("message", "경험이 수정되었습니다.");
+    }
+
+    @DeleteMapping("/{experienceId}")
+    public Map<String, String> deleteExperience(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer experienceId
+    ) {
+        Integer userId = principal.getUserId();
+        experienceService.deleteExperience(userId, experienceId);
+
+        return Map.of("message", "경험이 삭제되었습니다.");
     }
 }
