@@ -46,6 +46,19 @@ public class CompanyAnalysisController {
         return result;
     }
 
+    // 기업 분석 검색
+    @GetMapping("/search/{companyId}")
+    public ResponseEntity<?> CompanyAnalysisSearch(@PathVariable("companyId") Long companyId, @AuthenticationPrincipal UserPrincipal userPrincipal){
+
+        Integer userId = userPrincipal.getUserId();
+        List<CompanyAnalysisListResponseDto> result = companyAnalysisService.searchByCompanyIdCompanyAnalysis(companyId, userId);
+
+        if (result.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(result);
+    }
+
     // 기업 분석 북마크 추가
     @PostMapping("/bookmark")
     public CompanyAnalysisBookmarkSaveResponseDto CompanyAnalysisBookmarkSave(@RequestBody CompanyAnalysisBookmarkSaveRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal){

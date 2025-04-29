@@ -4,9 +4,11 @@ import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface CompanyAnalysisRepository extends JpaRepository<CompanyAnalysis, Long> {
 
-
+    List<CompanyAnalysis> findAllByCompany_CompanyId(Long companyId);
 
 }
