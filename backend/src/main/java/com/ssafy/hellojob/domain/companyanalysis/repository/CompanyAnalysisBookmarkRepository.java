@@ -1,0 +1,13 @@
+package com.ssafy.hellojob.domain.companyanalysis.repository;
+
+import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
+import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysisBookmark;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface CompanyAnalysisBookmarkRepository extends JpaRepository<CompanyAnalysisBookmark, Long> {
+
+    boolean existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(Integer userId, Long companyAnalysisId);
+
+}

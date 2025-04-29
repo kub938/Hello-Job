@@ -5,8 +5,10 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 import com.ssafy.hellojob.domain.company.entity.CompanySize;
+import lombok.Getter;
 
 @Entity
+@Getter
 @Table(name = "company")
 public class Company {
 
