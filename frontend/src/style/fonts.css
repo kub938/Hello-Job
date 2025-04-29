@@ -1,6 +1,6 @@
 @font-face {
   font-family: "LINESeedKR";
-  src: url("/public/font/LINESeedSansKR-Regular.woff2") format("truetype");
+  src: url("/fonts/LINESeedSansKR-Regular.woff2") format("truetype");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: "NEXONLv1Gothic";
-  src: url("/NEXONLv1GothicLight.woff2") format("truetype");
+  src: url("/fonts/NEXONLv1GothicLight.woff2") format("truetype");
   font-weight: light;
   font-style: normal;
   font-display: swap;
@@ -19,7 +19,7 @@
   font-weight: 700;
   font-display: swap;
   src: local("Pretendard Bold"),
-    url(/fonts/woff2-subset/Pretendard-Bold.subset.woff2) format("woff2");
+    url("/fonts/woff2-subset/Pretendard-Bold.subset.woff2") format("woff2");
 }
 
 @font-face {
@@ -27,7 +27,7 @@
   font-weight: 600;
   font-display: swap;
   src: local("Pretendard SemiBold"),
-    url(/fonts/woff2-subset/Pretendard-SemiBold.subset.woff2) format("woff2");
+    url("/fonts/woff2-subset/Pretendard-SemiBold.subset.woff2") format("woff2");
 }
 
 @font-face {
@@ -35,7 +35,7 @@
   font-weight: 500;
   font-display: swap;
   src: local("Pretendard Medium"),
-    url(/fonts/woff2-subset/Pretendard-Medium.subset.woff2) format("woff2");
+    url("/fonts/woff2-subset/Pretendard-Medium.subset.woff2") format("woff2");
 }
 
 @font-face {
@@ -43,7 +43,7 @@
   font-weight: 400;
   font-display: swap;
   src: local("Pretendard Regular"),
-    url(/fonts/woff2-subset/Pretendard-Regular.subset.woff2) format("woff2");
+    url("/fonts/woff2-subset/Pretendard-Regular.subset.woff2") format("woff2");
 }
 
 .font-pretendard {
