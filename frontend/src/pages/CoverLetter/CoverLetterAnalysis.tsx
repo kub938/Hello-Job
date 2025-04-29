@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import ReportList from "./components/ReportList";
 import LetterStep from "./components/LetterStep";
 import { useLocation, useNavigate } from "react-router";
+import CoverLetterAnalysisLayout from "./components/CoverLetterAnalysisLayout";
+import InputQuestion from "./components/InputQuestion";
 
 function CoverLetter() {
   const [nowStep, setNowStep] = useState(0);
@@ -22,10 +24,10 @@ function CoverLetter() {
     }
   }, [pathname]);
 
-  const handleStep = (stepNum: number) => {
+  const handleStep = useCallback((stepNum: number) => {
     setNowStep(stepNum);
     navigate(stepUrl[stepNum]);
-  };
+  }, []);
 
   const stepUrl = [
     "/cover-letter/select-company",
@@ -35,10 +37,12 @@ function CoverLetter() {
   ];
 
   return (
-    <div className="flex justify-center gap-20 mt-10">
-      {nowStep <= 2 && <ReportList nowStep={nowStep} />}
-      <LetterStep nowStep={nowStep} handleStep={handleStep} />
-    </div>
+    <>
+      <CoverLetterAnalysisLayout nowStep={nowStep} handleStep={handleStep}>
+        {nowStep <= 1 && <ReportList />}
+        {nowStep === 2 && <InputQuestion />}
+      </CoverLetterAnalysisLayout>
+    </>
   );
 }
 
