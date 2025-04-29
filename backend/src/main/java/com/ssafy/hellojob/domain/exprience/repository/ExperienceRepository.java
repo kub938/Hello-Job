@@ -14,7 +14,7 @@ public interface ExperienceRepository extends JpaRepository<Experience, Integer>
     Optional<Experience> findByExperienceId(Integer experienceId);
 
     @Query("SELECT new com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto( " +
-    "e.experienceName, e.experienceRole, e.updatedAt) " +
+    "e.experienceId, e.experienceName, e.experienceRole, e.updatedAt) " +
     "FROM Experience e WHERE e.user.userId = :userId " +
     "ORDER BY e.updatedAt DESC")
     List<ExperiencesResponseDto> findExperiencesByUserId(@Param("userId") Integer userId);
