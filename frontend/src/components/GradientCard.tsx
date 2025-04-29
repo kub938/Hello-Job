@@ -1,5 +1,5 @@
-import Avatar from "@/components/avatar";
-import CompanyCard from "@/components/companyCard";
+import Avatar from "@/components/Avatar";
+import CompanyCard from "@/components/CompanyCard";
 
 const PALETTE = [
   { r: 236, g: 0, b: 63 }, // rose-600
@@ -42,6 +42,7 @@ interface GradientCardProps {
   industryName: string;
   region: string;
   updatedAt: string;
+  onClick?: () => void;
   isGradient: boolean;
 }
 
@@ -56,6 +57,7 @@ const GradientCard: React.FC<GradientCardProps> = ({
   initialHeight = 180,
   region,
   updatedAt,
+  onClick,
   isGradient = false,
 }) => {
   const colors = [];
@@ -71,7 +73,10 @@ const GradientCard: React.FC<GradientCardProps> = ({
   colors.push({ r: 136, g: 107, b: 251 });
 
   return (
-    <div className={`relative w-[${initialWidth}px] h-[${initialHeight}px]`}>
+    <div
+      className="relative overflow-visible"
+      style={{ width: `${initialWidth}px`, height: `${initialHeight}px` }}
+    >
       <CompanyCard
         width={width}
         height={height}
@@ -85,6 +90,7 @@ const GradientCard: React.FC<GradientCardProps> = ({
         colors={colors}
         region={region}
         updatedAt={updatedAt}
+        onClick={onClick}
       >
         <div className="w-full h-full bg-black/10 px-4 py-8 rounded-lg flex flex-col items-center">
           <Avatar username={corName} size={50} className="bg-[#F1F3F9]" />

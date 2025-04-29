@@ -1,21 +1,7 @@
-import { Button } from "@/components/button";
-import useAuthStore from "@/store/authStore";
-import { useState } from "react";
+import { Button } from "@/components/Button";
 import { Link } from "react-router";
 
 function Login() {
-  const { login } = useAuthStore();
-  const [email, setEmail] = useState("");
-
-  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    login();
-  };
-
   return (
     <div className="container relative h-screen flex-col items-center justify-center lg:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
@@ -56,13 +42,9 @@ function Login() {
           </div>
 
           <div className="grid gap-6">
-            <form onSubmit={handleSubmit}>
-              <div className="grid gap-2">
-                <Button variant="default" size="default" type="submit">
-                  <Link to="/">비회원으로 서비스 이용하기</Link>
-                </Button>
-              </div>
-            </form>
+            <Button variant="default" size="default" type="submit">
+              <Link to="/">비회원으로 서비스 이용하기</Link>
+            </Button>
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
