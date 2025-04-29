@@ -153,6 +153,18 @@ public class CompanyAnalysisService {
                 .build();
     }
 
+    @Transactional
+    public void deleteCompanyAnalysisBookmark(Long companyAnalysisBookmarkId, Integer userId){
+        CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findById(companyAnalysisBookmarkId)
+                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+
+        CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
+
+        companyAnalysisBookmarkRepository.delete(bookmark);
+
+        companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() - 1);
+        companyAnalysisRepository.save(companyAnalysis);
+    }
 
 
 }
