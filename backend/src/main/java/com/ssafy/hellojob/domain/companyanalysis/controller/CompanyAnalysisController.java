@@ -58,4 +58,11 @@ public class CompanyAnalysisController {
         return responseDto;
     }
 
+    // 기업 분석 북마크 해제
+    @DeleteMapping("/bookmark/{companyAnalysisBookmarkId}")
+    public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisBookmarkId") Long companyAnalysisBookmarkId, @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+        companyAnalysisService.deleteCompanyAnalysisBookmark(companyAnalysisBookmarkId, userId);
+    }
+
 }
