@@ -16,7 +16,7 @@ public class JobRoleSnapshot extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_role_snapshot_id")
-    private Integer job_role_analysis_snapshot_id;
+    private Integer jobRoleAnalysisSnapshotId;
 
     @Column(name = "job_role_analysis_id")
     private Integer jobRoleAnalysisId;
@@ -49,8 +49,8 @@ public class JobRoleSnapshot extends BaseTimeEntity {
     private String jobRoleSnapshotCategory;
 
     @Builder
-    public JobRoleSnapshot(Integer job_role_analysis_snapshot_id, Integer jobRoleAnalysisId, String companyName, String jobRoleSnapshotName, String jobRoleSnapshotTitle, String jobRoleSnapshotWork, String jobRoleSnapshotSkills, String jobRoleSnapshotRequirements, String jobRoleSnapshotPreferences, String jobRoleSnapshotEtc, String jobRoleSnapshotCategory) {
-        this.job_role_analysis_snapshot_id = job_role_analysis_snapshot_id;
+    public JobRoleSnapshot(Integer jobRoleAnalysisSnapshotId, Integer jobRoleAnalysisId, String companyName, String jobRoleSnapshotName, String jobRoleSnapshotTitle, String jobRoleSnapshotWork, String jobRoleSnapshotSkills, String jobRoleSnapshotRequirements, String jobRoleSnapshotPreferences, String jobRoleSnapshotEtc, String jobRoleSnapshotCategory) {
+        this.jobRoleAnalysisSnapshotId = jobRoleAnalysisSnapshotId;
         this.jobRoleAnalysisId = jobRoleAnalysisId;
         this.companyName = companyName;
         this.jobRoleSnapshotName = jobRoleSnapshotName;

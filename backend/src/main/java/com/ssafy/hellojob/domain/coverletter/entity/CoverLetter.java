@@ -1,6 +1,6 @@
 package com.ssafy.hellojob.domain.coverletter.entity;
 
-import com.ssafy.hellojob.domain.company.entity.Company;
+import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -27,7 +27,7 @@ public class CoverLetter extends BaseTimeEntity {
 
     @ManyToOne
     @JoinColumn(name = "company_analysis_id", nullable = false)
-    private Company company;
+    private CompanyAnalysis companyAnalysis;
 
     @OneToOne
     @JoinColumn(name = "job_role_analysis_snapshot")
@@ -38,10 +38,10 @@ public class CoverLetter extends BaseTimeEntity {
     private boolean finish = false;
 
     @Builder
-    public CoverLetter(Integer coverLetterId, User user, Company company, JobRoleSnapshot jobRoleSnapshot, boolean finish) {
+    public CoverLetter(Integer coverLetterId, User user, CompanyAnalysis companyAnalysis, JobRoleSnapshot jobRoleSnapshot, boolean finish) {
         this.coverLetterId = coverLetterId;
         this.user = user;
-        this.company = company;
+        this.companyAnalysis = companyAnalysis;
         this.jobRoleSnapshot = jobRoleSnapshot;
         this.finish = finish;
     }

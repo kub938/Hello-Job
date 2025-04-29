@@ -6,6 +6,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 @Entity
 @Getter
@@ -18,12 +19,12 @@ public class CoverLetterContent extends BaseTimeEntity {
     @Column(name = "cover_letter_content_id")
     private Integer contentId;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_id", nullable = false)
     private CoverLetter coverLetter;
 
-    @OneToOne
-    @JoinColumn(name = "chat_log_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "chat_log_id", nullable = true)
     private ChatLog chatLog;
 
     @Column(name = "cover_letter_content_number", nullable = false)
@@ -38,8 +39,10 @@ public class CoverLetterContent extends BaseTimeEntity {
     @Column(name = "cover_letter_content_length")
     private Integer contentLength;
 
+    @Enumerated(EnumType.STRING)
+    @ColumnDefault("'PENDING'")
     @Column(name = "cover_letter_content_status", nullable = false)
-    private CoverLetterContentStatus coverLetterContentStatus;
+    private CoverLetterContentStatus coverLetterContentStatus = CoverLetterContentStatus.PENDING;
 
     @Column(name = "cover_letter_content_first_prompt", columnDefinition = "TEXT")
     private String contentFirstPrompt;
