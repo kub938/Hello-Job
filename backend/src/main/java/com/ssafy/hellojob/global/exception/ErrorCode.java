@@ -29,6 +29,9 @@ public enum ErrorCode {
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 프로젝트를 찾을 수 없습니다."),
     PROJECT_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 프로젝트 입력자가 일치하지 않습니다."),
 
+    // 경험
+    EXPERIENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 경험을 찾을 수 없습니다."),
+    EXPERIENCE_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 경험 입력자가 일치하지 않습니다."),
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.
