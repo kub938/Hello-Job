@@ -1,13 +1,11 @@
 package com.ssafy.hellojob.domain.companyanalysis.controller;
 
 import com.ssafy.hellojob.domain.company.entity.Company;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisBookmarkSaveRequestDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisBookmarkSaveResponseDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisDetailResponseDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisListResponseDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.*;
 import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisService;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisListResponseDto;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,6 +61,26 @@ public class CompanyAnalysisController {
     public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisBookmarkId") Long companyAnalysisBookmarkId, @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
         companyAnalysisService.deleteCompanyAnalysisBookmark(companyAnalysisBookmarkId, userId);
+    }
+
+    // 기업 분석 북마크 목록 조회
+    @GetMapping("/bookmark")
+    public ResponseEntity<?> CompanyAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Long companyId,
+                                                                              @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+        List<CompanyAnalysisBookmarkListResponseDto> result;
+
+        if (companyId == null) {
+            result = companyAnalysisService.searchCompanyAnalysisBookmarkList(userId);
+        } else {
+            result = companyAnalysisService.searchCompanyAnalysisBookmarkListWithCompanyId(userId, companyId);
+        }
+
+        if (result.isEmpty()) {
+            return ResponseEntity.noContent().build(); // 204 No Content
+        } else {
+            return ResponseEntity.ok(result); // 200 OK
+        }
     }
 
 }

@@ -3,10 +3,7 @@ package com.ssafy.hellojob.domain.companyanalysis.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisBookmarkSaveRequestDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisBookmarkSaveResponseDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisDetailResponseDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisListResponseDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.*;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysisBookmark;
 import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
@@ -15,6 +12,7 @@ import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookm
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisListResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysisBookmark;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -164,6 +162,73 @@ public class CompanyAnalysisService {
 
         companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() - 1);
         companyAnalysisRepository.save(companyAnalysis);
+    }
+
+    public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkList(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        List<CompanyAnalysisBookmark> bookmarkList = companyAnalysisBookmarkRepository.findAllByUser(user);
+
+        List<CompanyAnalysisBookmarkListResponseDto> result = new ArrayList<>();
+
+        for (CompanyAnalysisBookmark bookmark : bookmarkList) {
+            CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
+
+            if (!companyAnalysis.isPublic()) {
+                continue;
+            }
+
+            result.add(CompanyAnalysisBookmarkListResponseDto.builder()
+                    .companyAnalysisBookmarkId(bookmark.getCompanyAnalysisBookmarkId())
+                    .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
+                    .companyName(companyAnalysis.getCompany().getCompanyName())
+                    .createdAt(companyAnalysis.getCreatedAt())
+                    .companyViewCount(companyAnalysis.getCompanyAnalysisViewCount())
+                    .companyLocation(companyAnalysis.getCompany().getCompanyLocation())
+                    .companySize(companyAnalysis.getCompany().getCompanySize().name())
+                    .companyIndustry(companyAnalysis.getCompany().getCompanyIndustry())
+                    .companyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount())
+                    .bookmark(true)
+                    .isPublic(companyAnalysis.isPublic())
+                    .build());
+        }
+
+        return result;
+    }
+
+
+    public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Long companyId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        List<CompanyAnalysisBookmark> bookmarkList = companyAnalysisBookmarkRepository.findAllByUserAndCompanyAnalysis_Company_CompanyId(user, companyId);
+
+        List<CompanyAnalysisBookmarkListResponseDto> result = new ArrayList<>();
+
+        for (CompanyAnalysisBookmark bookmark : bookmarkList) {
+            CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
+
+            if (!companyAnalysis.isPublic()) {
+                continue;
+            }
+
+            result.add(CompanyAnalysisBookmarkListResponseDto.builder()
+                    .companyAnalysisBookmarkId(bookmark.getCompanyAnalysisBookmarkId())
+                    .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
+                    .companyName(companyAnalysis.getCompany().getCompanyName())
+                    .createdAt(companyAnalysis.getCreatedAt())
+                    .companyViewCount(companyAnalysis.getCompanyAnalysisViewCount())
+                    .companyLocation(companyAnalysis.getCompany().getCompanyLocation())
+                    .companySize(companyAnalysis.getCompany().getCompanySize().name())
+                    .companyIndustry(companyAnalysis.getCompany().getCompanyIndustry())
+                    .companyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount())
+                    .bookmark(true)
+                    .isPublic(companyAnalysis.isPublic())
+                    .build());
+        }
+
+        return result;
     }
 
 
