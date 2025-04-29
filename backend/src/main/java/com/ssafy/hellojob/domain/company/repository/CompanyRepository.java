@@ -20,5 +20,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
             "FROM Company c WHERE c.companyName LIKE CONCAT(:companyName, '%') AND c.companyVisible IS TRUE ORDER BY c.updatedAt DESC")
     List<CompanyListDto> getCompanyByCompanyName(@Param("companyName") String companyName);
 
+    @Query("SELECT c.companyName FROM Company c WHERE c.id = :companyId")
+    String getCompanyNameByCompanyId(@Param("companyId") Long companyId);
 
 }

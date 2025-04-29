@@ -1,43 +1,39 @@
 package com.ssafy.hellojob.domain.user.entity;
 
+import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Table(name = "user")
-public class User {
+public class User extends BaseTimeEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer userId;
 
-    @Column(name = "email", nullable = false, length = 100)
+    @Column(name = "email", length = 100, nullable = false)
     private String email;
 
-    @Column(name = "nickname", nullable = false, length = 30)
+    @Column(name = "nickname", length = 30)
     private String nickname;
 
-    @Column(name = "provider", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Column(name = "provider")
     private Provider provider;
 
-    @Column(name = "provider_id", nullable = false, length = 255)
+    @Column(name = "provider_id", nullable = false)
     private String providerId;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @Column(name = "withdraw", nullable = false)
-    private boolean withdraw = false;
+    private Boolean withdraw;
 
     @Column(name = "token", nullable = false)
-    private Integer token = 3;
+    private Integer token;
 
     @Builder
     public User(String email, String nickname, Provider provider, String providerId) {
@@ -45,24 +41,8 @@ public class User {
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
+        this.withdraw = false;
+        this.token = 3;
     }
 
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    // Enum 타입 정의
-    public enum Provider {
-        GOOGLE,
-        NAVER,
-        KAKAO
-    }
 }

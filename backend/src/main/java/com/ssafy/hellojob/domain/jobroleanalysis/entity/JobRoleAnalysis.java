@@ -74,6 +74,7 @@ public class JobRoleAnalysis {
     private Integer jobRoleBookmarkCount = 0;
 
 
+
     @Builder
     public JobRoleAnalysis(User user,
                            Long companyId,
@@ -105,6 +106,15 @@ public class JobRoleAnalysis {
         this.updatedAt = updatedAt;
         this.jobRoleCategory = jobRoleCategory;
         this.jobRoleBookmarkCount = jobRoleBookmarkCount;
+    }
+
+
+    public void setJobRoleBookmarkCount(Integer jobRoleBookmarkCount) {
+        this.jobRoleBookmarkCount = jobRoleBookmarkCount;
+    }
+
+    public void setJobRoleViewCount(Integer jobRoleViewCount){
+        this.jobRoleViewCount = jobRoleViewCount;
     }
 
 
