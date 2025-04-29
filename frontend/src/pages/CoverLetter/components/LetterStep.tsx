@@ -1,3 +1,5 @@
+import { Button } from "@/components/Button";
+
 interface LetterStepProps {
   nowStep: number;
   handleStep: (stepNum: number) => void;
@@ -18,7 +20,7 @@ function LetterStep({ nowStep, handleStep }: LetterStepProps) {
   };
 
   return (
-    <aside className="border w-[18rem] flex flex-col items-center gap-5 p-10 ">
+    <aside className="sticky  bg-white top-20 border w-[18rem] h-full flex flex-col items-center gap-5 p-10 ">
       {stepTitle.map((title, index) => (
         <div
           key={index}
@@ -28,8 +30,12 @@ function LetterStep({ nowStep, handleStep }: LetterStepProps) {
           {title}
         </div>
       ))}
-      <button>이전</button>
-      <button></button>
+      <div className="flex gap-5">
+        <Button variant={"white"} size="lg">
+          이전
+        </Button>
+        <Button size="lg">다음</Button>
+      </div>
     </aside>
   );
 }
