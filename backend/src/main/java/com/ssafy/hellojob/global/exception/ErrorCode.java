@@ -37,7 +37,11 @@ public enum ErrorCode {
     EXPERIENCE_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "경험 시작 날짜는 종료 날짜보다 먼저여야 합니다."),
 
     // 직무 분석
-    JOB_ROLE_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 레포트를 찾을 수 없습니다.");
+    JOB_ROLE_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 레포트를 찾을 수 없습니다."),
+
+    // 자기소개서 관련
+    JOB_ROLE_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 스냅샷을 찾을 수 없습니다.")
+
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.
