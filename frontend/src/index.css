@@ -4,6 +4,52 @@
 
 @custom-variant dark (&: is(.dark *));
 
+/* 타이핑 애니메이션 스타일 */
+.typing-demo {
+  width: 320px;
+  animation: typing1 1s steps(19), blink1 0.5s step-end 3 alternate forwards;
+  white-space: nowrap;
+  overflow: hidden;
+  border-color: transparent;
+}
+.typing-demo-2 {
+  width: 540px;
+  animation: blink2 0.5s step-end infinite alternate,
+    typing2 1s steps(22) forwards;
+  animation-delay: 1.5s;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 3px solid;
+  opacity: 0;
+}
+
+@keyframes typing1 {
+  from {
+    width: 0;
+  }
+}
+
+@keyframes blink1 {
+  50% {
+    border-right: 3px solid;
+  }
+}
+@keyframes typing2 {
+  from {
+    width: 0;
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes blink2 {
+  50% {
+    border-color: transparent;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
