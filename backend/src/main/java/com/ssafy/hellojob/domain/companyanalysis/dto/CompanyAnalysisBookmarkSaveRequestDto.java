@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.companyanalysis.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -10,5 +11,10 @@ import lombok.Setter;
 public class CompanyAnalysisBookmarkSaveRequestDto {
 
     private Long companyAnalysisId;
+
+    @Builder
+    public CompanyAnalysisBookmarkSaveRequestDto(Long companyAnalysisId){
+        this.companyAnalysisId = companyAnalysisId;
+    }
 
 }

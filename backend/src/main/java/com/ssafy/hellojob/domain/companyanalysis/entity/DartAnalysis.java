@@ -36,4 +36,17 @@ public class DartAnalysis {
 
     @Column(name = "dart_company_analysis_financial_data", nullable = false)
     private boolean dartCompanyAnalysisFinancialData;
+
+    public static DartAnalysis of(String brand, String vision, String summary,
+                                  boolean basic, boolean plus, boolean financial) {
+        DartAnalysis dart = new DartAnalysis();
+        dart.dartBrand = brand;
+        dart.dartVision = vision;
+        dart.dartFinancialSummary = summary;
+        dart.dartCompanyAnalysisBasic = basic;
+        dart.dartCompanyAnalysisPlus = plus;
+        dart.dartCompanyAnalysisFinancialData = financial;
+        return dart;
+    }
+
 }

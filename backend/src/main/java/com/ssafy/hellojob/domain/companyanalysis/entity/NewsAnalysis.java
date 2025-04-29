@@ -27,4 +27,12 @@ public class NewsAnalysis {
     @Column(name = "news_analysis_url")
     private String newsAnalysisUrl;
 
+    public static NewsAnalysis of(String summary, Date date, String urlJson) {
+        NewsAnalysis news = new NewsAnalysis();
+        news.newsAnalysisData = summary;
+        news.newsAnalysisDate = date;
+        news.newsAnalysisUrl = urlJson;
+        return news;
+    }
+
 }
