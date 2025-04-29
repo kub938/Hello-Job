@@ -285,6 +285,45 @@ public class JobRoleAnalysisService {
         return result;
     }
 
+    @Transactional(readOnly = true)
+    public List<JobRoleAnalysisSearchListResponseDto> searchJobRoleAnalysisByUserId(Integer userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 1. 북마크 정보 조회
+        List<JobRoleAnalysisBookmark> bookmarkList = jobRoleAnalysisBookmarkRepository.findAllByUser(user);
+
+        // 북마크한 jobRoleAnalysisId만 따로 뽑아두자
+        Set<Long> bookmarkedAnalysisIds = bookmarkList.stream()
+                .map(bookmark -> bookmark.getJobRoleAnalysis().getJobRoleAnalysisId())
+                .collect(Collectors.toSet());
+
+        // 2. companyId로 소속된 모든 직무 분석 조회
+        List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
+                .filter(analysis -> analysis.getUser().getUserId() == userId)
+                .collect(Collectors.toList());
+
+        // 3. 결과를 변환
+        List<JobRoleAnalysisSearchListResponseDto> result = new ArrayList<>();
+
+        for (JobRoleAnalysis jobRoleAnalysis : jobRoleAnalysisList) {
+            result.add(JobRoleAnalysisSearchListResponseDto.builder()
+                    .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
+                    .jobRoleName(jobRoleAnalysis.getJobRoleName())
+                    .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
+                    .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum -> 문자열
+                    .isPublic(jobRoleAnalysis.getIsPublic())
+                    .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
+                    .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
+                    .bookmark(bookmarkedAnalysisIds.contains(jobRoleAnalysis.getJobRoleAnalysisId())) // 북마크 여부
+                    .updatedAt(jobRoleAnalysis.getUpdatedAt())
+                    .build());
+        }
+
+        return result;
+    }
+
     public void deleteJobRoleAnalysis(Integer userId, Long jobRoleAnalysisId){
 
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(jobRoleAnalysisId)

@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.jobroleanalysis.service.JobRoleAnalysisService;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -15,12 +16,11 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1/job-role-analysis")
 public class JobRoleAnalysisController {
 
-
-    @Autowired
-    JobRoleAnalysisService jobRoleAnalysisService;
+    private final JobRoleAnalysisService jobRoleAnalysisService;
 
     // 직무 분석 등록
     @PostMapping()
