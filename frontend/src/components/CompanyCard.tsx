@@ -1,4 +1,4 @@
-import Avatar from "@/components/avatar";
+import Avatar from "@/components/Avatar";
 import React, { useEffect, useRef, useState } from "react";
 import { FaClock, FaBuildingUser } from "react-icons/fa6";
 import { cn } from "@/lib/utils";
@@ -122,6 +122,7 @@ interface CompanyCardProps {
   industryName: string;
   region: string;
   updatedAt: string;
+  onClick?: () => void;
   isGradient: boolean;
   colors?: { r: number; g: number; b: number }[];
 }
@@ -158,6 +159,7 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
   initialHeight = 180,
   isGradient = false,
   updatedAt,
+  onClick,
   colors = DEFAULT_COLORS,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -232,15 +234,12 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
 
   return (
     <div
-      className={`relative ${
-        !isHovered ? "" : "overflow-hidden"
-      } transition-all duration-150 ease-in-out`}
+      className={`relative transition-all duration-150 ease-in-out`}
       style={{
         width: isHovered && isGradient ? width : initialWidth,
         height: isHovered && isGradient ? height : initialHeight,
         cursor: "pointer",
         zIndex: isHovered && isGradient ? 31 : 1,
-        position: isHovered && isGradient ? "absolute" : "relative",
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -249,22 +248,24 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
         <>
           <canvas
             ref={canvasRef}
-            className={`absolute top-0 left-0 rounded-lg ${className} border border-[#6F4BFF]`}
+            className={`w-full h-full absolute top-0 left-0 rounded-lg ${className} border border-[#6F4BFF]`}
             style={{
-              width: "100%",
-              height: "100%",
               zIndex: isHovered ? 30 : 0,
             }}
           />
           <div
-            className="relative w-full h-full"
+            className="absolute w-full h-full"
+            onClick={onClick}
             style={{ zIndex: isHovered ? 50 : 20 }}
           >
             {children}
           </div>
         </>
       ) : (
-        <div className={`w-full h-full rounded-lg ${className}`}>
+        <div
+          className={`w-full h-full rounded-lg ${className}`}
+          onClick={onClick}
+        >
           <div className="w-full h-full bg-white flex flex-col justify-between p-4 items-center rounded-lg border border-[#AF9BFF] border-t-4 shadow-sm">
             <CardHeader>
               <Avatar username={corName} size={42} className="bg-[#F1F3F9]" />

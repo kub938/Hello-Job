@@ -1,8 +1,6 @@
 function Home() {
   return (
-    <div className="flex flex-col items-center justify-between h-screen">
-      <main></main>
-    </div>
+    <div className="flex flex-col flex-grow items-center justify-between"></div>
   );
 }
 
