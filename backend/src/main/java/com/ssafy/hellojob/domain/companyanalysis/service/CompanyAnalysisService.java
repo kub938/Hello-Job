@@ -10,17 +10,11 @@ import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.entity.NewsAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisListResponseDto;
-import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
-import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysisBookmark;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -113,6 +107,28 @@ public class CompanyAnalysisService {
                 .dartFinancialSummery(dart.getDartFinancialSummary())
                 .dartCategory(dartCategory)
                 .build();
+    }
+
+    public List<CompanyAnalysisListResponseDto> searchByCompanyIdCompanyAnalysis(Long companyId, Integer userId) {
+        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAllByCompany_CompanyId(companyId);
+
+        List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+                .map(analysis -> CompanyAnalysisListResponseDto.builder()
+                        .companyAnlaysisId(analysis.getCompanyAnalysisId())
+                        .companyName(analysis.getCompany().getCompanyName())
+                        .createdAt(analysis.getCreatedAt())
+                        .companyViewCount(analysis.getCompanyAnalysisViewCount())
+                        .companyLocation(analysis.getCompany().getCompanyLocation())
+                        .companySize(analysis.getCompany().getCompanySize().name())
+                        .companyIndustry(analysis.getCompany().getCompanyIndustry())
+                        .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
+                        .bookmark(companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, analysis.getCompanyAnalysisId()))
+                        .isPublic(analysis.isPublic())
+                        .build()
+                )
+                .toList();
+
+        return result;
     }
 
     @Transactional
