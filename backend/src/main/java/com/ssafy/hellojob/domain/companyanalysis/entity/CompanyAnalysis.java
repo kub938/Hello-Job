@@ -51,4 +51,13 @@ public class CompanyAnalysis {
     @Column(name = "public", nullable = false)
     private boolean isPublic;
 
+    public void setCompanyAnalysisBookmarkCount(Integer companyAnalysisBookmarkCount) {
+        this.companyAnalysisBookmarkCount = companyAnalysisBookmarkCount;
+    }
+
+    public void setCompanyAnalysisViewCount(Integer companyAnalysisViewCount){
+        this.companyAnalysisViewCount = companyAnalysisViewCount;
+    }
+
+
 }

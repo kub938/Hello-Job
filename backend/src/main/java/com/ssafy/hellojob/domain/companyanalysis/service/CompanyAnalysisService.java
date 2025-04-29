@@ -2,15 +2,26 @@ package com.ssafy.hellojob.domain.companyanalysis.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.hellojob.domain.company.entity.Company;
+import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisBookmarkSaveRequestDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisBookmarkSaveResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisDetailResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisListResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
+import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysisBookmark;
 import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.entity.NewsAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
+import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysisBookmark;
+import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,13 +30,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CompanyAnalysisService {
 
-    @Autowired
-    CompanyAnalysisRepository companyAnalysisRepository;
+    private final CompanyAnalysisRepository companyAnalysisRepository;
 
-    @Autowired
-    private CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
+    private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
+
+    private final UserRepository userRepository;
 
     public List<CompanyAnalysisListResponseDto> searchAllCompanyAnalysis(Integer userId) {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
@@ -102,6 +114,42 @@ public class CompanyAnalysisService {
                 .dartVision(dart.getDartVision())
                 .dartFinancialSummery(dart.getDartFinancialSummary())
                 .dartCategory(dartCategory)
+                .build();
+    }
+
+    @Transactional
+    public CompanyAnalysisBookmarkSaveResponseDto addCompanyAnalysisBookmark(Integer userId, CompanyAnalysisBookmarkSaveRequestDto requestDto) {
+
+        CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
+                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        boolean alreadyBookmarked = companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, companyAnalysis.getCompanyAnalysisId());
+
+        if (alreadyBookmarked) {
+            CompanyAnalysisBookmark existingBookmark = companyAnalysisBookmarkRepository.findByUserAndCompanyAnalysis(user, companyAnalysis)
+                    .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+            return CompanyAnalysisBookmarkSaveResponseDto.builder()
+                    .companyAnalysisBookmarkId(existingBookmark.getCompanyAnalysisBookmarkId())
+                    .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
+                    .build();
+        }
+
+        CompanyAnalysisBookmark newBookmark = CompanyAnalysisBookmark.builder()
+                .user(user)
+                .companyAnalysis(companyAnalysis)
+                .build();
+
+        companyAnalysisBookmarkRepository.save(newBookmark);
+
+        companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() + 1);
+        companyAnalysisRepository.save(companyAnalysis);
+
+        return CompanyAnalysisBookmarkSaveResponseDto.builder()
+                .companyAnalysisBookmarkId(newBookmark.getCompanyAnalysisBookmarkId())
+                .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
                 .build();
     }
 
