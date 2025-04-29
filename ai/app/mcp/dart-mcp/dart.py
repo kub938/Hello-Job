@@ -9,7 +9,20 @@ import re
 import traceback
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
+import logging # 로깅 모듈 임포트
 
+# 특정 런타임 에러 로그 필터링 설정
+class IgnoreRuntimeErrorFilter(logging.Filter):
+    def filter(self, record):
+        # 로그 메시지에 특정 문자열이 포함되어 있고, 예외 정보가 RuntimeError 타입인지 확인
+        if 'RuntimeError: Attempted to exit cancel scope in a different task' in record.getMessage() \
+           and record.exc_info and isinstance(record.exc_info[1], RuntimeError):
+            return False # 이 로그는 필터링 (출력 안 함)
+        return True # 다른 로그는 통과
+
+# 기본 로거 가져오기 및 필터 추가
+logger = logging.getLogger()
+logger.addFilter(IgnoreRuntimeErrorFilter())
 
 load_dotenv()
 # 상수 정의
@@ -381,31 +394,36 @@ def get_pattern_by_item_type(item_name: str) -> Dict[str, str]:
 
 def format_numeric_value(value_text: str, decimals: str) -> str:
     """
-    XBRL 숫자 값을 포맷팅
+    XBRL 숫자 값을 보기 좋은 형식으로 변환
     
     Args:
-        value_text: 숫자 텍스트
-        decimals: 소수점 자리수 지정 (숫자 또는 "INF")
+        value_text: XBRL 항목의 값
+        decimals: 소수점 자리수 설정
     
     Returns:
-        포맷팅된 숫자 문자열
+        포맷팅된 값
     """
-    numeric_value = float(value_text.replace(',', ''))
-    
-    # decimals가 "INF"인 경우 원본 값 그대로 사용
-    if decimals == "INF":
-        if numeric_value == int(numeric_value):
-            return f"{int(numeric_value):,}"
+    try:
+        value = float(value_text)
+        
+        # 매우 큰 숫자는 문자열로 처리하여 반환 (큰 숫자 처리시 오버플로우 방지)
+        if abs(value) > 1e14:  # 100조 이상의 큰 숫자
+            # 문자열 형태로 표시하여 숫자 그대로 반환
+            if decimals and int(decimals) > 0:
+                return value_text
+            else:
+                # 정수 부분만 표시
+                return f"{int(value):,}"
+        
+        # 소수점 처리
+        if decimals and int(decimals) > 0:
+            format_str = f"{{:,.{abs(int(decimals))}f}}"
+            return format_str.format(value)
         else:
-            return f"{numeric_value:,.2f}"
-    
-    # 일반적인 경우 decimals에 따라 스케일 조정
-    numeric_value *= (10 ** -int(decimals))
-    
-    if numeric_value == int(numeric_value):
-        return f"{int(numeric_value):,}"
-    else:
-        return f"{numeric_value:,.2f}"
+            # 부동소수점 정밀도 문제 방지를 위해 정수로 변환 후 콤마 추가
+            return f"{int(value):,}"
+    except (ValueError, TypeError):
+        return value_text  # 변환할 수 없는 경우 원본 반환
 
 
 def parse_xbrl_financial_data(xbrl_content: str, items_and_tags: Dict[str, List[str]]) -> Dict[str, str]:
@@ -483,23 +501,49 @@ def parse_xbrl_financial_data(xbrl_content: str, items_and_tags: Dict[str, List[
                             
                             if value_text and unit_ref:
                                 try:
-                                    formatted_value = format_numeric_value(value_text, decimals)
+                                    # 재무제표의 큰 숫자는 문자열로 처리
+                                    if "total_assets" in item_name.lower() or \
+                                       "total_liabilities" in item_name.lower() or \
+                                       "total_equity" in item_name.lower() or \
+                                       "cash_flow" in item_name.lower() or \
+                                       "revenue" in item_name.lower() or \
+                                       "profit" in item_name.lower() or \
+                                       "income" in item_name.lower() or \
+                                       "매출액" in item_name or \
+                                       "영업이익" in item_name or \
+                                       "당기순이익" in item_name or \
+                                       "자산" in item_name or \
+                                       "부채" in item_name or \
+                                       "자본" in item_name or \
+                                       "현금흐름" in item_name:
+                                        # 큰 숫자 포맷팅
+                                        formatted_value = format_numeric_value(value_text, decimals)
+                                        # 백만원 단위로 변환하여 표시
+                                        try:
+                                            num_value = float(value_text)
+                                            if abs(num_value) > 1e6:  # 백만 이상일 경우
+                                                millions = num_value / 1e6
+                                                formatted_value = f"{int(millions):,} 백만원"
+                                        except (ValueError, TypeError):
+                                            pass
+                                    else:
+                                        formatted_value = format_numeric_value(value_text, decimals)
+                                    
                                     extracted_data[item_name] = f"{formatted_value} ({report_type})"
                                     item_found = True
                                     break
                                 except (ValueError, TypeError) as e:
-                                    pass
+                                    continue
                     
                     if item_found:
                         break
-
-    except ET.ParseError as e:
-        extracted_data = {key: "XBRL 파싱 오류" for key in items_and_tags}
+        
+        return extracted_data
+    
     except Exception as e:
-        traceback.print_exc()
-        extracted_data = {key: "데이터 추출 오류" for key in items_and_tags}
-
-    return extracted_data
+        for key in extracted_data:
+            extracted_data[key] = f"XBRL 파싱 오류: {str(e)[:100]}"
+        return extracted_data
 
 
 def determine_report_code(report_name: str) -> Optional[str]:
@@ -580,15 +624,15 @@ def extract_business_section(document_text: str, section_type: str) -> str:
     # TITLE 태그가 있는지 확인
     title_tags = re.findall(r'<TITLE[^>]*>(.*?)</TITLE>', document_text)
     
-    # 섹션 타입별 패턴 매핑 (번호가 포함된 경우도 처리)
+    # 섹션 타입별 패턴 매핑 (번호가 포함된 경우도 처리) - lookahead 구문 수정
     section_patterns = {
-        '사업의 개요': r'<TITLE[^>]*>(?:\d+\.\s*)?사업의\s*개요[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION)',
-        '주요 제품 및 서비스': r'<TITLE[^>]*>(?:\d+\.\s*)?주요\s*제품[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION)',
-        '원재료 및 생산설비': r'<TITLE[^>]*>(?:\d+\.\s*)?원재료[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION)',
-        '매출 및 수주상황': r'<TITLE[^>]*>(?:\d+\.\s*)?매출[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION)',
-        '위험관리 및 파생거래': r'<TITLE[^>]*>(?:\d+\.\s*)?위험관리[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION>',
-        '주요계약 및 연구개발활동': r'<TITLE[^>]*>(?:\d+\.\s*)?주요\s*계약[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION)',
-        '기타 참고사항': r'<TITLE[^>]*>(?:\d+\.\s*)?기타\s*참고사항[^<]*</TITLE>(.*?)(?=<TITLE|</SECTION>',
+        '사업의 개요': r'<TITLE[^>]*>(?:\d+\.\s*)?사업의\s*개요[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
+        '주요 제품 및 서비스': r'<TITLE[^>]*>(?:\d+\.\s*)?주요\s*제품[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
+        '원재료 및 생산설비': r'<TITLE[^>]*>(?:\d+\.\s*)?원재료[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
+        '매출 및 수주상황': r'<TITLE[^>]*>(?:\d+\.\s*)?매출[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
+        '위험관리 및 파생거래': r'<TITLE[^>]*>(?:\d+\.\s*)?위험관리[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
+        '주요계약 및 연구개발활동': r'<TITLE[^>]*>(?:\d+\.\s*)?주요\s*계약[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
+        '기타 참고사항': r'<TITLE[^>]*>(?:\d+\.\s*)?기타\s*참고사항[^<]*</TITLE>(.*?)(?:(?=<TITLE)|(?=</SECTION))',
     }
     
     # 요청된 섹션 패턴 확인
@@ -770,14 +814,14 @@ async def search_disclosure(
         if requested_items:
             info_msg += f" {', '.join(requested_items)} 관련"
         info_msg += " 재무 정보를 검색합니다."
-        ctx.info(info_msg)
+        await ctx.info(info_msg) # await 추가
         
         # end_date 조정
         original_end_date = end_date
         adjusted_end_date, was_adjusted = adjust_end_date(end_date)
         
         if was_adjusted:
-            ctx.info(f"공시 제출 기간을 고려하여 검색 종료일을 {original_end_date}에서 {adjusted_end_date}로 자동 조정했습니다.")
+            await ctx.info(f"공시 제출 기간을 고려하여 검색 종료일을 {original_end_date}에서 {adjusted_end_date}로 자동 조정했습니다.") # await 추가
             end_date = adjusted_end_date
         
         # 회사 코드 조회
@@ -785,7 +829,7 @@ async def search_disclosure(
         if not corp_code:
             return f"회사 검색 오류: {matched_name}"
         
-        ctx.info(f"{matched_name}(고유번호: {corp_code})의 공시를 검색합니다.")
+        await ctx.info(f"{matched_name}(고유번호: {corp_code})의 공시를 검색합니다.") # await 추가
         
         # 공시 목록 조회
         disclosures, error_msg = await get_disclosure_list(corp_code, start_date, end_date)
@@ -798,7 +842,7 @@ async def search_disclosure(
                 date_range_msg += f" (원래 요청: {start_date}~{original_end_date}, 공시 제출 기간 고려하여 확장)"
             return f"{date_range_msg} '{matched_name}'(고유번호: {corp_code})의 정기공시가 없습니다."
         
-        ctx.info(f"{len(disclosures)}개의 정기공시를 찾았습니다. XBRL 데이터 조회 및 분석을 시도합니다.")
+        await ctx.info(f"{len(disclosures)}개의 정기공시를 찾았습니다. XBRL 데이터 조회 및 분석을 시도합니다.") # await 추가
 
         # 추출할 재무 항목 및 가능한 태그 리스트 정의
         all_items_and_tags = {
@@ -849,7 +893,7 @@ async def search_disclosure(
             processed_count += 1
             await ctx.report_progress(processed_count, disclosure_count) 
             
-            ctx.info(f"공시 {processed_count}/{disclosure_count} 분석 중: {report_name} (접수번호: {rcept_no})")
+            await ctx.info(f"공시 {processed_count}/{disclosure_count} 분석 중: {report_name} (접수번호: {rcept_no})") # await 추가
             
             # XBRL 데이터 조회
             try:
@@ -872,6 +916,7 @@ async def search_disclosure(
                     error_summary = xbrl_text.split('\n')[0][:100]
                     financial_data = {key: f"오류({error_summary})" for key in items_to_extract}
                     api_errors.append(f"{report_name}: {error_summary}")
+                    await ctx.warning(f"XBRL 데이터 조회 오류 ({report_name}): {error_summary}") # ctx.warning에도 await 추가 (만약 비동기라면)
 
                 # 요청된 항목 관련 데이터가 있는지 확인
                 is_relevant = True
@@ -900,9 +945,9 @@ async def search_disclosure(
                     
                     result += "\n" + "-" * 50 + "\n\n"
                 else:
-                     ctx.info(f"[{report_name}] 건너뜀: 요청하신 항목({', '.join(requested_items) if requested_items else '전체'}) 관련 유효 데이터 없음.")
+                     await ctx.info(f"[{report_name}] 건너뜀: 요청하신 항목({', '.join(requested_items) if requested_items else '전체'}) 관련 유효 데이터 없음.") # await 추가
             except Exception as e:
-                ctx.error(f"공시 처리 중 예상치 못한 오류 발생 ({report_name}): {e}")
+                await ctx.error(f"공시 처리 중 예상치 못한 오류 발생 ({report_name}): {e}") # ctx.error에도 await 추가 (만약 비동기라면)
                 api_errors.append(f"{report_name}: {str(e)}")
                 traceback.print_exc()
 
@@ -966,17 +1011,17 @@ async def search_detailed_financial_data(
         # 모든 재무제표 유형을 처리할 경우
         if statement_type is None:
             all_statement_types = list(STATEMENT_TYPES.keys())
-            ctx.info(f"{company_name}의 모든 재무제표(재무상태표, 손익계산서, 현금흐름표) 세부 정보를 검색합니다.")
+            await ctx.info(f"{company_name}의 모든 재무제표(재무상태표, 손익계산서, 현금흐름표) 세부 정보를 검색합니다.") # await 추가
         else:
             all_statement_types = [statement_type]
-            ctx.info(f"{company_name}의 {statement_type} 세부 정보를 검색합니다.")
+            await ctx.info(f"{company_name}의 {statement_type} 세부 정보를 검색합니다.") # await 추가
         
         # end_date 조정
         original_end_date = end_date
         adjusted_end_date, was_adjusted = adjust_end_date(end_date)
         
         if was_adjusted:
-            ctx.info(f"공시 제출 기간을 고려하여 검색 종료일을 {original_end_date}에서 {adjusted_end_date}로 자동 조정했습니다.")
+            await ctx.info(f"공시 제출 기간을 고려하여 검색 종료일을 {original_end_date}에서 {adjusted_end_date}로 자동 조정했습니다.") # await 추가
             end_date = adjusted_end_date
         
         # 회사 코드 조회
@@ -984,7 +1029,7 @@ async def search_detailed_financial_data(
         if not corp_code:
             return f"회사 검색 오류: {matched_name}"
         
-        ctx.info(f"{matched_name}(고유번호: {corp_code})의 공시를 검색합니다.")
+        await ctx.info(f"{matched_name}(고유번호: {corp_code})의 공시를 검색합니다.") # await 추가
         
         # 공시 목록 조회
         disclosures, error_msg = await get_disclosure_list(corp_code, start_date, end_date)
@@ -997,7 +1042,7 @@ async def search_detailed_financial_data(
                 date_range_msg += f" (원래 요청: {start_date}~{original_end_date}, 공시 제출 기간 고려하여 확장)"
             return f"{date_range_msg} '{matched_name}'(고유번호: {corp_code})의 정기공시가 없습니다."
         
-        ctx.info(f"{len(disclosures)}개의 정기공시를 찾았습니다. XBRL 데이터 조회 및 분석을 시도합니다.")
+        await ctx.info(f"{len(disclosures)}개의 정기공시를 찾았습니다. XBRL 데이터 조회 및 분석을 시도합니다.") # await 추가
 
         # 결과 문자열 초기화
         result = f"# {matched_name}의 세부 재무 정보 ({start_date} ~ {end_date})\n\n"
@@ -1019,7 +1064,7 @@ async def search_detailed_financial_data(
                 if not rcept_no or not reprt_code:
                     continue
 
-                ctx.info(f"공시 분석 중: {report_name} (접수번호: {rcept_no})")
+                await ctx.info(f"공시 분석 중: {report_name} (접수번호: {rcept_no})") # await 추가
                 
                 # XBRL 데이터 조회
                 xbrl_text = await get_financial_statement_xbrl(rcept_no, reprt_code)
@@ -1035,10 +1080,10 @@ async def search_detailed_financial_data(
                 else:
                     error_summary = xbrl_text.split('\n')[0][:100]
                     api_errors.append(f"{report_name}: {error_summary}")
-                    ctx.warning(f"XBRL 데이터 조회 오류 ({report_name}): {error_summary}")
+                    await ctx.warning(f"XBRL 데이터 조회 오류 ({report_name}): {error_summary}") # ctx.warning에도 await 추가 (만약 비동기라면)
             except Exception as e:
                 api_errors.append(f"{report_name if 'report_name' in locals() else '알 수 없는 보고서'}: {str(e)}")
-                ctx.error(f"공시 데이터 처리 중 예상치 못한 오류 발생: {e}")
+                await ctx.error(f"공시 데이터 처리 중 예상치 못한 오류 발생: {e}") # ctx.error에도 await 추가 (만약 비동기라면)
                 traceback.print_exc()
         
         # 각 재무제표 유형별 처리
@@ -1089,12 +1134,12 @@ async def search_detailed_financial_data(
                             
                             result += "\n"
                         else:
-                            ctx.info(f"[{report_name}] {current_statement_type}의 유효한 데이터가 없습니다.")
+                            await ctx.info(f"[{report_name}] {current_statement_type}의 유효한 데이터가 없습니다.") # await 추가
                     except Exception as e:
-                        ctx.warning(f"XBRL 파싱/분석 중 오류 발생 ({report_name}): {e}")
+                        await ctx.warning(f"XBRL 파싱/분석 중 오류 발생 ({report_name}): {e}") # ctx.warning에도 await 추가
                         api_errors.append(f"{report_name} 분석 중 오류: {str(e)}")
                 except Exception as e:
-                    ctx.error(f"공시 데이터 처리 중 예상치 못한 오류 발생: {e}")
+                    await ctx.error(f"공시 데이터 처리 중 예상치 못한 오류 발생: {e}") # ctx.error에도 await 추가
                     api_errors.append(f"공시 데이터 처리 오류: {str(e)}")
                     traceback.print_exc()
             
@@ -1167,14 +1212,14 @@ async def search_business_information(
             return f"지원하지 않는 정보 유형입니다. 지원되는 유형: {', '.join(supported_types)}"
         
         # 진행 상황 알림
-        ctx.info(f"{company_name}의 {information_type} 정보를 검색합니다.")
+        await ctx.info(f"{company_name}의 {information_type} 정보를 검색합니다.") # await 추가
         
         # end_date 조정
         original_end_date = end_date
         adjusted_end_date, was_adjusted = adjust_end_date(end_date)
         
         if was_adjusted:
-            ctx.info(f"공시 제출 기간을 고려하여 검색 종료일을 {original_end_date}에서 {adjusted_end_date}로 자동 조정했습니다.")
+            await ctx.info(f"공시 제출 기간을 고려하여 검색 종료일을 {original_end_date}에서 {adjusted_end_date}로 자동 조정했습니다.") # await 추가
             end_date = adjusted_end_date
         
         # 회사 코드 조회
@@ -1182,14 +1227,14 @@ async def search_business_information(
         if not corp_code:
             return f"회사 검색 오류: {matched_name}"
         
-        ctx.info(f"{matched_name}(고유번호: {corp_code})의 공시를 검색합니다.")
+        await ctx.info(f"{matched_name}(고유번호: {corp_code})의 공시를 검색합니다.") # await 추가
         
         # 공시 목록 조회
         disclosures, error_msg = await get_disclosure_list(corp_code, start_date, end_date)
         if error_msg:
             return error_msg
             
-        ctx.info(f"{len(disclosures)}개의 정기공시를 찾았습니다. 적절한 공시를 선택하여 정보를 추출합니다.")
+        await ctx.info(f"{len(disclosures)}개의 정기공시를 찾았습니다. 적절한 공시를 선택하여 정보를 추출합니다.") # await 추가
         
         # 사업정보를 포함할 가능성이 높은 정기보고서를 우선순위에 따라 필터링
         priority_reports = [
@@ -1220,7 +1265,7 @@ async def search_business_information(
         rcept_dt = selected_disclosure.get('rcept_dt', '날짜 없음')
         rcept_no = selected_disclosure.get('rcept_no', '')
         
-        ctx.info(f"'{report_name}' (접수번호: {rcept_no}, 접수일: {rcept_dt}) 공시에서 '{information_type}' 정보를 추출합니다.")
+        await ctx.info(f"'{report_name}' (접수번호: {rcept_no}, 접수일: {rcept_dt}) 공시에서 '{information_type}' 정보를 추출합니다.") # await 추가
         
         # 섹션 추출
         try:
@@ -1247,7 +1292,7 @@ async def search_business_information(
                 if len(result) > max_length:
                     result = result[:max_length] + f"\n\n... (이하 생략, 총 {len(result)} 자)"
         except Exception as e:
-            ctx.error(f"섹션 추출 중 예상치 못한 오류 발생: {e}")
+            await ctx.error(f"섹션 추출 중 예상치 못한 오류 발생: {e}") # ctx.error에도 await 추가
             result = f"# {matched_name} - {information_type}\n\n"
             result += f"## 출처: {report_name} (접수일: {rcept_dt})\n\n"
             result += f"정보 추출 중 오류 발생: {str(e)}\n\n"
@@ -1279,11 +1324,44 @@ async def get_current_date(
     
     # 컨텍스트가 제공된 경우 로그 출력
     if ctx:
-        ctx.info(f"현재 날짜: {formatted_date}")
+        await ctx.info(f"현재 날짜: {formatted_date}") # await 추가
     
     return formatted_date
 
 
 # 서버 실행 코드
 if __name__ == "__main__":
-    mcp.run(transport='stdio')
+    import asyncio
+    
+    # 비동기 예외 처리를 개선
+    def handle_exception(loop, context):
+        exception = context.get("exception")
+        message = context.get("message", "")
+
+        # 취소된 태스크 관련 오류는 무시
+        if isinstance(exception, asyncio.CancelledError):
+            # print("CancelledError 무시됨") # 디버깅용
+            return
+            
+        # 특정 RuntimeError (태스크 스코프 관련)는 로그 없이 무시
+        if isinstance(exception, RuntimeError) and "different task than it was entered in" in str(exception):
+            # print(f"태스크 스코프 오류 조용히 무시됨: {message}") # 디버깅용
+            return
+            
+        # 다른 예외는 기본 핸들러로 전달 (콘솔에 출력)
+        print(f"처리되지 않은 예외 발생: {message}") # 어떤 예외가 발생하는지 확인용
+        if exception:
+            print(f"예외 타입: {type(exception)}, 내용: {exception}")
+        # loop.default_exception_handler(context) # 필요시 기본 핸들러 호출 복구
+    
+    try:
+        # 비동기 이벤트 루프 설정
+        loop = asyncio.get_event_loop()
+        loop.set_exception_handler(handle_exception)
+        
+        # RunVar를 사용하지 않고 직접 MCP 서버 실행
+        mcp.run(transport='stdio')
+    except Exception as e:
+        print(f"MCP 서버 실행 중 오류 발생: {e}")
+        import traceback
+        traceback.print_exc()
