@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ExperiencesResponseDto {
+    private Integer experienceId;
     private String experienceName;
     private String experienceRole;
     private LocalDateTime updatedAt;
