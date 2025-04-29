@@ -1,12 +1,18 @@
 from pydantic import BaseModel
+from typing import Optional, List
 
 
 class CompanyAnalysisRequest(BaseModel):
     company_name: str
     base: bool # 사업 보고서 기본 분석 포함 여부
     plus: bool  # 사업 보고서 심화 분석 포함 여부
-    fin: bool  # 재무제표 분석 포함 여부
+    fin: bool  # 재무 정보 포함 여부
 
+
+# Default: 기본 제공 정보 
+class CompanyAnalysisDefault(BaseModel):
+    company_brand: str = None  # 주요 제품 및 브랜드
+    company_vision: str = None  # 기업 비전
 
 # Base: 사업 보고서 + 재무 정보
 class CompanyAnalysisBase(BaseModel):
@@ -17,9 +23,9 @@ class CompanyAnalysisBase(BaseModel):
     other_references: str = None  # 기타 참고사항
     
     # 재무 정보 (기본)
-    sales_revenue: float = None  # 매출액
-    operating_profit: float = None  # 영업이익
-    net_income: float = None  # 당기순이익
+    sales_revenue: str = None  # 매출액
+    operating_profit: str = None  # 영업이익
+    net_income: str = None  # 당기순이익
 
 
 # Plus: 사업 보고서 (심화)
@@ -32,14 +38,14 @@ class CompanyAnalysisPlus(BaseModel):
 # Fin: 재무 정보 (심화)
 class CompanyAnalysisFin(BaseModel):
     # 재무상태
-    total_assets: float = None  # 자산 총계
-    total_liabilities: float = None  # 부채 총계
-    total_equity: float = None  # 자본 총계
+    total_assets: str = None  # 자산 총계
+    total_liabilities: str = None  # 부채 총계
+    total_equity: str = None  # 자본 총계
     
     # 현금흐름
-    operating_cash_flow: float = None  # 영업활동 현금흐름
-    investing_cash_flow: float = None  # 투자활동 현금흐름
-    financing_cash_flow: float = None  # 재무활동 현금흐름
+    operating_cash_flow: str = None  # 영업활동 현금흐름
+    investing_cash_flow: str = None  # 투자활동 현금흐름
+    financing_cash_flow: str = None  # 재무활동 현금흐름
     
 
 
@@ -54,4 +60,4 @@ class CompanyAnalysisResponse(BaseModel):
     company_brand: str  # 주요 제품 및 브랜드
     company_analysis: str  # 기업 분석 결과 (기본, 심화, 재무)
     company_vision: str  # 기업 비전
-    company_news: CompanyNews  # 기업 뉴스 
+    company_news: Optional[CompanyNews] = None  # 기업 뉴스 (Optional로 변경 및 기본값 None 설정) 
