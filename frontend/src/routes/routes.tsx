@@ -14,7 +14,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import DefaultLayout from "@/components/layouts/DefaultLayout";
 import BlankLayout from "@/components/layouts/BlankLayout";
 
-const CoverLetter = lazy(() => import("@/pages/CoverLetter/CoverLetter"));
+const CoverLetterAnalysis = lazy(
+  () => import("@/pages/CoverLetter/CoverLetterAnalysis")
+);
 
 function SuspenseWrapper({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Loading />}>{children}</Suspense>;
@@ -40,11 +42,23 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <CoverLetter />
+                  <CoverLetterAnalysis />
                 </ErrorBoundary>
               </SuspenseWrapper>
             ),
+            children: [
+              {
+                path: "select-job",
+              },
+              {
+                path: "select-company",
+              },
+              {
+                path: "input-question",
+              },
+            ],
           },
+
           {
             path: "corporate-search",
             element: <CorporateSearch />,
