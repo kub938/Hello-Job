@@ -70,6 +70,7 @@
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary-light: var(--secondary-light);
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
@@ -95,7 +96,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   --color-text-foreground: var(--text-foreground);
-  --color-text-muted-foreground: var(--text-mute-foreground);
+  --color-text-muted-foreground: var(--text-muted-foreground);
   --color-text-disabled: var(--text-disabled);
 }
 
@@ -110,6 +111,7 @@
   --primary: #886bfb;
   --primary-foreground: #ffffff;
   --secondary: #af9bff;
+  --secondary-light: #f7f5ff;
   --secondary-foreground: #2a2c35;
   --muted: #f1f3f9;
   --muted-foreground: #6e7180;
@@ -189,6 +191,13 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
   }
 }
 
