@@ -1,5 +1,7 @@
 package com.ssafy.hellojob.domain.exprience.entity;
 
+import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
+import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceResponseDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -59,6 +61,15 @@ public class Experience {
         this.experienceClient = experienceClient;
         this.experienceStartDate = experienceStartDate;
         this.experienceEndDate = experienceEndDate;
+    }
+
+    public void updateExperience(ExperienceRequestDto experience) {
+        this.experienceName = experience.getExperienceName();
+        this.experienceRole = experience.getExperienceRole();
+        this.experienceDetail = experience.getExperienceDetail();
+        this.experienceClient = experience.getExperienceClient();
+        this.experienceStartDate = experience.getExperienceStartDate();
+        this.experienceEndDate = experience.getExperienceEndDate();
     }
 
     @PrePersist
