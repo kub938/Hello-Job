@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from app.schemas import company
-from app.services import company_analysis_dart, company_analysis_news
+from app.services.company_analysis_service import company_analysis_dart, company_analysis_news
 
 router = APIRouter(prefix="/company-analysis", tags=["company-analysis"])
 
@@ -27,9 +27,9 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
     response = company.CompanyAnalysisResponse(
         company_name=company_name,
         analysis_date=datetime.now().strftime("%Y-%m-%d"),
-        company_brand=company_analysis_result.company_brand,
-        company_analysis=company_analysis_result.company_analysis,
-        company_vision=company_analysis_result.company_vision,
+        company_brand=company_analysis_result["company_brand"],
+        company_analysis=company_analysis_result["company_analysis"],
+        company_vision=company_analysis_result["company_vision"],
         company_news=news_result
     )
     
