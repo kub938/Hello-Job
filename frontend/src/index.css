@@ -145,3 +145,16 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center z-50;
+    @apply transition-opacity duration-200;
+  }
+
+  .modal-container {
+    @apply bg-card text-card-foreground rounded-lg shadow-lg;
+    @apply w-[45rem] h-full mt-40 overflow-auto px-8 pt-6 pb-28 relative;
+    @apply animate-in fade-in-0 zoom-in-95 duration-300;
+  }
+}
