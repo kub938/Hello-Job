@@ -1,12 +1,21 @@
 package com.ssafy.hellojob.domain.companyanalysis.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisDetailResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisListResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
+import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
+import com.ssafy.hellojob.domain.companyanalysis.entity.NewsAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
+import com.ssafy.hellojob.global.exception.BaseException;
+import com.ssafy.hellojob.global.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -39,5 +48,63 @@ public class CompanyAnalysisService {
 
         return result;
     }
+
+    // 기업 분석 상세 조회
+    @Transactional(readOnly = true)
+    public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Long companyAnalysisId) {
+        CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
+                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+
+        // 공개 여부 필터링
+        if (!companyAnalysis.isPublic()) {
+            throw new BaseException(ErrorCode.BAD_REQUEST_ERROR);
+        }
+
+        // 즐겨찾기 여부 필터링
+        boolean isBookmarked = companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, companyAnalysisId);
+
+        // dart 분석 시 사용된 데이터 배열로 변환
+        DartAnalysis dart = companyAnalysis.getDartAnalysis();
+        List<String> dartCategory = new ArrayList<>();
+        if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+        if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+        if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+
+        NewsAnalysis news = companyAnalysis.getNewsAnalysis();
+
+        // 뉴스 크롤링 출처 기사 링크 배열로 변환
+        List<String> newsUrls = new ArrayList<>();
+        if (news.getNewsAnalysisUrl() != null && !news.getNewsAnalysisUrl().isBlank()) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                newsUrls = objectMapper.readValue(news.getNewsAnalysisUrl(), new TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                throw new RuntimeException("뉴스 URL 파싱 실패", e);
+            }
+        }
+
+        return CompanyAnalysisDetailResponseDto.builder()
+                .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
+                .companyName(companyAnalysis.getCompany().getCompanyName())
+                .createdAt(companyAnalysis.getCreatedAt())
+                .companyViewCount(companyAnalysis.getCompanyAnalysisViewCount())
+                .companyLocation(companyAnalysis.getCompany().getCompanyLocation())
+                .companySize(companyAnalysis.getCompany().getCompanySize().name())
+                .companyIndustry(companyAnalysis.getCompany().getCompanyIndustry())
+                .companyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount())
+                .bookmark(isBookmarked)
+                .isPublic(companyAnalysis.isPublic())
+                .newsAnalysisData(news.getNewsAnalysisData())
+                .newsAnalysisDate(news.getNewsAnalysisDate())
+                .newsAnalysisUrl(newsUrls) 
+                .dartBrand(dart.getDartBrand())
+                .dartCurrIssue(dart.getDartCurrIssue())
+                .dartVision(dart.getDartVision())
+                .dartFinancialSummery(dart.getDartFinancialSummary())
+                .dartCategory(dartCategory)
+                .build();
+    }
+
+
 
 }
