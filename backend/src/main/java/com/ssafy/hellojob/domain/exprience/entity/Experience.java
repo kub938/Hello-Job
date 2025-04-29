@@ -30,7 +30,7 @@ public class Experience {
     @Column(name = "experience_name", nullable = false, length = 100)
     private String experienceName;
 
-    @Column(name = "experience_detail", nullable = false)
+    @Column(name = "experience_detail", nullable = false, columnDefinition = "TEXT")
     private String experienceDetail;
 
     @Column(name = "experience_role", length = 50)
