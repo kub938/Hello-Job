@@ -13,7 +13,6 @@ import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +30,11 @@ public class ProjectService {
     public ProjectCreateResponseDto createProject(Integer userId, ProjectRequestDto projectRequestDto) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        if (projectRequestDto.getProjectStartDate().isAfter(projectRequestDto.getProjectEndDate())) {
+            log.debug("🌞 경험 시작 날짜: " + projectRequestDto.getProjectStartDate() + " 경험 종료 날짜: " + projectRequestDto.getProjectEndDate());
+            throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
+        }
 
         Project newProject = Project.builder()
                 .user(user)
@@ -92,6 +96,11 @@ public class ProjectService {
 
         if ( project.getUser().getUserId() != userId ) {
             throw new BaseException(ErrorCode.PROJECT_MISMATCH);
+        }
+
+        if (projectRequestDto.getProjectStartDate().isAfter(projectRequestDto.getProjectEndDate())) {
+            log.debug("🌞 경험 시작 날짜: " + projectRequestDto.getProjectStartDate() + " 경험 종료 날짜: " + projectRequestDto.getProjectEndDate());
+            throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
         }
 
         project.updateProject(
