@@ -60,4 +60,17 @@ public class CompanyAnalysis {
     }
 
 
+    public static CompanyAnalysis of(User user, Company company, DartAnalysis dart, NewsAnalysis news) {
+        CompanyAnalysis ca = new CompanyAnalysis();
+        ca.user = user;
+        ca.company = company;
+        ca.dartAnalysis = dart;
+        ca.newsAnalysis = news;
+        ca.companyAnalysisViewCount = 0;
+        ca.companyAnalysisBookmarkCount = 0;
+        ca.isPublic = true;
+        return ca;
+    }
+
+
 }
