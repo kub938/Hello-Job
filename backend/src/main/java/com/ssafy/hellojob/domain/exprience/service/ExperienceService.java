@@ -77,4 +77,20 @@ public class ExperienceService {
                 .updatedAt(experience.getUpdatedAt())
                 .build();
     }
+
+    public void updateExperience(Integer userId, Integer experienceId, ExperienceRequestDto experienceRequestDto) {
+        Experience experience = experienceRepository.findByExperienceId(experienceId)
+                .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
+
+        if (!userId.equals(experience.getUser().getUserId())) {
+            throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
+        }
+
+        if (experienceRequestDto.getExperienceStartDate().isAfter(experienceRequestDto.getExperienceEndDate())) {
+            log.debug("🌞 경험 시작 날짜: " + experience.getExperienceStartDate() + " 경험 종료 날짜: " + experience.getExperienceEndDate());
+            throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
+        }
+
+        experience.updateExperience(experienceRequestDto);
+    }
 }

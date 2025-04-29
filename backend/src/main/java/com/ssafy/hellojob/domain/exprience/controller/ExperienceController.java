@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -44,5 +46,16 @@ public class ExperienceController {
         Integer userId = principal.getUserId();
 
         return experienceService.getExperience(userId, experienceId);
+    }
+
+    @PutMapping("{experienceId}")
+    public Map<String, String> updateExperience(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer experienceId,
+            @Valid @RequestBody ExperienceRequestDto experienceRequestDto) {
+        Integer userId = principal.getUserId();
+        experienceService.updateExperience(userId, experienceId, experienceRequestDto);
+
+        return Map.of("message", "경험이 수정되었습니다.");
     }
 }
