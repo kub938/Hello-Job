@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.exprience.controller;
 
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceCreateResponseDto;
+import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceResponseDto;
 import com.ssafy.hellojob.domain.exprience.service.ExperienceService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import jakarta.validation.Valid;
@@ -34,5 +35,14 @@ public class ExperienceController {
         Integer userId = principal.getUserId();
 
         return experienceService.getExperiences(userId);
+    }
+
+    @GetMapping("/{experienceId}")
+    public ExperienceResponseDto getExperience(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer experienceId) {
+        Integer userId = principal.getUserId();
+
+        return experienceService.getExperience(userId, experienceId);
     }
 }

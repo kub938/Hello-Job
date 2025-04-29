@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.exprience.service;
 
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceCreateResponseDto;
+import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceResponseDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto;
 import com.ssafy.hellojob.domain.exprience.entity.Experience;
 import com.ssafy.hellojob.domain.exprience.repository.ExperienceRepository;
@@ -55,5 +56,25 @@ public class ExperienceService {
             return ResponseEntity.noContent().build();
 
         return ResponseEntity.ok(experiences);
+    }
+
+    public ExperienceResponseDto getExperience(Integer userId, Integer experienceId) {
+        Experience experience = experienceRepository.findByExperienceId(experienceId)
+                .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
+
+        if (!userId.equals(experience.getUser().getUserId())) {
+            throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
+        }
+
+        return ExperienceResponseDto.builder()
+                .experienceId(experience.getExperienceId())
+                .experienceName(experience.getExperienceName())
+                .experienceRole(experience.getExperienceRole())
+                .experienceDetail(experience.getExperienceDetail())
+                .experienceClient(experience.getExperienceClient())
+                .experienceStartDate(experience.getExperienceStartDate())
+                .experienceEndDate(experience.getExperienceEndDate())
+                .updatedAt(experience.getUpdatedAt())
+                .build();
     }
 }
