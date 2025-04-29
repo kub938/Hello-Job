@@ -31,7 +31,7 @@ public class CoverLetterService {
 
     public CoverLetterCreateResponseDto createCoverLetter(User user, CoverLetterRequestDto requestDto) {
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
         String companyName = companyAnalysis.getCompany().getCompanyName();
 
@@ -41,7 +41,7 @@ public class CoverLetterService {
             jobRoleSnapshot = null;
         } else {
             JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId().longValue())
-                    .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                    .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
             jobRoleSnapshot = jobRoleSnapshotService.copyJobRoleAnalysis(companyName, jobRoleAnalysis);
         }

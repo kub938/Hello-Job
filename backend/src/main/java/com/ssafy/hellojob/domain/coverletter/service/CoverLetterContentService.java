@@ -49,7 +49,7 @@ public class CoverLetterContentService {
                 Experience experience = experienceRepository.findByExperienceId(experienceId)
                         .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
 
-                if (!experience.getUser().equals(user))
+                if (!experience.getUser().getUserId().equals(user.getUserId()))
                     throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
 
                 CoverLetterExperience coverLetterExperience = CoverLetterExperience.builder()
@@ -64,8 +64,8 @@ public class CoverLetterContentService {
                 Project project = projectRepository.findById(projectId)
                         .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
 
-                if (!project.getUser().equals(user))
-                    throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
+                if (!project.getUser().getUserId().equals(user.getUserId()))
+                    throw new BaseException(ErrorCode.PROJECT_MISMATCH);
 
                 CoverLetterExperience coverLetterExperience = CoverLetterExperience.builder()
                         .coverLetterContent(newCoverLetterContent)

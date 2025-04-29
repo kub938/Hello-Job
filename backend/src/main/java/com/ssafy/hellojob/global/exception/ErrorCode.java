@@ -39,6 +39,9 @@ public enum ErrorCode {
     // 직무 분석
     JOB_ROLE_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 레포트를 찾을 수 없습니다."),
 
+    // 기업 분석
+    COMPANY_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 기업 분석 레포트를  찾을 수 없습니다."),
+
     // 자기소개서 관련
     JOB_ROLE_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 스냅샷을 찾을 수 없습니다.")
 
