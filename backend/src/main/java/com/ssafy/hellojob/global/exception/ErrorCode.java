@@ -33,7 +33,7 @@ public enum ErrorCode {
     // 경험
     EXPERIENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 경험을 찾을 수 없습니다."),
     EXPERIENCE_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 경험 입력자가 일치하지 않습니다."),
-    EXPERIENCE_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "경험 시작 날짜는 종료 날짜보다 먼저여야 합니다.");
+    EXPERIENCE_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "경험 시작 날짜는 종료 날짜보다 먼저여야 합니다.")
 
 
     /**
