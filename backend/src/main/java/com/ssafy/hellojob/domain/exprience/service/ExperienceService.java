@@ -31,6 +31,11 @@ public class ExperienceService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
+        if (experienceRequestDto.getExperienceStartDate().isAfter(experienceRequestDto.getExperienceEndDate())) {
+            log.debug("🌞 경험 시작 날짜: " + experienceRequestDto.getExperienceStartDate() + " 경험 종료 날짜: " + experienceRequestDto.getExperienceEndDate());
+            throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
+        }
+
         Experience experience = Experience.builder()
                 .user(user)
                 .experienceName(experienceRequestDto.getExperienceName())
@@ -87,7 +92,7 @@ public class ExperienceService {
         }
 
         if (experienceRequestDto.getExperienceStartDate().isAfter(experienceRequestDto.getExperienceEndDate())) {
-            log.debug("🌞 경험 시작 날짜: " + experience.getExperienceStartDate() + " 경험 종료 날짜: " + experience.getExperienceEndDate());
+            log.debug("🌞 경험 시작 날짜: " + experienceRequestDto.getExperienceStartDate() + " 경험 종료 날짜: " + experienceRequestDto.getExperienceEndDate());
             throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
         }
 
