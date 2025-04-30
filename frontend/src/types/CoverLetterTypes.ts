@@ -46,3 +46,19 @@ export interface CoverLetterResponse {
   summary: CoverLetterSummaryType;
   content: CoverLetterContentType;
 }
+
+//Post Request Type
+export interface CoverLetterPostRequest {
+  companyAnalysisId: number;
+  jobRoleAnalysisId: number;
+  contents: CoverLetterRequestContent;
+}
+
+export interface CoverLetterRequestContent {
+  contentQuestion: string;
+  contentNumber: number;
+  contentExperienceIds: number[];
+  contentProjectIds: number[];
+  contentLength: number;
+  contentFirstPrompt: string;
+}
