@@ -32,10 +32,6 @@ const router = createBrowserRouter([
         element: <DefaultLayout />,
         children: [
           {
-            path: "",
-            element: <Home />,
-          },
-          {
             path: "cover-letter",
             element: (
               <SuspenseWrapper>
@@ -63,6 +59,10 @@ const router = createBrowserRouter([
         // 헤더가 없는 레이아웃
         element: <BlankLayout />,
         children: [
+          {
+            path: "",
+            element: <Home />,
+          },
           {
             path: "login",
             element: <Login />,
