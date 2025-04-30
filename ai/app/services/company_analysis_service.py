@@ -165,7 +165,7 @@ async def company_analysis_dart(company_name, base, plus, fin):
     
     # Agent에게 전달할 context 수정
     context = f"DART API를 활용하여 {company_name} 기업의 기업 분석 내용을 제공하세요. "
-    context += "**반드시 '기업 브랜드 이미지 및 평판(company_brand)'과 '기업 비전 및 목표(company_vision)'를 분석하여 포함해야 합니다.** " # 강조 및 필수 명시
+    context += "**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'를 분석하여 포함해야 합니다.** " # 강조 및 필수 명시
     context += "분석에 사용한 문서는 문서명과 문서등록일을 포함하여 used_docs에 추가하세요. "
     context += "포함할 내용은 다음과 같습니다: \n"
     context += "company_brand, company_vision, " # 필드명 다시 언급
