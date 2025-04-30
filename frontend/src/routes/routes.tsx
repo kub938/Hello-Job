@@ -6,7 +6,7 @@ import Home from "@/pages/Home/Home";
 import Login from "@/pages/Login/Login";
 import CorporateSearch from "@/pages/CorporateSearch/CorporateSearch";
 import Mypage from "@/pages/Mypage/Mypage";
-import JobSearch from "@/pages/JobSearch/JobSearch";
+import JobResearch from "@/pages/JobResearch/JobResearch";
 import Loading from "@/components/Loading/Loading";
 import RouterErrorHandler from "@/components/Error/RouterErrorHandler";
 import RenderErrorFallback from "@/components/Error/RenderErrorHandler";
@@ -64,8 +64,8 @@ const router = createBrowserRouter([
             element: <Mypage />,
           },
           {
-            path: "job-search",
-            element: <JobSearch />,
+            path: "job-research",
+            element: <JobResearch />,
           },
         ],
       },
