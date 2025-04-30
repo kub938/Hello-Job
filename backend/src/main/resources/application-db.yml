@@ -19,7 +19,7 @@ spring:
     show-sql: true
     properties:
       hibernate:
-        format_sql: truessafy
+        format_sql: true
         use_sql_comments: true
         jdbc:
           time_zone: Asia/Seoul
