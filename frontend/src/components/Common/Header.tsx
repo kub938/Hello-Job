@@ -38,7 +38,7 @@ function Header({ isMinimize = false }: HeaderProps) {
         </Link>
         {isMinimize ? (
           <Link
-            className="shadow-xs border rounded-full px-4 py-1.5 text-sm"
+            className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5"
             to="/mypage"
           >
             OOO님 정보
