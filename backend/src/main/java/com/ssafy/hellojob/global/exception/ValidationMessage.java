@@ -24,4 +24,13 @@ public final class ValidationMessage {
     public static final String EXPERIENCE_START_DATE_NOT_EMPTY = "경험 시작일은 필수값 입니다.";
     public static final String EXPERIENCE_END_DATE_NOT_EMPTY = "경험 종료일은 필수값 입니다.";
 
+    // Job Role Analyis
+    public static final String JOB_ROLE_ANALYSIS_COMPANY_ID_NOT_EMPTY = "기업 아이디는 필수값 입니다.";
+    public static final String JOB_ROLE_ANALYSIS_JOB_ROLE_ANALYSIS_ID_NOT_EMPTY = "직무 분석 아이디는 필수값 입니다.";
+    public static final String JOB_ROLE_ANALYSIS_JOB_ROLE_NAME_NOT_EMPTY = "직무명은 필수값 입니다.";
+    public static final String JOB_ROLE_ANALYSIS_JOB_ROLE_CATEGORY_NOT_EMPTY = "직무 카테고리는 필수값 입니다.";
+
+    // Company Analysis
+    public static final String COMPANY_ANALYSIS_BOOKMARK_COMPANY_ANALYSIS_ID_NOT_EMPTY = "기업 분석 아이디는 필수값 입니다.";
+
 }

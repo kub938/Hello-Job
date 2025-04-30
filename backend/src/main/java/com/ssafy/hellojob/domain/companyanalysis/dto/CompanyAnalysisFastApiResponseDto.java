@@ -18,6 +18,7 @@ public class CompanyAnalysisFastApiResponseDto {
     private String company_brand;
     private String company_analysis;
     private String company_vision;
+    private String company_finance;
     private String news_summary;
     private List<String> news_urls;
 

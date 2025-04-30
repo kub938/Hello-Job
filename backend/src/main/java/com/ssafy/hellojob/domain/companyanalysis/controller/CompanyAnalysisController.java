@@ -1,16 +1,12 @@
 package com.ssafy.hellojob.domain.companyanalysis.controller;
 
-import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.service.CompanyService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.*;
 import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisService;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisListResponseDto;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +38,8 @@ public class CompanyAnalysisController {
 
     // 기업 분석 상세 조회
     @GetMapping("/{companyAnalysisId}")
-    public CompanyAnalysisDetailResponseDto CompanyAnalysisDetail(@PathVariable("companyAnalysisId") Long companyAnalysisId, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public CompanyAnalysisDetailResponseDto CompanyAnalysisDetail(@PathVariable("companyAnalysisId") Long companyAnalysisId,
+                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
         CompanyAnalysisDetailResponseDto result = companyAnalysisService.detailCompanyAnalysis(userId, companyAnalysisId);
@@ -51,25 +48,27 @@ public class CompanyAnalysisController {
     }
 
     // 테스트용 post 요청 코드
-//    @PostMapping("/test/{companyId}")
-//    public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@PathVariable("companyId") Long companyId,
-//                                                                        @RequestBody CompanyAnalysisFastApiResponseDto responseDto,
-//                                                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
-//        Integer userId = userPrincipal.getUserId();
-//
-//        boolean basic = true;
-//        boolean plus = false;
-//        boolean financial = true;
-//
-//        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, companyId, basic, plus, financial, responseDto);
-//
-//        return result;
-//
-//    }
+    @PostMapping("/test/{companyId}")
+    public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@PathVariable("companyId") Long companyId,
+                                                                        @RequestBody CompanyAnalysisFastApiResponseDto responseDto,
+                                                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+
+        boolean isPublic = true;
+        boolean basic = true;
+        boolean plus = false;
+        boolean financial = true;
+
+        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, companyId, isPublic, basic, plus, financial, responseDto);
+
+        return result;
+
+    }
 
     // fast API 구현 코드
     @GetMapping("/request/{companyId}")
     public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@PathVariable("companyId") Long companyId,
+                                                                        @RequestParam boolean isPublic,
                                                                         @RequestParam boolean basic,
                                                                         @RequestParam boolean plus,
                                                                         @RequestParam boolean financial,
@@ -87,7 +86,7 @@ public class CompanyAnalysisController {
 
         CompanyAnalysisFastApiResponseDto responseDto = fastApiClientService.sendJobAnalysisToFastApi(requestDto);
 
-        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, companyId, basic, plus, financial, responseDto);
+        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, companyId, isPublic, basic, plus, financial, responseDto);
 
         return result;
 
@@ -95,7 +94,8 @@ public class CompanyAnalysisController {
 
     // 기업 분석 검색
     @GetMapping("/search/{companyId}")
-    public ResponseEntity<?> CompanyAnalysisSearch(@PathVariable("companyId") Long companyId, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public ResponseEntity<?> CompanyAnalysisSearch(@PathVariable("companyId") Long companyId,
+                                                   @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
         List<CompanyAnalysisListResponseDto> result = companyAnalysisService.searchByCompanyIdCompanyAnalysis(companyId, userId);
@@ -108,7 +108,8 @@ public class CompanyAnalysisController {
 
     // 기업 분석 북마크 추가
     @PostMapping("/bookmark")
-    public CompanyAnalysisBookmarkSaveResponseDto CompanyAnalysisBookmarkSave(@RequestBody CompanyAnalysisBookmarkSaveRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public CompanyAnalysisBookmarkSaveResponseDto CompanyAnalysisBookmarkSave(@Valid @RequestBody CompanyAnalysisBookmarkSaveRequestDto requestDto,
+                                                                              @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
 
@@ -118,7 +119,9 @@ public class CompanyAnalysisController {
 
     // 기업 분석 북마크 해제
     @DeleteMapping("/bookmark/{companyAnalysisBookmarkId}")
-    public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisBookmarkId") Long companyAnalysisBookmarkId, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisBookmarkId") Long companyAnalysisBookmarkId,
+                                              @AuthenticationPrincipal UserPrincipal userPrincipal){
+
         Integer userId = userPrincipal.getUserId();
         companyAnalysisService.deleteCompanyAnalysisBookmark(companyAnalysisBookmarkId, userId);
     }
@@ -126,7 +129,7 @@ public class CompanyAnalysisController {
     // 기업 분석 북마크 목록 조회
     @GetMapping("/bookmark")
     public ResponseEntity<?> CompanyAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Long companyId,
-                                                                              @AuthenticationPrincipal UserPrincipal userPrincipal){
+                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
         List<CompanyAnalysisBookmarkListResponseDto> result;
 

@@ -23,10 +23,6 @@ public class CoverLetterContent extends BaseTimeEntity {
     @JoinColumn(name = "cover_letter_id", nullable = false)
     private CoverLetter coverLetter;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "chat_log_id", nullable = true)
-    private ChatLog chatLog;
-
     @Column(name = "cover_letter_content_number", nullable = false)
     private Integer contentNumber;
 
@@ -42,21 +38,20 @@ public class CoverLetterContent extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'PENDING'")
     @Column(name = "cover_letter_content_status", nullable = false)
-    private CoverLetterContentStatus coverLetterContentStatus = CoverLetterContentStatus.PENDING;
+    private CoverLetterContentStatus contentStatus = CoverLetterContentStatus.PENDING;
 
     @Column(name = "cover_letter_content_first_prompt", columnDefinition = "TEXT")
     private String contentFirstPrompt;
 
     @Builder
-    public CoverLetterContent(Integer contentId, CoverLetter coverLetter, ChatLog chatLog, Integer contentNumber, String contentQuestion, String contentDetail, Integer contentLength, CoverLetterContentStatus coverLetterContentStatus, String contentFirstPrompt) {
+    public CoverLetterContent(Integer contentId, CoverLetter coverLetter, Integer contentNumber, String contentQuestion, String contentDetail, Integer contentLength, CoverLetterContentStatus contentStatus, String contentFirstPrompt) {
         this.contentId = contentId;
         this.coverLetter = coverLetter;
-        this.chatLog = chatLog;
         this.contentNumber = contentNumber;
         this.contentQuestion = contentQuestion;
         this.contentDetail = contentDetail;
         this.contentLength = contentLength;
-        this.coverLetterContentStatus = coverLetterContentStatus;
+        this.contentStatus = contentStatus;
         this.contentFirstPrompt = contentFirstPrompt;
     }
 }

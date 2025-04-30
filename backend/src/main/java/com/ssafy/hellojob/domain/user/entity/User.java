@@ -45,4 +45,11 @@ public class User extends BaseTimeEntity {
         this.token = 3;
     }
 
+    public void decreaseToken() {
+        if (this.token > 0) {
+            this.token -= 1;
+        }
+    }
+
+
 }

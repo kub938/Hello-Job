@@ -19,7 +19,7 @@ public enum ErrorCode {
 
     // 회원
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."),
-    INVALID_USER(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다."),
+    INVALID_USER(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // 인증
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -28,12 +28,12 @@ public enum ErrorCode {
 
     // 프로젝트
     PROJECT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 프로젝트를 찾을 수 없습니다."),
-    PROJECT_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 프로젝트 입력자가 일치하지 않습니다."),
+    PROJECT_MISMATCH(HttpStatus.FORBIDDEN, "현재 유저와 프로젝트 입력자가 일치하지 않습니다."),
     PROJECT_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "프로젝트 시작 날짜는 종료 날짜보다 먼저여야 합니다."),
 
     // 경험
     EXPERIENCE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 경험을 찾을 수 없습니다."),
-    EXPERIENCE_MISMATCH(HttpStatus.BAD_REQUEST, "현재 유저와 경험 입력자가 일치하지 않습니다."),
+    EXPERIENCE_MISMATCH(HttpStatus.FORBIDDEN, "현재 유저와 경험 입력자가 일치하지 않습니다."),
     EXPERIENCE_DATE_NOT_VALID(HttpStatus.BAD_REQUEST, "경험 시작 날짜는 종료 날짜보다 먼저여야 합니다."),
 
     // 직무 분석
@@ -45,10 +45,14 @@ public enum ErrorCode {
     COMPANY_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 기업 분석 레포트를  찾을 수 없습니다."),
     COMPANY_ANALYSIS_ALREADY_BOOKMARK(HttpStatus.NOT_FOUND, "이미 즐겨찾기에 추가된 항목입니다."),
     COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 즐겨찾기 항목을 찾을 수 없습니다."),
+    COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED(HttpStatus.NO_CONTENT, "일일 기업 분석 요청 횟수를 초과하였습니다."),
 
 
     // 자기소개서 관련
-    JOB_ROLE_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 스냅샷을 찾을 수 없습니다.")
+    JOB_ROLE_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 스냅샷을 찾을 수 없습니다."),
+    COVER_LETTER_CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 본문을 찾을 수 없습니다."),
+    COVER_LETTER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서를 찾을 수 없습니다."),
+    COVER_LETTER_MISMATCH(HttpStatus.FORBIDDEN, "현재 유저와 자기소개서 작성자가 일치하지 않습니다.")
 
 
     /**
