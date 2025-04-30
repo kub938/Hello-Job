@@ -12,5 +12,5 @@ COPY . .
 RUN npm run build
 # 포트 설정
 EXPOSE 5173
-# 실행 명령어
-CMD ["npm", "start"]
+# 실행 명령어 수정 - npm start 대신 npm run dev 사용
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
