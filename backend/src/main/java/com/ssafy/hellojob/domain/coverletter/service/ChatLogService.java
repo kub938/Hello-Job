@@ -19,7 +19,7 @@ import java.util.List;
 public class ChatLogService {
 
     private final ChatLogRepository chatLogRepository;
-    // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔주는 줌
+    // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌
     private final ObjectMapper mapper = new ObjectMapper();
 
     public List<ChatMessageDto> getContentChatLog(Integer contentId) {
