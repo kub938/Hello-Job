@@ -79,7 +79,7 @@ public class CompanyAnalysisController {
         String companyName = companyService.getCompanyNameByCompanyId(companyId);
 
         CompanyAnalysisFastApiRequestDto requestDto = CompanyAnalysisFastApiRequestDto.builder()
-                .companyName(companyName)
+                .company_name(companyName)
                 .base(basic)
                 .plus(plus)
                 .fin(financial)

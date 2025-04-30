@@ -13,12 +13,12 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisFastApiResponseDto {
 
-    private String companyName;
-    private Date analysisDate;
-    private String companyBrand;
-    private String companyAnalysis;
-    private String companyVision;
-    private String newsSummary;
-    private List<String> newsUrls;
+    private String company_name;
+    private Date analysis_date;
+    private String company_brand;
+    private String company_analysis;
+    private String company_vision;
+    private String news_summary;
+    private List<String> news_urls;
 
 }

@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class CompanyAnalysisFastApiRequestDto {
 
-    private String companyName;
+    private String company_name;
     private boolean base;
     private boolean plus;
     private boolean fin;
