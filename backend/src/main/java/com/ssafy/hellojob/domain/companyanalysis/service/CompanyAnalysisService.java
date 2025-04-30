@@ -116,11 +116,11 @@ public class CompanyAnalysisService {
     @Transactional(readOnly = true)
     public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Long companyAnalysisId) {
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
         // 공개 여부 필터링
         if (!companyAnalysis.isPublic()) {
-            throw new BaseException(ErrorCode.BAD_REQUEST_ERROR);
+            throw new BaseException(ErrorCode.INVALID_USER);
         }
 
         // 즐겨찾기 여부 필터링
@@ -194,7 +194,7 @@ public class CompanyAnalysisService {
     public CompanyAnalysisBookmarkSaveResponseDto addCompanyAnalysisBookmark(Integer userId, CompanyAnalysisBookmarkSaveRequestDto requestDto) {
 
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -203,7 +203,7 @@ public class CompanyAnalysisService {
 
         if (alreadyBookmarked) {
             CompanyAnalysisBookmark existingBookmark = companyAnalysisBookmarkRepository.findByUserAndCompanyAnalysis(user, companyAnalysis)
-                    .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                    .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_ALREADY_BOOKMARK));
             return CompanyAnalysisBookmarkSaveResponseDto.builder()
                     .companyAnalysisBookmarkId(existingBookmark.getCompanyAnalysisBookmarkId())
                     .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
@@ -229,7 +229,7 @@ public class CompanyAnalysisService {
     @Transactional
     public void deleteCompanyAnalysisBookmark(Long companyAnalysisBookmarkId, Integer userId){
         CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findById(companyAnalysisBookmarkId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND));
 
         CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 

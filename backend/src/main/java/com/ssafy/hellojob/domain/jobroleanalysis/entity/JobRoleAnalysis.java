@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.jobroleanalysis.entity;
 
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisUpdateRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "job_role_analysis")
-public class JobRoleAnalysis {
+public class JobRoleAnalysis extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,22 +59,12 @@ public class JobRoleAnalysis {
     @Column(name = "public", nullable = false)
     private Boolean isPublic = true;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "job_role_category")
     private JobRoleCategory jobRoleCategory;
 
     @Column(name = "job_role_bookmark_count", nullable = false)
     private Integer jobRoleBookmarkCount = 0;
-
 
 
     @Builder
@@ -88,8 +79,6 @@ public class JobRoleAnalysis {
                            String jobRoleEtc,
                            Integer jobRoleViewCount,
                            Boolean isPublic,
-                           LocalDateTime createdAt,
-                           LocalDateTime updatedAt,
                            JobRoleCategory jobRoleCategory,
                            Integer jobRoleBookmarkCount) {
         this.user = user;
@@ -103,8 +92,6 @@ public class JobRoleAnalysis {
         this.jobRoleEtc = jobRoleEtc;
         this.jobRoleViewCount = jobRoleViewCount;
         this.isPublic = isPublic;
-        this.createdAt = createdAt;
-        this.updatedAt = updatedAt;
         this.jobRoleCategory = jobRoleCategory;
         this.jobRoleBookmarkCount = jobRoleBookmarkCount;
     }
