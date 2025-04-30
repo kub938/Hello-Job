@@ -45,4 +45,12 @@ public class CoverLetter extends BaseTimeEntity {
         this.jobRoleSnapshot = jobRoleSnapshot;
         this.finish = finish;
     }
+
+    public void updateUpdatedAt() {
+        this.finish = this.finish;
+    }
+
+    public void updateFinish(boolean finish) {
+        this.finish = finish;
+    }
 }
