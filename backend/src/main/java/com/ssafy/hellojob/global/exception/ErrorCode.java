@@ -19,7 +19,7 @@ public enum ErrorCode {
 
     // 회원
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."),
-    INVALID_USER(HttpStatus.UNAUTHORIZED, "접근 권한이 없습니다."),
+    INVALID_USER(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // 인증
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
@@ -45,6 +45,7 @@ public enum ErrorCode {
     COMPANY_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 기업 분석 레포트를  찾을 수 없습니다."),
     COMPANY_ANALYSIS_ALREADY_BOOKMARK(HttpStatus.NOT_FOUND, "이미 즐겨찾기에 추가된 항목입니다."),
     COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 즐겨찾기 항목을 찾을 수 없습니다."),
+    COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED(HttpStatus.NO_CONTENT, "일일 기업 분석 요청 횟수를 초과하였습니다."),
 
 
     // 자기소개서 관련

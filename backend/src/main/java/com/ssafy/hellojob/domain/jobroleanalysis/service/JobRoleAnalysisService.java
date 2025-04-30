@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.service;
 
+import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.*;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
@@ -10,6 +11,7 @@ import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,25 +22,26 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class JobRoleAnalysisService {
 
-    @Autowired
-    JobRoleAnalysisRepository jobRoleAnalysisRepository;
+    private final JobRoleAnalysisRepository jobRoleAnalysisRepository;
+    private final JobRoleAnalysisBookmarkRepository jobRoleAnalysisBookmarkRepository;
+    private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
 
-    @Autowired
-    JobRoleAnalysisBookmarkRepository jobRoleAnalysisBookmarkRepository;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    CompanyRepository companyRepository;
-
+    // 직무 분석 데이터 저장
     public JobRoleAnalysisSaveResponseDto createJobRoleAnalysis(Integer userId, JobRoleAnalysisSaveRequestDto requestDto){
 
+        // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
+        // 기업 정보 조회
+        companyRepository.findById(requestDto.getCompanyId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // db에 저장할 객체 생성
         JobRoleAnalysis newJobRoleAnalysis = JobRoleAnalysis.builder()
                 .user(user)
                 .companyId(requestDto.getCompanyId())
@@ -62,25 +65,33 @@ public class JobRoleAnalysisService {
                 .build();
     }
 
+    // 직무 분석 정보 조회
     @Transactional
     public JobRoleAnalysisDetailResponseDto searchJobRoleAnalysis(Integer userId, Long jobRoleAnalysisId) {
+
+        // 유저 정보 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        
+        // 직무 분석 데이터 조회
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(jobRoleAnalysisId)
                 .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
-        // 1. 회사명 조회
+        // 기업 정보 조회
+        companyRepository.findById(jobRoleAnalysis.getCompanyId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // 기업명 조회
         String companyName = companyRepository.getCompanyNameByCompanyId(jobRoleAnalysis.getCompanyId());
 
-        // 2. 현재 로그인한 유저가 이거 북마크했는지 여부 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        // 현재 로그인한 유저가 이거 북마크했는지 여부 조회
         boolean isBookmarked = jobRoleAnalysisBookmarkRepository.existsByUserAndJobRoleAnalysis(user, jobRoleAnalysis);
 
-        // 🔥 3. 조회수 +1
+        // 조회수 +1
         jobRoleAnalysis.setJobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount() + 1);
         jobRoleAnalysisRepository.save(jobRoleAnalysis); // 업데이트 반영
 
-
-        // 4. ResponseDto에 담아서 리턴 (반영된 조회수로)
+        // ResponseDto에 담아서 리턴 (반영된 조회수로)
         return JobRoleAnalysisDetailResponseDto.builder()
                 .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
                 .companyName(companyName)
@@ -100,16 +111,21 @@ public class JobRoleAnalysisService {
     }
 
 
-
+    // 북마크 추가
     public JobRoleAnalysisBookmarkSaveResponseDto addJobRoleBookmark(Integer userId, JobRoleAnalysisBookmarkSaveRequestDto requestDto) {
-
+        
+        // 유저 정보 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        
+        // 직무 분석 데이터 조회
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
                 .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
-
+        // 현재 로그인한 유저가 해당 직무 분석 데이터 북마크 했는지 확인
         boolean alreadyBookmarked = jobRoleAnalysisBookmarkRepository.existsByUserAndJobRoleAnalysis(user, jobRoleAnalysis);
+
+        // 이미 북마크된 경우 기존에 저장되어 있던 정보 반환(에러 처리 X)
         if (alreadyBookmarked) {
             JobRoleAnalysisBookmark existingBookmark = jobRoleAnalysisBookmarkRepository.findByUserAndJobRoleAnalysis(user, jobRoleAnalysis)
                     .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_BOOKMARK_NOT_FOUND));
@@ -119,6 +135,7 @@ public class JobRoleAnalysisService {
                     .build();
         }
 
+        // 북마크 안 되어 있는 경우 새로 저장
         JobRoleAnalysisBookmark newJobRoleAnalysisBookmark = JobRoleAnalysisBookmark.builder()
                 .user(user)
                 .jobRoleAnalysis(jobRoleAnalysis)
@@ -126,6 +143,7 @@ public class JobRoleAnalysisService {
 
         jobRoleAnalysisBookmarkRepository.save(newJobRoleAnalysisBookmark);
 
+        // 해당 직무 분석 데이터에 북마크 수 +1
         jobRoleAnalysis.setJobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount() + 1);
         jobRoleAnalysisRepository.save(jobRoleAnalysis);
 
@@ -135,19 +153,29 @@ public class JobRoleAnalysisService {
                 .build();
     }
 
+    // 북마크 삭제
     @Transactional
-    public void deleteJobRoleBookmark(Long jobRoleAnalysisBookmarkId) {
-        // 1. 북마크 조회
+    public void deleteJobRoleBookmark(Long jobRoleAnalysisBookmarkId, Integer userId) {
+        
+        // 북마크 조회
         JobRoleAnalysisBookmark bookmark = jobRoleAnalysisBookmarkRepository.findById(jobRoleAnalysisBookmarkId)
                 .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_BOOKMARK_NOT_FOUND));
 
-        // 2. 북마크가 가리키는 JobRoleAnalysis 가져오기
+        // 유저 조회
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 직무 분석 데이터 조회
         JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
-        // 3. 북마크 삭제
-        jobRoleAnalysisBookmarkRepository.delete(bookmark);
+        // 유저 아이디와 북마크에 저장된 유저 아이디가 같을 때 요청 실행
+        if(userId.equals(bookmark.getUser().getUserId())){
+            jobRoleAnalysisBookmarkRepository.delete(bookmark);
+        } else {
+            throw new BaseException(ErrorCode.INVALID_USER);
+        }
 
-        // 4. JobRoleAnalysis의 북마크 카운트 -1
+        // 해당 직무 분석 데이터의 북마크 카운트 -1
         jobRoleAnalysis.setJobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount() - 1);
         jobRoleAnalysisRepository.save(jobRoleAnalysis);
     }
@@ -155,23 +183,25 @@ public class JobRoleAnalysisService {
     // 해당 유저가 북마크한 모든 직무 분석 리스트 출력(마이페이지에서)
     @Transactional(readOnly = true)
     public List<JobRoleAnalysisListResponseDto> searchJobRoleAnalysisBookmarkList(Integer userId) {
+        
+        // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
-        // 1. 이 유저가 북마크한 모든 직무 분석 리스트 가져오기
+        // 유저가 북마크한 모든 직무 분석 리스트 가져오기
         List<JobRoleAnalysisBookmark> bookmarkList = jobRoleAnalysisBookmarkRepository.findAllByUser(user);
 
+        // 결과값 반환할 객체 배열 생성
         List<JobRoleAnalysisListResponseDto> result = new ArrayList<>();
 
         for (JobRoleAnalysisBookmark bookmark : bookmarkList) {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
-            // 2. 직무 분석이 '비공개'인 경우는 제외
+            // 직무 분석이 '비공개'인 경우는 제외
             if (!jobRoleAnalysis.getIsPublic()) {
                 continue;
             }
 
-            // 3. 결과 리스트에 추가
             result.add(JobRoleAnalysisListResponseDto.builder()
                     .jobRoleAnalysisBookmarkId(bookmark.getJobRoleAnalysisBookmarkId())
                     .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
@@ -192,23 +222,29 @@ public class JobRoleAnalysisService {
     // 유저가 북마크한 직무 분석 중 특정 기업에 대한 직무 분석 리스트 출력
     @Transactional(readOnly = true)
     public List<JobRoleAnalysisListResponseDto> searchJobRoleAnalysisBookmarkListWithCompanyId(Integer userId, Long companyId) {
+
+        // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
-        // 1. 이 유저가 북마크한 모든 직무 분석 리스트 가져오기
+        // 기업 정보 조회
+        companyRepository.findById(companyId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // 이 유저가 북마크한 모든 직무 분석 리스트 가져오기
         List<JobRoleAnalysisBookmark> bookmarkList = jobRoleAnalysisBookmarkRepository.findByUserAndJobRoleAnalysis_CompanyId(user, companyId);
 
+        // 결과값 저장할 객체 배열 생성
         List<JobRoleAnalysisListResponseDto> result = new ArrayList<>();
 
         for (JobRoleAnalysisBookmark bookmark : bookmarkList) {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
-            // 2. 직무 분석이 '비공개'인 경우는 제외
+            // 직무 분석이 '비공개'인 경우는 제외
             if (!jobRoleAnalysis.getIsPublic()) {
                 continue;
             }
 
-            // 3. 결과 리스트에 추가
             result.add(JobRoleAnalysisListResponseDto.builder()
                     .jobRoleAnalysisBookmarkId(bookmark.getJobRoleAnalysisBookmarkId())
                     .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
@@ -230,21 +266,26 @@ public class JobRoleAnalysisService {
     @Transactional(readOnly = true)
     public List<JobRoleAnalysisSearchListResponseDto> searchJobRoleAnalysis(Integer userId, Long companyId, JobRoleAnalysisSearchCondition condition) {
 
+        // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
-        // 1. 북마크 정보 조회
+        // 기업 정보 조회
+        companyRepository.findById(companyId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // 이 유저의 북마크 정보 조회
         List<JobRoleAnalysisBookmark> bookmarkList = jobRoleAnalysisBookmarkRepository.findAllByUser(user);
 
-        // 북마크한 jobRoleAnalysisId만 따로 뽑아두자
+        // 북마크한 jobRoleAnalysisId 별도 관리
         Set<Long> bookmarkedAnalysisIds = bookmarkList.stream()
                 .map(bookmark -> bookmark.getJobRoleAnalysis().getJobRoleAnalysisId())
                 .collect(Collectors.toSet());
 
-        // 2. companyId로 소속된 모든 직무 분석 조회
+        // companyId로 소속된 모든 직무 분석 조회
         List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
                 .filter(analysis -> analysis.getCompanyId().equals(companyId)) // companyId 일치
-                .filter(JobRoleAnalysis::getIsPublic) // isPublic == true
+                .filter(JobRoleAnalysis::getIsPublic)
                 .filter(analysis -> {
                     if (condition.getJobRoleName() != null && !condition.getJobRoleName().isEmpty()) {
                         return analysis.getJobRoleName().startsWith(condition.getJobRoleName()); // jobRoleName이 시작하는 경우
@@ -285,26 +326,28 @@ public class JobRoleAnalysisService {
         return result;
     }
 
+    // 유저가 작성한 직무 분석 데이터 조회
     @Transactional(readOnly = true)
     public List<JobRoleAnalysisSearchListResponseDto> searchJobRoleAnalysisByUserId(Integer userId) {
 
+        // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
-        // 1. 북마크 정보 조회
+        // 북마크 정보 조회
         List<JobRoleAnalysisBookmark> bookmarkList = jobRoleAnalysisBookmarkRepository.findAllByUser(user);
 
-        // 북마크한 jobRoleAnalysisId만 따로 뽑아두자
+        // 북마크한 jobRoleAnalysisId만 따로 뽑아두기
         Set<Long> bookmarkedAnalysisIds = bookmarkList.stream()
                 .map(bookmark -> bookmark.getJobRoleAnalysis().getJobRoleAnalysisId())
                 .collect(Collectors.toSet());
 
-        // 2. companyId로 소속된 모든 직무 분석 조회
+        // userId 기반 직무 분석 데이터 조회
         List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
-                .filter(analysis -> analysis.getUser().getUserId() == userId)
+                .filter(analysis -> userId.equals(analysis.getUser().getUserId()))
                 .collect(Collectors.toList());
 
-        // 3. 결과를 변환
+        // 결과를 변환
         List<JobRoleAnalysisSearchListResponseDto> result = new ArrayList<>();
 
         for (JobRoleAnalysis jobRoleAnalysis : jobRoleAnalysisList) {
@@ -324,11 +367,18 @@ public class JobRoleAnalysisService {
         return result;
     }
 
+    // 직무 분석 데이터 삭제
     public void deleteJobRoleAnalysis(Integer userId, Long jobRoleAnalysisId){
 
+        // 유저 조회
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 직무 분석 데이터 조회
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(jobRoleAnalysisId)
                 .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
+        // 작성자와 userId가 같을 때만 삭제
         if(userId == jobRoleAnalysis.getUser().getUserId()){
             jobRoleAnalysisRepository.delete(jobRoleAnalysis);
         } else {
@@ -336,17 +386,29 @@ public class JobRoleAnalysisService {
         }
     }
 
+    // 직무 분석 수정
     @Transactional
     public JobRoleAnalysisUpdateResponseDto updateJobRoleAnalysis(JobRoleAnalysisUpdateRequestDto requestDto, Integer userId) {
 
+        // 유저 정보 조회
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 기업 정보 조회
+        companyRepository.findById(requestDto.getCompanyId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // 직무 분석 정보 조회
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
                 .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
+        // 작성자와 userId 다를 경우 처리
         Integer jobRoleAnalysisUserId = jobRoleAnalysisRepository.findUserIdByJobRoleAnalysisId(requestDto.getJobRoleAnalysisId());
         if (!userId.equals(jobRoleAnalysisUserId)) {
             throw new BaseException(ErrorCode.INVALID_USER);
         }
 
+        // 직무 분석 정보 수정
         jobRoleAnalysis.update(requestDto);
 
         return JobRoleAnalysisUpdateResponseDto.builder()

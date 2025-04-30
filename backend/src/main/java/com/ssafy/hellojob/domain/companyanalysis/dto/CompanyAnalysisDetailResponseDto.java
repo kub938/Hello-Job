@@ -27,7 +27,7 @@ public class CompanyAnalysisDetailResponseDto {
     private Date newsAnalysisDate;
     private List<String> newsAnalysisUrl;
     private String dartBrand;
-    private String dartCurrIssue;
+    private String dartCompanyAnalysis;
     private String dartVision;
     private String dartFinancialSummery;
     private List<String> dartCategory;
