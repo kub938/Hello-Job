@@ -13,6 +13,7 @@ public class JobRoleAnalysisListResponseDto {
 
     private Long jobRoleAnalysisBookmarkId;
     private Long jobRoleAnalysisId;
+    private String companyName;
     private String jobRoleName;
     private String jobRoleAnalysisTitle;
     private String jobRoleCategory;
