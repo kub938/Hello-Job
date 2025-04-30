@@ -18,6 +18,21 @@ export default defineConfig({
   ],
   server: {
     port: 5173,
+    proxy: {
+      "/api": {
+        target: "https://k12b105.p.ssafy.io",
+        secure: true,
+        changeOrigin: true,
+        configure: (proxy, _options) => {
+          proxy.on("proxyReq", function (proxyReq, req) {
+            // 쿠키를 포함하여 요청을 전송
+            proxyReq.setHeader("Cookie", req.headers.cookie || "");
+          });
+        },
+        cookieDomainRewrite: "localhost", // 쿠키 도메인 재작성
+        cookiePathRewrite: "/", // 쿠키 경로 재작성
+      },
+    },
   },
   build: {
     outDir: "dist",
