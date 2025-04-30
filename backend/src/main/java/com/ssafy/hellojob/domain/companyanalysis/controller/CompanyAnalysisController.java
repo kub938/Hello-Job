@@ -1,12 +1,14 @@
 package com.ssafy.hellojob.domain.companyanalysis.controller;
 
 import com.ssafy.hellojob.domain.company.entity.Company;
+import com.ssafy.hellojob.domain.company.service.CompanyService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.*;
 import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisService;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisBookmarkSaveResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisListResponseDto;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,8 +22,10 @@ import java.util.List;
 @RequestMapping("/api/v1/company-analysis")
 public class CompanyAnalysisController {
 
+    private final FastApiClientService fastApiClientService;
 
     private final CompanyAnalysisService companyAnalysisService;
+    private final CompanyService companyService;
 
     // 기업 분석 전체 목록 조회
     @GetMapping("/all-analysis")
@@ -44,6 +48,49 @@ public class CompanyAnalysisController {
         CompanyAnalysisDetailResponseDto result = companyAnalysisService.detailCompanyAnalysis(userId, companyAnalysisId);
 
         return result;
+    }
+
+    // 테스트용 post 요청 코드
+//    @PostMapping("/test/{companyId}")
+//    public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@PathVariable("companyId") Long companyId,
+//                                                                        @RequestBody CompanyAnalysisFastApiResponseDto responseDto,
+//                                                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
+//        Integer userId = userPrincipal.getUserId();
+//
+//        boolean basic = true;
+//        boolean plus = false;
+//        boolean financial = true;
+//
+//        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, companyId, basic, plus, financial, responseDto);
+//
+//        return result;
+//
+//    }
+
+    // fast API 구현 코드
+    @GetMapping("/request/{companyId}")
+    public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@PathVariable("companyId") Long companyId,
+                                                                        @RequestParam boolean basic,
+                                                                        @RequestParam boolean plus,
+                                                                        @RequestParam boolean financial,
+                                                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
+
+        Integer userId = userPrincipal.getUserId();
+        String companyName = companyService.getCompanyNameByCompanyId(companyId);
+
+        CompanyAnalysisFastApiRequestDto requestDto = CompanyAnalysisFastApiRequestDto.builder()
+                .company_name(companyName)
+                .base(basic)
+                .plus(plus)
+                .fin(financial)
+                .build();
+
+        CompanyAnalysisFastApiResponseDto responseDto = fastApiClientService.sendJobAnalysisToFastApi(requestDto);
+
+        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, companyId, basic, plus, financial, responseDto);
+
+        return result;
+
     }
 
     // 기업 분석 검색

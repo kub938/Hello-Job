@@ -1,8 +1,10 @@
 package com.ssafy.hellojob.domain.companyanalysis.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
+import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.companyanalysis.dto.*;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysisBookmark;
@@ -10,6 +12,8 @@ import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.entity.NewsAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
+import com.ssafy.hellojob.domain.companyanalysis.repository.DartAnalysisRepository;
+import com.ssafy.hellojob.domain.companyanalysis.repository.NewsAnalysisRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
@@ -25,11 +29,66 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyAnalysisService {
 
+    private final CompanyRepository companyRepository;
+
     private final CompanyAnalysisRepository companyAnalysisRepository;
 
     private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
 
+    private final DartAnalysisRepository dartAnalysisRepository;
+
+    private final NewsAnalysisRepository newsAnalysisRepository;
+
     private final UserRepository userRepository;
+
+    // 저장 로직은 내일할거임 !!!!!
+    @Transactional
+    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId, Long companyId,
+                                                                       boolean basic, boolean plus, boolean financial,
+                                                                       CompanyAnalysisFastApiResponseDto responseDto) {
+        // 1. 유저, 회사 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+
+        // 2. DartAnalysis 저장
+        DartAnalysis dart = DartAnalysis.of(
+                responseDto.getCompany_brand(),
+                responseDto.getCompany_vision(),
+                responseDto.getCompany_analysis(),
+                basic, plus, financial
+        );
+
+        dartAnalysisRepository.save(dart);
+
+        // 3. NewsAnalysis 저장
+        String jsonUrls;
+        try {
+            jsonUrls = new ObjectMapper().writeValueAsString(responseDto.getNews_urls());
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("뉴스 URL 직렬화 실패", e);
+        }
+
+        NewsAnalysis news = NewsAnalysis.of(
+                responseDto.getNews_summary(),
+                responseDto.getAnalysis_date(),
+                jsonUrls
+        );
+
+
+        newsAnalysisRepository.save(news);
+
+        // 4. CompanyAnalysis 저장
+        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news);
+
+        companyAnalysisRepository.save(companyAnalysis);
+
+        return CompanyAnalysisBookmarkSaveRequestDto.builder()
+                .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
+                .build();
+    }
+
 
     public List<CompanyAnalysisListResponseDto> searchAllCompanyAnalysis(Integer userId) {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
@@ -57,11 +116,11 @@ public class CompanyAnalysisService {
     @Transactional(readOnly = true)
     public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Long companyAnalysisId) {
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
         // 공개 여부 필터링
         if (!companyAnalysis.isPublic()) {
-            throw new BaseException(ErrorCode.BAD_REQUEST_ERROR);
+            throw new BaseException(ErrorCode.INVALID_USER);
         }
 
         // 즐겨찾기 여부 필터링
@@ -135,7 +194,7 @@ public class CompanyAnalysisService {
     public CompanyAnalysisBookmarkSaveResponseDto addCompanyAnalysisBookmark(Integer userId, CompanyAnalysisBookmarkSaveRequestDto requestDto) {
 
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -144,7 +203,7 @@ public class CompanyAnalysisService {
 
         if (alreadyBookmarked) {
             CompanyAnalysisBookmark existingBookmark = companyAnalysisBookmarkRepository.findByUserAndCompanyAnalysis(user, companyAnalysis)
-                    .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                    .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_ALREADY_BOOKMARK));
             return CompanyAnalysisBookmarkSaveResponseDto.builder()
                     .companyAnalysisBookmarkId(existingBookmark.getCompanyAnalysisBookmarkId())
                     .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
@@ -170,7 +229,7 @@ public class CompanyAnalysisService {
     @Transactional
     public void deleteCompanyAnalysisBookmark(Long companyAnalysisBookmarkId, Integer userId){
         CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findById(companyAnalysisBookmarkId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND));
 
         CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
