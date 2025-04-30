@@ -27,6 +27,3 @@ RUN chmod +x start.sh # 실행 권한 추가
 
 # 포트 노출
 EXPOSE 8000
-
-# 애플리케이션 실행 (start.sh 스크립트를 실행)
-CMD ["/root/hellojob/start.sh"]
