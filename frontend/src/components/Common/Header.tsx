@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
 interface HeaderProps {
@@ -5,9 +6,30 @@ interface HeaderProps {
 }
 
 function Header({ isMinimize = false }: HeaderProps) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY >= 52;
+      if (isScrolled !== scrolled) {
+        setScrolled(isScrolled);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [scrolled]);
+
   return (
     <>
-      <header className="z-10 sticky top-0 max-w-screen-xl mx-auto w-full h-13 flex items-center justify-between">
+      <header
+        className={`${
+          scrolled && "bg-white"
+        }  z-10 sticky top-0 transition-all duration-150 h-13 flex items-center justify-between`}
+      >
         <Link to="/">
           <div className="font-bold text-2xl ml-5">
             <span>HELLO</span>
