@@ -54,9 +54,9 @@ public class CompanyAnalysisService {
 
         // 2. DartAnalysis 저장
         DartAnalysis dart = DartAnalysis.of(
-                responseDto.getCompanyBrand(),
-                responseDto.getCompanyVision(),
-                responseDto.getCompanyAnalysis(),
+                responseDto.getCompany_brand(),
+                responseDto.getCompany_vision(),
+                responseDto.getCompany_analysis(),
                 basic, plus, financial
         );
 
@@ -65,14 +65,14 @@ public class CompanyAnalysisService {
         // 3. NewsAnalysis 저장
         String jsonUrls;
         try {
-            jsonUrls = new ObjectMapper().writeValueAsString(responseDto.getNewsUrls());
+            jsonUrls = new ObjectMapper().writeValueAsString(responseDto.getNews_urls());
         } catch (JsonProcessingException e) {
             throw new RuntimeException("뉴스 URL 직렬화 실패", e);
         }
 
         NewsAnalysis news = NewsAnalysis.of(
-                responseDto.getNewsSummary(),
-                responseDto.getAnalysisDate(),
+                responseDto.getNews_summary(),
+                responseDto.getAnalysis_date(),
                 jsonUrls
         );
 
