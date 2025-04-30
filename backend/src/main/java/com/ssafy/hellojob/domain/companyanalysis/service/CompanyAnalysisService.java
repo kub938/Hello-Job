@@ -30,39 +30,44 @@ import java.util.List;
 public class CompanyAnalysisService {
 
     private final CompanyRepository companyRepository;
-
     private final CompanyAnalysisRepository companyAnalysisRepository;
-
     private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
-
     private final DartAnalysisRepository dartAnalysisRepository;
-
     private final NewsAnalysisRepository newsAnalysisRepository;
-
     private final UserRepository userRepository;
 
-    // 저장 로직은 내일할거임 !!!!!
+    // 기업 분석 저장
     @Transactional
-    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId, Long companyId,
+    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId, Long companyId, boolean isPublic,
                                                                        boolean basic, boolean plus, boolean financial,
                                                                        CompanyAnalysisFastApiResponseDto responseDto) {
-        // 1. 유저, 회사 조회
+        // 유저 조회 및 토큰(기업 분석 가능 횟수) 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
-        Company company = companyRepository.findById(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
 
-        // 2. DartAnalysis 저장
+        if (user.getToken() <= 0) {
+            throw new BaseException(ErrorCode.COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED);
+        }
+
+        // 토큰 감소
+        user.decreaseToken();
+
+        // 회사 조회
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // DartAnalysis 저장
         DartAnalysis dart = DartAnalysis.of(
                 responseDto.getCompany_brand(),
-                responseDto.getCompany_vision(),
                 responseDto.getCompany_analysis(),
+                responseDto.getCompany_vision(),
+                responseDto.getCompany_finance(),
                 basic, plus, financial
         );
 
         dartAnalysisRepository.save(dart);
 
-        // 3. NewsAnalysis 저장
+        // NewsAnalysis 저장
         String jsonUrls;
         try {
             jsonUrls = new ObjectMapper().writeValueAsString(responseDto.getNews_urls());
@@ -76,12 +81,10 @@ public class CompanyAnalysisService {
                 jsonUrls
         );
 
-
         newsAnalysisRepository.save(news);
 
-        // 4. CompanyAnalysis 저장
-        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news);
-
+        // CompanyAnalysis 저장
+        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, isPublic);
         companyAnalysisRepository.save(companyAnalysis);
 
         return CompanyAnalysisBookmarkSaveRequestDto.builder()
@@ -90,10 +93,12 @@ public class CompanyAnalysisService {
     }
 
 
+    // 기업 분석 목록 전체 조회
     public List<CompanyAnalysisListResponseDto> searchAllCompanyAnalysis(Integer userId) {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
 
         List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+                .filter(CompanyAnalysis::isPublic) // 공개된 기업 분석만 조회
                 .map(analysis -> CompanyAnalysisListResponseDto.builder()
                         .companyAnlaysisId(analysis.getCompanyAnalysisId())
                         .companyName(analysis.getCompany().getCompanyName())
@@ -113,8 +118,14 @@ public class CompanyAnalysisService {
     }
 
     // 기업 분석 상세 조회
-    @Transactional(readOnly = true)
+    @Transactional
     public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Long companyAnalysisId) {
+
+        // 유저 조회
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 기업 분석 데이터 조회
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
@@ -122,6 +133,10 @@ public class CompanyAnalysisService {
         if (!companyAnalysis.isPublic()) {
             throw new BaseException(ErrorCode.INVALID_USER);
         }
+
+        // 조회수 증가
+        companyAnalysis.setCompanyAnalysisViewCount(companyAnalysis.getCompanyAnalysisViewCount() + 1);
+        companyAnalysisRepository.save(companyAnalysis);
 
         // 즐겨찾기 여부 필터링
         boolean isBookmarked = companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, companyAnalysisId);
@@ -133,6 +148,7 @@ public class CompanyAnalysisService {
         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
 
+        // 해당 기업 분석에 활용된 뉴스 분석 정보 불러오기
         NewsAnalysis news = companyAnalysis.getNewsAnalysis();
 
         // 뉴스 크롤링 출처 기사 링크 배열로 변환
@@ -161,17 +177,28 @@ public class CompanyAnalysisService {
                 .newsAnalysisDate(news.getNewsAnalysisDate())
                 .newsAnalysisUrl(newsUrls) 
                 .dartBrand(dart.getDartBrand())
-                .dartCurrIssue(dart.getDartCurrIssue())
+                .dartCompanyAnalysis(dart.getDartCompanyAnalysis())
                 .dartVision(dart.getDartVision())
                 .dartFinancialSummery(dart.getDartFinancialSummary())
                 .dartCategory(dartCategory)
                 .build();
     }
 
+    // 기업 분석 검색
     public List<CompanyAnalysisListResponseDto> searchByCompanyIdCompanyAnalysis(Long companyId, Integer userId) {
+
+        // 유저, 회사 조회
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        companyRepository.findById(companyId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+
+        // 모든 기업 정보 불러오기
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAllByCompany_CompanyId(companyId);
 
+        // 결과 반환할 배열에 매핑
         List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+                .filter(CompanyAnalysis::isPublic) // 공개 여부 필터링
                 .map(analysis -> CompanyAnalysisListResponseDto.builder()
                         .companyAnlaysisId(analysis.getCompanyAnalysisId())
                         .companyName(analysis.getCompany().getCompanyName())
@@ -190,17 +217,22 @@ public class CompanyAnalysisService {
         return result;
     }
 
+    // 기업 분석 북마크 추가
     @Transactional
     public CompanyAnalysisBookmarkSaveResponseDto addCompanyAnalysisBookmark(Integer userId, CompanyAnalysisBookmarkSaveRequestDto requestDto) {
 
+        // 기업 분석 데이터 조회
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
 
+        // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
+        // 이미 북마크 되어 있는지 여부 확인
         boolean alreadyBookmarked = companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, companyAnalysis.getCompanyAnalysisId());
 
+        // 이미 되어 있으면 기존에 저장되어 있던 정보 반환(에러 처리x)
         if (alreadyBookmarked) {
             CompanyAnalysisBookmark existingBookmark = companyAnalysisBookmarkRepository.findByUserAndCompanyAnalysis(user, companyAnalysis)
                     .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_ALREADY_BOOKMARK));
@@ -210,11 +242,13 @@ public class CompanyAnalysisService {
                     .build();
         }
 
+        // 새 북마크 저장 객체 생성
         CompanyAnalysisBookmark newBookmark = CompanyAnalysisBookmark.builder()
                 .user(user)
                 .companyAnalysis(companyAnalysis)
                 .build();
 
+        // 북마크 정보 저장
         companyAnalysisBookmarkRepository.save(newBookmark);
 
         companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() + 1);
@@ -226,19 +260,29 @@ public class CompanyAnalysisService {
                 .build();
     }
 
+    // 기업 분석 북마크 해제
     @Transactional
     public void deleteCompanyAnalysisBookmark(Long companyAnalysisBookmarkId, Integer userId){
+
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
         CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findById(companyAnalysisBookmarkId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND));
 
         CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
-        companyAnalysisBookmarkRepository.delete(bookmark);
+        if(userId.equals(bookmark.getUser().getUserId())){
+            companyAnalysisBookmarkRepository.delete(bookmark);
+        } else {
+            throw new BaseException(ErrorCode.INVALID_USER);
+        }
 
         companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() - 1);
         companyAnalysisRepository.save(companyAnalysis);
     }
 
+    // 기업 분석 북마크 목록 조회(기업 상관 없이 전부)
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkList(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -273,6 +317,7 @@ public class CompanyAnalysisService {
     }
 
 
+    // 기업 분석 북마크 목록 조회(기업별)
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Long companyId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));

@@ -19,8 +19,8 @@ public class DartAnalysis {
     @Column(name = "dart_brand")
     private String dartBrand;
 
-    @Column(name = "dart_curr_issue")
-    private String dartCurrIssue;
+    @Column(name = "dart_company_analysis")
+    private String dartCompanyAnalysis;
 
     @Column(name = "dart_vision")
     private String dartVision;
@@ -37,10 +37,11 @@ public class DartAnalysis {
     @Column(name = "dart_company_analysis_financial_data", nullable = false)
     private boolean dartCompanyAnalysisFinancialData;
 
-    public static DartAnalysis of(String brand, String vision, String summary,
+    public static DartAnalysis of(String brand, String analysis, String vision, String summary,
                                   boolean basic, boolean plus, boolean financial) {
         DartAnalysis dart = new DartAnalysis();
         dart.dartBrand = brand;
+        dart.dartCompanyAnalysis = analysis;
         dart.dartVision = vision;
         dart.dartFinancialSummary = summary;
         dart.dartCompanyAnalysisBasic = basic;

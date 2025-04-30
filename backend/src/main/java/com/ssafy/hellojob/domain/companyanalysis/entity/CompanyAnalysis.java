@@ -60,7 +60,7 @@ public class CompanyAnalysis {
     }
 
 
-    public static CompanyAnalysis of(User user, Company company, DartAnalysis dart, NewsAnalysis news) {
+    public static CompanyAnalysis of(User user, Company company, DartAnalysis dart, NewsAnalysis news, boolean isPublic) {
         CompanyAnalysis ca = new CompanyAnalysis();
         ca.user = user;
         ca.company = company;
@@ -68,7 +68,7 @@ public class CompanyAnalysis {
         ca.newsAnalysis = news;
         ca.companyAnalysisViewCount = 0;
         ca.companyAnalysisBookmarkCount = 0;
-        ca.isPublic = true;
+        ca.isPublic = isPublic;
         return ca;
     }
 
