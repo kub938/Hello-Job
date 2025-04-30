@@ -4,8 +4,8 @@ import CompanyCard from "@/components/CompanyCard";
 
 function CorporateSearch() {
   return (
-    <div className="flex flex-col items-center justify-between h-screen">
-      <div className="flex flex-col items-center h-screen">
+    <div className="flex flex-col items-center justify-between">
+      <div className="flex flex-col items-center">
         <div className="flex flex-col items-center justify-end w-[360px] h-1/3">
           <h1 className="text-2xl font-bold">분석할 기업을 검색하세요.</h1>
           <Input />
