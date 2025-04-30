@@ -251,6 +251,7 @@ public class CompanyAnalysisService {
         // 북마크 정보 저장
         companyAnalysisBookmarkRepository.save(newBookmark);
 
+        // 기업 분석 테이블 북마크 수 +1
         companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() + 1);
         companyAnalysisRepository.save(companyAnalysis);
 
@@ -264,36 +265,47 @@ public class CompanyAnalysisService {
     @Transactional
     public void deleteCompanyAnalysisBookmark(Long companyAnalysisBookmarkId, Integer userId){
 
+        // 유저 조회
         userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
+        // 북마크 정보 조회
         CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findById(companyAnalysisBookmarkId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND));
 
+        // 기업 분석 데이터 조회
         CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
+        // 북마크 정보의 userId와 요청한 userId가 같을 때만 요청 처리
         if(userId.equals(bookmark.getUser().getUserId())){
             companyAnalysisBookmarkRepository.delete(bookmark);
         } else {
             throw new BaseException(ErrorCode.INVALID_USER);
         }
 
+        // 기업 분석 데이터 북마크 수 -1
         companyAnalysis.setCompanyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount() - 1);
         companyAnalysisRepository.save(companyAnalysis);
     }
 
     // 기업 분석 북마크 목록 조회(기업 상관 없이 전부)
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkList(Integer userId) {
+        
+        // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
+        // 유저가 북마크한 모든 북마크 리스트 조회
         List<CompanyAnalysisBookmark> bookmarkList = companyAnalysisBookmarkRepository.findAllByUser(user);
 
+        // 기업 분석 데이터 저장할 객체 배열 생성
         List<CompanyAnalysisBookmarkListResponseDto> result = new ArrayList<>();
 
+        // 불러온 북마크 정보 기반으로 기업 분석 데이터 불러와서 result에 저장
         for (CompanyAnalysisBookmark bookmark : bookmarkList) {
             CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
+            // 공개 여부 처리(비공개일경우 pass)
             if (!companyAnalysis.isPublic()) {
                 continue;
             }
@@ -319,16 +331,24 @@ public class CompanyAnalysisService {
 
     // 기업 분석 북마크 목록 조회(기업별)
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Long companyId) {
+        
+        // 유저, 회사 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        companyRepository.findById(companyId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
 
+        // 유저 + 기업 정보 기반 북마크 리스트 조회
         List<CompanyAnalysisBookmark> bookmarkList = companyAnalysisBookmarkRepository.findAllByUserAndCompanyAnalysis_Company_CompanyId(user, companyId);
 
+        // 결과 반환할 객체 배열 생성
         List<CompanyAnalysisBookmarkListResponseDto> result = new ArrayList<>();
 
+        // 불러온 북마크 정보 기반으로 기업 분석 데이터 불러와서 result에 저장
         for (CompanyAnalysisBookmark bookmark : bookmarkList) {
             CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
+            // 공개 여부 처리(비공개 시 pass)
             if (!companyAnalysis.isPublic()) {
                 continue;
             }
