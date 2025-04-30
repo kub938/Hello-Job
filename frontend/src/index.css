@@ -80,6 +80,14 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+
+  --color-pending: var(--pending);
+  --color-in-progress: var(--in-progress);
+  --color-finish: var(--finish);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
@@ -141,7 +149,10 @@
   --text-muted-foreground: #6e7180;
   --text-disabled: #aeb4c5;
 
-  --success: #34c759;
+  --pending: #eeeeee;
+  --in-progress: #ffc507;
+  --completed: #00ef0c;
+
   --warning: #ff9500;
   --error: #ff3b30;
 }
