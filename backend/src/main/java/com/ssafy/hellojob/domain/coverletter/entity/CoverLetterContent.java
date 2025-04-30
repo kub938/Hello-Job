@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.coverletter.entity;
 
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -53,5 +54,12 @@ public class CoverLetterContent extends BaseTimeEntity {
         this.contentLength = contentLength;
         this.contentStatus = contentStatus;
         this.contentFirstPrompt = contentFirstPrompt;
+    }
+
+    public void updateCoverLetterContent(CoverLetterUpdateRequestDto requestDto) {
+        this.contentDetail = requestDto.getContentDetail();
+        if (requestDto.getContentStatus() != null) {
+            this.contentStatus = requestDto.getContentStatus();
+        }
     }
 }

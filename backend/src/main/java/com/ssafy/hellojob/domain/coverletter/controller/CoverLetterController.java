@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.coverletter.controller;
 
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterCreateResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
@@ -10,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -37,5 +40,16 @@ public class CoverLetterController {
     ) {
         User user = principal.getUser();
         return coverLetterService.getCoverLetterByContentNumber(user, coverLetterId, contentNumber);
+    }
+
+    @PatchMapping("/{coverLetterId}/{contentNumber}")
+    public Map<String, String> updateCoverLetterContent(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable("coverLetterId") Integer coverLetterId,
+            @PathVariable("contentNumber") Integer contentNumber,
+            @RequestBody CoverLetterUpdateRequestDto requestDto
+            ) {
+        User user = principal.getUser();
+        return coverLetterService.updateCoverLetter(user, coverLetterId, contentNumber, requestDto);
     }
 }
