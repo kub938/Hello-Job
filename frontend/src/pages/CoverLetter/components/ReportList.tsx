@@ -1,7 +1,3 @@
-import InputQuestion from "./InputQuestion";
-
-interface ReportListProps {}
-
 function ReportList() {
   return (
     <>
