@@ -36,8 +36,8 @@ public class AuthService {
     public void addRefreshTokenCookie(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from("refresh_token", refreshToken)
                 .httpOnly(true) // JavaScript 접근 차단
-                .secure(false)   // HTTP에서도 사용 가능
-                .sameSite("Lax") // SameSite=Lax 설정
+                .secure(true)   // HTTPS에서만 사용 가능
+                .sameSite("None") // SameSite=None 설정
                 .path("/")      // 전체 경로에서 유효
                 .maxAge(1209600)  // 14일 유지
                 .build();
@@ -48,8 +48,8 @@ public class AuthService {
     public void addAccessTokenCookie(HttpServletResponse response, String accessToken) {
         ResponseCookie cookie = ResponseCookie.from("access_token", accessToken)
                 .httpOnly(true) // JavaScript 접근 차단
-                .secure(false)   // HTTP에서도 사용 가능
-                .sameSite("Lax") // SameSite=Lax 설정
+                .secure(true)   // HTTPS에서만 사용 가능
+                .sameSite("None") // SameSite=None 설정
                 .path("/")      // 전체 경로에서 유효
                 .maxAge(32400)  // 9시간 유지
                 .build();
@@ -105,8 +105,8 @@ public class AuthService {
     private void deleteCookie(String name, HttpServletResponse response) {
         ResponseCookie cookie = ResponseCookie.from(name, "")
                 .httpOnly(true)
-                .secure(false)  // http에서도 사용
-                .sameSite("Lax") // SameSite=Lax 설정
+                .secure(true)  // HTTPS에서만 사용 가능
+                .sameSite("None") // SameSite=None 설정
                 .path("/")
                 .maxAge(0)
                 .build();
