@@ -46,19 +46,19 @@ services:
     volumes:
       - pip-cache:/root/.cache/pip
 
-    nginx:
-      build: ./nginx
-      ports:
-        - "80:80"
-        - "443:443"
-      depends_on:
-        - frontend
-        - backend
-        - ai
-      restart: always
-      volumes:
-        - /var/www/certbot:/var/www/certbot
-        - /etc/letsencrypt:/etc/letsencrypt
+  nginx:
+    build: ./nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - frontend
+      - backend
+      - ai
+    restart: always
+    volumes:
+      - /var/www/certbot:/var/www/certbot
+      - /etc/letsencrypt:/etc/letsencrypt
 
   mysql:
     image: mysql:8.0.4     # MySQL 이미지
