@@ -13,4 +13,6 @@ services:
       - ./main.py:/root/hellojob/main.py
       - ./app:/root/hellojob/app
     environment:
-      - ENV_FILE=/root/hellojob/.env # 컨테이너 내부에서 .env 파일 경로를 참조할 환경 변수 설정
+      - ENV_FILE=/root/hellojob/.env # 컨테이너 내부에서 .env 파일 경로를 참조할 환경 변수 설정`
+
+    command: ["bash", "-c", "/root/hellojob/start.sh"]
