@@ -63,6 +63,9 @@ pipeline {  // 파이프라인 정의 시작
                         sh '''
                             echo "🔄 Stopping existing containers..."
                             docker-compose down
+
+                            mkdir -p certbot/conf
+                            mkdir -p certbot/www
                             
                             echo "🔄 Building Docker images..."
                             docker-compose build \
