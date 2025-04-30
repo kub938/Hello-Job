@@ -56,7 +56,7 @@ pipeline {  // 파이프라인 정의 시작
                         string(credentialsId: 'MYSQL_ROOT_PASSWORD', variable: 'MYSQL_ROOT_PASSWORD'),
                         string(credentialsId: 'SERVER_DOMAIN', variable: 'SERVER_DOMAIN'),
                         string(credentialsId: 'FRONTEND_URL', variable: 'FRONTEND_URL'),
-                        string(credentialsId: 'OPEN_API_KEY', variable: 'OPEN_API_KEY'),
+                        string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY'),
                         string(credentialsId: 'DART_API_KEY', variable: 'DART_API_KEY'),
                         string(credentialsId: 'FASTAPI_URL', variable: 'FASTAPI_URL')
                     ]) {
@@ -78,7 +78,7 @@ pipeline {  // 파이프라인 정의 시작
                                 --build-arg GOOGLE_REDIRECT_URL=$GOOGLE_REDIRECT_URL \
                                 --build-arg SERVER_DOMAIN=$SERVER_DOMAIN \
                                 --build-arg FRONTEND_URL=$FRONTEND_URL \
-                                --build-arg OPEN_API_KEY=$OPEN_API_KEY \
+                                --build-arg OPENAI_API_KEY=$OPENAI_API_KEY \
                                 --build-arg DART_API_KEY=$DART_API_KEY \
                                 --build-arg FASTAPI_URL=$FASTAPI_URL
 
