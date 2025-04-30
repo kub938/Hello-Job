@@ -15,9 +15,12 @@ import org.hibernate.annotations.ColumnDefault;
 public class ChatLog extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chat_log_id")
-    private Integer chatLogId;
+    private Integer coverLetterContentId;
+
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "cover_letter_content_id")
+    private CoverLetterContent coverLetterContent;
 
     @Column(name = "chat_log_content", columnDefinition = "TEXT", nullable = false)
     private String chatLogContent;
@@ -27,8 +30,8 @@ public class ChatLog extends BaseTimeEntity {
     private Integer updatedCount = 0;
 
     @Builder
-    public ChatLog(Integer chatLogId, String chatLogContent, Integer updatedCount) {
-        this.chatLogId = chatLogId;
+    public ChatLog(CoverLetterContent coverLetterContent, String chatLogContent, Integer updatedCount) {
+        this.coverLetterContent = coverLetterContent;
         this.chatLogContent = chatLogContent;
         this.updatedCount = updatedCount;
     }

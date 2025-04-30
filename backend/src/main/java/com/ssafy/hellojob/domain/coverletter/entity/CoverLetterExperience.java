@@ -22,7 +22,7 @@ public class CoverLetterExperience {
     @Column(name = "experience_id")
     private Integer experienceId;
 
-    @JoinColumn(name = "project_id")
+    @Column(name = "project_id")
     private Integer projectId;
 
     @ManyToOne(fetch = FetchType.LAZY)
