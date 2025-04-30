@@ -58,6 +58,8 @@ class CompanyAnalysisResponse(BaseModel):
     company_name: str  # 기업 명 
     analysis_date: str  # 기업 분석 일자 
     company_brand: str  # 주요 제품 및 브랜드
-    company_analysis: str  # 기업 분석 결과 (기본, 심화, 재무)
+    company_analysis: str  # 기업 분석 내용
     company_vision: str  # 기업 비전
-    company_news: Optional[CompanyNews] = None  # 기업 뉴스 (Optional로 변경 및 기본값 None 설정) 
+    company_finance: str  # 재정상황
+    news_summary: str  # 뉴스 기사 분석 요약
+    news_urls: list[str]  # 뉴스 링크 리스트 
