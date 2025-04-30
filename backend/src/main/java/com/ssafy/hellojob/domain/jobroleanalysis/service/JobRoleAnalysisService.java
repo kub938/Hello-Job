@@ -205,6 +205,7 @@ public class JobRoleAnalysisService {
             result.add(JobRoleAnalysisListResponseDto.builder()
                     .jobRoleAnalysisBookmarkId(bookmark.getJobRoleAnalysisBookmarkId())
                     .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
+                    .companyName(companyRepository.getCompanyNameByCompanyId(jobRoleAnalysis.getCompanyId()))
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum을 문자열로
@@ -248,6 +249,7 @@ public class JobRoleAnalysisService {
             result.add(JobRoleAnalysisListResponseDto.builder()
                     .jobRoleAnalysisBookmarkId(bookmark.getJobRoleAnalysisBookmarkId())
                     .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
+                    .companyName(companyRepository.getCompanyNameByCompanyId(jobRoleAnalysis.getCompanyId()))
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum을 문자열로
@@ -312,6 +314,7 @@ public class JobRoleAnalysisService {
         for (JobRoleAnalysis jobRoleAnalysis : jobRoleAnalysisList) {
             result.add(JobRoleAnalysisSearchListResponseDto.builder()
                     .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
+                    .companyName(companyRepository.getCompanyNameByCompanyId(jobRoleAnalysis.getCompanyId()))
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum -> 문자열

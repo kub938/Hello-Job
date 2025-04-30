@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 public class JobRoleAnalysisSearchListResponseDto {
 
     private Long jobRoleAnalysisId;
+    private String companyName;
     private String jobRoleName;
     private String jobRoleAnalysisTitle;
     private String jobRoleCategory;
