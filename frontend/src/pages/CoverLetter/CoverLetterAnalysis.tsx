@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
 import ReportList from "./components/ReportList";
-import LetterStep from "./components/LetterStep";
 import { useLocation, useNavigate } from "react-router";
 import CoverLetterAnalysisLayout from "./components/CoverLetterAnalysisLayout";
 import InputQuestion from "./components/InputQuestion";
