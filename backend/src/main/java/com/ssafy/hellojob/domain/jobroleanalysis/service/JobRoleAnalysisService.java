@@ -65,7 +65,7 @@ public class JobRoleAnalysisService {
     @Transactional
     public JobRoleAnalysisDetailResponseDto searchJobRoleAnalysis(Integer userId, Long jobRoleAnalysisId) {
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(jobRoleAnalysisId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
         // 1. 회사명 조회
         String companyName = companyRepository.getCompanyNameByCompanyId(jobRoleAnalysis.getCompanyId());
@@ -104,7 +104,7 @@ public class JobRoleAnalysisService {
     public JobRoleAnalysisBookmarkSaveResponseDto addJobRoleBookmark(Integer userId, JobRoleAnalysisBookmarkSaveRequestDto requestDto) {
 
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -112,7 +112,7 @@ public class JobRoleAnalysisService {
         boolean alreadyBookmarked = jobRoleAnalysisBookmarkRepository.existsByUserAndJobRoleAnalysis(user, jobRoleAnalysis);
         if (alreadyBookmarked) {
             JobRoleAnalysisBookmark existingBookmark = jobRoleAnalysisBookmarkRepository.findByUserAndJobRoleAnalysis(user, jobRoleAnalysis)
-                    .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                    .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_BOOKMARK_NOT_FOUND));
             return JobRoleAnalysisBookmarkSaveResponseDto.builder()
                     .jobRoleAnalysisBookmarkId(existingBookmark.getJobRoleAnalysisBookmarkId())
                     .jobRoleAnalysisId(jobRoleAnalysis.getJobRoleAnalysisId())
@@ -139,7 +139,7 @@ public class JobRoleAnalysisService {
     public void deleteJobRoleBookmark(Long jobRoleAnalysisBookmarkId) {
         // 1. 북마크 조회
         JobRoleAnalysisBookmark bookmark = jobRoleAnalysisBookmarkRepository.findById(jobRoleAnalysisBookmarkId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_BOOKMARK_NOT_FOUND));
 
         // 2. 북마크가 가리키는 JobRoleAnalysis 가져오기
         JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
@@ -327,7 +327,7 @@ public class JobRoleAnalysisService {
     public void deleteJobRoleAnalysis(Integer userId, Long jobRoleAnalysisId){
 
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(jobRoleAnalysisId)
-                .orElseThrow(() -> new BaseException(ErrorCode.BAD_REQUEST_ERROR));
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
         if(userId == jobRoleAnalysis.getUser().getUserId()){
             jobRoleAnalysisRepository.delete(jobRoleAnalysis);
