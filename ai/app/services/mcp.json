@@ -1,0 +1,8 @@
+{
+    "mcpServers": {
+        "dart-mcp": {
+            "command": "/root/.local/bin/uv", 
+            "args": ["--directory", "/root/hellojob/app/mcp/dart-mcp", "run", "dart.py"]
+        }
+    }
+}
