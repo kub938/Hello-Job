@@ -18,13 +18,13 @@ public class NewsAnalysis {
     @Column(name = "news_analysis_id", nullable = false)
     private Long newsAnalysisId;
 
-    @Column(name = "news_analysis_data", nullable = false)
+    @Column(name = "news_analysis_data", nullable = false, columnDefinition = "TEXT")
     private String newsAnalysisData;
 
     @Column(name = "news_analysis_date")
     private Date newsAnalysisDate;
 
-    @Column(name = "news_analysis_url")
+    @Column(name = "news_analysis_url", columnDefinition = "TEXT")
     private String newsAnalysisUrl;
 
     public static NewsAnalysis of(String summary, Date date, String urlJson) {

@@ -16,16 +16,16 @@ public class DartAnalysis {
     @Column(name = "dart_analysis_id", nullable = false)
     private Long dartAnalysisId;
 
-    @Column(name = "dart_brand")
+    @Column(name = "dart_brand", columnDefinition = "TEXT")
     private String dartBrand;
 
-    @Column(name = "dart_company_analysis")
+    @Column(name = "dart_company_analysis", columnDefinition = "TEXT")
     private String dartCompanyAnalysis;
 
-    @Column(name = "dart_vision")
+    @Column(name = "dart_vision", columnDefinition = "TEXT")
     private String dartVision;
 
-    @Column(name = "dart_financial_summary")
+    @Column(name = "dart_financial_summary", columnDefinition = "TEXT")
     private String dartFinancialSummary;
 
     @Column(name = "dart_company_analysis_basic", nullable = false)
