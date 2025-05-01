@@ -25,8 +25,9 @@ function QuestionStep({
   };
   return (
     <div className="flex flex-col gap-3  justify-center items-center">
-      {questions.map((num) => (
+      {questions.map((num, index) => (
         <div
+          key={index}
           onClick={() => handleSelectQuestion(num)}
           className={`flex flex-col ${stepBlockStyle(num === selectQuestion)}`}
         >
