@@ -1,3 +1,6 @@
+export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
+export type SenderType = "AI" | "USER";
+
 export interface QuestionStatus {
   contentNumber: number;
   contentStatus: ContentQuestionStatusType;
@@ -14,10 +17,8 @@ export interface QuestionStatus {
   contentStatus: ContentQuestionStatusType;
 }
 
-export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
-
 export interface ContentChatLogType {
-  sender: string;
+  sender: SenderType;
   message: string;
 }
 
@@ -62,3 +63,13 @@ export interface CoverLetterRequestContent {
   contentLength: number;
   contentFirstPrompt: string;
 }
+
+export type ChatMessage = {
+  sender: "USER" | "AI";
+  message: string;
+};
+
+export type ChatStore = {
+  chatLog: ChatMessage[];
+  addUserMessage: (message: string) => void;
+};
