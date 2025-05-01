@@ -1,7 +1,7 @@
 import { CoverLetterPostRequest } from "@/types/CoverLetterTypes";
 import { api } from "./api";
 
-export const CoverLetterApi = {
+export const coverLetterApi = {
   postCoverLetter: (postCoverLetterRequest: CoverLetterPostRequest) => {
     return api.post("/api/v1/cover-letter", { postCoverLetterRequest });
   },
