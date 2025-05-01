@@ -56,8 +56,10 @@ function InputChat({ onSubmitMessage }: InputChatProps) {
     <>
       <div className="min-h-[3rem] mt-7 duration-100 border-2 border-transparent ring ring-[#b8b9ba44]  bg-background  rounded-2xl focus-within:border-accent focus-within:border-2">
         <div className="relative w-full">
+          <label htmlFor="userMessage"></label>
           <textarea
             ref={textareaRef}
+            id="userMessage"
             name="userMessage"
             value={inputValue}
             className="break-all resize-none px-3 py-2 pr-14 max-h-40 overflow-y-auto outline-0 w-full"
@@ -66,9 +68,11 @@ function InputChat({ onSubmitMessage }: InputChatProps) {
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
             rows={1}
+            placeholder="메시지를 입력하세요"
           ></textarea>
           <div className="absolute right-3 bottom-1.5 ">
             <Button
+              aria-label="메시지 전송"
               className="flex-shrink-0"
               onClick={() => handleAddMessage(inputValue)}
               disabled={inputValue.trim() === ""}
