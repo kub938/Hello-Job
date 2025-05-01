@@ -1,0 +1,19 @@
+spring:
+  profiles:
+    active:
+      - local
+    group:
+      local:
+        - oauth
+        - db-local
+        #        - cloud
+      dev:
+        - oauth
+        - db-dev
+        #        - cloud
+    include: db, oauth
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.ssafy: DEBUG

@@ -33,6 +33,8 @@ export default defineConfig({
         cookiePathRewrite: "/", // 쿠키 경로 재작성
       },
     },
+    host: true,
+    allowedHosts: true,
   },
   build: {
     outDir: "dist",
