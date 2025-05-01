@@ -1,0 +1,18 @@
+import { CoverLetterApi } from "@/api/CoverLetterApi";
+import { useQuery } from "@tanstack/react-query";
+
+export const useGetCoverLetter = (
+  coverLetterId: number,
+  coverLetterNumber: number
+) => {
+  return useQuery({
+    queryKey: ["cover-letter-number", "cover-letter"],
+    queryFn: async () => {
+      const response = await CoverLetterApi.getCoverLetter(
+        coverLetterId,
+        coverLetterNumber
+      );
+      return response;
+    },
+  });
+};
