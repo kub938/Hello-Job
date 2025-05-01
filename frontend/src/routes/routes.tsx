@@ -13,6 +13,7 @@ import RenderErrorFallback from "@/components/Error/RenderErrorHandler";
 import { ErrorBoundary } from "react-error-boundary";
 import DefaultLayout from "@/components/layouts/DefaultLayout";
 import BlankLayout from "@/components/layouts/BlankLayout";
+import CoverLetter from "@/pages/CoverLetter/CoverLetter";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetter/CoverLetterAnalysis")
@@ -58,7 +59,10 @@ const router = createBrowserRouter([
               },
             ],
           },
-
+          {
+            path: "cover-letter/:id",
+            element: <CoverLetter />,
+          },
           {
             path: "corporate-search",
             element: <CorporateSearch />,
