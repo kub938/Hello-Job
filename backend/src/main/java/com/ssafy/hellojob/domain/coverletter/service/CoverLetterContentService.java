@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.coverletter.service;
 
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.ContentDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.ContentQuestionStatusDto;
@@ -18,6 +19,7 @@ import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -48,6 +50,7 @@ public class CoverLetterContentService {
         }
     }
 
+    // 자기소개서 문항별 조회 응답
     public ContentDto getCoverLetterContent(Integer coverLetterId, Integer contentNumber) {
         log.debug("🌞 자기소개서 coverLetterId {} 문항 번호 contentNumber: {}", coverLetterId, contentNumber);
 
@@ -83,5 +86,17 @@ public class CoverLetterContentService {
     public List<ContentQuestionStatusDto> getCoverLetterContentQuestionStatues(Integer coverLetterId) {
         List<ContentQuestionStatusDto> statuses = coverLetterContentRepository.getCoverLetterContentStatuses(coverLetterId);
         return statuses;
+    }
+
+    public Boolean updateCoverLetterContent(Integer coverLetterId, Integer contentNumber, CoverLetterUpdateRequestDto requestDto) {
+        CoverLetterContent content = coverLetterContentRepository.findByCoverLetterIdAndContentNumber(coverLetterId, contentNumber)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
+
+        content.updateCoverLetterContent(requestDto);
+
+        if (requestDto.getContentStatus() == CoverLetterContentStatus.IN_PROGRESS) {
+            return true;
+        }
+        return false;
     }
 }
