@@ -1,4 +1,3 @@
-import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 const baseURL = import.meta.env.DEV ? "" : "https://k12b105.p.ssafy.io";
