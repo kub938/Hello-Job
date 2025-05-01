@@ -1,8 +1,10 @@
-import { useCallback, useRef, useState } from "react";
-import { CoverLetterResponse, SenderType } from "@/types/CoverLetterTypes";
+import { useCallback, useMemo, useRef, useState } from "react";
+import { CoverLetterResponse } from "@/types/CoverLetterTypes";
 import InputChat from "./components/InputChat";
 import QuestionStep from "./components/QuestionStep";
 import { useCoverLetterStore } from "@/store/CoverLetterStore";
+import CoverLetterEditor from "./components/CoverLetterEditor";
+import { useParams } from "react-router";
 
 function CoverLetter() {
   const data: CoverLetterResponse = {
@@ -39,7 +41,10 @@ function CoverLetter() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   const [selectQuestion, setSelectQuestion] = useState(1);
+  const param = useParams();
   const { chatLog } = useCoverLetterStore();
+
+  const coverLetterId = param.id ? parseInt(param.id, 10) : 0;
 
   const handleSelectQuestion = (selectNum: number) => {
     setSelectQuestion(selectNum);
@@ -59,24 +64,21 @@ function CoverLetter() {
 
   const QuestionStatuses = data.summary.contentQuestionStatuses;
 
-  const chatStyle = (type: SenderType) => {
-    const defaultChatBubbleStyle =
-      "break-all border max-w-92 px-3 py-3 rounded-xl";
-    if (type === "USER") {
-      return {
+  const chatStyles = useMemo(
+    () => ({
+      USER: {
         container: "flex flex-row-reverse",
-        chatBubble: `${defaultChatBubbleStyle} bg-primary text-white `,
-      };
-    } else if (type === "AI") {
-      return {
+        chatBubble:
+          "break-all border max-w-92 px-3 py-3 rounded-xl bg-primary text-white",
+      },
+      AI: {
         container: "flex",
-        chatBubble: `${defaultChatBubbleStyle} bg-muted`,
-      };
-    }
-    return {};
-  };
+        chatBubble: "break-all border max-w-92 px-3 py-3 rounded-xl bg-muted",
+      },
+    }),
+    []
+  );
 
-  console.log(chatLog);
   return (
     <>
       <div className="flex mt-5 gap-3 items-start">
@@ -89,11 +91,11 @@ function CoverLetter() {
           <div className="relative">
             <div
               ref={chatContainerRef}
-              className="flex flex-col h-[76vh] grow overflow-y-auto gap-2 mt-2 mx-3 pb-15"
+              className="flex flex-col h-[76vh] grow overflow-y-auto gap-2 mt-2 pb-15"
             >
               {chatLog.map((chat, index) => (
-                <div key={index} className={chatStyle(chat.sender).container}>
-                  <div className={chatStyle(chat.sender).chatBubble}>
+                <div key={index} className={chatStyles[chat.sender].container}>
+                  <div className={chatStyles[chat.sender].chatBubble}>
                     {chat.message}
                   </div>
                 </div>
@@ -105,7 +107,10 @@ function CoverLetter() {
           </div>
         </div>
 
-        <div className="bg-white border w-[50rem] rounded-xl p-10 "></div>
+        <CoverLetterEditor
+          selectQuestion={selectQuestion}
+          coverLetterId={coverLetterId}
+        />
 
         <QuestionStep
           QuestionStatuses={QuestionStatuses}

@@ -57,7 +57,13 @@ const router = createBrowserRouter([
           },
           {
             path: "cover-letter/:id",
-            element: <CoverLetter />,
+            element: (
+              <SuspenseWrapper>
+                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                  <CoverLetter />,
+                </ErrorBoundary>
+              </SuspenseWrapper>
+            ),
           },
           {
             path: "corporate-search",
