@@ -7,7 +7,7 @@ from app.services.company_analysis_service import company_analysis_dart, company
 router = APIRouter(prefix="/company-analysis", tags=["company-analysis"])
 
 
-@router.post("/")
+@router.post("")
 async def company_analysis(request: company.CompanyAnalysisRequest):
     """_summary_
 
