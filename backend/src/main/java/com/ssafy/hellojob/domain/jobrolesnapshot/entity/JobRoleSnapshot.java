@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.coverletter.entity;
+package com.ssafy.hellojob.domain.jobrolesnapshot.entity;
 
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "jobRoleSnapshot")
+@Table(name = "jobrolesnapshot")
 public class JobRoleSnapshot extends BaseTimeEntity {
 
     @Id
