@@ -3,8 +3,10 @@ package com.ssafy.hellojob.domain.coverletter.service;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetterContent;
 import com.ssafy.hellojob.domain.coverletter.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -98,5 +101,21 @@ public class CoverLetterService {
                 .build();
 
         return summaryDto;
+    }
+
+    public Map<String, String> updateCoverLetter(User user, Integer coverLetterId, Integer coverLetterNumber, CoverLetterUpdateRequestDto requestDto) {
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId()))
+            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
+
+        Boolean isInProgress = coverLetterContentService.updateCoverLetterContent(coverLetterId, coverLetterNumber, requestDto);
+        coverLetter.updateUpdatedAt();
+
+        if (isInProgress)
+            return Map.of("message", "자기소개서가 임시 저장되었습니다.");
+
+        return Map.of("message", "자기소개서가 저장되었습니다.");
     }
 }
