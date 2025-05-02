@@ -46,6 +46,7 @@ public enum ErrorCode {
     COMPANY_ANALYSIS_ALREADY_BOOKMARK(HttpStatus.NOT_FOUND, "이미 즐겨찾기에 추가된 항목입니다."),
     COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 즐겨찾기 항목을 찾을 수 없습니다."),
     COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED(HttpStatus.NO_CONTENT, "일일 기업 분석 요청 횟수를 초과하였습니다."),
+    FASTAPI_RESPONSE_NULL(HttpStatus.BAD_REQUEST, "fast API 반환값이 없습니다"),
 
 
     // 자기소개서 관련

@@ -38,19 +38,19 @@ public class JobRoleAnalysis extends BaseTimeEntity {
     @Column(name = "job_role_title", nullable = false, length = 150)
     private String jobRoleTitle;
 
-    @Column(name = "job_role_work")
+    @Column(name = "job_role_work", columnDefinition = "TEXT")
     private String jobRoleWork;
 
-    @Column(name = "job_role_skills")
+    @Column(name = "job_role_skills", columnDefinition = "TEXT")
     private String jobRoleSkills;
 
-    @Column(name = "job_role_requirements")
+    @Column(name = "job_role_requirements", columnDefinition = "TEXT")
     private String jobRoleRequirements;
 
-    @Column(name = "job_role_preferences")
+    @Column(name = "job_role_preferences", columnDefinition = "TEXT")
     private String jobRolePreferences;
 
-    @Column(name = "job_role_etc")
+    @Column(name = "job_role_etc", columnDefinition = "TEXT")
     private String jobRoleEtc;
 
     @Column(name = "job_role_view_count", nullable = false)
