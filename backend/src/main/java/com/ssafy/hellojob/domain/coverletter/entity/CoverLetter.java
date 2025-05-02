@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.coverletter.entity;
 
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
+import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;

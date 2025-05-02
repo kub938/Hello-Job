@@ -1,7 +1,7 @@
-package com.ssafy.hellojob.domain.coverletter.service;
+package com.ssafy.hellojob.domain.jobrolesnapshot.service;
 
-import com.ssafy.hellojob.domain.coverletter.entity.JobRoleSnapshot;
-import com.ssafy.hellojob.domain.coverletter.repository.JobRoleSnapshotRepository;
+import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
+import com.ssafy.hellojob.domain.jobrolesnapshot.repository.JobRoleSnapshotRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
