@@ -2,10 +2,16 @@
 
 Hello Job의 AI 관련 서버입니다.
 
+## 설치 방법
+
+```bash
+pip install -r requirements.txt
+```
+
 ## 실행 방법
 
-```bash 
-docker compose up -d --build
+```bash
+uvicorn main:app --reload
 ```
 
 ## 환경 변수 설정
