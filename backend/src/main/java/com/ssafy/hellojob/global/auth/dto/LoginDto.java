@@ -8,5 +8,6 @@ import lombok.Getter;
 public class LoginDto {
 
     private Boolean authenticated;
+    private String nickname;
 
 }
