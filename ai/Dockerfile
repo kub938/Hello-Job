@@ -5,6 +5,8 @@ WORKDIR /root/hellojob
 RUN apt-get update && apt-get install -y \
     curl \
     gcc \
+    nodejs \
+    npm \
     && rm -rf /var/lib/apt/lists/*
 
 # uv 설치 및 shell 재실행 -> 이 라인은 필요 없습니다. uv는 PATH에 추가됩니다.
