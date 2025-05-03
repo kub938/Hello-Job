@@ -1,7 +1,6 @@
-package com.ssafy.hellojob.domain.coverletter.entity;
+package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
-import com.ssafy.hellojob.domain.exprience.entity.Experience;
-import com.ssafy.hellojob.domain.project.entity.Project;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;

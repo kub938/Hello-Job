@@ -1,8 +1,8 @@
-package com.ssafy.hellojob.domain.coverletter.service;
+package com.ssafy.hellojob.domain.coverlettercontent.service;
 
-import com.ssafy.hellojob.domain.coverletter.entity.CoverLetterContent;
-import com.ssafy.hellojob.domain.coverletter.entity.CoverLetterExperience;
-import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterExperienceRepository;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterExperience;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterExperienceRepository;
 import com.ssafy.hellojob.domain.exprience.entity.Experience;
 import com.ssafy.hellojob.domain.exprience.repository.ExperienceRepository;
 import com.ssafy.hellojob.domain.project.entity.Project;
@@ -61,16 +61,16 @@ public class CoverLetterExperienceService {
         }
     }
 
-    public List<Integer> getCoverLetterExperienceIds(Integer coverLetterId, Integer contentNumber) {
+    public List<Integer> getCoverLetterExperienceIds(Integer contentId) {
         List<Integer> contentExperienceIds =
-                coverLetterExperienceRepository.findExperiencesByCoverLetterIdAndContentNumber(coverLetterId, contentNumber);
+                coverLetterExperienceRepository.findExperiencesByContentId(contentId);
 
         return contentExperienceIds;
     }
 
-    public List<Integer> getCoverLetterProjectIds(Integer coverLetterId, Integer contentNumber) {
+    public List<Integer> getCoverLetterProjectIds(Integer contentId) {
         List<Integer> contentProjectIds =
-                coverLetterExperienceRepository.findProjectsByCoverLetterIdAndContentNumber(coverLetterId, contentNumber);
+                coverLetterExperienceRepository.findProjectsByContentId(contentId);
         return contentProjectIds;
     }
 }

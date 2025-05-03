@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.coverletter.entity;
 
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
