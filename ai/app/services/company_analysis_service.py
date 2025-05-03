@@ -21,9 +21,11 @@ async def setup_mcp_servers():
         for server_name, server_config in config.get('mcpServers', {}).items():
             try:
                 mcp_server = MCPServerStdio(
+                    name=server_name,
                     params={
                         "command": server_config.get("command"),
-                        "args": server_config.get("args", [])
+                        "args": server_config.get("args", []),
+                        "env": server_config.get("env", {})
                     },
                     client_session_timeout_seconds=60,
                     cache_tools_list=True
@@ -66,7 +68,7 @@ async def setup_agent(output_model):
     
     agent = Agent(
         name="Company Analysis Assistant",
-        instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다.",
+        instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. DART MCP 와 Search MCP를 활용하여 기업 분석 결과를 반환합니다.",
         model="gpt-4o",
         output_type=output_model,
         mcp_servers=mcp_servers
@@ -202,7 +204,7 @@ async def company_analysis_dart(company_name, base, plus, fin):
         context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow)"
 
     # 정보 부재 시 처리 방법 명시 추가
-    context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 최대한 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
+    context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 Search MCP 를 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
     # 동적으로 Pydantic 모델 생성 (정형화된 agent 출력을 위함)
     CompanyAnalysisOutput = create_model('CompanyAnalysisOutput', **model_fields)
     
@@ -210,7 +212,7 @@ async def company_analysis_dart(company_name, base, plus, fin):
     agent, _ = await setup_agent(output_model=CompanyAnalysisOutput)
 
     # 기업 분석 Agent 실행 
-    result = await Runner.run(agent, context)
+    result = await Runner.run(starting_agent=agent, input=context, max_turns=30)
 
     # Agent 결과가 없는 경우 처리
     if not result or not result.final_output:
