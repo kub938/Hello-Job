@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.coverletter.repository;
 
 import com.ssafy.hellojob.domain.coverletter.dto.response.ContentQuestionStatusDto;
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetterContent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,7 @@ public interface CoverLetterContentRepository extends JpaRepository<CoverLetterC
     "WHERE clc.coverLetter.coverLetterId = :coverLetterId " +
     "ORDER BY clc.contentNumber")
     List<ContentQuestionStatusDto> getCoverLetterContentStatuses(@Param("coverLetterId")Integer coverLetterId);
+
+    List<CoverLetterContent> findByCoverLetter(CoverLetter coverLetter);
+
 }
