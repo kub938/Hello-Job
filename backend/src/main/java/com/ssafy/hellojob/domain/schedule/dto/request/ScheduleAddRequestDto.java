@@ -26,6 +26,7 @@ public class ScheduleAddRequestDto {
     @Size(max = 166, message = "스케줄 메모는 166자 이하로 입력해주세요.")
     private String scheduleMemo;
 
+    @NotBlank(message = ValidationMessage.SCHEDULE_STATUS_NOT_EMPTY)
     private String scheduleStatusName;
 
     private Integer coverLetterId;

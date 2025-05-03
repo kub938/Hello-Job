@@ -25,11 +25,11 @@ public class Schedule {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedule_status_id", nullable = false)
     private ScheduleStatus scheduleStatus;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_id", nullable = true)
     private CoverLetter coverLetter;
 
@@ -55,6 +55,30 @@ public class Schedule {
         this.scheduleTitle = scheduleTitle;
         this.scheduleMemo = scheduleMemo;
 
+    }
+
+    public void setScheduleStatus(ScheduleStatus scheduleStatus){
+        this.scheduleStatus = scheduleStatus;
+    }
+
+    public void setScheduleCoverLetter(CoverLetter coverLetter){
+        this.coverLetter = coverLetter;
+    }
+
+    public void setScheduleStartDate(Date scheduleStartDate){
+        this.scheduleStartDate = scheduleStartDate;
+    }
+
+    public void setScheduleEndDate(Date scheduleEndDate){
+        this.scheduleEndDate = scheduleEndDate;
+    }
+
+    public void setScheduleTitle(String scheduleTitle){
+        this.scheduleTitle = scheduleTitle;
+    }
+
+    public void setScheduleMemo(String scheduleMemo){
+        this.scheduleMemo = scheduleMemo;
     }
 
 }

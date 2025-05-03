@@ -56,7 +56,8 @@ public enum ErrorCode {
     COVER_LETTER_MISMATCH(HttpStatus.FORBIDDEN, "현재 유저와 자기소개서 작성자가 일치하지 않습니다."),
 
     // 일정
-    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 일정을 찾을 수 없습니다.")
+    SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 일정을 찾을 수 없습니다."),
+    COVER_LETTER_ALREADY_IN_USE(HttpStatus.BAD_REQUEST, "이미 해당 자기소개서로 등록된 일정이 있습니다.")
 
 
     /**
