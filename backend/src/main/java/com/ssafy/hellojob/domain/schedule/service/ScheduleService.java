@@ -17,6 +17,9 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +39,6 @@ public class ScheduleService {
         ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
 
         CoverLetter coverLetter = null;
-
         if(requestDto.getCoverLetterId() != null){
             coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
         }
@@ -129,5 +131,46 @@ public class ScheduleService {
         return new ScheduleIdResponseDto(schedule.getScheduleId());
 
     }
+
+    @Transactional
+    public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Long scheduleId, Integer userId) {
+        // 유저 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 기존 스케줄 조회
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+        // 상태 값 수정
+        ScheduleStatus status = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
+        schedule.setScheduleStatus(status);
+
+        // CoverLetter는 요청에 값이 있을 경우에만 수정
+        if (requestDto.getCoverLetterId() != null) {
+            CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
+                    .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+            // 동일한 커버레터를 다시 설정하는 경우에는 생략
+            if (schedule.getCoverLetter() == null || !schedule.getCoverLetter().getCoverLetterId().equals(coverLetter.getCoverLetterId())) {
+                // 커버레터가 이미 다른 스케줄에 연결되어 있는지 확인
+                Optional<Schedule> otherSchedule = scheduleRepository.findByCoverLetter(coverLetter);
+                if (otherSchedule.isPresent() && !otherSchedule.get().getScheduleId().equals(scheduleId)) {
+                    throw new BaseException(ErrorCode.COVER_LETTER_ALREADY_IN_USE); // 커스텀 에러 코드 정의 필요
+                }
+                schedule.setScheduleCoverLetter(coverLetter);
+            }
+        }
+
+        schedule.setScheduleStartDate(requestDto.getScheduleStartDate());
+        schedule.setScheduleEndDate(requestDto.getScheduleEndDate());
+        schedule.setScheduleTitle(requestDto.getScheduleTitle());
+        schedule.setScheduleMemo(requestDto.getScheduleMemo());
+
+        return new ScheduleIdResponseDto(schedule.getScheduleId());
+    }
+
+
+
 
 }

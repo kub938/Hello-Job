@@ -59,4 +59,13 @@ public class ScheduleController {
         return responseDto;
     }
 
+    @PutMapping("/{scheduleId}")
+    public ScheduleIdResponseDto ScheduleUpdate(@RequestBody ScheduleAddRequestDto requestDto,
+                                                @PathVariable("scheduleId") Long scheduleId,
+                                                @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+        ScheduleIdResponseDto responseDto = scheduleService.updateSchedule(requestDto, scheduleId, userId);
+        return responseDto;
+    }
+
 }
