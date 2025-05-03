@@ -1,6 +1,6 @@
-package com.ssafy.hellojob.domain.coverletter.dto.request;
+package com.ssafy.hellojob.domain.coverlettercontent.dto.request;
 
-import com.ssafy.hellojob.domain.coverletter.entity.CoverLetterContentStatus;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
