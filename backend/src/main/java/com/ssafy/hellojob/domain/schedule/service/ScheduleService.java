@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleCoverLetterRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleIdResponseDto;
+import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleListResponseDto;
 import com.ssafy.hellojob.domain.schedule.entity.Schedule;
 import com.ssafy.hellojob.domain.schedule.entity.ScheduleStatus;
 import com.ssafy.hellojob.domain.schedule.entity.ScheduleStatusStep;
@@ -19,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -170,7 +173,28 @@ public class ScheduleService {
         return new ScheduleIdResponseDto(schedule.getScheduleId());
     }
 
+    public List<ScheduleListResponseDto> allSchedule(Integer userId){
 
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        List<Schedule> schedules = scheduleRepository.findByUser(user);
+
+        List<ScheduleListResponseDto> responseDto = new ArrayList<>();
+
+        for(Schedule schedule: schedules){
+            responseDto.add(ScheduleListResponseDto.builder()
+                            .scheduleId(schedule.getScheduleId())
+                            .scheduleStartDate(schedule.getScheduleStartDate())
+                            .scheduleEndDate(schedule.getScheduleEndDate())
+                            .scheduleTitle(schedule.getScheduleTitle())
+                            .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
+                            .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
+                    .build());
+        }
+
+        return responseDto;
+    }
 
 
 }

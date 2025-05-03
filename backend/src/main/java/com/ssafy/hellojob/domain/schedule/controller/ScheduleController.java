@@ -4,12 +4,16 @@ import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleCoverLetterRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleIdResponseDto;
+import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleListResponseDto;
 import com.ssafy.hellojob.domain.schedule.service.ScheduleService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -67,5 +71,19 @@ public class ScheduleController {
         ScheduleIdResponseDto responseDto = scheduleService.updateSchedule(requestDto, scheduleId, userId);
         return responseDto;
     }
+
+    @GetMapping()
+    public ResponseEntity<?> ScheduleList(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+        List<ScheduleListResponseDto> responseDto = scheduleService.allSchedule(userId);
+
+        if(responseDto.size() != 0 || !responseDto.isEmpty()){
+            return ResponseEntity.ok(responseDto);
+        }
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 
 }
