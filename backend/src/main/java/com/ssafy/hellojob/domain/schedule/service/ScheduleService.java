@@ -56,4 +56,23 @@ public class ScheduleService {
 
     }
 
+    public void deleteSchedule(Long scheduleId, Integer userId){
+
+        // 유저 정보 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 스케줄 정보 조회
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+        // 작성자와 userId가 같을 때만 삭제
+        if(userId == schedule.getUser().getUserId()){
+            scheduleRepository.delete(schedule);
+        } else {
+            throw new BaseException(ErrorCode.INVALID_USER);
+        }
+
+    }
+
 }

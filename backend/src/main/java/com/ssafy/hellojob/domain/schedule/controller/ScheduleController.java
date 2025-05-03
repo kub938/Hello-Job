@@ -7,10 +7,7 @@ import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +17,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     @PostMapping()
-    private ScheduleIdResponseDto ScheduleAdd(@Valid @RequestBody ScheduleAddRequestDto requestDto,
+    public ScheduleIdResponseDto ScheduleAdd(@Valid @RequestBody ScheduleAddRequestDto requestDto,
                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
@@ -28,6 +25,15 @@ public class ScheduleController {
         ScheduleIdResponseDto responseDto = scheduleService.addSchedule(requestDto, userId);
 
         return responseDto;
+
+    }
+
+    @DeleteMapping("{scheduleId}")
+    public void ScheduleDelete(@PathVariable("scheduleId") Long scheduleId,
+                               @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+
+        scheduleService.deleteSchedule(scheduleId, userId);
 
     }
 
