@@ -3,6 +3,8 @@ package com.ssafy.hellojob.domain.schedule.controller;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleCoverLetterRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
+import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleDetailCompanyAnalysis;
+import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleDetailResponseDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleIdResponseDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleListResponseDto;
 import com.ssafy.hellojob.domain.schedule.service.ScheduleService;
@@ -84,6 +86,14 @@ public class ScheduleController {
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/{scheduleId}")
+    public ScheduleDetailResponseDto ScheduleDetail(@PathVariable("scheduleId") Long scheduleId,
+                                                    @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+        ScheduleDetailResponseDto responseDto = scheduleService.detailSchedule(scheduleId, userId);
+
+        return responseDto;
+    }
 
 
 }
