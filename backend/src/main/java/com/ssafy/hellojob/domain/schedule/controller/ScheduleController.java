@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.schedule.controller;
 
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
+import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleCoverLetterRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleIdResponseDto;
 import com.ssafy.hellojob.domain.schedule.service.ScheduleService;
@@ -45,6 +46,16 @@ public class ScheduleController {
         Integer userId = userPrincipal.getUserId();
 
         ScheduleIdResponseDto responseDto = scheduleService.updateScheduleStatus(requestDto, scheduleId, userId);
+        return responseDto;
+    }
+
+    @PatchMapping("/{scheduleId}/cover-letter")
+    public ScheduleIdResponseDto ScheduleUpdateCoverLetter(@RequestBody ScheduleUpdateScheduleCoverLetterRequestDto requestDto,
+                                                            @PathVariable("scheduleId") Long scheduleId,
+                                                            @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+
+        ScheduleIdResponseDto responseDto = scheduleService.updateScheduleCoverLetter(requestDto, scheduleId, userId);
         return responseDto;
     }
 

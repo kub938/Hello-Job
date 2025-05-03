@@ -3,6 +3,7 @@ package com.ssafy.hellojob.domain.schedule.service;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
+import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleCoverLetterRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleIdResponseDto;
 import com.ssafy.hellojob.domain.schedule.entity.Schedule;
@@ -96,6 +97,32 @@ public class ScheduleService {
 
         // 상태 변경
         schedule.setScheduleStatus(newStatus);
+        scheduleRepository.save(schedule);
+
+        // 저장
+        return new ScheduleIdResponseDto(schedule.getScheduleId());
+
+    }
+
+    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Long scheduleId, Integer userId){
+        // 유저 정보 조회
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        // 스케줄 정보 조회
+        Schedule schedule = scheduleRepository.findById(scheduleId)
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+
+        // 권한 검증 (스케줄 소유자와 일치하는지 확인)
+        if (!schedule.getUser().getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.INVALID_USER);
+        }
+
+        // 자기소개서 조회
+        CoverLetter coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
+
+        // 상태 변경
+        schedule.setScheduleCoverLetter(coverLetter);
         scheduleRepository.save(schedule);
 
         // 저장

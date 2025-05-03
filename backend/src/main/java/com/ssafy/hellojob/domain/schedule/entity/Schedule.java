@@ -61,4 +61,8 @@ public class Schedule {
         this.scheduleStatus = scheduleStatus;
     }
 
+    public void setScheduleCoverLetter(CoverLetter coverLetter){
+        this.coverLetter = coverLetter;
+    }
+
 }
