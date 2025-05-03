@@ -1,4 +1,5 @@
 import json
+import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, create_model
 from typing import List, Optional, Any
@@ -20,12 +21,26 @@ async def setup_mcp_servers():
         # 구성된 MCP 서버들을 순회
         for server_name, server_config in config.get('mcpServers', {}).items():
             try:
+                # 환경 변수 설정
+                env_vars = server_config.get("env", {}).copy()
+                
+                # API 키가 필요한 경우 .env 파일에서 로드
+                if "env" in server_config and any(key.endswith("_API_KEY") for key in server_config["env"]):
+                    for key in list(env_vars.keys()):
+                        if key.endswith("_API_KEY"):
+                            # .env 파일에서 환경 변수 가져오기
+                            env_value = os.getenv(key)
+                            if env_value:
+                                env_vars[key] = env_value
+                            else:
+                                print(f"경고: {key} 환경 변수가 .env 파일에 설정되지 않았습니다.")
+                
                 mcp_server = MCPServerStdio(
                     name=server_name,
                     params={
                         "command": server_config.get("command"),
                         "args": server_config.get("args", []),
-                        "env": server_config.get("env", {})
+                        "env": env_vars
                     },
                     client_session_timeout_seconds=60,
                     cache_tools_list=True
