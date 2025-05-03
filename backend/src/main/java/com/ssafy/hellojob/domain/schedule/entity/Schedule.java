@@ -57,4 +57,8 @@ public class Schedule {
 
     }
 
+    public void setScheduleStatus(ScheduleStatus scheduleStatus){
+        this.scheduleStatus = scheduleStatus;
+    }
+
 }

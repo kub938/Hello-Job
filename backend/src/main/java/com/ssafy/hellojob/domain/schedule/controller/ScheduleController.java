@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.schedule.controller;
 
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
+import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.response.ScheduleIdResponseDto;
 import com.ssafy.hellojob.domain.schedule.service.ScheduleService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
@@ -35,6 +36,16 @@ public class ScheduleController {
 
         scheduleService.deleteSchedule(scheduleId, userId);
 
+    }
+
+    @PatchMapping("/{scheduleId}/status")
+    public ScheduleIdResponseDto ScheduleUpdateStatus(@RequestBody ScheduleUpdateScheduleStatusRequestDto requestDto,
+                                                      @PathVariable("scheduleId") Long scheduleId,
+                                                      @AuthenticationPrincipal UserPrincipal userPrincipal){
+        Integer userId = userPrincipal.getUserId();
+
+        ScheduleIdResponseDto responseDto = scheduleService.updateScheduleStatus(requestDto, scheduleId, userId);
+        return responseDto;
     }
 
 }
