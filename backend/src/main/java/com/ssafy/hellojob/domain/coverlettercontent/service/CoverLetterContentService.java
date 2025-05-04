@@ -26,7 +26,6 @@ import java.util.Map;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class CoverLetterContentService {
 
     private final CoverLetterContentRepository coverLetterContentRepository;
@@ -59,6 +58,7 @@ public class CoverLetterContentService {
     }
 
     // 자기소개서 문항별 조회 응답
+    @Transactional
     public CoverLetterContentDto getCoverLetterContent(User user, Integer contentId) {
         CoverLetterContent coverLetterContent = coverLetterContentRepository.findById(contentId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
@@ -121,6 +121,7 @@ public class CoverLetterContentService {
         return contentIds;
     }
 
+    @Transactional
     public Map<String, String> updateCoverLetterContent(User user, Integer contentId, CoverLetterUpdateRequestDto requestDto) {
         CoverLetterContent content = coverLetterContentRepository.findById(contentId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
