@@ -126,7 +126,7 @@ public class CoverLetterService {
         return Map.of("message", "자기소개서가 전체 저장되었습니다.");
     }
 
-    // 자기소개서 삭제: 관련 엔터티 cascade
+    // 자기소개서 삭제: 관련 엔터티 cascade로 전부 삭제
     public Map<String, String> deleteCoverLetter(User user, Integer coverLetterId) {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
