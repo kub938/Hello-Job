@@ -12,6 +12,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class CoverLetterController {
     public CoverLetterCreateResponseDto createCoverLetter(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody CoverLetterRequestDto requestDto
-            ) {
+    ) {
         User user = principal.getUser();
 
         return coverLetterService.createCoverLetter(user, requestDto);
@@ -46,5 +48,14 @@ public class CoverLetterController {
     ) {
         User user = principal.getUser();
         return coverLetterService.getCoverLetterSummary(user, coverLetterId);
+    }
+
+    @PatchMapping("/{coverLetterId}")
+    public Map<String, String> saveAll(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer coverLetterId
+    ) {
+        User user = principal.getUser();
+        return coverLetterService.saveAll(user, coverLetterId);
     }
 }
