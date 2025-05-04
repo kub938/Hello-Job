@@ -78,7 +78,7 @@ function CorporateSearch() {
       <div className="flex flex-col items-center h-full">
         <div className="flex flex-col items-center justify-end w-full h-1/3 mt-[8vh] mb-[4vh]">
           <h1 className="text-5xl font-bold mb-8">분석할 기업을 검색하세요</h1>
-          <Input className="bg-white border border-[#bdc6d8] rounded-md w-180 h-10 text-xl" />
+          <Input className="bg-white border border-[#bdc6d8] rounded-md w-140 h-10 text-base" />
         </div>
         <h2 className="w-full text-2xl font-bold mb-[2vh]">기업 목록</h2>
         <div className="flex justify-start gap-4 w-[968px] mx-auto flex-wrap pb-[196px]">
