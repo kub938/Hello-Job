@@ -58,4 +58,13 @@ public class CoverLetterController {
         User user = principal.getUser();
         return coverLetterService.saveAll(user, coverLetterId);
     }
+
+    @DeleteMapping("/{coverLetterId}")
+    public Map<String, String> deleteCoverLetter(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer coverLetterId
+    ) {
+        User user = principal.getUser();
+        return coverLetterService.deleteCoverLetter(user, coverLetterId);
+    }
 }
