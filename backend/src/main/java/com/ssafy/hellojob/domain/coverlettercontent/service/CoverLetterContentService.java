@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.coverlettercontent.service;
 
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
+import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverletter.service.ChatLogService;
@@ -17,15 +18,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CoverLetterContentService {
 
     private final CoverLetterContentRepository coverLetterContentRepository;
+    private final CoverLetterRepository coverLetterRepository;
     private final CoverLetterExperienceService coverLetterExperienceService;
     private final ChatLogService chatLogService;
 
@@ -41,7 +46,6 @@ public class CoverLetterContentService {
                     .build();
 
             coverLetterContentRepository.save(newCoverLetterContent);
-
             coverLetterExperienceService.saveCoverLetterExperience(content.getContentExperienceIds(), user, newCoverLetterContent);
             coverLetterExperienceService.saveCoverLetterProject(content.getContentProjectIds(), user, newCoverLetterContent);
         }
@@ -59,7 +63,7 @@ public class CoverLetterContentService {
         CoverLetterContent coverLetterContent = coverLetterContentRepository.findById(contentId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
 
-        if (!user.equals(coverLetterContent.getCoverLetter().getUser()))
+        if (!user.getUserId().equals(coverLetterContent.getCoverLetter().getUser().getUserId()))
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
 
         List<Integer> contentExperienceIds =
@@ -91,15 +95,32 @@ public class CoverLetterContentService {
         return statuses;
     }
 
-    public Boolean updateCoverLetterContent(Integer coverLetterId, Integer contentNumber, CoverLetterUpdateRequestDto requestDto) {
-        CoverLetterContent content = coverLetterContentRepository.findByCoverLetterIdAndContentNumber(coverLetterId, contentNumber)
+    // 자기소개서 id에 해당하는 contentId 리스트 반환
+    public List<Integer> getContentIdsByCoverLetterId(Integer coverLetterId) {
+        List<Integer> contentIds = coverLetterContentRepository
+                .findContentIdByCoverLetterId(coverLetterId);
+
+        return contentIds;
+    }
+
+    public Map<String, String> updateCoverLetterContent(User user, Integer contentId, CoverLetterUpdateRequestDto requestDto) {
+        CoverLetterContent content = coverLetterContentRepository.findById(contentId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
 
-        content.updateCoverLetterContent(requestDto);
+        if (!user.getUserId().equals(content.getCoverLetter().getUser().getUserId()))
+            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
 
-        if (requestDto.getContentStatus() == CoverLetterContentStatus.IN_PROGRESS) {
-            return true;
+        if (requestDto.getContentStatus() == CoverLetterContentStatus.PENDING) {
+            throw new BaseException(ErrorCode.COVER_LETTER_CONTENT_ALREADY_START);
         }
-        return false;
+
+        content.updateCoverLetterContent(requestDto);
+        coverLetterRepository.touch(content.getCoverLetter().getCoverLetterId());
+
+        if (content.getContentStatus() == CoverLetterContentStatus.IN_PROGRESS)
+            return Map.of("message", "자기소개서가 임시 저장되었습니다.");
+
+        return Map.of("message", "자기소개서가 저장되었습니다.");
     }
+
 }

@@ -3,6 +3,7 @@ package com.ssafy.hellojob.domain.coverletter.controller;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterCreateResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
+import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterSummaryDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
@@ -36,5 +37,14 @@ public class CoverLetterController {
     ) {
         User user = principal.getUser();
         return coverLetterService.getCoverLetterStatuses(user, coverLetterId);
+    }
+
+    @GetMapping("/{coverLetterId}")
+    public CoverLetterSummaryDto getCoverLetterSummary(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer coverLetterId
+    ) {
+        User user = principal.getUser();
+        return coverLetterService.getCoverLetterSummary(user, coverLetterId);
     }
 }

@@ -72,12 +72,13 @@ public class CoverLetterService {
                 .build();
     }
 
+    // 자기소개서 전체 문항 상태 조회
     public CoverLetterStatusesDto getCoverLetterStatuses(User user, Integer coverLetterId) {
 
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.equals(coverLetter.getUser())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
@@ -85,6 +86,7 @@ public class CoverLetterService {
         int totalContentQuestionCount = contentQuestionStatuses.size();
 
         CoverLetterStatusesDto coverLetterStatusesDto = CoverLetterStatusesDto.builder()
+                .coverLetterId(coverLetter.getCoverLetterId())
                 .totalContentQuestionCount(totalContentQuestionCount)
                 .contentQuestionStatuses(contentQuestionStatuses)
                 .updatedAt(coverLetter.getUpdatedAt())
@@ -93,19 +95,21 @@ public class CoverLetterService {
         return coverLetterStatusesDto;
     }
 
-    public Map<String, String> updateCoverLetter(User user, Integer coverLetterId, Integer coverLetterNumber, CoverLetterUpdateRequestDto requestDto) {
+    // 자기소개서 요약 조회
+    public CoverLetterSummaryDto getCoverLetterSummary(User user, Integer coverLetterId) {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId()))
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
+        }
 
-        Boolean isInProgress = coverLetterContentService.updateCoverLetterContent(coverLetterId, coverLetterNumber, requestDto);
-        coverLetter.updateUpdatedAt();
+        List<Integer> contentIds = coverLetterContentService.getContentIdsByCoverLetterId(coverLetterId);
 
-        if (isInProgress)
-            return Map.of("message", "자기소개서가 임시 저장되었습니다.");
-
-        return Map.of("message", "자기소개서가 저장되었습니다.");
+        return CoverLetterSummaryDto.builder()
+                .contentIds(contentIds)
+                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
+                .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
+                .build();
     }
 }
