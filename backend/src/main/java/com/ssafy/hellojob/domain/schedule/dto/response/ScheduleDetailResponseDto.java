@@ -1,6 +1,5 @@
 package com.ssafy.hellojob.domain.schedule.dto.response;
 
-import com.ssafy.hellojob.domain.coverletter.dto.response.ContentDto;
 import lombok.*;
 
 import java.sql.Date;
