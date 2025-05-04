@@ -49,7 +49,6 @@ services:
         condition: service_healthy
     volumes:
       - pip-cache:/root/.cache/pip
-      - ./ai/main.py:/root/hellojob/main.py
       - ./ai/app:/root/hellojob/app
   nginx:
     build: ./nginx
