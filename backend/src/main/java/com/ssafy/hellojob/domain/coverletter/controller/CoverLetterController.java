@@ -1,9 +1,9 @@
 package com.ssafy.hellojob.domain.coverletter.controller;
 
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
-import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterCreateResponseDto;
-import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterResponseDto;
+import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
+import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterSummaryDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
@@ -26,30 +26,45 @@ public class CoverLetterController {
     public CoverLetterCreateResponseDto createCoverLetter(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody CoverLetterRequestDto requestDto
-            ) {
+    ) {
         User user = principal.getUser();
 
         return coverLetterService.createCoverLetter(user, requestDto);
     }
 
-    @GetMapping("/{coverLetterId}/{contentNumber}")
-    public CoverLetterResponseDto getCoverLetterContent(
+    @GetMapping("/status/{coverLetterId}")
+    public CoverLetterStatusesDto getCoverLetterStatuses(
             @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable("coverLetterId") Integer coverLetterId,
-            @PathVariable("contentNumber") Integer contentNumber
+            @PathVariable Integer coverLetterId
     ) {
         User user = principal.getUser();
-        return coverLetterService.getCoverLetterByContentNumber(user, coverLetterId, contentNumber);
+        return coverLetterService.getCoverLetterStatuses(user, coverLetterId);
     }
 
-    @PatchMapping("/{coverLetterId}/{contentNumber}")
-    public Map<String, String> updateCoverLetterContent(
+    @GetMapping("/{coverLetterId}")
+    public CoverLetterSummaryDto getCoverLetterSummary(
             @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable("coverLetterId") Integer coverLetterId,
-            @PathVariable("contentNumber") Integer contentNumber,
-            @RequestBody CoverLetterUpdateRequestDto requestDto
-            ) {
+            @PathVariable Integer coverLetterId
+    ) {
         User user = principal.getUser();
-        return coverLetterService.updateCoverLetter(user, coverLetterId, contentNumber, requestDto);
+        return coverLetterService.getCoverLetterSummary(user, coverLetterId);
+    }
+
+    @PatchMapping("/{coverLetterId}")
+    public Map<String, String> saveAll(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer coverLetterId
+    ) {
+        User user = principal.getUser();
+        return coverLetterService.saveAll(user, coverLetterId);
+    }
+
+    @DeleteMapping("/{coverLetterId}")
+    public Map<String, String> deleteCoverLetter(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer coverLetterId
+    ) {
+        User user = principal.getUser();
+        return coverLetterService.deleteCoverLetter(user, coverLetterId);
     }
 }

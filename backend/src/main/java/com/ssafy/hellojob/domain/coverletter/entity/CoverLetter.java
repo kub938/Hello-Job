@@ -1,6 +1,8 @@
 package com.ssafy.hellojob.domain.coverletter.entity;
 
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
+import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -9,6 +11,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -29,13 +34,16 @@ public class CoverLetter extends BaseTimeEntity {
     @JoinColumn(name = "company_analysis_id", nullable = false)
     private CompanyAnalysis companyAnalysis;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "job_role_analysis_snapshot")
     private JobRoleSnapshot jobRoleSnapshot;
 
     @Column(name = "finish", nullable = false)
     @ColumnDefault("false")
     private boolean finish = false;
+
+    @OneToMany(mappedBy = "coverLetter", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CoverLetterContent> contents = new ArrayList<>();
 
     @Builder
     public CoverLetter(Integer coverLetterId, User user, CompanyAnalysis companyAnalysis, JobRoleSnapshot jobRoleSnapshot, boolean finish) {
@@ -44,10 +52,6 @@ public class CoverLetter extends BaseTimeEntity {
         this.companyAnalysis = companyAnalysis;
         this.jobRoleSnapshot = jobRoleSnapshot;
         this.finish = finish;
-    }
-
-    public void updateUpdatedAt() {
-        this.finish = this.finish;
     }
 
     public void updateFinish(boolean finish) {
