@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.coverletter.dto.response;
+package com.ssafy.hellojob.domain.coverlettercontent.dto.response;
 
 import lombok.Builder;
 import lombok.Getter;
