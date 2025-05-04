@@ -22,6 +22,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -86,6 +88,9 @@ public class CompanyAnalysisService {
         // CompanyAnalysis 저장
         CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, isPublic);
         companyAnalysisRepository.save(companyAnalysis);
+
+        // 기업 테이블 업데이트
+        company.setUpdatedAt(LocalDateTime.now());
 
         return CompanyAnalysisBookmarkSaveRequestDto.builder()
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
