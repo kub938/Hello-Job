@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
+import com.ssafy.hellojob.domain.coverletter.entity.ChatLog;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
@@ -9,6 +10,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -44,6 +48,12 @@ public class CoverLetterContent extends BaseTimeEntity {
 
     @Column(name = "cover_letter_content_first_prompt", length = 4500)
     private String contentFirstPrompt;
+
+    @OneToOne(mappedBy = "coverLetterContent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ChatLog chatLog;
+
+    @OneToMany(mappedBy = "coverLetterContent", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CoverLetterExperience> experiences = new ArrayList<>();
 
     @Builder
     public CoverLetterContent(Integer contentId, CoverLetter coverLetter, Integer contentNumber, String contentQuestion, String contentDetail, Integer contentLength, CoverLetterContentStatus contentStatus, String contentFirstPrompt) {
