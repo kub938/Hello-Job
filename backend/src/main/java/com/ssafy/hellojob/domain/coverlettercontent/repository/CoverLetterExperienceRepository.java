@@ -13,6 +13,7 @@ public interface CoverLetterExperienceRepository extends JpaRepository<CoverLett
             SELECT cle.experienceId
             FROM CoverLetterExperience cle
             WHERE cle.coverLetterContent.contentId = :contentId
+            AND cle.experienceId IS NOT NULL
             """)
     List<Integer> findExperiencesByContentId(
             @Param("contentId") Integer contentId);
@@ -21,6 +22,7 @@ public interface CoverLetterExperienceRepository extends JpaRepository<CoverLett
             SELECT cle.projectId
             FROM CoverLetterExperience cle
             WHERE cle.coverLetterContent.contentId = :contentId
+            AND cle.projectId IS NOT NULL
             """)
     List<Integer> findProjectsByContentId(
             @Param("contentId") Integer contentId);
