@@ -1,8 +1,0 @@
-{
-    "mcpServers": {
-        "dart-mcp": {
-            "command": "python", 
-            "args": ["/root/hellojob/app/mcp/dart-mcp/dart.py"]
-        }
-    }
-}
