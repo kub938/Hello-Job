@@ -1,6 +1,7 @@
-package com.ssafy.hellojob.domain.coverletter.entity;
+package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
-import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterUpdateRequestDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -41,7 +42,7 @@ public class CoverLetterContent extends BaseTimeEntity {
     @Column(name = "cover_letter_content_status", nullable = false)
     private CoverLetterContentStatus contentStatus = CoverLetterContentStatus.PENDING;
 
-    @Column(name = "cover_letter_content_first_prompt", columnDefinition = "TEXT")
+    @Column(name = "cover_letter_content_first_prompt", length = 4500)
     private String contentFirstPrompt;
 
     @Builder

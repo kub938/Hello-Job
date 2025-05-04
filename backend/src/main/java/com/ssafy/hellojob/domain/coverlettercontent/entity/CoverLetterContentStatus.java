@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.coverletter.entity;
+package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
 public enum CoverLetterContentStatus {
     PENDING,

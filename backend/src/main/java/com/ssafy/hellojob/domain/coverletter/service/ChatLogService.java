@@ -23,11 +23,14 @@ public class ChatLogService {
     private final ObjectMapper mapper = new ObjectMapper();
 
     public List<ChatMessageDto> getContentChatLog(Integer contentId) {
+        log.debug("🌞 지금 GetContentChatLog 들어옴");
         String chatLogString = chatLogRepository.findChatLogContentById(contentId);
+        log.debug("🌞 ChatLogString: {}", chatLogString);
 
         if (chatLogString == null || chatLogString.isBlank()) return new ArrayList<>();
 
         List<ChatMessageDto> chatLog;
+
         try {
             chatLog = mapper.readValue(chatLogString, new TypeReference<>() {
             });
@@ -35,6 +38,8 @@ public class ChatLogService {
             log.error("🌞 채팅 로그 파싱 실패: {}", chatLogString);
             throw new RuntimeException("채팅 로그 JSON 파싱 실패", e);
         }
+
+        log.debug("🌞 chatLog {}", chatLog.toArray().toString());
 
         return chatLog;
     }

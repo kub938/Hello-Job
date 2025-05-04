@@ -9,10 +9,9 @@ import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepos
 import com.ssafy.hellojob.domain.companyanalysis.repository.DartAnalysisRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.NewsAnalysisRepository;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
-import com.ssafy.hellojob.domain.coverletter.entity.CoverLetterContent;
-import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
-import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.jobrolesnapshot.repository.JobRoleSnapshotRepository;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
