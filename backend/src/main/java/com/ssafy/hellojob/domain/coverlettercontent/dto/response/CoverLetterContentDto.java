@@ -1,6 +1,5 @@
 package com.ssafy.hellojob.domain.coverlettercontent.dto.response;
 
-import com.ssafy.hellojob.domain.coverletter.dto.response.ChatMessageDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

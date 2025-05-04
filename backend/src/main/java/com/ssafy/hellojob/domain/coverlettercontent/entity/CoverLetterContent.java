@@ -1,6 +1,5 @@
 package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
-import com.ssafy.hellojob.domain.coverletter.entity.ChatLog;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
@@ -72,6 +71,10 @@ public class CoverLetterContent extends BaseTimeEntity {
         if (requestDto.getContentStatus() != null) {
             this.contentStatus = requestDto.getContentStatus();
         }
+    }
+
+    public void updateCoverLetterContentWithChat(String contentDetail) {
+        this.contentDetail = contentDetail;
     }
 
     public void updateContentStatus(CoverLetterContentStatus status) {
