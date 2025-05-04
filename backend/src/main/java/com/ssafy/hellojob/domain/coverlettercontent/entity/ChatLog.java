@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.coverletter.entity;
+package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
@@ -35,5 +35,10 @@ public class ChatLog extends BaseTimeEntity {
         this.coverLetterContent = coverLetterContent;
         this.chatLogContent = chatLogContent;
         this.updatedCount = updatedCount;
+    }
+
+    public void updateChatLog(String chatLogContent) {
+        this.chatLogContent = chatLogContent;
+        this.updatedCount += 1;
     }
 }
