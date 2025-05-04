@@ -97,6 +97,7 @@ public class JobRoleAnalysisService {
                 .companyName(companyName)
                 .jobRoleName(jobRoleAnalysis.getJobRoleName())
                 .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
+                .jobRoleWork(jobRoleAnalysis.getJobRoleWork())
                 .jobRoleSkills(jobRoleAnalysis.getJobRoleSkills())
                 .jobRoleRequirements(jobRoleAnalysis.getJobRoleRequirements())
                 .jobRolePreferences(jobRoleAnalysis.getJobRolePreferences())

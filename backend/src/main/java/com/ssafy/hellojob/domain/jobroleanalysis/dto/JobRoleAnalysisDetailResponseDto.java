@@ -16,6 +16,7 @@ public class JobRoleAnalysisDetailResponseDto {
     private String companyName;             // 기업명
     private String jobRoleName;             // 직무명
     private String jobRoleAnalysisTitle;
+    private String jobRoleWork;
     private String jobRoleSkills;           // 기술스택
     private String jobRoleRequirements;     // 자격요건
     private String jobRolePreferences;      // 우대사항
