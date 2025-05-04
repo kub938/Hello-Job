@@ -3,7 +3,6 @@ package com.ssafy.hellojob.domain.coverletter.service;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
@@ -111,5 +110,19 @@ public class CoverLetterService {
                 .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
                 .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
                 .build();
+    }
+
+    public Map<String, String> saveAll(User user, Integer coverLetterId) {
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
+        }
+
+        coverLetterContentService.saveAllContents(coverLetter);
+        coverLetter.updateFinish(true);
+
+        return Map.of("message", "자기소개서가 전체 저장되었습니다.");
     }
 }

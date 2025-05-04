@@ -95,6 +95,24 @@ public class CoverLetterContentService {
         return statuses;
     }
 
+    public boolean isWholeContentCompleted(List<ContentQuestionStatusDto> statuses) {
+        boolean result = true;
+        for (ContentQuestionStatusDto status : statuses) {
+            if (status.getContentStatus() != CoverLetterContentStatus.COMPLETED) {
+                result = false;
+                break;
+            }
+        }
+        return result;
+    }
+
+    public void saveAllContents(CoverLetter coverLetter) {
+        List<CoverLetterContent> contents = coverLetterContentRepository.findByCoverLetter(coverLetter);
+        for (CoverLetterContent content : contents) {
+            content.updateContentStatus(CoverLetterContentStatus.COMPLETED);
+        }
+    }
+
     // 자기소개서 id에 해당하는 contentId 리스트 반환
     public List<Integer> getContentIdsByCoverLetterId(Integer coverLetterId) {
         List<Integer> contentIds = coverLetterContentRepository
@@ -115,12 +133,22 @@ public class CoverLetterContentService {
         }
 
         content.updateCoverLetterContent(requestDto);
-        coverLetterRepository.touch(content.getCoverLetter().getCoverLetterId());
+        Integer coverLetterId = content.getCoverLetter().getCoverLetterId();
+
+        List<ContentQuestionStatusDto> statuses = getCoverLetterContentQuestionStatues(coverLetterId);
+        boolean isWholeContentCompleted = isWholeContentCompleted(statuses);
+
+        // 전체 완료인 경우 자기소개서 finish 처리
+        if (isWholeContentCompleted) {
+            content.getCoverLetter().updateFinish(true);
+        } else { // 아닌 경우 updatedAt만 반영
+            content.getCoverLetter().updateFinish(false);
+            coverLetterRepository.touch(coverLetterId);
+        }
 
         if (content.getContentStatus() == CoverLetterContentStatus.IN_PROGRESS)
             return Map.of("message", "자기소개서가 임시 저장되었습니다.");
 
         return Map.of("message", "자기소개서가 저장되었습니다.");
     }
-
 }
