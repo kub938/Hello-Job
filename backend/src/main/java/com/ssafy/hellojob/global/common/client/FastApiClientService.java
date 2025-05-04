@@ -18,7 +18,7 @@ public class FastApiClientService {
     public CompanyAnalysisFastApiResponseDto sendJobAnalysisToFastApi(CompanyAnalysisFastApiRequestDto requestDto) {
 
         CompanyAnalysisFastApiResponseDto response = fastApiWebClient.post()
-                .uri("/api/v1/company-analysis/")
+                .uri("/api/v1/ai/company-analysis/")
                 .bodyValue(requestDto)
                 .retrieve()
                 .bodyToMono(CompanyAnalysisFastApiResponseDto.class)

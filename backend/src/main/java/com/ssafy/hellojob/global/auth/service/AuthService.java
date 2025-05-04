@@ -62,9 +62,9 @@ public class AuthService {
     }
 
 
-    public LoginDto loginStatus(String accessToken) {
+    public LoginDto loginStatus(String accessToken, String nickname) {
         jwtUtil.validateToken(accessToken);
-        return new LoginDto(true);
+        return new LoginDto(true, nickname);
     }
 
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
