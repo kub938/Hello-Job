@@ -70,10 +70,6 @@ const router = createBrowserRouter([
             element: <CorporateSearch />,
           },
           {
-            path: "mypage",
-            element: <Mypage />,
-          },
-          {
             path: "job-research",
             element: <JobResearch />,
           },
@@ -90,6 +86,10 @@ const router = createBrowserRouter([
           {
             path: "login",
             element: <Login />,
+          },
+          {
+            path: "mypage",
+            element: <Mypage />,
           },
           // 헤더가 없는 다른 페이지들을 여기에 추가할 수 있습니다
         ],

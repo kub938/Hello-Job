@@ -1,5 +1,9 @@
 function Mypage() {
-  return <div className="flex flex-col items-center justify-between "></div>;
+  return (
+    <div className="flex bg-[#F8F9FC] h-screen">
+      <div className="w-30 h-full bg-white"></div>
+    </div>
+  );
 }
 
 export default Mypage;
