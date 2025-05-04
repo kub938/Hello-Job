@@ -15,6 +15,14 @@ import DefaultLayout from "@/components/layouts/DefaultLayout";
 import BlankLayout from "@/components/layouts/BlankLayout";
 import CoverLetter from "@/pages/CoverLetter/CoverLetter";
 
+// 마이페이지 서브 컴포넌트들
+import Schedule from "@/pages/Mypage/components/Schedule";
+import BookmarkedCompanies from "@/pages/Mypage/components/BookmarkedCompanies";
+import BookmarkedJobs from "@/pages/Mypage/components/BookmarkedJobs";
+import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
+import Account from "@/pages/Mypage/components/Account";
+import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
+
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetter/CoverLetterAnalysis")
 );
@@ -90,6 +98,36 @@ const router = createBrowserRouter([
           {
             path: "mypage",
             element: <Mypage />,
+            children: [
+              {
+                path: "",
+                element: <Schedule />,
+              },
+              {
+                path: "schedule",
+                element: <Schedule />,
+              },
+              {
+                path: "cover-letter-list",
+                element: <CoverLetterList />,
+              },
+              {
+                path: "bookmarks/companies",
+                element: <BookmarkedCompanies />,
+              },
+              {
+                path: "bookmarks/jobs",
+                element: <BookmarkedJobs />,
+              },
+              {
+                path: "interviews-videos",
+                element: <InterviewVideos />,
+              },
+              {
+                path: "account",
+                element: <Account />,
+              },
+            ],
           },
           // 헤더가 없는 다른 페이지들을 여기에 추가할 수 있습니다
         ],
