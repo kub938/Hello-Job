@@ -1,3 +1,4 @@
+import { useAuthStore } from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { Link } from "react-router";
 
@@ -7,6 +8,7 @@ interface HeaderProps {
 
 function Header({ isMinimize = false }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
+  const { isLoggedIn, userName } = useAuthStore();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -37,12 +39,21 @@ function Header({ isMinimize = false }: HeaderProps) {
           </div>
         </Link>
         {isMinimize ? (
-          <Link
-            className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5"
-            to="/mypage"
-          >
-            OOO님 정보
-          </Link>
+          isLoggedIn ? (
+            <Link
+              className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+              to="/mypage"
+            >
+              {userName}님 정보
+            </Link>
+          ) : (
+            <Link
+              className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+              to="/login"
+            >
+              로그인
+            </Link>
+          )
         ) : (
           <ul className="flex gap-3 mr-5">
             <li>

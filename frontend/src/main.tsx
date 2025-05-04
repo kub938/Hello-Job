@@ -1,4 +1,4 @@
-import { StrictMode, Suspense } from "react";
+import { Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { RouterProvider } from "react-router";
@@ -18,13 +18,11 @@ const queryClient = new QueryClient({
 });
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <ErrorBoundary FallbackComponent={RouterErrorHandler}>
-      <QueryClientProvider client={queryClient}>
-        <Suspense fallback={<Loading />}>
-          <RouterProvider router={router} />
-        </Suspense>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  </StrictMode>
+  <ErrorBoundary FallbackComponent={RouterErrorHandler}>
+    <QueryClientProvider client={queryClient}>
+      <Suspense fallback={<Loading />}>
+        <RouterProvider router={router} />
+      </Suspense>
+    </QueryClientProvider>
+  </ErrorBoundary>
 );
