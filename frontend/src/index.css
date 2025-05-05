@@ -79,6 +79,7 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-active: var(--active);
 
   --color-success: var(--success);
   --color-warning: var(--warning);
@@ -129,6 +130,7 @@
   --border: #e4e8f0;
   --input: #ffffff;
   --ring: #886bfb;
+  --active: #cec6f5;
 
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
@@ -226,5 +228,9 @@
     @apply bg-card text-card-foreground rounded-lg shadow-lg;
     @apply h-full overflow-auto px-6 pt-8 pb-6 relative;
     @apply animate-in fade-in-0 zoom-in-95 duration-300;
+  }
+
+  .hover-block {
+    @apply duration-100 hover:border-2 hover:border-primary hover:bg-secondary-light;
   }
 }
