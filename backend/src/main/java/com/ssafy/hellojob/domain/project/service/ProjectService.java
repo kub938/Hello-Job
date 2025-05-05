@@ -12,7 +12,8 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,17 +56,20 @@ public class ProjectService {
                 .build();
     }
 
-    public ResponseEntity<?> getProjects(Integer userId) {
+    public List<ProjectsResponseDto> getProjects(Integer userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
         List<ProjectsResponseDto> projects = projectRepository.findByUserId(userId);
 
-        if (projects.isEmpty()) {
-            log.debug("🌞 userId: ", userId, " 해당 유저의 프로젝트가 없습니다.");
-            return ResponseEntity.noContent().build();
-        }
+        return projects;
+    }
 
-        return ResponseEntity.ok(projects);
+    public Page<ProjectsResponseDto> getProjectsPage(Integer userId, Pageable pageable) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        Page<ProjectsResponseDto> projects = projectRepository.findPageByUserId(userId, pageable);
+
+        return projects;
     }
 
     public ProjectResponseDto getProject(Integer userId, Integer projectId) {
