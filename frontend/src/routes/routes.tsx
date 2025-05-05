@@ -16,7 +16,7 @@ import BlankLayout from "@/components/layouts/BlankLayout";
 import CoverLetter from "@/pages/CoverLetter/CoverLetter";
 
 const CoverLetterAnalysis = lazy(
-  () => import("@/pages/CoverLetter/CoverLetterAnalysis")
+  () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
 );
 
 function SuspenseWrapper({ children }: { children: ReactNode }) {

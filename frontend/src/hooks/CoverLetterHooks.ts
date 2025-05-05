@@ -1,4 +1,4 @@
-import { coverLetterApi } from "@/api/coverLetterApi";
+import { coverLetterApi } from "@/api/CoverLetterApi";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetCoverLetter = (
