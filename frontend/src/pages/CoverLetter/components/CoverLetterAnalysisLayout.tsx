@@ -13,12 +13,17 @@ function CoverLetterAnalysisLayout({
   handleStep,
 }: CoverLetterAnalysisLayoutProps) {
   const title = [
+    "기업/직무 선택",
     "기업분석 선택하기",
     "직무분석 선택하기",
     "자기소개서 문항 입력",
   ];
 
   const subTitle = [
+    <>
+      <p className="mb-2">지원하실 기업/직무를 선택해 주세요!</p>
+      <p className="text-text-muted-foreground text-lg"></p>
+    </>,
     <>
       <p className="mb-2">원하시는 기업분석 자료를 선택해 주세요!</p>
       <p className="text-text-muted-foreground text-lg">
