@@ -3,6 +3,7 @@ package com.ssafy.hellojob.domain.project.controller;
 import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectCreateResponseDto;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectResponseDto;
+import com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto;
 import com.ssafy.hellojob.domain.project.service.ProjectService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import jakarta.validation.Valid;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -37,8 +39,10 @@ public class ProjectController {
     @GetMapping
     public ResponseEntity<?> getProjects(@AuthenticationPrincipal UserPrincipal principal) {
         Integer userId = principal.getUserId();
-        ResponseEntity<?> response = projectService.getProjects(userId);
-        return response;
+        List<ProjectsResponseDto> list = projectService.getProjects(userId);
+        return list.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(list);
     }
 
     @GetMapping("/{projectId}")

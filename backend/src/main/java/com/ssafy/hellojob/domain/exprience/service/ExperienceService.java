@@ -12,7 +12,8 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,13 +55,15 @@ public class ExperienceService {
                 .build();
     }
 
-    public ResponseEntity<?> getExperiences(Integer userId) {
+    public List<ExperiencesResponseDto> getExperiences(Integer userId) {
         List<ExperiencesResponseDto> experiences = experienceRepository.findExperiencesByUserId(userId);
 
-        if (experiences.isEmpty())
-            return ResponseEntity.noContent().build();
+        return experiences;
+    }
 
-        return ResponseEntity.ok(experiences);
+    public Page<ExperiencesResponseDto> getExperiencesPage(Integer userId, Pageable pageable) {
+        Page<ExperiencesResponseDto> page = experienceRepository.findExperiencesPageByUserId(userId, pageable);
+        return page;
     }
 
     public ExperienceResponseDto getExperience(Integer userId, Integer experienceId) {

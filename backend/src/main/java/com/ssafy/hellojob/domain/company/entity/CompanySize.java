@@ -9,7 +9,8 @@ public enum CompanySize {
 
     대기업("대기업"),
     중소기업("중소기업"),
-    중견기업("중견기업");
+    중견기업("중견기업"),
+    정보없음("정보없음");
 
     private final String label;
 }
