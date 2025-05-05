@@ -45,8 +45,8 @@ function CoverLetterAnalysisLayout({
   ];
   return (
     <>
-      <div className="flex justify-center gap-20 mt-10 mb-20">
-        <div className="bg-white border w-[50rem] border-t-4 border-t-primary rounded-xl p-10 ">
+      <div className="flex justify-center gap-10 mt-10 mb-20">
+        <div className="bg-white border w-full border-t-4 border-t-primary rounded-xl p-10 ">
           <div className="text-2xl font-bold pb-3 border-b-1">
             {title[nowStep]}
           </div>

@@ -5,7 +5,6 @@ import {
 } from "@/types/CoverLetterTypes";
 import { useState } from "react";
 import { useParams } from "react-router";
-import SearchInput from "./SearchInputModal";
 
 function ReportList({ nowStep }: ReportListProps) {
   const companyData = [
