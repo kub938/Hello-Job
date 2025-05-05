@@ -1,8 +1,8 @@
 import { Button } from "@/components/Button";
 import Loading from "@/components/Loading/Loading";
-import { useGetCompanies } from "@/hooks/CompanyHooks";
-import { useSelectCompanyStore } from "@/store/CoverLetterAnalysisStore";
-import { CompanyState } from "@/types/CoverLetterStoreTypes";
+import { useGetCompanies } from "@/hooks/companyHooks";
+import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
+import { CompanyState } from "@/types/coverLetterStoreTypes";
 import { useEffect, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 

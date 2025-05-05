@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { CoverLetterResponse } from "@/types/CoverLetterTypes";
+import { CoverLetterResponse } from "@/types/coverLetterTypes";
 import { useState } from "react";
 
 export interface CoverLetterEditor {

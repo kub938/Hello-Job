@@ -1,4 +1,4 @@
-import { CoverLetterPostRequest } from "@/types/CoverLetterTypes";
+import { CoverLetterPostRequest } from "@/types/coverLetterTypes";
 import { api } from "./api";
 
 export const coverLetterApi = {

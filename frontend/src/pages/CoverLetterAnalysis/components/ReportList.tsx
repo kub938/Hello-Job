@@ -2,7 +2,7 @@ import {
   CompanyBookMarkResponse,
   JobBookMarkResponse,
   ReportListProps,
-} from "@/types/CoverLetterTypes";
+} from "@/types/coverLetterTypes";
 import { useState } from "react";
 import { useParams } from "react-router";
 

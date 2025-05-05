@@ -1,8 +1,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { CoverLetterResponse } from "@/types/CoverLetterTypes";
+import { CoverLetterResponse } from "@/types/coverLetterTypes";
 import InputChat from "./components/InputChat";
 import QuestionStep from "./components/QuestionStep";
-import { useCoverLetterStore } from "@/store/CoverLetterStore";
+import { useCoverLetterStore } from "@/store/coverLetterStore";
 import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
 

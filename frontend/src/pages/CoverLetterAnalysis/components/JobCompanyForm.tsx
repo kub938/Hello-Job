@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
-import { useSelectCompanyStore } from "@/store/CoverLetterAnalysisStore";
+import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
 import JobSearch from "../SearchInputModal/JobSearch";
 import CompanySearch from "../SearchInputModal/CompanySearch";
 

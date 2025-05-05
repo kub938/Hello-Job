@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { useCoverLetterStore } from "@/store/CoverLetterStore";
+import { useCoverLetterStore } from "@/store/coverLetterStore";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 

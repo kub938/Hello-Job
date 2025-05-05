@@ -1,7 +1,7 @@
 import {
   CompanyState,
   SelectCompanyState,
-} from "@/types/CoverLetterStoreTypes";
+} from "@/types/coverLetterStoreTypes";
 import { create } from "zustand/react";
 
 export const useSelectCompanyStore = create<SelectCompanyState>((set) => ({
