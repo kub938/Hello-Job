@@ -51,7 +51,7 @@ export interface CoverLetterResponse {
 //Post Request Type
 export interface CoverLetterPostRequest {
   companyAnalysisId: number;
-  jobRoleAnalysisId: number;
+  jobRoleAnalysisId: number | null;
   contents: CoverLetterRequestContent;
 }
 
@@ -64,12 +64,33 @@ export interface CoverLetterRequestContent {
   contentFirstPrompt: string;
 }
 
-export type ChatMessage = {
-  sender: "USER" | "AI";
-  message: string;
-};
+export interface ReportListProps {
+  nowStep: number;
+}
 
-export type ChatStore = {
-  chatLog: ChatMessage[];
-  addUserMessage: (message: string) => void;
-};
+export interface JobBookMarkResponse {
+  jobRoleAnalysisId: number;
+  companyName: string;
+  jobRoleName: string;
+  jobRoleAnalysisTitle: string;
+  jobRoleCategory: string;
+  jobRoleViewCount: number;
+  jobRoleBookmarkCount: number;
+  bookmark: boolean;
+  updatedAt: string;
+  public: boolean;
+}
+
+export interface CompanyBookMarkResponse {
+  companyAnalysisBookmarkId: number;
+  companyAnalysisId: number;
+  companyName: string;
+  createdAt: string;
+  companyViewCount: number;
+  companyLocation: string;
+  companySize: string;
+  companyIndustry: string;
+  companyAnalysisBookmarkCount: number;
+  bookmark: boolean;
+  public: boolean;
+}

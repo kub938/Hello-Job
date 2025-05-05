@@ -45,7 +45,7 @@ api.interceptors.response.use(
             errorResponse
           );
           alert("인증이 만료되었습니다");
-          window.location.replace("/");
+          window.location.replace("/login");
           break;
         case 403:
           console.error(`${errorStatus} Forbidden: 권한 오류`, errorResponse);

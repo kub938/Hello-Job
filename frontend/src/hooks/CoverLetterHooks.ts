@@ -1,4 +1,4 @@
-import { CoverLetterApi } from "@/api/CoverLetterApi";
+import { coverLetterApi } from "@/api/coverLetterApi";
 import { useQuery } from "@tanstack/react-query";
 
 export const useGetCoverLetter = (
@@ -8,7 +8,7 @@ export const useGetCoverLetter = (
   return useQuery({
     queryKey: ["cover-letter-number", "cover-letter"],
     queryFn: async () => {
-      const response = await CoverLetterApi.getCoverLetter(
+      const response = await coverLetterApi.getCoverLetter(
         coverLetterId,
         coverLetterNumber
       );

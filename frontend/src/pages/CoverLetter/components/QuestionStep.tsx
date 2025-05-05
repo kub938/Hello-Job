@@ -1,4 +1,4 @@
-import { QuestionStepProps } from "@/types/CoverLetterTypes";
+import { QuestionStepProps } from "@/types/coverLetterTypes";
 
 function QuestionStep({
   QuestionStatuses,

@@ -24,7 +24,7 @@ import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 
 const CoverLetterAnalysis = lazy(
-  () => import("@/pages/CoverLetter/CoverLetterAnalysis")
+  () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
 );
 
 function SuspenseWrapper({ children }: { children: ReactNode }) {

@@ -7,6 +7,7 @@ interface LetterStepProps {
 
 function LetterStep({ nowStep, handleStep }: LetterStepProps) {
   const stepTitle = [
+    "기업/직무 입력",
     "1. 기업분석",
     "2. 직무분석",
     "3. 문항 입력",

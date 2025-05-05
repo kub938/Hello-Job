@@ -1,4 +1,5 @@
-import { ChatStore } from "@/types/CoverLetterTypes";
+import { ChatStore } from "@/types/coverLetterStoreTypes";
+import { CoverLetterPostRequest } from "@/types/coverLetterTypes";
 import { create } from "zustand";
 
 export const useCoverLetterStore = create<ChatStore>((set) => ({
@@ -17,6 +18,35 @@ export const useCoverLetterStore = create<ChatStore>((set) => ({
   addAiMessage: (message: string) => {
     set((prev) => ({
       chatLog: [...prev.chatLog, { sender: "AI", message }],
+    }));
+  },
+}));
+
+export const useCoverLetterInputStore = create((set) => ({
+  companyAnalysisId: 0,
+  jobRoleAnalysisId: null,
+  contents: [
+    {
+      contentQuestion: "",
+      contentNumber: 0,
+      contentExperienceIds: [],
+      contentProjectIds: [],
+      contentLength: 0,
+      contentFirstPrompt: "",
+    },
+  ],
+
+  setCompanyAnalysisId: (id: number) => {
+    set((state: CoverLetterPostRequest) => ({
+      ...state,
+      companyAnalysisId: id,
+    }));
+  },
+
+  setJobRoleAnalysisId: (id: number) => {
+    set((state: CoverLetterPostRequest) => ({
+      ...state,
+      jobRoleAnalysisId: id,
     }));
   },
 }));
