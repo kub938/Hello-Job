@@ -2,6 +2,12 @@ import { Button } from "@/components/Button";
 import { Link } from "react-router";
 
 function Login() {
+  const handleGoogleLogin = () => {
+    window.location.replace(
+      "https://k12b105.p.ssafy.io/oauth2/authorization/google"
+    );
+  };
+
   return (
     <div className="container relative h-screen flex-col items-center justify-center lg:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
       <div className="relative hidden h-full flex-col bg-muted p-10 text-white dark:border-r lg:flex">
@@ -62,6 +68,7 @@ function Login() {
                 size="default"
                 type="button"
                 className="inline-flex items-center"
+                onClick={handleGoogleLogin}
               >
                 <img
                   src="../../src/assets/google-icon.svg"

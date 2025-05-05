@@ -32,6 +32,7 @@ function stringToPaletteClass(str: string): {
 }
 
 interface GradientCardProps {
+  id: string;
   width: number;
   height: number;
   className?: string;
@@ -47,6 +48,7 @@ interface GradientCardProps {
 }
 
 const GradientCard: React.FC<GradientCardProps> = ({
+  id,
   width,
   height,
   className,
@@ -75,6 +77,7 @@ const GradientCard: React.FC<GradientCardProps> = ({
   return (
     <div
       className="relative overflow-visible"
+      key={id}
       style={{ width: `${initialWidth}px`, height: `${initialHeight}px` }}
     >
       <CompanyCard
