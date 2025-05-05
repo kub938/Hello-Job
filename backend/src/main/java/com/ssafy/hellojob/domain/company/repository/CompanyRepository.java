@@ -12,15 +12,15 @@ import java.util.List;
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Long> {
 
-    @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(c.id, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt) " +
+    @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(c.companyId, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt) " +
             "FROM Company c WHERE c.companyVisible IS TRUE ORDER BY c.updatedAt DESC")
     List<CompanyListDto> getAllCompany();
 
-    @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(c.id, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt) " +
+    @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(c.companyId, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt) " +
             "FROM Company c WHERE c.companyName LIKE CONCAT(:companyName, '%') AND c.companyVisible IS TRUE ORDER BY c.updatedAt DESC")
     List<CompanyListDto> getCompanyByCompanyName(@Param("companyName") String companyName);
 
-    @Query("SELECT c.companyName FROM Company c WHERE c.id = :companyId")
+    @Query("SELECT c.companyName FROM Company c WHERE c.companyId = :companyId")
     String getCompanyNameByCompanyId(@Param("companyId") Long companyId);
 
 }
