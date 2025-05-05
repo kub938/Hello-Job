@@ -3,15 +3,21 @@ package com.ssafy.hellojob.domain.exprience.controller;
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceCreateResponseDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceResponseDto;
+import com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto;
 import com.ssafy.hellojob.domain.exprience.service.ExperienceService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -36,7 +42,25 @@ public class ExperienceController {
             @AuthenticationPrincipal UserPrincipal principal) {
         Integer userId = principal.getUserId();
 
-        return experienceService.getExperiences(userId);
+        List<ExperiencesResponseDto> experiences = experienceService.getExperiences(userId);
+
+        return experiences.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(experiences);
+    }
+
+    // 마이페이지 경험 목록 Pageable
+    @GetMapping
+    public ResponseEntity<?> getExperiencesPage(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Integer userId = principal.getUserId();
+
+        Page<ExperiencesResponseDto> experiences = experienceService.getExperiencesPage(userId, pageable);
+
+        return experiences.isEmpty()
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.ok(experiences);
     }
 
     @GetMapping("/{experienceId}")
