@@ -64,16 +64,6 @@ export interface CoverLetterRequestContent {
   contentFirstPrompt: string;
 }
 
-export type ChatMessage = {
-  sender: "USER" | "AI";
-  message: string;
-};
-
-export type ChatStore = {
-  chatLog: ChatMessage[];
-  addUserMessage: (message: string) => void;
-};
-
 export interface ReportListProps {
   nowStep: number;
 }

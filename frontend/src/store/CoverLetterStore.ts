@@ -1,4 +1,5 @@
-import { ChatStore, CoverLetterPostRequest } from "@/types/CoverLetterTypes";
+import { ChatStore } from "@/types/CoverLetterStoreTypes";
+import { CoverLetterPostRequest } from "@/types/CoverLetterTypes";
 import { create } from "zustand";
 
 export const useCoverLetterStore = create<ChatStore>((set) => ({
