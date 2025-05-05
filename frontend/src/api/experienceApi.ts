@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { authApi } from "./instance";
 
 export interface PostProjectRequest {
   projectName: string;
@@ -38,18 +38,18 @@ export interface GetProjectResponse {
 }
 export const experienceApi = {
   postProject: (projectFormData: PostProjectRequest) => {
-    return api.post("/api/v1/project", projectFormData);
+    return authApi.post("/api/v1/project", projectFormData);
   },
   getProjects: () => {
-    return api.get("/api/v1/project");
+    return authApi.get("/api/v1/project");
   },
   getProject: (projectId: number) => {
-    return api.get(`/api/v1/project/${projectId}`);
+    return authApi.get(`/api/v1/project/${projectId}`);
   },
   putProject: (projectFormData: PostProjectRequest, projectId: number) => {
-    return api.put(`/api/v1/project/${projectId}`, projectFormData);
+    return authApi.put(`/api/v1/project/${projectId}`, projectFormData);
   },
   deleteProject: (projectId: number) => {
-    return api.delete(`/api/v1/project/${projectId}`);
+    return authApi.delete(`/api/v1/project/${projectId}`);
   },
 };

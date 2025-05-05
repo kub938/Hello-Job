@@ -1,12 +1,12 @@
-import { api } from "./api";
+import { authApi } from "./instance";
 
 export const jobRoleAnalysis = {
   getJobDetail: (jobRoleAnalysisId: number) => {
-    return api.get(`/api/v1/job_role_analysis/${jobRoleAnalysisId}`);
+    return authApi.get(`/api/v1/job_role_analysis/${jobRoleAnalysisId}`);
   },
 
   getJobBookMarks: (companyId: number) => {
-    return api.get(`/api/v1/job_role_analysis/bookmark`, {
+    return authApi.get(`/api/v1/job_role_analysis/bookmark`, {
       params: { companyId },
     });
   },
