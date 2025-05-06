@@ -104,23 +104,35 @@ public class CompanyAnalysisService {
 
         List<CompanyAnalysisListResponseDto> result = analysisList.stream()
                 .filter(CompanyAnalysis::isPublic) // 공개된 기업 분석만 조회
-                .map(analysis -> CompanyAnalysisListResponseDto.builder()
-                        .companyAnlaysisId(analysis.getCompanyAnalysisId())
-                        .companyName(analysis.getCompany().getCompanyName())
-                        .createdAt(analysis.getCreatedAt())
-                        .companyViewCount(analysis.getCompanyAnalysisViewCount())
-                        .companyLocation(analysis.getCompany().getCompanyLocation())
-                        .companySize(analysis.getCompany().getCompanySize().name())
-                        .companyIndustry(analysis.getCompany().getCompanyIndustry())
-                        .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
-                        .bookmark(companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, analysis.getCompanyAnalysisId()))
-                        .isPublic(analysis.isPublic())
-                        .build()
-                )
+                .map(analysis -> {
+                    DartAnalysis dart = analysis.getDartAnalysis();
+                    List<String> dartCategory = new ArrayList<>();
+                    if (dart != null) {
+                        if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+                        if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+                        if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+                    }
+
+                    return CompanyAnalysisListResponseDto.builder()
+                            .companyAnlaysisId(analysis.getCompanyAnalysisId())
+                            .companyName(analysis.getCompany().getCompanyName())
+                            .createdAt(analysis.getCreatedAt())
+                            .companyViewCount(analysis.getCompanyAnalysisViewCount())
+                            .companyLocation(analysis.getCompany().getCompanyLocation())
+                            .companySize(analysis.getCompany().getCompanySize().name())
+                            .companyIndustry(analysis.getCompany().getCompanyIndustry())
+                            .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
+                            .bookmark(companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(
+                                    userId, analysis.getCompanyAnalysisId()))
+                            .isPublic(analysis.isPublic())
+                            .dartCategory(dartCategory)
+                            .build();
+                })
                 .toList();
 
         return result;
     }
+
 
     // 기업 분석 상세 조회
     @Transactional
@@ -192,35 +204,45 @@ public class CompanyAnalysisService {
     // 기업 분석 검색
     public List<CompanyAnalysisListResponseDto> searchByCompanyIdCompanyAnalysis(Long companyId, Integer userId) {
 
-        // 유저, 회사 조회
+        // 유저, 회사 존재 여부 확인
         userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
         companyRepository.findById(companyId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
 
-        // 모든 기업 정보 불러오기
+        // 해당 기업의 기업 분석 전체 조회
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAllByCompany_CompanyId(companyId);
 
-        // 결과 반환할 배열에 매핑
-        List<CompanyAnalysisListResponseDto> result = analysisList.stream()
-                .filter(CompanyAnalysis::isPublic) // 공개 여부 필터링
-                .map(analysis -> CompanyAnalysisListResponseDto.builder()
-                        .companyAnlaysisId(analysis.getCompanyAnalysisId())
-                        .companyName(analysis.getCompany().getCompanyName())
-                        .createdAt(analysis.getCreatedAt())
-                        .companyViewCount(analysis.getCompanyAnalysisViewCount())
-                        .companyLocation(analysis.getCompany().getCompanyLocation())
-                        .companySize(analysis.getCompany().getCompanySize().name())
-                        .companyIndustry(analysis.getCompany().getCompanyIndustry())
-                        .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
-                        .bookmark(companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, analysis.getCompanyAnalysisId()))
-                        .isPublic(analysis.isPublic())
-                        .build()
-                )
-                .toList();
+        // 공개된 분석만 필터링하여 DTO 매핑
+        return analysisList.stream()
+                .filter(CompanyAnalysis::isPublic)
+                .map(analysis -> {
+                    DartAnalysis dart = analysis.getDartAnalysis();
+                    List<String> dartCategory = new ArrayList<>();
+                    if (dart != null) {
+                        if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+                        if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+                        if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+                    }
 
-        return result;
+                    return CompanyAnalysisListResponseDto.builder()
+                            .companyAnlaysisId(analysis.getCompanyAnalysisId())
+                            .companyName(analysis.getCompany().getCompanyName())
+                            .createdAt(analysis.getCreatedAt())
+                            .companyViewCount(analysis.getCompanyAnalysisViewCount())
+                            .companyLocation(analysis.getCompany().getCompanyLocation())
+                            .companySize(analysis.getCompany().getCompanySize().name())
+                            .companyIndustry(analysis.getCompany().getCompanyIndustry())
+                            .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
+                            .bookmark(companyAnalysisBookmarkRepository
+                                    .existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, analysis.getCompanyAnalysisId()))
+                            .isPublic(analysis.isPublic())
+                            .dartCategory(dartCategory)
+                            .build();
+                })
+                .toList();
     }
+
 
     // 기업 분석 북마크 추가
     @Transactional
@@ -315,6 +337,14 @@ public class CompanyAnalysisService {
                 continue;
             }
 
+            DartAnalysis dart = companyAnalysis.getDartAnalysis();
+            List<String> dartCategory = new ArrayList<>();
+            if (dart != null) {
+                if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+                if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+                if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+            }
+
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()
                     .companyAnalysisBookmarkId(bookmark.getCompanyAnalysisBookmarkId())
                     .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
@@ -327,6 +357,7 @@ public class CompanyAnalysisService {
                     .companyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount())
                     .bookmark(true)
                     .isPublic(companyAnalysis.isPublic())
+                    .dartCategory(dartCategory)
                     .build());
         }
 
@@ -358,6 +389,14 @@ public class CompanyAnalysisService {
                 continue;
             }
 
+            DartAnalysis dart = companyAnalysis.getDartAnalysis();
+            List<String> dartCategory = new ArrayList<>();
+            if (dart != null) {
+                if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+                if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+                if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+            }
+
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()
                     .companyAnalysisBookmarkId(bookmark.getCompanyAnalysisBookmarkId())
                     .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
@@ -370,6 +409,7 @@ public class CompanyAnalysisService {
                     .companyAnalysisBookmarkCount(companyAnalysis.getCompanyAnalysisBookmarkCount())
                     .bookmark(true)
                     .isPublic(companyAnalysis.isPublic())
+                    .dartCategory(dartCategory)
                     .build());
         }
 
