@@ -1,13 +1,9 @@
 package com.ssafy.hellojob.domain.coverletter.dto.ai.request;
 
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
-import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter

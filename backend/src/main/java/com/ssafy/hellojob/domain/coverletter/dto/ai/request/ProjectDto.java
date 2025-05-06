@@ -1,10 +1,8 @@
 package com.ssafy.hellojob.domain.coverletter.dto.ai.request;
 
 import com.ssafy.hellojob.domain.project.entity.Project;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 

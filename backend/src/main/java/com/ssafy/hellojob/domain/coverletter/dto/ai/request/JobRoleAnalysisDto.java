@@ -1,10 +1,8 @@
 package com.ssafy.hellojob.domain.coverletter.dto.ai.request;
 
 import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
