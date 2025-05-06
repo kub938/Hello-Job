@@ -27,4 +27,20 @@ public interface CoverLetterRepository extends JpaRepository<CoverLetter, Intege
             WHERE cl.user.userId = :userId
             """)
     Page<MyPageCoverLetterDto> getCoverLettersByUser(@Param("userId") Integer userId, Pageable pageable);
+
+    @Query("""
+            SELECT cl
+            FROM CoverLetter cl
+            JOIN FETCH cl.jobRoleSnapshot jr
+            JOIN FETCH cl.companyAnalysis ca
+            JOIN FETCH ca.company co
+            JOIN FETCH ca.dartAnalysis da
+            JOIN FETCH ca.newsAnalysis na
+            JOIN FETCH cl.contents c
+            LEFT JOIN FETCH c.experiences cle
+            LEFT JOIN FETCH cle.experience
+            LEFT JOIN FETCH cle.project
+            WHERE cl.coverLetterId = :coverLetterId
+            """)
+    CoverLetter findFullCoverLetterDetail(@Param("coverLetterId") Integer coverLetterId);
 }

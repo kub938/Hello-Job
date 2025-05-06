@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.coverlettercontent.service;
 
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -32,8 +34,13 @@ public class CoverLetterContentService {
     private final CoverLetterExperienceService coverLetterExperienceService;
     private final ChatLogService chatLogService;
 
-    public Integer createContents(User user, CoverLetter coverLetter, List<ContentsDto> contents) {
+    public Integer createContents(User user, CoverLetter coverLetter, List<ContentsDto> contents, List<AICoverLetterResponseDto> aiResponse) {
+        Map<Integer, String> aiMap = aiResponse.stream()
+                .collect(Collectors.toMap(AICoverLetterResponseDto::getContent_number, AICoverLetterResponseDto::getCover_letter));
+
         for (ContentsDto content : contents) {
+            String contentDetail = aiMap.get(content.getContentNumber());
+
             CoverLetterContent newCoverLetterContent = CoverLetterContent.builder()
                     .coverLetter(coverLetter)
                     .contentStatus(CoverLetterContentStatus.PENDING)
@@ -41,6 +48,7 @@ public class CoverLetterContentService {
                     .contentNumber(content.getContentNumber())
                     .contentLength(content.getContentLength())
                     .contentFirstPrompt(content.getContentFirstPrompt())
+                    .contentDetail(contentDetail)
                     .build();
 
             coverLetterContentRepository.save(newCoverLetterContent);

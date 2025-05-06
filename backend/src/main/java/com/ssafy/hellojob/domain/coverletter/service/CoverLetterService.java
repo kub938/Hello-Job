@@ -2,6 +2,8 @@ package com.ssafy.hellojob.domain.coverletter.service;
 
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.request.*;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
@@ -14,6 +16,7 @@ import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
 import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisRepository;
 import com.ssafy.hellojob.domain.jobrolesnapshot.service.JobRoleSnapshotService;
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ public class CoverLetterService {
     private final JobRoleAnalysisRepository jobRoleAnalysisRepository;
     private final JobRoleSnapshotService jobRoleSnapshotService;
     private final CoverLetterContentService coverLetterContentService;
+    private final FastApiClientService fastApiClientService;
 
     public CoverLetterCreateResponseDto createCoverLetter(User user, CoverLetterRequestDto requestDto) {
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
@@ -66,12 +70,42 @@ public class CoverLetterService {
 
         Integer newCoverLetterId = newCoverLetter.getCoverLetterId();
 
-        Integer firstContentId = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents());
+        List<AICoverLetterResponseDto> AIResponses = getAIResponses(newCoverLetterId);
+
+        Integer firstContentId = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents(), AIResponses);
 
         return CoverLetterCreateResponseDto.builder()
                 .coverLetterId(newCoverLetterId)
                 .firstContentId(firstContentId)
                 .build();
+    }
+
+    public List<AICoverLetterResponseDto> getAIResponses(Integer coverLetterId) {
+        List<AICoverLetterResponseDto> responseDto;
+
+        CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
+
+        AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
+                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .jobRole_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .contents(coverLetter.getContents().stream()
+                        .map(content -> ContentDto.builder()
+                                .content_number(content.getContentNumber())
+                                .content_length(content.getContentLength())
+                                .content_question(content.getContentQuestion())
+                                .content_prompt(content.getContentFirstPrompt())
+                                .experiences(content.getExperiences().stream()
+                                        .map(cle -> ExperienceDto.from(cle.getExperience())).toList()
+                                )
+                                .projects(content.getExperiences().stream()
+                                        .map(cle -> ProjectDto.from(cle.getProject())).toList()
+                                )
+                                .build()
+                        ).toList()
+                ).build();
+
+        responseDto = fastApiClientService.sendCoverLetterToFastApi(requestDto);
+        return responseDto;
     }
 
     // 자기소개서 전체 문항 상태 조회
@@ -80,7 +114,7 @@ public class CoverLetterService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
@@ -102,7 +136,7 @@ public class CoverLetterService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
@@ -120,7 +154,7 @@ public class CoverLetterService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
