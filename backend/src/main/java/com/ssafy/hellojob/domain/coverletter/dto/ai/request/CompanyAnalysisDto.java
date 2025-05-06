@@ -1,20 +1,35 @@
 package com.ssafy.hellojob.domain.coverletter.dto.ai.request;
 
+import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class CompanyAnalysisDto {
     private String company_name;
     private String company_brand;
     private String company_analysis;
     private String company_vision;
     private String company_finance;
-    private LocalDate created_at;
+    private LocalDateTime created_at;
     private String news_analysis_data;
+
+    public static CompanyAnalysisDto from(CompanyAnalysis companyAnalysis) {
+        return CompanyAnalysisDto.builder()
+                .company_name(companyAnalysis.getCompany().getCompanyName())
+                .company_analysis(companyAnalysis.getDartAnalysis().getDartCompanyAnalysis())
+                .company_brand(companyAnalysis.getDartAnalysis().getDartBrand())
+                .company_finance(companyAnalysis.getDartAnalysis().getDartFinancialSummary())
+                .company_vision(companyAnalysis.getDartAnalysis().getDartVision())
+                .created_at(companyAnalysis.getCreatedAt())
+                .news_analysis_data(companyAnalysis.getNewsAnalysis().getNewsAnalysisData())
+                .build();
+    }
 }
