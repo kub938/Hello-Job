@@ -10,19 +10,19 @@ import java.util.List;
 public interface CoverLetterExperienceRepository extends JpaRepository<CoverLetterExperience, Integer> {
 
     @Query("""
-            SELECT cle.experienceId
+            SELECT cle.experience.experienceId
             FROM CoverLetterExperience cle
             WHERE cle.coverLetterContent.contentId = :contentId
-            AND cle.experienceId IS NOT NULL
+            AND cle.experience IS NOT NULL
             """)
     List<Integer> findExperiencesByContentId(
             @Param("contentId") Integer contentId);
 
     @Query("""
-            SELECT cle.projectId
+            SELECT cle.project.projectId
             FROM CoverLetterExperience cle
             WHERE cle.coverLetterContent.contentId = :contentId
-            AND cle.projectId IS NOT NULL
+            AND cle.project IS NOT NULL
             """)
     List<Integer> findProjectsByContentId(
             @Param("contentId") Integer contentId);

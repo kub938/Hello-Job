@@ -1,6 +1,8 @@
 package com.ssafy.hellojob.domain.coverlettercontent.entity;
 
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
+import com.ssafy.hellojob.domain.exprience.entity.Experience;
+import com.ssafy.hellojob.domain.project.entity.Project;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -18,21 +20,23 @@ public class CoverLetterExperience {
     @Column(name = "cover_letter_experience")
     private Integer coverLetterExperienceId;
 
-    @Column(name = "experience_id")
-    private Integer experienceId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn (name = "experience_id")
+    private Experience experience;
 
-    @Column(name = "project_id")
-    private Integer projectId;
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "project_id")
+    private Project project;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_content_id", nullable = false)
     private CoverLetterContent coverLetterContent;
 
     @Builder
-    public CoverLetterExperience(Integer coverLetterExperienceId, Integer experienceId, Integer projectId, CoverLetterContent coverLetterContent) {
+    public CoverLetterExperience(Integer coverLetterExperienceId, Experience experience, Project project, CoverLetterContent coverLetterContent) {
         this.coverLetterExperienceId = coverLetterExperienceId;
-        this.experienceId = experienceId;
-        this.projectId = projectId;
+        this.experience = experience;
+        this.project = project;
         this.coverLetterContent = coverLetterContent;
     }
 }

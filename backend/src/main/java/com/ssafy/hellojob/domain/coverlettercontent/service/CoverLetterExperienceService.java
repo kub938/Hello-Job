@@ -36,7 +36,7 @@ public class CoverLetterExperienceService {
 
             CoverLetterExperience coverLetterExperience = CoverLetterExperience.builder()
                     .coverLetterContent(content)
-                    .experienceId(experienceId)
+                    .experience(experience)
                     .build();
 
             coverLetterExperienceRepository.save(coverLetterExperience);
@@ -54,7 +54,7 @@ public class CoverLetterExperienceService {
 
             CoverLetterExperience coverLetterExperience = CoverLetterExperience.builder()
                     .coverLetterContent(content)
-                    .projectId(projectId)
+                    .project(project)
                     .build();
 
             coverLetterExperienceRepository.save(coverLetterExperience);
