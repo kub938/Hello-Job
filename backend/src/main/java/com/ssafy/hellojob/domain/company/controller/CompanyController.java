@@ -20,7 +20,7 @@ public class CompanyController {
     private final CompanyService companyService;
 
     @GetMapping("/search")
-    public ResponseEntity<?> getCompanyName(@RequestParam(value = "companyName", required = false) String companyName){
+    public List<CompanyListDto> getCompanyName(@RequestParam(value = "companyName", required = false) String companyName){
         List<CompanyListDto> result;
 
         if (companyName != null && !companyName.isEmpty()) {
@@ -29,11 +29,7 @@ public class CompanyController {
             result = companyService.getAllCompany();
         }
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } else {
-            return ResponseEntity.ok(result); // 200 OK + 데이터
-        }
+        return result;
 
     }
 

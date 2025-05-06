@@ -75,15 +75,11 @@ public class ScheduleController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> ScheduleList(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public List<ScheduleListResponseDto> ScheduleList(@AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
         List<ScheduleListResponseDto> responseDto = scheduleService.allSchedule(userId);
 
-        if(responseDto.size() != 0 || !responseDto.isEmpty()){
-            return ResponseEntity.ok(responseDto);
-        }
-
-        return ResponseEntity.noContent().build();
+        return responseDto;
     }
 
     @GetMapping("/{scheduleId}")

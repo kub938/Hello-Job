@@ -25,15 +25,12 @@ public class CompanyAnalysisController {
 
     // 기업 분석 전체 목록 조회
     @GetMapping("/all-analysis")
-    public ResponseEntity<?> CompanyAnalysisAll(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public List<CompanyAnalysisListResponseDto> CompanyAnalysisAll(@AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
         List<CompanyAnalysisListResponseDto> result = companyAnalysisService.searchAllCompanyAnalysis(userId);
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // 기업 분석 상세 조회
@@ -94,16 +91,13 @@ public class CompanyAnalysisController {
 
     // 기업 분석 검색
     @GetMapping("/search/{companyId}")
-    public ResponseEntity<?> CompanyAnalysisSearch(@PathVariable("companyId") Long companyId,
+    public List<CompanyAnalysisListResponseDto> CompanyAnalysisSearch(@PathVariable("companyId") Long companyId,
                                                    @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
         List<CompanyAnalysisListResponseDto> result = companyAnalysisService.searchByCompanyIdCompanyAnalysis(companyId, userId);
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // 기업 분석 북마크 추가
@@ -128,7 +122,7 @@ public class CompanyAnalysisController {
 
     // 기업 분석 북마크 목록 조회
     @GetMapping("/bookmark")
-    public ResponseEntity<?> CompanyAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Long companyId,
+    public List<CompanyAnalysisBookmarkListResponseDto> CompanyAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Long companyId,
                                                          @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
         List<CompanyAnalysisBookmarkListResponseDto> result;
@@ -139,11 +133,8 @@ public class CompanyAnalysisController {
             result = companyAnalysisService.searchCompanyAnalysisBookmarkListWithCompanyId(userId, companyId);
         }
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } else {
-            return ResponseEntity.ok(result); // 200 OK
-        }
+        return result;
+
     }
 
 }

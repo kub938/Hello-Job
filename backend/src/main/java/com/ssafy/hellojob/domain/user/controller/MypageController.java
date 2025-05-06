@@ -33,15 +33,12 @@ public class MypageController {
     private final ProjectService projectService;
 
     @GetMapping("/job-role-analysis")
-    public ResponseEntity<?> JobRoleAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public List<JobRoleAnalysisSearchListResponseDto> JobRoleAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         Integer userId = userPrincipal.getUserId();
         List<JobRoleAnalysisSearchListResponseDto> result = jobRoleAnalysisService.searchJobRoleAnalysisByUserId(userId);
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     @GetMapping("/cover-letter")
