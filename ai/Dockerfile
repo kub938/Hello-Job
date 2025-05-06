@@ -29,3 +29,6 @@ RUN chmod +x start.sh # 실행 권한 추가
 
 # 포트 노출
 EXPOSE 8000
+
+# 컨테이너 시작 시 실행할 명령 추가
+CMD ["/bin/bash", "-c", "/root/hellojob/start.sh"]
