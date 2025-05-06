@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import LetterStep from "./LetterStep";
+import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
 
 interface CoverLetterAnalysisLayoutProps {
   nowStep: number;
@@ -12,6 +13,7 @@ function CoverLetterAnalysisLayout({
   nowStep,
   handleStep,
 }: CoverLetterAnalysisLayoutProps) {
+  const { company } = useSelectCompanyStore();
   const title = [
     "기업/직무 선택",
     "기업분석 선택하기",
@@ -21,19 +23,23 @@ function CoverLetterAnalysisLayout({
 
   const subTitle = [
     <>
-      <p className="mb-2">지원하실 기업/직무를 선택해 주세요!</p>
+      <p className="mb-2">지원하실 기업/직무를 선택해 주세요</p>
       <p className="text-text-muted-foreground text-lg"></p>
     </>,
     <>
-      <p className="mb-2">원하시는 기업분석 자료를 선택해 주세요!</p>
+      <p className="mb-2">
+        {company.companyName}의 기업분석 자료를 선택해 주세요
+      </p>
       <p className="text-text-muted-foreground text-lg">
-        기업분석 자료가 없다면 즐겨찾기에 추가해 보세요!
+        즐겨찾기해놓은 기업분석 자료가 없다면 추가해 보세요!
       </p>
     </>,
     <>
-      <p className="mb-2">원하시는 직무분석 자료를 선택해 주세요!</p>
+      <p className="mb-2">
+        {company.companyName}의 직무분석 자료를 선택해 주세요
+      </p>
       <p className="text-text-muted-foreground text-lg">
-        직무분석 자료가 없다면 즐겨찾기에 추가해 보세요!
+        즐겨찾기해놓은 직무분석 자료가 없다면 추가해 보세요!
       </p>
     </>,
     <>
