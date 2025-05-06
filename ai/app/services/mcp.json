@@ -3,6 +3,16 @@
         "dart-mcp": {
             "command": "python", 
             "args": ["/root/hellojob/app/mcp/dart-mcp/dart.py"]
+        },
+    "brave-search": {
+        "command": "/usr/bin/npx",
+        "args": [
+          "-y",
+          "@modelcontextprotocol/server-brave-search"
+        ],
+        "env": {
+          "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_IN_DOTENV"
         }
+      }
     }
 }

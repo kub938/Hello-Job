@@ -1,6 +1,6 @@
 services:
   hellojob-app:
-    image: hellojob-image # Dockerfile 빌드 시 사용할 이미지 이름으로 변경하세요.
+    image: hellojob-image # Dockerfile 빌드 시 사용할 이미지 이름
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,5 +14,3 @@ services:
       - ./app:/root/hellojob/app
     environment:
       - ENV_FILE=/root/hellojob/.env # 컨테이너 내부에서 .env 파일 경로를 참조할 환경 변수 설정`
-
-    command: ["bash", "-c", "/root/hellojob/start.sh"]

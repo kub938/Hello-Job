@@ -1,4 +1,5 @@
 import json
+import os
 from dotenv import load_dotenv
 from pydantic import BaseModel, create_model
 from typing import List, Optional, Any
@@ -20,10 +21,26 @@ async def setup_mcp_servers():
         # 구성된 MCP 서버들을 순회
         for server_name, server_config in config.get('mcpServers', {}).items():
             try:
+                # 환경 변수 설정
+                env_vars = server_config.get("env", {}).copy()
+                
+                # API 키가 필요한 경우 .env 파일에서 로드
+                if "env" in server_config and any(key.endswith("_API_KEY") for key in server_config["env"]):
+                    for key in list(env_vars.keys()):
+                        if key.endswith("_API_KEY"):
+                            # .env 파일에서 환경 변수 가져오기
+                            env_value = os.getenv(key)
+                            if env_value:
+                                env_vars[key] = env_value
+                            else:
+                                print(f"경고: {key} 환경 변수가 .env 파일에 설정되지 않았습니다.")
+                
                 mcp_server = MCPServerStdio(
+                    name=server_name,
                     params={
                         "command": server_config.get("command"),
-                        "args": server_config.get("args", [])
+                        "args": server_config.get("args", []),
+                        "env": env_vars
                     },
                     client_session_timeout_seconds=60,
                     cache_tools_list=True
@@ -66,7 +83,7 @@ async def setup_agent(output_model):
     
     agent = Agent(
         name="Company Analysis Assistant",
-        instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다.",
+        instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. DART MCP 와 Search MCP를 활용하여 기업 분석 결과를 반환합니다.",
         model="gpt-4o",
         output_type=output_model,
         mcp_servers=mcp_servers
@@ -202,7 +219,7 @@ async def company_analysis_dart(company_name, base, plus, fin):
         context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow)"
 
     # 정보 부재 시 처리 방법 명시 추가
-    context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 최대한 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
+    context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 Search MCP 를 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
     # 동적으로 Pydantic 모델 생성 (정형화된 agent 출력을 위함)
     CompanyAnalysisOutput = create_model('CompanyAnalysisOutput', **model_fields)
     
@@ -210,7 +227,7 @@ async def company_analysis_dart(company_name, base, plus, fin):
     agent, _ = await setup_agent(output_model=CompanyAnalysisOutput)
 
     # 기업 분석 Agent 실행 
-    result = await Runner.run(agent, context)
+    result = await Runner.run(starting_agent=agent, input=context, max_turns=30)
 
     # Agent 결과가 없는 경우 처리
     if not result or not result.final_output:
