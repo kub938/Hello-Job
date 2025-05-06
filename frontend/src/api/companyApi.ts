@@ -1,17 +1,19 @@
-import { api } from "./api";
+import { authApi } from "./instance";
 
 export const getCompanies = (companyName: string) => {
-  return api.get("/api/v1/company/search", {
+  return authApi.get("/api/v1/company/search", {
     params: { companyName },
   });
 };
 
 export const companyAnalysisApi = {
   getCompanyAnalyses: () => {
-    return api.get("/api/v1/company-analysis/all-analysis");
+    return authApi.get("/api/v1/company-analysis/all-analysis");
   },
 
   getCompanyBookMarks: (companyId: number) => {
-    return api.get(`/api/v1/company-analysis/bookmark?companyId=${companyId}`);
+    return authApi.get("/api/v1/company-analysis/bookmark", {
+      params: { companyId },
+    });
   },
 };

@@ -1,154 +1,28 @@
+import { useGetCompanyBookMarks } from "@/hooks/companyHooks";
+import { useGetJobBookMarks } from "@/hooks/jobRoleAnalysisHook";
+import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
 import {
   CompanyBookMarkResponse,
   JobBookMarkResponse,
   ReportListProps,
 } from "@/types/coverLetterTypes";
 import { useState } from "react";
-import { useParams } from "react-router";
 
 function ReportList({ nowStep }: ReportListProps) {
-  const companyData = [
-    {
-      companyAnalysisBookmarkId: 1,
-      companyAnalysisId: 1,
-      companyName: "삼성전자",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 10,
-      companyLocation: "서울특별시 강남구",
-      companySize: "대기업",
-      companyIndustry: "전자제품 제조업",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 4,
-      companyName: "일이삼사오육칠팔구십",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 5,
-      companyName: "무신사",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 123,
-      companyName: "무신사",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 8,
-      companyName: "무신사",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 9,
-      companyName: "무신사",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 10,
-      companyName: "무신사",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-    {
-      companyAnalysisBookmarkId: 4,
-      companyAnalysisId: 11,
-      companyName: "무신사",
-      createdAt: "2025-04-29T12:49:32",
-      companyViewCount: 15,
-      companyLocation: "서울특별시 성동구",
-      companySize: "중견기업",
-      companyIndustry: "온라인 패션 쇼핑몰",
-      companyAnalysisBookmarkCount: 2,
-      bookmark: true,
-      public: true,
-    },
-  ];
-  const jobData = [
-    {
-      jobRoleAnalysisId: 6,
-      companyName: "야놀자",
-      jobRoleName: "수정한거임",
-      jobRoleAnalysisTitle: "수정한거임",
-      jobRoleCategory: "프론트엔드_개발자",
-      jobRoleViewCount: 0,
-      jobRoleBookmarkCount: 0,
-      bookmark: false,
-      updatedAt: "2025-04-29T11:08:11.241433",
-      public: true,
-    },
-    {
-      jobRoleAnalysisId: 7,
-      companyName: "야놀자",
-      jobRoleName: "수정한거임",
-      jobRoleAnalysisTitle: "수정한거임",
-      jobRoleCategory: "프론트엔드_개발자",
-      jobRoleViewCount: 3,
-      jobRoleBookmarkCount: 0,
-      bookmark: false,
-      updatedAt: "2025-04-30T11:01:34.14763",
-      public: true,
-    },
-  ];
-  const param = useParams();
-  const reportType = param;
-  console.log(reportType);
   const reportBlockLayout =
     "p-5 border w-full rounded-2xl h-35 flex justify-center items-center cursor-pointer ";
   const hoverReportBlockLayout =
     "duration-100 hover:border-2 hover:border-primary hover:bg-secondary-light";
   const selectedStyle = "border-2 border-primary bg-secondary-light ";
 
+  const { company } = useSelectCompanyStore();
+  const companyBookMarksQuery = useGetCompanyBookMarks(company.companyId);
+  const jobBookMarksQuery = useGetJobBookMarks(company.companyId);
   const [selectCompanies, setSelectCompanies] = useState<number[]>([]);
+  console.log(companyBookMarksQuery.data, jobBookMarksQuery.data);
+
+  const data =
+    nowStep === 1 ? companyBookMarksQuery.data : jobBookMarksQuery.data;
 
   const handleSelect = (analysisId: number) => {
     setSelectCompanies((prev) => {
@@ -159,10 +33,10 @@ function ReportList({ nowStep }: ReportListProps) {
     });
   };
 
-  const adaptData = (
+  function adaptData(
     data: JobBookMarkResponse[] | CompanyBookMarkResponse[],
     nowStep: number
-  ) => {
+  ) {
     if (!data || data.length === 0) {
       return [];
     }
@@ -177,17 +51,17 @@ function ReportList({ nowStep }: ReportListProps) {
       return (data as JobBookMarkResponse[]).map((item) => ({
         id: item.jobRoleAnalysisId,
         name: item.jobRoleName ?? "",
-        industry: item.jobRoleCategory ?? "",
+        industry: item.jobRoleAnalysisTitle ?? "",
       }));
     }
-  };
+  }
 
-  const reports = adaptData(jobData, nowStep);
-  console.log(companyData);
+  if (!data) return;
+  const reports = adaptData(data, nowStep);
 
   return (
     <>
-      <div className="grid md:grid-cols-3 grid-cols-2 gap-4 ">
+      <div className="grid  md:grid-cols-3 grid-cols-2 gap-4 ">
         {reports &&
           reports.map((report) => {
             const isSelected = selectCompanies.includes(report.id);
@@ -203,8 +77,10 @@ function ReportList({ nowStep }: ReportListProps) {
                   {report.name[0]}
                 </div>
                 <div>
-                  <div className=" font-semibold text-xl">{report.name}</div>
-                  <div className="text-sm text-muted-foreground">
+                  <div className="whitespace-normal line-clamp-2 font-semibold text-xl">
+                    {report.name}
+                  </div>
+                  <div className="text-sm line-clamp-2 text-muted-foreground">
                     {report.industry}
                   </div>
                 </div>
