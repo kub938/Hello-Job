@@ -10,5 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AICoverLetterResponseDto {
-    private List<CoverLetterDto> coverLetters;
+    private int content_number;
+    private String cover_letter;
 }
