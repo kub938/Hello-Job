@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useGetJobBookMarks = (companyId: number) => {
   return useQuery<JobBookMarkResponse[], Error>({
-    queryKey: ["jobBookMark", companyId],
+    queryKey: ["job-book-mark", companyId],
     queryFn: async () => {
       const response = await jobRoleAnalysis.getJobBookMarks(companyId);
       return response.data;
