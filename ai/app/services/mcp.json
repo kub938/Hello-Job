@@ -4,15 +4,16 @@
             "command": "python", 
             "args": ["/root/hellojob/app/mcp/dart-mcp/dart.py"]
         },
-    "brave-search": {
-        "command": "/usr/bin/npx",
-        "args": [
-          "-y",
-          "@modelcontextprotocol/server-brave-search"
-        ],
-        "env": {
-          "BRAVE_API_KEY": "YOUR_BRAVE_API_KEY_IN_DOTENV"
+        "naver-search": {
+            "command": "/usr/bin/npx",
+            "args": [
+                "-y",
+                "@isnow890/naver-search-mcp"
+            ],
+            "env": {
+                "NAVER_CLIENT_ID": "YOUR_NAVER_CLIENT_ID_IN_DOTENV",
+                "NAVER_CLIENT_SECRET": "YOUR_NAVER_CLIENT_SECRET_IN_DOTENV"
+            }
         }
-      }
     }
 }
