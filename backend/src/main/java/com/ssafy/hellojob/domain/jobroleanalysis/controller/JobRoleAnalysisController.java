@@ -34,7 +34,6 @@ public class JobRoleAnalysisController {
             throw new BaseException(ErrorCode.AUTH_NOT_FOUND);
         }
 
-
         Integer userId = userPrincipal.getUserId();
 
         JobRoleAnalysisSaveResponseDto responseDto = jobRoleAnalysisService.createJobRoleAnalysis(userId, requestDto);
@@ -74,7 +73,7 @@ public class JobRoleAnalysisController {
 
     // 직무 분석 북마크 목록 조회
     @GetMapping("/bookmark")
-    public ResponseEntity<?> JobRoleAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Long companyId,
+    public List<JobRoleAnalysisListResponseDto> JobRoleAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Long companyId,
                                                          @AuthenticationPrincipal UserPrincipal userPrincipal) {
         Integer userId = userPrincipal.getUserId();
         List<JobRoleAnalysisListResponseDto> result;
@@ -85,26 +84,20 @@ public class JobRoleAnalysisController {
             result = jobRoleAnalysisService.searchJobRoleAnalysisBookmarkListWithCompanyId(userId, companyId);
         }
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build(); // 204 No Content
-        } else {
-            return ResponseEntity.ok(result); // 200 OK
-        }
+        return result;
+
     }
 
     // 직무 분석 검색(기본값: companyId, 검색 조건: 직무명, 직무 분석 제목, 직무 카테고리)
     @GetMapping("/{companyId}/search")
-    public ResponseEntity<?> JobRoleAnalysisSearch(@PathVariable Long companyId,
+    public List<JobRoleAnalysisSearchListResponseDto> JobRoleAnalysisSearch(@PathVariable Long companyId,
                                                    @ModelAttribute JobRoleAnalysisSearchCondition condition,
                                                    @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         Integer userId = userPrincipal.getUserId();
         List<JobRoleAnalysisSearchListResponseDto> result = jobRoleAnalysisService.searchJobRoleAnalysis(userId, companyId, condition);
 
-        if (result.isEmpty()) {
-            return ResponseEntity.noContent().build();
-        }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // 직무 분석 삭제
