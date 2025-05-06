@@ -1,12 +1,12 @@
 import { useGetCompanyBookMarks } from "@/hooks/companyHooks";
 import { useGetJobBookMarks } from "@/hooks/jobRoleAnalysisHook";
 import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
+import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import {
   CompanyBookMarkResponse,
   JobBookMarkResponse,
   ReportListProps,
 } from "@/types/coverLetterTypes";
-import { useState } from "react";
 
 function ReportList({ nowStep }: ReportListProps) {
   const reportBlockLayout =
@@ -16,21 +16,24 @@ function ReportList({ nowStep }: ReportListProps) {
   const selectedStyle = "border-2 border-primary bg-secondary-light ";
 
   const { company } = useSelectCompanyStore();
+  const { setCompanyAnalysisId, setJobRoleAnalysisId, inputData } =
+    useCoverLetterInputStore();
   const companyBookMarksQuery = useGetCompanyBookMarks(company.companyId);
   const jobBookMarksQuery = useGetJobBookMarks(company.companyId);
-  const [selectCompanies, setSelectCompanies] = useState<number[]>([]);
-  console.log(companyBookMarksQuery.data, jobBookMarksQuery.data);
 
   const data =
     nowStep === 1 ? companyBookMarksQuery.data : jobBookMarksQuery.data;
 
   const handleSelect = (analysisId: number) => {
-    setSelectCompanies((prev) => {
-      if (prev.includes(analysisId)) {
-        return prev.filter((id) => id !== analysisId);
-      }
-      return [...prev, analysisId];
-    });
+    if (nowStep === 1) {
+      inputData.companyAnalysisId === analysisId
+        ? setCompanyAnalysisId(null)
+        : setCompanyAnalysisId(analysisId);
+    } else if (nowStep === 2) {
+      inputData.jobRoleAnalysisId === analysisId
+        ? setJobRoleAnalysisId(null)
+        : setJobRoleAnalysisId(analysisId);
+    }
   };
 
   function adaptData(
@@ -64,7 +67,10 @@ function ReportList({ nowStep }: ReportListProps) {
       <div className="grid  md:grid-cols-3 grid-cols-2 gap-4 ">
         {reports &&
           reports.map((report) => {
-            const isSelected = selectCompanies.includes(report.id);
+            const isSelected =
+              nowStep === 1
+                ? inputData.companyAnalysisId === report.id
+                : inputData.jobRoleAnalysisId === report.id;
             return (
               <div
                 onClick={() => handleSelect(report.id)}
@@ -90,8 +96,8 @@ function ReportList({ nowStep }: ReportListProps) {
         <div
           className={`${reportBlockLayout} ${hoverReportBlockLayout} flex-col`}
         >
-          <div className="">기업 추가하기</div>
-          <div>+</div>
+          <div>{nowStep === 1 ? "기업분석" : "직무분석"} 추가하기</div>
+          <div className="text-3xl text-primary">+</div>
         </div>
       </div>
     </>
