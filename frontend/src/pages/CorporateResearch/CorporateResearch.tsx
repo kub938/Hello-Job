@@ -1,14 +1,18 @@
 import { Button } from "@/components/Button";
 import { useNavigate, useParams } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { corporateReportApi } from "@/api/corporateReport";
-import CorporateDetailModal from "./components/CorporateDetailModal";
 
 import { FaClock, FaBuildingUser, FaPlus } from "react-icons/fa6";
+import DetailModal from "@/components/Common/DetailModal";
+import CreateCorporate from "./components/CreateCorporate";
+import ReadCorporate from "./components/ReadCorporate";
+import { getCorporateReportListResponse } from "@/types/coporateResearch";
+import CorporateReportCard from "./components/CorporateReportCard";
 
 // 더미 데이터 배열 정의
 interface AnalysisReport {
-  title: string;
   companyAnlaysisId: string;
   createdAt: string;
   companyViewCount: number;
@@ -19,50 +23,66 @@ interface AnalysisReport {
   public: boolean;
 }
 
-// 더미 데이터
-const dummyReports: AnalysisReport[] = [
-  {
-    title: "재무재표 중심 기업 분석",
-    companyAnlaysisId: "1",
-    createdAt: "2023-11-15",
-    companyViewCount: 1250,
-    companyLocation: "서울특별시 서초구",
-    companyIndustry: "전자/반도체",
-    companyAnalysisBookmarkCount: 87,
-    bookmark: true,
-    public: true,
-  },
-  {
-    title: "사업 계획서 기반으로 작성함",
-    companyAnlaysisId: "2",
-    createdAt: "2023-10-22",
-    companyViewCount: 980,
-    companyLocation: "서울특별시 서초구",
-    companyIndustry: "전자/반도체",
-    companyAnalysisBookmarkCount: 65,
-    bookmark: false,
-    public: true,
-  },
-  {
-    title: "뉴스 크롤링 데이터 많음",
-    companyAnlaysisId: "3",
-    createdAt: "2023-09-05",
-    companyViewCount: 1540,
-    companyLocation: "경기도 수원시",
-    companyIndustry: "전자/반도체",
-    companyAnalysisBookmarkCount: 120,
-    bookmark: false,
-    public: true,
-  },
-];
+interface CorporateReport {
+  companyAnlaysisId: number;
+  companyName: string;
+  createdAt: string;
+  companyViewCount: number;
+  companyAnalysisBookmarkCount: number;
+  companyLocation: string;
+  bookmark: boolean;
+  dartCategory: string[];
+  public: boolean;
+}
 
 function CorporateResearch() {
   const params = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // tanstack query를 사용한 데이터 불러오기
+  const [modalView, setModalView] = useState<"create" | "read">("create");
+  const [researchId, setResearchId] = useState<number>(1);
 
-  const openModal = () => {
+  // tanstack query를 사용한 특정 기업의 모든 리포트 불러오기
+  const { data: corporateReportListData, isLoading } = useQuery({
+    queryKey: ["corporateReportList", params.id],
+    queryFn: async () => {
+      const response = await corporateReportApi.getCorporateReportList(
+        parseInt(params.id ? params.id : "1")
+      );
+      return response.data as getCorporateReportListResponse[];
+    },
+  });
+
+  const [corporateReportList, setCorporateReportList] = useState<
+    CorporateReport[]
+  >([]);
+
+  useEffect(() => {
+    const temp =
+      corporateReportListData?.map((corporateReport) => ({
+        companyAnlaysisId: corporateReport.companyAnlaysisId,
+        companyName: corporateReport.companyName,
+        createdAt: corporateReport.createdAt,
+        companyViewCount: corporateReport.companyViewCount,
+        companyLocation: corporateReport.companyLocation,
+        companyAnalysisBookmarkCount:
+          corporateReport.companyAnalysisBookmarkCount,
+        bookmark: corporateReport.bookmark,
+        dartCategory: corporateReport.dartCategory,
+        public: corporateReport.public,
+      })) || [];
+    setCorporateReportList(temp);
+    debugger;
+  }, [corporateReportListData]);
+
+  const openCreateModal = () => {
+    setModalView("create");
+    setIsModalOpen(true);
+  };
+
+  const openReadModal = (id: number) => {
+    setResearchId(id);
+    setModalView("read");
     setIsModalOpen(true);
   };
 
@@ -75,9 +95,9 @@ function CorporateResearch() {
       <h2 className="text-2xl font-bold mb-4">기업 분석 검색 결과</h2>
       <h1 className="text-3xl font-bold mb-1">삼성 전자</h1>
       <h1 className="text-3xl font-bold mb-12">기업 분석 레포트 목록입니다</h1>
-      <div className="flex justify-start gap-4 w-[1064px] mx-auto flex-wrap">
-        <button className="cursor-pointer" onClick={openModal}>
-          <div className="w-[200px] h-[180px] rounded-lg group border border-dashed border-[#886BFB] flex flex-col items-center justify-center gap-2 hover:border-[#6F52E0] transition-colors">
+      <div className="flex justify-start gap-4 w-[1114px] mx-auto flex-wrap">
+        <button className="cursor-pointer" onClick={openCreateModal}>
+          <div className="w-[210px] h-[180px] rounded-lg group border border-dashed border-[#886BFB] flex flex-col items-center justify-center gap-2 hover:border-[#6F52E0] transition-colors">
             <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[#AF9BFF] group-hover:bg-[#886BFB] transition-colors text-white">
               <FaPlus />
             </div>
@@ -86,11 +106,32 @@ function CorporateResearch() {
             </span>
           </div>
         </button>
-        <div className="w-[200px] h-[180px] bg-gray-200 rounded-lg"></div>
-        <div className="w-[200px] h-[180px] bg-gray-200 rounded-lg"></div>
-        <div className="w-[200px] h-[180px] bg-gray-200 rounded-lg"></div>
-        <div className="w-[200px] h-[180px] bg-gray-200 rounded-lg"></div>
-        <div className="w-[200px] h-[180px] bg-gray-200 rounded-lg"></div>
+        {isLoading ? (
+          <div>로딩 중...</div>
+        ) : corporateReportList.length > 0 ? (
+          corporateReportList.map((corporateReport) => (
+            <CorporateReportCard
+              key={corporateReport.companyAnlaysisId}
+              onClick={() => {
+                openReadModal(corporateReport.companyAnlaysisId);
+              }}
+              companyName={corporateReport.companyName}
+              createdAt={corporateReport.createdAt}
+              companyViewCount={corporateReport.companyViewCount}
+              companyLocation={corporateReport.companyLocation}
+              companyAnalysisBookmarkCount={
+                corporateReport.companyAnalysisBookmarkCount
+              }
+              bookmark={corporateReport.bookmark}
+              dartCategory={corporateReport.dartCategory}
+            />
+          ))
+        ) : (
+          <div className="text-center text-gray-500 text-lg h-[180px] w-[210px] flex flex-col items-center justify-center">
+            <h1>검색 결과가 없습니다.</h1>
+            <h1 className="text-base mt-2">기업 분석을 진행해주세요.</h1>
+          </div>
+        )}
       </div>
 
       <footer className="fixed left-0 bottom-0 w-full flex justify-center gap-4 pb-6 pt-10 bg-gradient-to-t from-[#FFFFFF]/70 via-[#FFFFFF]/70 to-transparent">
@@ -110,7 +151,15 @@ function CorporateResearch() {
         </Button>
       </footer>
 
-      {isModalOpen && <CorporateDetailModal />}
+      {isModalOpen && (
+        <DetailModal isOpen={isModalOpen} onClose={closeModal}>
+          {modalView === "create" ? (
+            <CreateCorporate />
+          ) : (
+            <ReadCorporate onClose={closeModal} id={researchId} />
+          )}
+        </DetailModal>
+      )}
     </div>
   );
 }
