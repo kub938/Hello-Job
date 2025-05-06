@@ -1,18 +1,16 @@
 package com.ssafy.hellojob.domain.coverletter.dto.ai.request;
 
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
+@Builder
 public class ContentDto {
-    private String content_number;
+    private int content_number;
     private String content_question;
-    private String content_length;
+    private int content_length;
     private String content_prompt;
     private List<ExperienceDto> experiences;
     private List<ProjectDto> projects;
