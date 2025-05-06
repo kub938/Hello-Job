@@ -1,4 +1,5 @@
-import { getCompanies } from "@/api/companyApi";
+import { companyAnalysisApi, getCompanies } from "@/api/companyApi";
+import { CompanyBookMarkResponse } from "@/types/coverLetterTypes";
 import { useQuery } from "@tanstack/react-query";
 
 interface GetCompaniesResponse {
@@ -17,6 +18,17 @@ export const useGetCompanies = (companyName: string) => {
       const response = await getCompanies(companyName);
       return response.data;
     },
-    // enabled: companyName.trim().length > 0,
+    enabled: companyName.trim().length > 0,
+  });
+};
+
+export const useGetCompanyBookMarks = (companyId: number) => {
+  return useQuery<CompanyBookMarkResponse[]>({
+    queryKey: ["companyBookMark", companyId],
+    queryFn: async () => {
+      const response = await companyAnalysisApi.getCompanyBookMarks(companyId);
+      console.log(response.data);
+      return response.data;
+    },
   });
 };

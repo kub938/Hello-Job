@@ -12,8 +12,8 @@ export const companyAnalysisApi = {
   },
 
   getCompanyBookMarks: (companyId: number) => {
-    return authApi.get(
-      `/api/v1/company-analysis/bookmark?companyId=${companyId}`
-    );
+    return authApi.get("/api/v1/company-analysis/bookmark", {
+      params: { companyId },
+    });
   },
 };

@@ -1,3 +1,4 @@
+import { api } from "./api";
 import { authApi } from "./instance";
 
 export const jobRoleAnalysis = {
@@ -6,7 +7,7 @@ export const jobRoleAnalysis = {
   },
 
   getJobBookMarks: (companyId: number) => {
-    return authApi.get(`/api/v1/job_role_analysis/bookmark`, {
+    return api.get(`/api/v1/job-role-analysis/bookmark`, {
       params: { companyId },
     });
   },
