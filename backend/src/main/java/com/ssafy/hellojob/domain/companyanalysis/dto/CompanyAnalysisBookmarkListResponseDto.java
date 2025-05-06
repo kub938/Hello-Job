@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -22,5 +23,6 @@ public class CompanyAnalysisBookmarkListResponseDto {
     private Integer companyAnalysisBookmarkCount;
     private boolean bookmark; // 북마크 여부
     private boolean isPublic;
+    private List<String> dartCategory;
 
 }
