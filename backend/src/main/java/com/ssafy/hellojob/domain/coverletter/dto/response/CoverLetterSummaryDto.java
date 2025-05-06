@@ -10,12 +10,14 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class CoverLetterSummaryDto {
+    private String coverLetterTitle;
     private List<Integer> contentIds;
     private Integer companyAnalysisId;
     private Integer jobRoleSnapshotId;
 
     @Builder
-    public CoverLetterSummaryDto(List<Integer> contentIds, Integer companyAnalysisId, Integer jobRoleSnapshotId) {
+    public CoverLetterSummaryDto(String coverLetterTitle, List<Integer> contentIds, Integer companyAnalysisId, Integer jobRoleSnapshotId) {
+        this.coverLetterTitle = coverLetterTitle;
         this.contentIds = contentIds;
         this.companyAnalysisId = companyAnalysisId;
         this.jobRoleSnapshotId = jobRoleSnapshotId;

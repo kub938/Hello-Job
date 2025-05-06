@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MyPageCoverLetterDto {
     private Integer coverLetterId;
+    private String coverLetterTitle;
     private String companyName;
     private String jobRoleName;
     private String jobRoleCategory;

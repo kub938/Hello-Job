@@ -10,6 +10,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CoverLetterRequestDto {
+    private String coverLetterTitle;
     private Long companyAnalysisId;
     private Integer jobRoleAnalysisId;
     private List<ContentsDto> contents;
