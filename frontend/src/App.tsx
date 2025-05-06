@@ -21,7 +21,6 @@ function App() {
         setIsLoggedIn(true);
         setUserName(res.data.nickname);
         console.log("로그인 성공");
-        debugger;
       } catch (error) {
         setIsLoggedIn(false);
       }
