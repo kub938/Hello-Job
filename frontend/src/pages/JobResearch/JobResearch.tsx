@@ -3,15 +3,25 @@ import { useNavigate } from "react-router";
 import { useState } from "react";
 // import { useNavigate, useParams } from "react-router";
 import { FaPlus } from "react-icons/fa6";
+import DetailModal from "@/components/Common/DetailModal";
+import CreateJob from "./components/CreateJob";
+import ReadJob from "./components/ReadJob";
 
 function JobResearch() {
   // const params = useParams();
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalView, setModalView] = useState<"create" | "read">("create");
   // tanstack query를 사용한 데이터 불러오기
 
-  const openModal = () => {
+  const openCreateModal = () => {
+    setModalView("create");
+    setIsModalOpen(true);
+  };
+
+  const openReadModal = () => {
+    setModalView("read");
     setIsModalOpen(true);
   };
 
@@ -25,7 +35,7 @@ function JobResearch() {
       <h1 className="text-3xl font-bold mb-1">삼성 전자</h1>
       <h1 className="text-3xl font-bold mb-12">직무 분석 레포트 목록입니다</h1>
       <div className="flex justify-start gap-2 w-[800px] mx-auto flex-wrap">
-        <button className="cursor-pointer" onClick={openModal}>
+        <button className="cursor-pointer" onClick={openCreateModal}>
           <div className="w-[800px] h-[110px] rounded-lg group border border-dashed border-[#886BFB] flex flex-col items-center justify-center gap-2 hover:border-[#6F52E0] transition-colors">
             <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[#AF9BFF] group-hover:bg-[#886BFB] transition-colors text-white">
               <FaPlus />
@@ -35,7 +45,10 @@ function JobResearch() {
             </span>
           </div>
         </button>
-        <div className="w-[800px] h-[110px] bg-gray-200 rounded-lg"></div>
+        <div
+          onClick={openReadModal}
+          className="w-[800px] h-[110px] bg-gray-200 rounded-lg cursor-pointer"
+        ></div>
         <div className="w-[800px] h-[110px] bg-gray-200 rounded-lg"></div>
         <div className="w-[800px] h-[110px] bg-gray-200 rounded-lg"></div>
         <div className="w-[800px] h-[110px] bg-gray-200 rounded-lg"></div>
@@ -57,6 +70,11 @@ function JobResearch() {
           홈으로
         </Button>
       </footer>
+      {isModalOpen && (
+        <DetailModal isOpen={isModalOpen} onClose={closeModal}>
+          {modalView === "create" ? <CreateJob /> : <ReadJob />}
+        </DetailModal>
+      )}
     </div>
   );
 }
