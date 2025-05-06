@@ -4,6 +4,7 @@ import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisFastApiReque
 import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisFastApiResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AICoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseWrapperDto;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -36,17 +37,18 @@ public class FastApiClientService {
     }
 
     public List<AICoverLetterResponseDto> sendCoverLetterToFastApi(AICoverLetterRequestDto requestDto) {
-        List<AICoverLetterResponseDto> response = fastApiWebClient.post()
-                .uri("api/v1/ai/cover-letter")
+        AICoverLetterResponseWrapperDto responseWrapper = fastApiWebClient.post()
+                .uri("/api/v1/ai/cover-letter")
                 .bodyValue(requestDto)
                 .retrieve()
-                .bodyToMono(new ParameterizedTypeReference<List<AICoverLetterResponseDto>>() {
-                })
+                .bodyToMono(AICoverLetterResponseWrapperDto.class)
                 .block();
 
-        if (response == null) {
+        if (responseWrapper == null || responseWrapper.getCover_letters() == null) {
             throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
         }
+
+        List<AICoverLetterResponseDto> response = responseWrapper.getCover_letters();
 
         return response;
     }
