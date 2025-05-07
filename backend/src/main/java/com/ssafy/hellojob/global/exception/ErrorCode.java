@@ -58,7 +58,8 @@ public enum ErrorCode {
 
     // 일정
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 일정을 찾을 수 없습니다."),
-    COVER_LETTER_ALREADY_IN_USE(HttpStatus.BAD_REQUEST, "이미 해당 자기소개서로 등록된 일정이 있습니다.")
+    COVER_LETTER_ALREADY_IN_USE(HttpStatus.BAD_REQUEST, "이미 해당 자기소개서로 등록된 일정이 있습니다."),
+    SCHEDULE_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상태를 찾을 수 없습니다.")
 
 
     /**
