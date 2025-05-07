@@ -7,6 +7,8 @@ import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterOnlyContentDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.WholeCoverLetterContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
 import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -14,6 +16,7 @@ import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
 import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisRepository;
 import com.ssafy.hellojob.domain.jobrolesnapshot.service.JobRoleSnapshotService;
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +40,7 @@ public class CoverLetterService {
     private final JobRoleAnalysisRepository jobRoleAnalysisRepository;
     private final JobRoleSnapshotService jobRoleSnapshotService;
     private final CoverLetterContentService coverLetterContentService;
+    private final UserReadService userReadService;
 
     public CoverLetterCreateResponseDto createCoverLetter(User user, CoverLetterRequestDto requestDto) {
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
@@ -147,5 +151,27 @@ public class CoverLetterService {
     public Page<MyPageCoverLetterDto> getCoverLettersForMaPage(Integer userId, Pageable pageable) {
         Page<MyPageCoverLetterDto> list = coverLetterRepository.getCoverLettersByUser(userId, pageable);
         return list;
+    }
+
+    public WholeCoverLetterContentDto getWholeContentDetail(Integer userId, Integer coverLetterId) {
+        userReadService.findUserByIdOrElseThrow(userId);
+
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        if (!coverLetter.getUser().getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
+        }
+
+        List<CoverLetterOnlyContentDto> contents = coverLetterContentService.getWholeContentDetail(coverLetterId);
+
+        WholeCoverLetterContentDto response = WholeCoverLetterContentDto.builder()
+                .coverLetterId(coverLetterId)
+                .contents(contents)
+                .finish(coverLetter.isFinish())
+                .updatedAt(coverLetter.getUpdatedAt())
+                .build();
+
+        return response;
     }
 }
