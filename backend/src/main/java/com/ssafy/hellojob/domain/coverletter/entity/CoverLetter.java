@@ -30,6 +30,9 @@ public class CoverLetter extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(name = "cover_letter_title", length = 90, nullable = false)
+    private String coverLetterTitle;
+
     @ManyToOne
     @JoinColumn(name = "company_analysis_id", nullable = false)
     private CompanyAnalysis companyAnalysis;
@@ -46,9 +49,10 @@ public class CoverLetter extends BaseTimeEntity {
     private List<CoverLetterContent> contents = new ArrayList<>();
 
     @Builder
-    public CoverLetter(Integer coverLetterId, User user, CompanyAnalysis companyAnalysis, JobRoleSnapshot jobRoleSnapshot, boolean finish) {
+    public CoverLetter(Integer coverLetterId, User user, String coverLetterTitle, CompanyAnalysis companyAnalysis, JobRoleSnapshot jobRoleSnapshot, boolean finish) {
         this.coverLetterId = coverLetterId;
         this.user = user;
+        this.coverLetterTitle = coverLetterTitle;
         this.companyAnalysis = companyAnalysis;
         this.jobRoleSnapshot = jobRoleSnapshot;
         this.finish = finish;

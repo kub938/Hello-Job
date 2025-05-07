@@ -56,6 +56,7 @@ public class CoverLetterService {
         }
 
         CoverLetter newCoverLetter = CoverLetter.builder()
+                .coverLetterTitle(requestDto.getCoverLetterTitle())
                 .user(user)
                 .companyAnalysis(companyAnalysis)
                 .jobRoleSnapshot(jobRoleSnapshot)
@@ -108,6 +109,7 @@ public class CoverLetterService {
         List<Integer> contentIds = coverLetterContentService.getContentIdsByCoverLetterId(coverLetterId);
 
         return CoverLetterSummaryDto.builder()
+                .coverLetterTitle(coverLetter.getCoverLetterTitle())
                 .contentIds(contentIds)
                 .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
                 .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
