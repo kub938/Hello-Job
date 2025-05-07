@@ -3,6 +3,7 @@ import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { getJobRoleDetail } from "@/types/jobResearch";
+import { Button } from "@/components/Button";
 
 interface ReadJobProps {
   onClose: () => void;
@@ -95,6 +96,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
           <span>북마크</span>
         </button>
       </header>
+      <Button onClick={onClose}>닫기</Button>
     </div>
   );
 }

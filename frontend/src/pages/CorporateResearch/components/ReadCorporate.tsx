@@ -144,9 +144,7 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
             {activeTab === "분석 요약" && (
               <AnalysisSummary reportDetail={reportDetail} />
             )}
-            {activeTab === "최신 후기" && (
-              <LatestReviews reportDetail={reportDetail} />
-            )}
+            {activeTab === "최신 후기" && <LatestReviews />}
           </>
         )}
       </div>
@@ -329,11 +327,7 @@ function AnalysisSummary({
 }
 
 // 최신 후기 컴포넌트
-function LatestReviews({
-  reportDetail,
-}: {
-  reportDetail?: getCorporateReportDetailResponse;
-}) {
+function LatestReviews() {
   // 실제 데이터가 없으므로 예시 데이터 사용
   const reviews = [
     {
