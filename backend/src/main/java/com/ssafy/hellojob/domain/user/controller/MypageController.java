@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.user.controller;
 
 import com.ssafy.hellojob.domain.coverletter.dto.response.MyPageCoverLetterDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.WholeCoverLetterContentDto;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto;
 import com.ssafy.hellojob.domain.exprience.service.ExperienceService;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSearchListResponseDto;
@@ -16,9 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -77,5 +76,15 @@ public class MypageController {
         return list.isEmpty()
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.ok(list);
+    }
+
+    @GetMapping("/cover-letter/{coverLetterId}")
+    public WholeCoverLetterContentDto getWholeCoverLetterDetail(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer coverLetterId
+    ) {
+        Integer userId = principal.getUserId();
+        WholeCoverLetterContentDto response = coverLetterService.getWholeContentDetail(userId, coverLetterId);
+        return response;
     }
 }
