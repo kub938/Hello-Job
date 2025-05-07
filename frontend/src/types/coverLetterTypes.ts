@@ -52,7 +52,7 @@ export interface CoverLetterResponse {
 export interface CoverLetterPostRequest {
   companyAnalysisId: number;
   jobRoleAnalysisId: number | null;
-  contents: CoverLetterRequestContent;
+  contents: CoverLetterRequestContent[];
 }
 
 export interface CoverLetterRequestContent {
@@ -68,6 +68,7 @@ export interface ReportListProps {
   nowStep: number;
 }
 
+// bookMark 타입
 export interface JobBookMarkResponse {
   jobRoleAnalysisId: number;
   companyName: string;

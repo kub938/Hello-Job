@@ -1,37 +1,64 @@
+import { PostProjectRequest } from "@/api/experienceApi";
+import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
+import { usePostProject } from "@/hooks/projectHooks";
+import { FormEvent, useState } from "react";
 
-// "projectName": "Hello Job",
-// "projectIntro": "개발자의 취업준비를 A to Z까지 도와주는 서비스",
-// "projectRole": "백엔드",
-// "projectSkills": "SpringBoot, JPA, mySQL 등",
-// "projectStartDate": "2024-04-23",
-// "projectEndDate": "2024-04-23",
-// "projectDetail": "프로젝트 상세 내용이 들어갑니다아",
-// "projectClient": "SSAFY"
+interface ProjectFormProps {
+  onClose: () => void;
+}
 
-function ProjectForm() {
-  //   useEffect(() => {
-  //     if (isOpen) {
-  //       document.body.style.overflow = "hidden";
-  //     }
-  //     return () => {
-  //       document.body.style.overflow = "unset";
-  //     };
-  //   }, [isOpen]);
+function ProjectForm({ onClose }: ProjectFormProps) {
+  const [formData, setFormData] = useState<PostProjectRequest>({
+    projectName: "",
+    projectIntro: "",
+    projectRole: "",
+    projectSkills: "",
+    projectStartDate: "",
+    projectEndDate: "",
+    projectDetail: "",
+    projectClient: "",
+  });
 
-  const handleSubmit = () => {};
-  // const closeModal = () => {};
+  const mutation = usePostProject();
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    mutation.mutate(formData, {
+      onSuccess: () => {
+        onClose();
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    });
+  };
+
   return (
     <>
-      <div className="modal-overlay ">
-        <div className="modal-container">
-          <div className=" border-b pb-3 mb-5">
+      <div className="modal-overlay" onClick={handleOverlayClick}>
+        <div className="modal-container h-200">
+          <div className="border-b pb-3 mb-5">
             <div className="text-2xl font-bold pb-1">프로젝트 추가</div>
             <div className="text-muted-foreground text-sm">
               좀더 적합한 자소서 초안 작성을 위해 프로젝트를 추가해 주세요!
             </div>
           </div>
-          <form action="" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <FormInput
               type="text"
               width="41rem"
@@ -40,16 +67,20 @@ function ProjectForm() {
               label="프로젝트명"
               placeholder="프로젝트명 입력"
               require
-            ></FormInput>
+              value={formData.projectName}
+              onChange={handleChange}
+            />
             <FormInput
               type="text"
               width="41rem"
               height="2.8rem"
               name="projectIntro"
-              label="소제목"
-              placeholder="소제목"
+              label="개요"
+              placeholder="개요 입력"
               require
-            ></FormInput>
+              value={formData.projectIntro}
+              onChange={handleChange}
+            />
             <FormInput
               type="text"
               width="41rem"
@@ -57,7 +88,9 @@ function ProjectForm() {
               name="projectRole"
               label="역할"
               placeholder="예: 프론트엔드, 백엔드, 인프라, AI ..."
-            ></FormInput>
+              value={formData.projectRole}
+              onChange={handleChange}
+            />
             <FormInput
               type="text"
               width="41rem"
@@ -65,33 +98,41 @@ function ProjectForm() {
               name="projectSkills"
               label="기술"
               placeholder="예: Spring boot, React, TypeScript ..."
-            ></FormInput>
+              value={formData.projectSkills}
+              onChange={handleChange}
+            />
             <div className="flex gap-8">
               <FormInput
                 type="date"
                 width="19.5rem"
                 height="2.8rem"
-                name="projectDetail"
+                name="projectStartDate"
                 label="시작일"
                 require
-              ></FormInput>
+                value={formData.projectStartDate}
+                onChange={handleChange}
+              />
               <FormInput
                 type="date"
                 width="19.5rem"
                 height="2.8rem"
-                name="projectName"
+                name="projectEndDate"
                 label="종료일"
                 require
-              ></FormInput>
+                value={formData.projectEndDate}
+                onChange={handleChange}
+              />
             </div>
             <FormInput
               type="text"
               width="41rem"
               height="2.8rem"
               name="projectClient"
-              label="기술"
-              placeholder="예: Spring boot, React, TypeScript ..."
-            ></FormInput>
+              label="기관"
+              placeholder="예: 삼성 전자, SSAFY ..."
+              value={formData.projectClient}
+              onChange={handleChange}
+            />
             <FormInput
               type="text"
               width="41rem"
@@ -99,7 +140,15 @@ function ProjectForm() {
               name="projectDetail"
               label="프로젝트 상세내용"
               placeholder="프로젝트 상세 내용을 입력해 주세요"
-            ></FormInput>
+              value={formData.projectDetail}
+              onChange={handleChange}
+            />
+            <div className="flex justify-end gap-3 mt-4">
+              <Button onClick={onClose} variant={"white"} type="button">
+                취소
+              </Button>
+              <Button type="submit">완료</Button>
+            </div>
           </form>
         </div>
       </div>

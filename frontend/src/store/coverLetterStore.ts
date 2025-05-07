@@ -1,5 +1,8 @@
-import { ChatStore } from "@/types/coverLetterStoreTypes";
-import { CoverLetterPostRequest } from "@/types/coverLetterTypes";
+import {
+  ChatStore,
+  CoverLetterInputStoreType,
+} from "@/types/coverLetterStoreTypes";
+import { toast } from "sonner";
 import { create } from "zustand";
 
 export const useCoverLetterStore = create<ChatStore>((set) => ({
@@ -22,31 +25,64 @@ export const useCoverLetterStore = create<ChatStore>((set) => ({
   },
 }));
 
-export const useCoverLetterInputStore = create((set) => ({
-  companyAnalysisId: 0,
-  jobRoleAnalysisId: null,
-  contents: [
-    {
-      contentQuestion: "",
-      contentNumber: 0,
-      contentExperienceIds: [],
-      contentProjectIds: [],
-      contentLength: 0,
-      contentFirstPrompt: "",
+export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
+  (set) => ({
+    inputData: {
+      companyAnalysisId: null,
+      jobRoleAnalysisId: null,
+      contents: [
+        {
+          contentQuestion: "",
+          contentNumber: 1,
+          contentExperienceIds: [],
+          contentProjectIds: [],
+          contentLength: 0,
+          contentFirstPrompt: "",
+        },
+      ],
     },
-  ],
 
-  setCompanyAnalysisId: (id: number) => {
-    set((state: CoverLetterPostRequest) => ({
-      ...state,
-      companyAnalysisId: id,
-    }));
-  },
+    setCompanyAnalysisId: (id: number | null) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          companyAnalysisId: id,
+        },
+      }));
+    },
 
-  setJobRoleAnalysisId: (id: number) => {
-    set((state: CoverLetterPostRequest) => ({
-      ...state,
-      jobRoleAnalysisId: id,
-    }));
-  },
-}));
+    setJobRoleAnalysisId: (id: number | null) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          jobRoleAnalysisId: id,
+        },
+      }));
+    },
+
+    addQuestion: () =>
+      set((state) => {
+        if (state.inputData.contents.length >= 10) {
+          toast.warning("최대 10개의 문항만 추가할 수 있습니다.");
+          return state;
+        }
+
+        return {
+          inputData: {
+            ...state.inputData,
+            contents: [
+              ...state.inputData.contents,
+              {
+                contentQuestion: "",
+                contentNumber: state.inputData.contents.length + 1,
+                contentExperienceIds: [],
+                contentProjectIds: [],
+                contentLength: 0,
+                contentFirstPrompt: "",
+              },
+            ],
+          },
+        };
+      }),
+  })
+);
