@@ -20,7 +20,6 @@ import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStat
 import com.ssafy.hellojob.domain.schedule.dto.response.*;
 import com.ssafy.hellojob.domain.schedule.entity.Schedule;
 import com.ssafy.hellojob.domain.schedule.entity.ScheduleStatus;
-import com.ssafy.hellojob.domain.schedule.entity.ScheduleStatusStep;
 import com.ssafy.hellojob.domain.schedule.repository.ScheduleRepository;
 import com.ssafy.hellojob.domain.schedule.repository.ScheduleStatusRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -31,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -58,10 +56,9 @@ public class ScheduleService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
-        ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
-        if (scheduleStatus == null) {
-            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND); // 400번 정의 필요
-        }
+        ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
+                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+
 
         CoverLetter coverLetter = null;
         if(requestDto.getCoverLetterId() != null){
@@ -87,7 +84,7 @@ public class ScheduleService {
     }
 
     // 일정 삭제
-    public void deleteSchedule(Long scheduleId, Integer userId){
+    public void deleteSchedule(Integer scheduleId, Integer userId){
 
         // 유저 정보 조회
         User user = userRepository.findById(userId)
@@ -107,7 +104,7 @@ public class ScheduleService {
     }
 
     // 일정 상태 수정
-    public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Long scheduleId, Integer userId){
+    public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId){
         // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -122,9 +119,10 @@ public class ScheduleService {
         }
 
         // 새로운 상태 조회
-        ScheduleStatus newStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
+        ScheduleStatus newStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
+                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
         if (newStatus == null) {
-            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND); // 400번 정의 필요
+            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND);
         }
 
         // 상태 변경
@@ -137,7 +135,7 @@ public class ScheduleService {
     }
 
     // 일정 자기소개서 수정
-    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Long scheduleId, Integer userId){
+    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId){
         // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -168,7 +166,7 @@ public class ScheduleService {
 
     // 일정 전체 수정
     @Transactional
-    public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Long scheduleId, Integer userId) {
+    public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -182,9 +180,10 @@ public class ScheduleService {
         }
 
         // 상태 값 수정
-        ScheduleStatus status = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
+        ScheduleStatus status = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
+                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
         if (status == null) {
-            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND); // 400번 정의 필요
+            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND);
         }
         schedule.setScheduleStatus(status);
 
@@ -237,7 +236,7 @@ public class ScheduleService {
     }
 
     // 일정 상세 조회
-    public ScheduleDetailResponseDto detailSchedule(Long scheduleId, Integer userId) {
+    public ScheduleDetailResponseDto detailSchedule(Integer scheduleId, Integer userId) {
 
         userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -250,7 +249,7 @@ public class ScheduleService {
         ScheduleDetailJobRoleSnapshot scheduleDetailJobRoleSnapshot = null;
 
         if (!schedule.getUser().getUserId().equals(userId)) {
-            throw new BaseException(ErrorCode.INVALID_USER); 
+            throw new BaseException(ErrorCode.INVALID_USER);
         }
 
         if (schedule.getCoverLetter() != null) {
@@ -306,8 +305,6 @@ public class ScheduleService {
                     .dartFinancialSummery(dartAnalysis.getDartFinancialSummary())
                     .dartCategory(dartCategory)
                     .build();
-
-            System.out.println(coverLetter.getJobRoleSnapshot());
 
             // 직무 스냅샷
             if (coverLetter.getJobRoleSnapshot() != null) {

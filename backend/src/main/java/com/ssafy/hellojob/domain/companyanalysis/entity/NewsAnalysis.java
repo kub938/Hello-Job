@@ -16,7 +16,7 @@ public class NewsAnalysis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "news_analysis_id", nullable = false)
-    private Long newsAnalysisId;
+    private Integer newsAnalysisId;
 
     @Column(name = "news_analysis_data", nullable = false, columnDefinition = "TEXT")
     private String newsAnalysisData;

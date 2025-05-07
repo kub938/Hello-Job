@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.jobroleanalysis.dto;
+package com.ssafy.hellojob.domain.jobroleanalysis.dto.request;
 
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleCategory;
 import lombok.Getter;

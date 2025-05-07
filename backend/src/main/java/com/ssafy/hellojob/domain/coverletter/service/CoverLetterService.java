@@ -53,7 +53,7 @@ public class CoverLetterService {
         if (requestDto.getJobRoleAnalysisId() == null) {
             jobRoleSnapshot = null;
         } else {
-            JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId().longValue())
+            JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
                     .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
             jobRoleSnapshot = jobRoleSnapshotService.copyJobRoleAnalysis(companyName, jobRoleAnalysis);

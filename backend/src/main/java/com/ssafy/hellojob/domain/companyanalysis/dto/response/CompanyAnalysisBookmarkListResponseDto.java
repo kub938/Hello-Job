@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.companyanalysis.dto;
+package com.ssafy.hellojob.domain.companyanalysis.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisBookmarkListResponseDto {
 
-    private Long companyAnalysisBookmarkId;
-    private Long companyAnalysisId;
+    private Integer companyAnalysisBookmarkId;
+    private Integer companyAnalysisId;
     private String companyName; // 기업명
     private LocalDateTime createdAt;
     private Integer companyViewCount;

@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface JobRoleAnalysisBookmarkRepository extends JpaRepository<JobRoleAnalysisBookmark, Long> {
+public interface JobRoleAnalysisBookmarkRepository extends JpaRepository<JobRoleAnalysisBookmark, Integer> {
 
     boolean existsByUserAndJobRoleAnalysis(User user, JobRoleAnalysis jobRoleAnalysis);
 
@@ -18,6 +18,6 @@ public interface JobRoleAnalysisBookmarkRepository extends JpaRepository<JobRole
 
     List<JobRoleAnalysisBookmark> findAllByUser(User user);
 
-    List<JobRoleAnalysisBookmark> findByUserAndJobRoleAnalysis_CompanyId(User user, Long companyId);
+    List<JobRoleAnalysisBookmark> findByUserAndJobRoleAnalysis_CompanyId(User user, Integer companyId);
 
 }
