@@ -3,7 +3,6 @@ import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
 import { useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ProjectForm from "@/pages/Resume/ProjectForm";
-import ProjectModal from "../ProjectModal/ProjectModal";
 
 export interface QuestionItemProps {
   index: number;

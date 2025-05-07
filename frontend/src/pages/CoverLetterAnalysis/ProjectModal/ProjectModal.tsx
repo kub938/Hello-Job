@@ -1,5 +1,4 @@
 import { Button } from "@/components/Button";
-import { useGetProjects } from "@/hooks/projectHooks";
 
 // {
 //     "projectId": 8,
