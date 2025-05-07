@@ -1,7 +1,7 @@
-import { PostProjectRequest } from "@/api/experienceApi";
 import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
 import { usePostProject } from "@/hooks/projectHooks";
+import { PostProjectRequest } from "@/types/projectApiTypes";
 import { FormEvent, useState } from "react";
 
 interface ProjectFormProps {
@@ -51,7 +51,7 @@ function ProjectForm({ onClose }: ProjectFormProps) {
   return (
     <>
       <div className="modal-overlay" onClick={handleOverlayClick}>
-        <div className="modal-container h-200">
+        <div className="modal-container h-[80%]">
           <div className="border-b pb-3 mb-5">
             <div className="text-2xl font-bold pb-1">프로젝트 추가</div>
             <div className="text-muted-foreground text-sm">
