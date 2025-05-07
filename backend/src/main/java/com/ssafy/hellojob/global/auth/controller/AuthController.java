@@ -3,12 +3,12 @@ package com.ssafy.hellojob.global.auth.controller;
 import com.ssafy.hellojob.global.auth.dto.LoginDto;
 import com.ssafy.hellojob.global.auth.service.AuthService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,6 +20,12 @@ public class AuthController {
     @GetMapping("/login")
     public LoginDto checkLogin(@CookieValue(value = "access_token") String accessToken, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return authService.loginStatus(accessToken, userPrincipal.getNickname());
+    }
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/refresh")
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
+        authService.refreshToken(request, response);
     }
 
 }
