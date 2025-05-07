@@ -1,8 +1,11 @@
 import os
 import json
+import hashlib
 from dotenv import load_dotenv
 from openai import OpenAI
 from app.schemas.cover_letter import *
+from app.core.openai_utils import get_rate_limiter
+from app.core.request_queue import get_request_queue
 
 load_dotenv()
 
@@ -10,7 +13,11 @@ async def create_cover_letter(content: ContentItem,
                               company_analysis: CompanyAnalysis, 
                               job_role_analysis: JobRoleAnalysis) -> CoverLetterItem:
     
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    # 요청 큐 가져오기
+    request_queue = get_request_queue()
+    
+    # 캐시 키 생성
+    cache_key = f"cover_letter_{content.content_number}_{hashlib.md5(content.content_question.encode()).hexdigest()}"
     
     # 경험 정보 텍스트 구성
     experiences_text = ""
@@ -82,19 +89,30 @@ async def create_cover_letter(content: ContentItem,
     7. 항목 질문({content.content_question})에 직접적으로 답하는 방식으로 작성해주세요.
     """
     
-    # OpenAI API 호출
-    response = client.chat.completions.create(
-        model="gpt-4.1", 
-        messages=[
-            {"role": "system", "content": "당신은 전문적인 자기소개서 작성 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서를 작성해주세요."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-        max_tokens=1500
-    )
+    # 실제 OpenAI API 호출을 수행하는 함수
+    async def perform_api_call():
+        rate_limiter = get_rate_limiter()
+        response = await rate_limiter.chat_completion(
+            model="gpt-4.1", 
+            messages=[
+                {"role": "system", "content": "당신은 전문적인 자기소개서 작성 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서를 작성해주세요."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        # API 응답에서 자기소개서 내용 추출
+        cover_letter = response.choices[0].message.content.strip()
+        return cover_letter
     
-    # API 응답에서 자기소개서 내용 추출
-    cover_letter = response.choices[0].message.content.strip()
+    # 요청 큐에 넣고 실행 (캐싱 적용)
+    cover_letter = await request_queue.enqueue(
+        perform_api_call,
+        priority=5,  # 우선순위 (낮을수록 우선)
+        estimated_tokens=3000,
+        cache_key=cache_key
+    )
     
     return CoverLetterItem(content_number=content.content_number, cover_letter=cover_letter)
 
@@ -132,7 +150,12 @@ async def parse_edit_suggestion(ai_message: EditSuggestionList) -> str:
 
 async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
     
-    client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+    # 요청 큐 가져오기
+    request_queue = get_request_queue()
+    
+    # 캐시 키 생성
+    user_msg_hash = hashlib.md5(request.edit_content.user_message.encode()).hexdigest()
+    cache_key = f"edit_cover_letter_{request.edit_content.content_number}_{user_msg_hash}"
     
     # 기업 분석 정보
     company_analysis = request.company_analysis
@@ -230,20 +253,46 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
     - 각 수정 제안(edit_suggestion)에는 구체적인 문장이 아닌 수정 방향과 고려 사항만 작성해주세요.
     """
     
-    # OpenAI API 호출
-    response = client.beta.chat.completions.parse(
-        model="gpt-4.1",
-        messages=[
-            {"role": "system", "content": "당신은 전문적인 자기소개서 수정 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서 수정 방향을 제시해주세요. 직접적인 수정은 절대 하지 말고 수정 방향만 제안해주세요. 수정 제안은 반드시 JSON 형식으로 작성해주세요."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.7,
-        max_tokens=1500,
-        response_format=EditSuggestionList
+    # 실제 OpenAI API 호출을 수행하는 함수
+    async def perform_api_call():
+        rate_limiter = get_rate_limiter()
+        response = await rate_limiter.chat_completion(
+            model="gpt-4.1",
+            messages=[
+                {"role": "system", "content": "당신은 전문적인 자기소개서 수정 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서 수정 방향을 제시해주세요. 직접적인 수정은 절대 하지 말고 수정 방향만 제안해주세요. 수정 제안은 반드시 JSON 형식으로 작성해주세요."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500,
+            response_format={"type": "json_object"}
+        )
+        
+        # API 응답 JSON 추출 및 파싱
+        suggestion_json = response.choices[0].message.content.strip()
+        return suggestion_json
+    
+    # 요청 큐에 넣고 실행 (캐싱 적용)
+    suggestion_json = await request_queue.enqueue(
+        perform_api_call,
+        priority=5,  # 우선순위 (낮을수록 우선)
+        estimated_tokens=3000,
+        cache_key=cache_key
     )
     
-    # API 응답에서 수정 방향 추출
-    ai_message = response.choices[0].message.parsed
-    ai_message_str = await parse_edit_suggestion(ai_message)
+    # JSON 파싱 및 변환
+    edit_suggestions = json.loads(suggestion_json)
+    
+    # 수정 제안 변환
+    suggestions_list = EditSuggestionList(suggestions=[
+        EditSuggestion(
+            original_content=suggestion.get("original_content", ""),
+            edit_reason=suggestion.get("edit_reason", ""),
+            edit_suggestion=suggestion.get("edit_suggestion", "")
+        )
+        for suggestion in edit_suggestions
+    ])
+    
+    # 포맷팅된 결과 반환
+    ai_message_str = await parse_edit_suggestion(suggestions_list)
     
     return ai_message_str
