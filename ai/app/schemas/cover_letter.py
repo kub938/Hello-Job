@@ -67,7 +67,33 @@ class CreateCoverLetterResponse(BaseModel):
     """자기소개서 응답"""
     cover_letters: List[CoverLetterItem]
 
+class EditContent(BaseModel):
+    """자기소개서 수정 내용"""
+    content_number: int
+    content_question: str
+    content_length: int
+    user_message: str
+    cover_letter: str
+
 class EditCoverLetterRequest(BaseModel):
     """자기소개서 수정 방향 제시 요청 정보"""
-    pass 
+    company_analysis: CompanyAnalysis
+    job_role_analysis: JobRoleAnalysis
+    experiences: List[Experience]
+    projects: List[Project]
+    edit_content: EditContent
 
+class EditSuggestion(BaseModel):
+    """자기소개서 수정 제안"""
+    original_content: str  # 수정이 필요한 원본 자기소개서의 특정 부분 (문장 또는 구절)
+    edit_reason: str  # 수정 이유
+    edit_suggestion: str  # 수정 제안
+
+class EditSuggestionList(BaseModel):
+    """자기소개서 수정 제안 리스트"""
+    suggestions: List[EditSuggestion]
+
+class EditCoverLetterResponse(BaseModel):
+    """자기소개서 수정 방향 응답"""
+    user_message: str
+    ai_message: str

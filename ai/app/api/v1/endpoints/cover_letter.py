@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from app.schemas.cover_letter import CreateCoverLetterRequest, EditCoverLetterRequest, CreateCoverLetterResponse
-from app.services.cover_letter_service import create_cover_letter_all
+from app.schemas.cover_letter import CreateCoverLetterRequest, EditCoverLetterRequest, CreateCoverLetterResponse, EditCoverLetterResponse
+from app.services.cover_letter_service import create_cover_letter_all, edit_cover_letter_service
 
 
 router = APIRouter(prefix="/cover-letter", tags=["cover-letter"])
@@ -15,8 +15,10 @@ async def create_cover_letter(request: CreateCoverLetterRequest):
 @router.post("/edit")
 async def edit_cover_letter(request: EditCoverLetterRequest):
     """자기소개서 수정 방향을 제시합니다."""
+    edit_suggestions_result = await edit_cover_letter_service(request)
     
-    #TODO: 자기소개서 수정 API 엔드포인트 구현
-    
-    pass 
+    return EditCoverLetterResponse(
+        user_message=request.edit_content.user_message,
+        ai_message=edit_suggestions_result
+    )
 
