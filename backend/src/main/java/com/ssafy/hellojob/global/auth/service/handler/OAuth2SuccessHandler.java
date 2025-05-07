@@ -1,7 +1,7 @@
 package com.ssafy.hellojob.global.auth.service.handler;
 
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.service.UserService;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.auth.dto.TokenDto;
 import com.ssafy.hellojob.global.auth.entity.Auth;
 import com.ssafy.hellojob.global.auth.repository.AuthRepository;
@@ -30,7 +30,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private final JwtUtil jwtUtil;
     private final AuthService authService;
     private final AuthRepository authRepository;
-    private final UserService userService;
+    private final UserReadService userReadService;
 
     @Value("${frontend.url}")
     private String frontendUrl;
@@ -40,7 +40,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                                         Authentication authentication) throws IOException {
         UserPrincipal oAuth2User = (UserPrincipal) authentication.getPrincipal();
         String email = oAuth2User.getEmail();
-        User user = userService.findUserByEmailOrElseThrow(email);
+        User user = userReadService.findUserByEmailOrElseThrow(email);
         Auth auth = authRepository.findByUser(user)
                 .orElseThrow(() -> new BaseException(AUTH_NOT_FOUND));
 

@@ -1,7 +1,7 @@
 package com.ssafy.hellojob.global.auth.service;
 
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.service.UserService;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.auth.dto.LoginDto;
 import com.ssafy.hellojob.global.auth.dto.TokenDto;
 import com.ssafy.hellojob.global.auth.entity.Auth;
@@ -26,7 +26,7 @@ public class AuthService {
 
     private final JwtUtil jwtUtil;
     private final AuthRepository authRepository;
-    private final UserService userService;
+    private final UserReadService userReadService;
 
     public void updateRefreshToken(String refreshToken, Auth auth) {
         auth.updateToken(refreshToken, LocalDateTime.now().plusDays(14));
@@ -75,7 +75,7 @@ public class AuthService {
         }
 
         String email = jwtUtil.getEmailFromToken(refreshToken);
-        User user = userService.findUserByEmailOrElseThrow(email);
+        User user = userReadService.findUserByEmailOrElseThrow(email);
         Auth savedAuth = authRepository.findByUser(user)
                 .orElseThrow(() -> new BaseException(INVALID_TOKEN));
 
