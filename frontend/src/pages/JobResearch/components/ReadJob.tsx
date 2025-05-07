@@ -78,7 +78,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
     <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
       <header className="flex w-full justify-between items-end mb-4">
         <h1 className="text-2xl font-bold">
-          {isLoading || !jobDetail ? "로딩 중..." : jobDetail.companyName} 기업
+          {isLoading || !jobDetail ? "로딩 중..." : jobDetail.companyName} 직무
           분석 -{" "}
           {isLoading || !jobDetail
             ? ""

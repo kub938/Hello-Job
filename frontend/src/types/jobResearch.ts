@@ -8,6 +8,7 @@ export interface getAllJobList {
   jobRoleBookmarkCount: number;
   bookmark: boolean;
   updatedAt: string;
+  createdAt: string;
   public: boolean;
 }
 
