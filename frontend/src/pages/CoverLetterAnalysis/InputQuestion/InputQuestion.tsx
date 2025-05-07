@@ -11,8 +11,8 @@ function InputQuestion() {
   console.log(contentList);
   return (
     <>
-      {contentList.map((content, index) => (
-        <QuestionItem content={content} index={index} />
+      {contentList.map((content, contentIndex) => (
+        <QuestionItem content={content} contentIndex={contentIndex} />
       ))}
       <div
         onClick={handleAddQuestion}

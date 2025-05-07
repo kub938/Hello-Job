@@ -1,24 +1,45 @@
 import FormInput from "@/components/Common/FormInput";
 import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import ProjectForm from "@/pages/Resume/ProjectForm";
 import ProjectModal from "../ProjectModal/ProjectModal";
+import { GetProjectsResponse, useGetProjects } from "@/hooks/projectHooks";
+import { useCoverLetterInputStore } from "@/store/coverLetterStore";
+import ExperienceModal from "../ExperienceModal/ExperienceModal";
 
 export interface QuestionItemProps {
-  index: number;
+  contentIndex: number;
   content: CoverLetterRequestContent;
 }
 
-function QuestionItem({ content }: QuestionItemProps) {
+function QuestionItem({ content, contentIndex }: QuestionItemProps) {
   const headerStyle =
     "w-full text-primary bg-secondary-light rounded-t-2xl py-3 px-4 font-semibold";
 
-  // 문항 열림/닫힘 상태 관리
+  const { data } = useGetProjects();
+
   const [isOpen, setIsOpen] = useState(true);
   const [charCount, setCharCount] = useState(0);
   const [projectFormOpen, setProjectFormOpen] = useState(false);
-  // 토글 핸들러
+  const [projectModalOpen, setProjectModalOpen] = useState(false);
+  const [experienceModalOpen, setExperienceModalOpen] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState<
+    GetProjectsResponse[]
+  >([]);
+  const { inputData } = useCoverLetterInputStore();
+
+  const selectedProjectNum = inputData.contents[contentIndex].contentProjectIds;
+
+  useEffect(() => {
+    if (data) {
+      const temp = data.filter((project) =>
+        selectedProjectNum.includes(project.projectId)
+      );
+      setSelectedProjects(temp);
+    }
+  }, [data, selectedProjectNum]);
+
   const toggleForm = () => {
     setIsOpen(!isOpen);
   };
@@ -31,10 +52,37 @@ function QuestionItem({ content }: QuestionItemProps) {
     setProjectFormOpen(true);
   };
 
+  const handleProjectModalClose = () => {
+    setProjectModalOpen(false);
+  };
+
+  const handleProjectModalOpen = () => {
+    setProjectModalOpen(true);
+  };
+
+  const handleExperienceModalClose = () => {
+    setExperienceModalOpen(false);
+  };
+
+  const handleExperienceModalOpen = () => {
+    setExperienceModalOpen(true);
+  };
+
   return (
     <>
-      {/* <ProjectModal /> */}
-      {projectFormOpen && <ProjectForm onClose={handleProjectFormClose} />}
+      {projectModalOpen && (
+        <ProjectModal
+          contentIndex={contentIndex}
+          onClose={handleProjectModalClose}
+          onOpenForm={handleProjectFormOpen}
+        />
+      )}
+      {experienceModalOpen && (
+        <ExperienceModal onClose={handleExperienceModalClose} />
+      )}
+      {projectFormOpen && (
+        <ProjectForm type="project" onClose={handleProjectFormClose} />
+      )}
       <form action="" className="border w-full rounded-2xl mb-3">
         <div
           className={`${headerStyle} flex justify-between items-center cursor-pointer`}
@@ -72,11 +120,14 @@ function QuestionItem({ content }: QuestionItemProps) {
               <div className="w-[50%]">
                 <div className={`${headerStyle}`}>프로젝트</div>
                 <div className="flex flex-col gap-2.5 border p-3 rounded-b-xl">
-                  <div className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg">
-                    Hello Job 프로젝트
-                  </div>
+                  {selectedProjects.map((project) => (
+                    <div className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg">
+                      {project.projectName}
+                    </div>
+                  ))}
+
                   <div
-                    onClick={handleProjectFormOpen}
+                    onClick={handleProjectModalOpen}
                     className="border border-transparent py-3 px-5 text-text-muted-foreground rounded-lg bg-background hover:bg-secondary-light hover:text-black hover:border hover:border-secondary"
                   >
                     + 프로젝트 연결하기
@@ -87,7 +138,13 @@ function QuestionItem({ content }: QuestionItemProps) {
               <div className="w-[50%]">
                 <div className={`${headerStyle}`}>경험</div>
                 <div className="flex flex-col gap-2.5 border p-3 rounded-b-xl">
-                  <div className="border border-transparent py-3 px-5 text-text-muted-foreground rounded-lg bg-background hover:bg-secondary-light hover:text-black hover:border hover:border-secondary">
+                  <div className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg">
+                    경험입니다?
+                  </div>
+                  <div
+                    onClick={handleExperienceModalOpen}
+                    className="border border-transparent py-3 px-5 text-text-muted-foreground rounded-lg bg-background hover:bg-secondary-light hover:text-black hover:border hover:border-secondary"
+                  >
                     + 경험 연결하기
                   </div>
                 </div>
