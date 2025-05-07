@@ -21,5 +21,6 @@ public class JobRoleAnalysisSearchListResponseDto {
     private Integer jobRoleBookmarkCount;
     private boolean bookmark;
     private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 
 }

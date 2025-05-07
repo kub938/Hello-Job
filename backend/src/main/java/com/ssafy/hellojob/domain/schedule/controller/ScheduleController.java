@@ -24,6 +24,7 @@ public class ScheduleController {
 
     private final ScheduleService scheduleService;
 
+    // 일정 추가
     @PostMapping()
     public ScheduleIdResponseDto ScheduleAdd(@Valid @RequestBody ScheduleAddRequestDto requestDto,
                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
@@ -36,6 +37,7 @@ public class ScheduleController {
 
     }
 
+    // 일정 삭제
     @DeleteMapping("{scheduleId}")
     public void ScheduleDelete(@PathVariable("scheduleId") Long scheduleId,
                                @AuthenticationPrincipal UserPrincipal userPrincipal){
@@ -45,8 +47,9 @@ public class ScheduleController {
 
     }
 
+    // 일정 상태 수정
     @PatchMapping("/{scheduleId}/status")
-    public ScheduleIdResponseDto ScheduleUpdateStatus(@RequestBody ScheduleUpdateScheduleStatusRequestDto requestDto,
+    public ScheduleIdResponseDto ScheduleUpdateStatus(@Valid @RequestBody ScheduleUpdateScheduleStatusRequestDto requestDto,
                                                       @PathVariable("scheduleId") Long scheduleId,
                                                       @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
@@ -55,8 +58,9 @@ public class ScheduleController {
         return responseDto;
     }
 
+    // 일정 자기소개서 수정
     @PatchMapping("/{scheduleId}/cover-letter")
-    public ScheduleIdResponseDto ScheduleUpdateCoverLetter(@RequestBody ScheduleUpdateScheduleCoverLetterRequestDto requestDto,
+    public ScheduleIdResponseDto ScheduleUpdateCoverLetter(@Valid @RequestBody ScheduleUpdateScheduleCoverLetterRequestDto requestDto,
                                                             @PathVariable("scheduleId") Long scheduleId,
                                                             @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
@@ -65,8 +69,9 @@ public class ScheduleController {
         return responseDto;
     }
 
+    // 일정 전체 수정
     @PutMapping("/{scheduleId}")
-    public ScheduleIdResponseDto ScheduleUpdate(@RequestBody ScheduleAddRequestDto requestDto,
+    public ScheduleIdResponseDto ScheduleUpdate(@Valid @RequestBody ScheduleAddRequestDto requestDto,
                                                 @PathVariable("scheduleId") Long scheduleId,
                                                 @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
@@ -74,6 +79,7 @@ public class ScheduleController {
         return responseDto;
     }
 
+    // 일정 전체 조회
     @GetMapping()
     public List<ScheduleListResponseDto> ScheduleList(@AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
@@ -82,6 +88,7 @@ public class ScheduleController {
         return responseDto;
     }
 
+    // 일정 상세 조회
     @GetMapping("/{scheduleId}")
     public ScheduleDetailResponseDto ScheduleDetail(@PathVariable("scheduleId") Long scheduleId,
                                                     @AuthenticationPrincipal UserPrincipal userPrincipal){
