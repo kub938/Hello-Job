@@ -10,10 +10,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ScheduleIdResponseDto {
 
-    private Long scheduleId;
+    private Integer scheduleId;
 
     @Builder
-    public ScheduleIdResponseDto(Long scheduleId){
+    public ScheduleIdResponseDto(Integer scheduleId){
         this.scheduleId = scheduleId;
     }
 

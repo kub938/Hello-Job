@@ -12,7 +12,7 @@ import java.sql.Date;
 @NoArgsConstructor
 public class ScheduleListResponseDto {
 
-    private Long scheduleId;
+    private Integer scheduleId;
     private Date scheduleStartDate;
     private Date scheduleEndDate;
     private String scheduleTitle;
@@ -20,7 +20,7 @@ public class ScheduleListResponseDto {
     private String scheduleStatusStep;
 
     @Builder
-    public ScheduleListResponseDto(Long scheduleId, Date scheduleStartDate, Date scheduleEndDate, String scheduleTitle, String scheduleStatusName, String scheduleStatusStep){
+    public ScheduleListResponseDto(Integer scheduleId, Date scheduleStartDate, Date scheduleEndDate, String scheduleTitle, String scheduleStatusName, String scheduleStatusStep){
         this.scheduleId = scheduleId;
         this.scheduleStartDate = scheduleStartDate;
         this.scheduleEndDate = scheduleEndDate;

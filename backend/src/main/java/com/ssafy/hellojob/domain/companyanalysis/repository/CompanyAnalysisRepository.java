@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CompanyAnalysisRepository extends JpaRepository<CompanyAnalysis, Long> {
+public interface CompanyAnalysisRepository extends JpaRepository<CompanyAnalysis, Integer> {
 
-    List<CompanyAnalysis> findAllByCompany_CompanyId(Long companyId);
+    List<CompanyAnalysis> findAllByCompany_CompanyId(Integer companyId);
 
 }

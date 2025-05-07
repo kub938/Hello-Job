@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.jobroleanalysis.dto;
+package com.ssafy.hellojob.domain.jobroleanalysis.dto.response;
 
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleCategory;
 import lombok.AllArgsConstructor;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class JobRoleAnalysisDetailResponseDto {
 
-    private Long jobRoleAnalysisId;        // 직무 분석 레포트 아이디
+    private Integer jobRoleAnalysisId;        // 직무 분석 레포트 아이디
     private String companyName;             // 기업명
     private String jobRoleName;             // 직무명
     private String jobRoleAnalysisTitle;

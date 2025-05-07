@@ -16,7 +16,7 @@ public class JobRoleAnalysisBookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_role_analysis_bookmark_id", nullable = false)
-    private Long jobRoleAnalysisBookmarkId;
+    private Integer jobRoleAnalysisBookmarkId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

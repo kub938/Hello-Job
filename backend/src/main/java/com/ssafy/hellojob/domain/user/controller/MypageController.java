@@ -4,7 +4,7 @@ import com.ssafy.hellojob.domain.coverletter.dto.response.MyPageCoverLetterDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
 import com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto;
 import com.ssafy.hellojob.domain.exprience.service.ExperienceService;
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisSearchListResponseDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.response.JobRoleAnalysisSearchListResponseDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.service.JobRoleAnalysisService;
 import com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto;
 import com.ssafy.hellojob.domain.project.service.ProjectService;

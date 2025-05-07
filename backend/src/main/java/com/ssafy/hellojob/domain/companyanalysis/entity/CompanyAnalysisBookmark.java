@@ -18,7 +18,7 @@ public class CompanyAnalysisBookmark {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "company_analysis_bookmark_id", nullable = false)
-    private Long companyAnalysisBookmarkId;
+    private Integer companyAnalysisBookmarkId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
