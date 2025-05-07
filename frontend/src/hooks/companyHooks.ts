@@ -13,7 +13,7 @@ interface GetCompaniesResponse {
 
 export const useGetCompanies = (companyName: string) => {
   return useQuery<GetCompaniesResponse[], Error>({
-    queryKey: ["companyName", companyName],
+    queryKey: ["company-name", companyName],
     queryFn: async () => {
       const response = await getCompanies(companyName);
       return response.data;
