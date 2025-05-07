@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AIUpdateCoverLetterResponseDto {
+public class AIChatResponseDto {
     private String user_message;
     private String ai_message;
 }

@@ -3,6 +3,8 @@ package com.ssafy.hellojob.domain.coverlettercontent.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
@@ -11,6 +13,7 @@ import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentStatus;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.ChatLogRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +32,7 @@ public class ChatLogService {
 
     private final ChatLogRepository chatLogRepository;
     private final CoverLetterContentRepository coverLetterContentRepository;
+    private final FastApiClientService fastApiClientService;
 
     // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌
     private final ObjectMapper mapper = new ObjectMapper();
@@ -40,15 +44,7 @@ public class ChatLogService {
 
         if (chatLogString == null || chatLogString.isBlank()) return new ArrayList<>();
 
-        List<ChatMessageDto> chatLog;
-
-        try {
-            chatLog = mapper.readValue(chatLogString, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            log.error("🌞 채팅 로그 파싱 실패: {}", chatLogString);
-            throw new RuntimeException("채팅 로그 JSON 파싱 실패", e);
-        }
+        List<ChatMessageDto> chatLog = parseJson(chatLogString);
 
         log.debug("🌞 chatLog {}", chatLog.toArray().toString());
 
@@ -60,6 +56,18 @@ public class ChatLogService {
         // 사용자 메시지를 받은 다음 AI에 전달
         // AI로부터 메시지를 받으면 DB에 저장 & contentStatus 확인 후 IN_PROGRESS로 변경
         // AI 메시지를 받는 로직 들어가야 함
+//        ChatMessageDto userMessages = ChatMessageDto.builder()
+//                .sender("user")
+//                .message(requestDto.getUserMessage())
+//                .build();
+//
+//        ChatMessageDto aiMessage = ChatMessageDto.builder()
+//                .sender("ai")
+//                .message("아직 AI 연결 안됐지롱")
+//                .build();
+
+        AIChatResponseDto response = sendChatToFastApi(requestDto);
+
         ChatMessageDto userMessages = ChatMessageDto.builder()
                 .sender("user")
                 .message(requestDto.getUserMessage())
@@ -67,7 +75,7 @@ public class ChatLogService {
 
         ChatMessageDto aiMessage = ChatMessageDto.builder()
                 .sender("ai")
-                .message("아직 AI 연결 안됐지롱")
+                .message(response.getAi_message())
                 .build();
 
         // 본문 내용 저장
@@ -82,7 +90,7 @@ public class ChatLogService {
         List<ChatMessageDto> newChats = new ArrayList<>();
 
         Optional<ChatLog> chatLogOpt = chatLogRepository.findById(contentId);
-        
+
         if (chatLogOpt.isEmpty()) {
             // 기존 로그 없으면 새로 생성
             newChats.add(userMessages);
@@ -118,11 +126,23 @@ public class ChatLogService {
                 .build();
     }
 
+    public AIChatResponseDto sendChatToFastApi(ChatRequestDto requestDto) {
+        AIChatRequestDto request = AIChatRequestDto.builder()
+                .user_message(requestDto.getUserMessage())
+                .cover_letter(requestDto.getContentDetail())
+                .build();
+
+        AIChatResponseDto response = fastApiClientService.sendChatToFastApi(request);
+
+        return response;
+    }
+
     // JSON 형태로 파싱
     private List<ChatMessageDto> parseJson(String json) {
         if (json == null || json.isBlank()) return new ArrayList<>();
         try {
-            return mapper.readValue(json, new TypeReference<>() {});
+            return mapper.readValue(json, new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             throw new RuntimeException("채팅 로그 파싱 실패", e);
         }
