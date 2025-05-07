@@ -5,11 +5,8 @@
             "args": ["/root/hellojob/app/mcp/dart-mcp/dart.py"]
         },
         "naver-search": {
-            "command": "/usr/bin/npx",
-            "args": [
-                "-y",
-                "@isnow890/naver-search-mcp"
-            ],
+            "command": "/usr/bin/node",
+            "args": ["/root/hellojob/app/mcp/naver-search-mcp/dist/src/index.js"],
             "env": {
                 "NAVER_CLIENT_ID": "YOUR_NAVER_CLIENT_ID_IN_DOTENV",
                 "NAVER_CLIENT_SECRET": "YOUR_NAVER_CLIENT_SECRET_IN_DOTENV"
