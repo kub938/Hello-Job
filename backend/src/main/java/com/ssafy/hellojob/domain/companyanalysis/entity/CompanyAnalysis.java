@@ -20,7 +20,7 @@ public class CompanyAnalysis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "company_analysis_id", nullable = false)
-    private Long companyAnalysisId;
+    private Integer companyAnalysisId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)

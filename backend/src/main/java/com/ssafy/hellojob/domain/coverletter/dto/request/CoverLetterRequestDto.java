@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CoverLetterRequestDto {
     private String coverLetterTitle;
-    private Long companyAnalysisId;
+    private Integer companyAnalysisId;
     private Integer jobRoleAnalysisId;
     private List<ContentsDto> contents;
 }

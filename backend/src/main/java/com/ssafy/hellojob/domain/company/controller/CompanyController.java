@@ -1,14 +1,12 @@
 package com.ssafy.hellojob.domain.company.controller;
 
+import com.ssafy.hellojob.domain.company.dto.CompanyDto;
 import com.ssafy.hellojob.domain.company.dto.CompanyListDto;
 import com.ssafy.hellojob.domain.company.service.CompanyService;
+import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,6 +29,14 @@ public class CompanyController {
 
         return result;
 
+    }
+
+    @GetMapping("/{companyId}")
+    public CompanyDto getCompanyDetail(@PathVariable("companyId") Integer companyId,
+                                       @AuthenticationPrincipal UserPrincipal userPrincipal){
+
+        CompanyDto result = companyService.getCompanyByCompanyId(companyId);
+        return result;
     }
 
 

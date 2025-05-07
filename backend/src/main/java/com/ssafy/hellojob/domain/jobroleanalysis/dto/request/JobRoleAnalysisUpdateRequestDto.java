@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.jobroleanalysis.dto;
+package com.ssafy.hellojob.domain.jobroleanalysis.dto.request;
 
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleCategory;
 import com.ssafy.hellojob.global.exception.ValidationMessage;
@@ -12,10 +12,13 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class JobRoleAnalysisSaveRequestDto {
+public class JobRoleAnalysisUpdateRequestDto {
+
+    @NotNull(message = ValidationMessage.JOB_ROLE_ANALYSIS_JOB_ROLE_ANALYSIS_ID_NOT_EMPTY)
+    private Integer jobRoleAnalysisId;
 
     @NotNull(message = ValidationMessage.JOB_ROLE_ANALYSIS_COMPANY_ID_NOT_EMPTY)
-    private Long companyId;
+    private Integer companyId;
 
     @Size(max = 33, message = "직무명은 33자 이하로 입력해주세요.")
     @NotBlank(message = ValidationMessage.JOB_ROLE_ANALYSIS_JOB_ROLE_NAME_NOT_EMPTY)

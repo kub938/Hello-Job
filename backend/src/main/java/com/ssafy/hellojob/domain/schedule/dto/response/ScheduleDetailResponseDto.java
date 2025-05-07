@@ -10,7 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ScheduleDetailResponseDto {
 
-    private Long scheduleId;
+    private Integer scheduleId;
     private Date scheduleStartDate;
     private Date scheduleEndDate;
     private String scheduleTitle;

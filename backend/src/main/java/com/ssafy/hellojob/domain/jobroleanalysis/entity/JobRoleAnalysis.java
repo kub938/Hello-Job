@@ -1,6 +1,6 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.entity;
 
-import com.ssafy.hellojob.domain.jobroleanalysis.dto.JobRoleAnalysisUpdateRequestDto;
+import com.ssafy.hellojob.domain.jobroleanalysis.dto.request.JobRoleAnalysisUpdateRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -8,10 +8,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -22,7 +18,7 @@ public class JobRoleAnalysis extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_role_analysis_id", nullable = false)
-    private Long jobRoleAnalysisId;
+    private Integer jobRoleAnalysisId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
@@ -30,7 +26,7 @@ public class JobRoleAnalysis extends BaseTimeEntity {
 
 
     @Column(name = "company_id", nullable = false)
-    private Long companyId;
+    private Integer companyId;
 
     @Column(name = "job_role_name", nullable = false, length = 100)
     private String jobRoleName;
@@ -69,7 +65,7 @@ public class JobRoleAnalysis extends BaseTimeEntity {
 
     @Builder
     public JobRoleAnalysis(User user,
-                           Long companyId,
+                           Integer companyId,
                            String jobRoleName,
                            String jobRoleTitle,
                            String jobRoleWork,

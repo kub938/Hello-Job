@@ -9,6 +9,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ScheduleDetailCoverLetter {
 
+    private String coverLetterTitle;
     private Integer coverLetterId;
     private boolean finish;
     private List<ScheduleCoverLetterContent> scheduleCoverLetterContents;

@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface NewsAnalysisRepository extends JpaRepository<NewsAnalysis, Long> {
+public interface NewsAnalysisRepository extends JpaRepository<NewsAnalysis, Integer> {
 
 }

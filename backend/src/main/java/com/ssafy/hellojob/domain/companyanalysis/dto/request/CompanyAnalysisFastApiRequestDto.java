@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.companyanalysis.dto;
+package com.ssafy.hellojob.domain.companyanalysis.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
