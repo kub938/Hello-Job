@@ -22,6 +22,7 @@ import BookmarkedJobs from "@/pages/Mypage/components/BookmarkedJobs";
 import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
+import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -78,8 +79,24 @@ const router = createBrowserRouter([
             element: <CorporateSearch />,
           },
           {
-            path: "job-research",
-            element: <JobResearch />,
+            path: "job-research/:id",
+            element: (
+              <SuspenseWrapper>
+                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                  <JobResearch />
+                </ErrorBoundary>
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: "corporate-research/:id",
+            element: (
+              <SuspenseWrapper>
+                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                  <CorporateResearch />
+                </ErrorBoundary>
+              </SuspenseWrapper>
+            ),
           },
         ],
       },
