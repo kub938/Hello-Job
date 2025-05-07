@@ -1,4 +1,7 @@
-import { postJobBookmarkRequest } from "@/types/jobResearch";
+import {
+  postJobBookmarkRequest,
+  postJobRoleAnalysisRequest,
+} from "@/types/jobResearch";
 import { api } from "./api";
 import { authApi } from "./instance";
 
@@ -26,5 +29,13 @@ export const jobRoleAnalysis = {
     return authApi.delete(
       `/api/v1/job-role-analysis/bookmark/${jobRoleAnalysisBookmarkId}`
     );
+  },
+
+  postJobRoleAnalysis: (
+    postJobRoleAnalysisRequest: postJobRoleAnalysisRequest
+  ) => {
+    return authApi.post(`/api/v1/job-role-analysis`, {
+      postJobRoleAnalysisRequest,
+    });
   },
 };
