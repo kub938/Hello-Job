@@ -10,14 +10,14 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CompanyAnalysisBookmarkRepository extends JpaRepository<CompanyAnalysisBookmark, Long> {
+public interface CompanyAnalysisBookmarkRepository extends JpaRepository<CompanyAnalysisBookmark, Integer> {
 
-    boolean existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(Integer userId, Long companyAnalysisId);
+    boolean existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(Integer userId, Integer companyAnalysisId);
     Optional<CompanyAnalysisBookmark> findByUserAndCompanyAnalysis(User user, CompanyAnalysis companyAnalysis);
 
     List<CompanyAnalysisBookmark> findAllByUser(User user);
 
-    List<CompanyAnalysisBookmark> findAllByUserAndCompanyAnalysis_Company_CompanyId(User user, Long companyId);
+    List<CompanyAnalysisBookmark> findAllByUserAndCompanyAnalysis_Company_CompanyId(User user, Integer companyId);
 
 
 

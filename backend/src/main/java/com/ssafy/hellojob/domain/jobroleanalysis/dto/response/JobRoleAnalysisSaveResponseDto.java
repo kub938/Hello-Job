@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.jobroleanalysis.dto;
+package com.ssafy.hellojob.domain.jobroleanalysis.dto.response;
 
 import lombok.*;
 
@@ -6,10 +6,10 @@ import lombok.*;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class JobRoleAnalysisSaveResponseDto {
 
-    private Long jobRoleAnalysisId;
+    private Integer jobRoleAnalysisId;
 
     @Builder
-    public JobRoleAnalysisSaveResponseDto(Long jobRoleAnalysisId){
+    public JobRoleAnalysisSaveResponseDto(Integer jobRoleAnalysisId){
         this.jobRoleAnalysisId = jobRoleAnalysisId;
     }
 

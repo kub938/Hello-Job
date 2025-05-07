@@ -5,7 +5,9 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
-import com.ssafy.hellojob.domain.companyanalysis.dto.*;
+import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.response.*;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysisBookmark;
 import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
@@ -22,7 +24,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,8 @@ public class CompanyAnalysisService {
 
     // 기업 분석 저장
     @Transactional
-    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId, Long companyId, boolean isPublic,
-                                                                       boolean basic, boolean plus, boolean financial,
+    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId,
+                                                                       CompanyAnalysisRequestDto requestDto,
                                                                        CompanyAnalysisFastApiResponseDto responseDto) {
         // 유저 조회 및 토큰(기업 분석 가능 횟수) 조회
         User user = userRepository.findById(userId)
@@ -55,7 +56,7 @@ public class CompanyAnalysisService {
         user.decreaseToken();
 
         // 회사 조회
-        Company company = companyRepository.findById(companyId)
+        Company company = companyRepository.findById(requestDto.getCompanyId())
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
 
         // DartAnalysis 저장
@@ -64,7 +65,9 @@ public class CompanyAnalysisService {
                 responseDto.getCompany_analysis(),
                 responseDto.getCompany_vision(),
                 responseDto.getCompany_finance(),
-                basic, plus, financial
+                requestDto.isBasic(),
+                requestDto.isPlus(),
+                requestDto.isFinancial()
         );
 
         dartAnalysisRepository.save(dart);
@@ -86,7 +89,7 @@ public class CompanyAnalysisService {
         newsAnalysisRepository.save(news);
 
         // CompanyAnalysis 저장
-        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, isPublic);
+        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, requestDto.isPublic());
         companyAnalysisRepository.save(companyAnalysis);
 
         // 기업 테이블 업데이트
@@ -136,7 +139,7 @@ public class CompanyAnalysisService {
 
     // 기업 분석 상세 조회
     @Transactional
-    public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Long companyAnalysisId) {
+    public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Integer companyAnalysisId) {
 
         // 유저 조회
         userRepository.findById(userId)
@@ -202,7 +205,7 @@ public class CompanyAnalysisService {
     }
 
     // 기업 분석 검색
-    public List<CompanyAnalysisListResponseDto> searchByCompanyIdCompanyAnalysis(Long companyId, Integer userId) {
+    public List<CompanyAnalysisListResponseDto> searchByCompanyIdCompanyAnalysis(Integer companyId, Integer userId) {
 
         // 유저, 회사 존재 여부 확인
         userRepository.findById(userId)
@@ -290,7 +293,7 @@ public class CompanyAnalysisService {
 
     // 기업 분석 북마크 해제
     @Transactional
-    public void deleteCompanyAnalysisBookmark(Long companyAnalysisBookmarkId, Integer userId){
+    public void deleteCompanyAnalysisBookmark(Integer companyAnalysisBookmarkId, Integer userId){
 
         // 유저 조회
         userRepository.findById(userId)
@@ -366,7 +369,7 @@ public class CompanyAnalysisService {
 
 
     // 기업 분석 북마크 목록 조회(기업별)
-    public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Long companyId) {
+    public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Integer companyId) {
         
         // 유저, 회사 조회
         User user = userRepository.findById(userId)

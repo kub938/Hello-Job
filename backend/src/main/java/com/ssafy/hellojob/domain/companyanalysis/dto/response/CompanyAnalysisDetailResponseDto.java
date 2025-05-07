@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.companyanalysis.dto;
+package com.ssafy.hellojob.domain.companyanalysis.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisDetailResponseDto {
 
-    private Long companyAnalysisId;
+    private Integer companyAnalysisId;
     private String companyName;
     private LocalDateTime createdAt;
     private Integer companyViewCount;
