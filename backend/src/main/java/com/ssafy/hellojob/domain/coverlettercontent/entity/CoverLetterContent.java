@@ -80,4 +80,8 @@ public class CoverLetterContent extends BaseTimeEntity {
     public void updateContentStatus(CoverLetterContentStatus status) {
         this.contentStatus = status;
     }
+
+    public void updateContentDetail(String contentDetail) {
+        this.contentDetail = contentDetail;
+    }
 }
