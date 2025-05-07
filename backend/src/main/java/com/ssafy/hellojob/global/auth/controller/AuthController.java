@@ -28,4 +28,11 @@ public class AuthController {
         authService.refreshToken(request, response);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @PostMapping("/logout")
+    public void logout(@AuthenticationPrincipal UserPrincipal user, HttpServletResponse response) {
+        authService.logout(user.getUser(), response);
+    }
+
+
 }
