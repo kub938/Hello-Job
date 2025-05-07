@@ -24,7 +24,7 @@ function CorporateReportCard({
   return (
     <div
       onClick={onClick}
-      className="w-[210px] h-[180px] bg-white rounded-lg cursor-pointer border border-gray-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between"
+      className="w-[220px] h-[180px] bg-white rounded-lg cursor-pointer border border-gray-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between"
     >
       <div>
         <div className="flex items-center w-full border-b border-[#AF9BFF]/80 pb-1 justify-between">
@@ -46,7 +46,7 @@ function CorporateReportCard({
           {dartCategory?.map((category, index) => (
             <span
               key={index}
-              className="text-[10px] bg-purple-100 text-purple-800 rounded-full px-2 py-0.5"
+              className="text-xs bg-purple-100 text-purple-800 rounded-full px-2 py-0.5 h-[18px]"
             >
               {category}
             </span>
