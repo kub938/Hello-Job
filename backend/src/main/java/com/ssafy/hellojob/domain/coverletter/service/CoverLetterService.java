@@ -9,6 +9,8 @@ import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
 import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -28,6 +30,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -36,6 +40,7 @@ import java.util.Map;
 public class CoverLetterService {
 
     private final CoverLetterRepository coverLetterRepository;
+    private final CoverLetterContentRepository coverLetterContentRepository;
     private final CompanyAnalysisRepository companyAnalysisRepository;
     private final JobRoleAnalysisRepository jobRoleAnalysisRepository;
     private final JobRoleSnapshotService jobRoleSnapshotService;
@@ -69,25 +74,33 @@ public class CoverLetterService {
         coverLetterRepository.save(newCoverLetter);
 
         Integer newCoverLetterId = newCoverLetter.getCoverLetterId();
+        log.debug("🌞 coverLetterId : {}", newCoverLetterId);
 
-        List<AICoverLetterResponseDto> AIResponses = getAIResponses(newCoverLetterId);
-
-        Integer firstContentId = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents(), AIResponses);
+        List<CoverLetterContent> contents = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents());
+        List<AICoverLetterResponseDto> AIResponses = getAIResponses(newCoverLetterId, contents);
+        coverLetterContentService.appendDetail(contents, AIResponses);
 
         return CoverLetterCreateResponseDto.builder()
                 .coverLetterId(newCoverLetterId)
-                .firstContentId(firstContentId)
+                .firstContentId(contents.get(0).getContentId())
                 .build();
     }
 
-    public List<AICoverLetterResponseDto> getAIResponses(Integer coverLetterId) {
+    public List<AICoverLetterResponseDto> getAIResponses(Integer coverLetterId, List<CoverLetterContent> contents) {
         List<AICoverLetterResponseDto> responseDto;
 
-        CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
+        CoverLetter coverLetter = getFullDetail(coverLetterId, contents);
+
+        log.debug("🎈 coverLetter : {}", coverLetter.getCoverLetterId());
+        log.debug("🎈 coverLetter content: {}", coverLetter.getContents());
+
+        log.debug("🌞 coverLetter의 content: {}", coverLetter.getContents().stream()
+                .map(c -> String.format("[id=%d, number=%d]", c.getContentId(), c.getContentNumber()))
+                .collect(Collectors.joining(", ")));
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .jobRole_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
                 .contents(coverLetter.getContents().stream()
                         .map(content -> ContentDto.builder()
                                 .content_number(content.getContentNumber())
@@ -95,17 +108,37 @@ public class CoverLetterService {
                                 .content_question(content.getContentQuestion())
                                 .content_prompt(content.getContentFirstPrompt())
                                 .experiences(content.getExperiences().stream()
-                                        .map(cle -> ExperienceDto.from(cle.getExperience())).toList()
+                                        .map(cle -> cle.getExperience())
+                                        .filter(Objects::nonNull)
+                                        .map(ExperienceDto::from)
+                                        .toList()
                                 )
                                 .projects(content.getExperiences().stream()
-                                        .map(cle -> ProjectDto.from(cle.getProject())).toList()
+                                        .map(cle -> cle.getProject())
+                                        .filter(Objects::nonNull)
+                                        .map(ProjectDto::from)
+                                        .toList()
                                 )
                                 .build()
                         ).toList()
                 ).build();
 
-        responseDto = fastApiClientService.sendCoverLetterToFastApi(requestDto);
+        responseDto = fastApiClientService.getCoverLetterContentDetail(requestDto);
         return responseDto;
+    }
+
+
+    public CoverLetter getFullDetail(Integer coverLetterId, List<CoverLetterContent> contents) {
+        log.debug("🌞 coverLetterId : {} ", coverLetterId);
+        CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
+
+        contents.forEach(c -> {
+            log.debug("🧩 contentId={}, expSize={}", c.getContentId(), c.getExperiences().size());
+        });
+
+        coverLetter.assignContents(contents);
+
+        return coverLetter;
     }
 
     // 자기소개서 전체 문항 상태 조회

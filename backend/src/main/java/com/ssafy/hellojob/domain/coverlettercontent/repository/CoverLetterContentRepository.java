@@ -36,4 +36,12 @@ public interface CoverLetterContentRepository extends JpaRepository<CoverLetterC
     List<Integer> findContentIdByCoverLetterId(@Param("coverLetterId") Integer coverLetterId);
 
     List<CoverLetterContent> findByCoverLetter(CoverLetter coverLetter);
+
+    @Query("""
+            SELECT DISTINCT c
+            FROM CoverLetterContent c
+            LEFT JOIN FETCH c.experiences cle
+            WHERE c.coverLetter.coverLetterId = :coverLetterId
+            """)
+    List<CoverLetterContent> findContentsWithExperiences(@Param("coverLetterId") Integer coverLetterId);
 }
