@@ -2,11 +2,11 @@ import FormInput from "@/components/Common/FormInput";
 import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
 import { useEffect, useState } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import ProjectForm from "@/pages/Resume/ProjectForm";
-import ProjectModal from "../ProjectModal/ProjectModal";
 import { GetProjectsResponse, useGetProjects } from "@/hooks/projectHooks";
 import { useCoverLetterInputStore } from "@/store/coverLetterStore";
-import ExperienceModal from "../ExperienceModal/ExperienceModal";
+import ProjectForm from "@/pages/Resume/ProjectForm";
+import SelectModal, { ModalType } from "../SelectModal/SelectModal";
+import ExperienceForm from "@/pages/Resume/ExperienceForm";
 
 export interface QuestionItemProps {
   contentIndex: number;
@@ -21,9 +21,15 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
 
   const [isOpen, setIsOpen] = useState(true);
   const [charCount, setCharCount] = useState(0);
+
+  /* Form 관리 */
   const [projectFormOpen, setProjectFormOpen] = useState(false);
-  const [projectModalOpen, setProjectModalOpen] = useState(false);
-  const [experienceModalOpen, setExperienceModalOpen] = useState(false);
+  const [ExperienceFormOpen, setExperienceFormOpen] = useState(false);
+
+  /* modal 관리 */
+  const [selectModalOpen, setSelectModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<ModalType>("");
+
   const [selectedProjects, setSelectedProjects] = useState<
     GetProjectsResponse[]
   >([]);
@@ -44,45 +50,60 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
     setIsOpen(!isOpen);
   };
 
-  const handleProjectFormClose = () => {
-    setProjectFormOpen(false);
-  };
+  //form 관리
+  // const handleProjectFormClose = () => {
+  //   setProjectFormOpen(false);
+  // };
 
-  const handleProjectFormOpen = () => {
-    setProjectFormOpen(true);
-  };
+  // const handleProjectFormOpen = () => {
+  //   setProjectFormOpen(true);
+  // };
 
+  //modal 관리
   const handleProjectModalClose = () => {
-    setProjectModalOpen(false);
+    setSelectModalOpen(false);
   };
 
   const handleProjectModalOpen = () => {
-    setProjectModalOpen(true);
-  };
-
-  const handleExperienceModalClose = () => {
-    setExperienceModalOpen(false);
+    setModalType("project");
+    setSelectModalOpen(true);
   };
 
   const handleExperienceModalOpen = () => {
-    setExperienceModalOpen(true);
+    setModalType("experience");
+    setSelectModalOpen(true);
   };
 
+  //
+  const onOpenProjectForm = () => {
+    setProjectFormOpen(true);
+  };
+
+  const onOpenExperienceForm = () => {
+    setExperienceFormOpen(true);
+  };
+
+  const onCloseProjectForm = () => {
+    setProjectFormOpen(false);
+  };
+
+  const onCloseExperienceForm = () => {
+    setExperienceFormOpen(false);
+  };
   return (
     <>
-      {projectModalOpen && (
-        <ProjectModal
+      {selectModalOpen && (
+        <SelectModal
           contentIndex={contentIndex}
           onClose={handleProjectModalClose}
-          onOpenForm={handleProjectFormOpen}
+          onOpenProjectForm={onOpenProjectForm}
+          onOpenExperienceForm={onOpenExperienceForm}
+          type={modalType}
         />
       )}
-      {experienceModalOpen && (
-        <ExperienceModal onClose={handleExperienceModalClose} />
-      )}
-      {projectFormOpen && (
-        <ProjectForm type="project" onClose={handleProjectFormClose} />
-      )}
+      {projectFormOpen && <ProjectForm onClose={onCloseProjectForm} />}
+      {ExperienceFormOpen && <ExperienceForm onClose={onCloseExperienceForm} />}
+      {/* {projectFormOpen && <SelectForm onClose={handleProjectFormClose} />} */}
       <form action="" className="border w-full rounded-2xl mb-3">
         <div
           className={`${headerStyle} flex justify-between items-center cursor-pointer`}
@@ -121,7 +142,10 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
                 <div className={`${headerStyle}`}>프로젝트</div>
                 <div className="flex flex-col gap-2.5 border p-3 rounded-b-xl">
                   {selectedProjects.map((project) => (
-                    <div className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg">
+                    <div
+                      onClick={handleProjectModalOpen}
+                      className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg"
+                    >
                       {project.projectName}
                     </div>
                   ))}
@@ -138,7 +162,10 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
               <div className="w-[50%]">
                 <div className={`${headerStyle}`}>경험</div>
                 <div className="flex flex-col gap-2.5 border p-3 rounded-b-xl">
-                  <div className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg">
+                  <div
+                    onClick={handleExperienceModalOpen}
+                    className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg"
+                  >
                     경험입니다?
                   </div>
                   <div
