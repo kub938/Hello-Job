@@ -51,6 +51,7 @@ public class ScheduleService {
     private final JobRoleSnapshotRepository jobRoleSnapshotRepository;
 
 
+    // 일정 추가
     public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId){
 
         // 유저 정보 조회
@@ -58,6 +59,9 @@ public class ScheduleService {
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
+        if (scheduleStatus == null) {
+            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND); // 400번 정의 필요
+        }
 
         CoverLetter coverLetter = null;
         if(requestDto.getCoverLetterId() != null){
@@ -82,6 +86,7 @@ public class ScheduleService {
 
     }
 
+    // 일정 삭제
     public void deleteSchedule(Long scheduleId, Integer userId){
 
         // 유저 정보 조회
@@ -101,6 +106,7 @@ public class ScheduleService {
 
     }
 
+    // 일정 상태 수정
     public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Long scheduleId, Integer userId){
         // 유저 정보 조회
         User user = userRepository.findById(userId)
@@ -117,6 +123,9 @@ public class ScheduleService {
 
         // 새로운 상태 조회
         ScheduleStatus newStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
+        if (newStatus == null) {
+            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND); // 400번 정의 필요
+        }
 
         // 상태 변경
         schedule.setScheduleStatus(newStatus);
@@ -127,6 +136,7 @@ public class ScheduleService {
 
     }
 
+    // 일정 자기소개서 수정
     public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Long scheduleId, Integer userId){
         // 유저 정보 조회
         User user = userRepository.findById(userId)
@@ -143,6 +153,9 @@ public class ScheduleService {
 
         // 자기소개서 조회
         CoverLetter coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
+        if(coverLetter == null){
+            throw new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND);
+        }
 
         // 상태 변경
         schedule.setScheduleCoverLetter(coverLetter);
@@ -153,6 +166,7 @@ public class ScheduleService {
 
     }
 
+    // 일정 전체 수정
     @Transactional
     public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Long scheduleId, Integer userId) {
         // 유저 조회
@@ -163,8 +177,15 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
 
+        if (!schedule.getUser().getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.INVALID_USER);
+        }
+
         // 상태 값 수정
         ScheduleStatus status = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName());
+        if (status == null) {
+            throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND); // 400번 정의 필요
+        }
         schedule.setScheduleStatus(status);
 
         // CoverLetter는 요청에 값이 있을 경우에만 수정
@@ -191,6 +212,7 @@ public class ScheduleService {
         return new ScheduleIdResponseDto(schedule.getScheduleId());
     }
 
+    // 일정 전체 조회
     public List<ScheduleListResponseDto> allSchedule(Integer userId){
 
         User user = userRepository.findById(userId)
@@ -214,9 +236,10 @@ public class ScheduleService {
         return responseDto;
     }
 
+    // 일정 상세 조회
     public ScheduleDetailResponseDto detailSchedule(Long scheduleId, Integer userId) {
 
-        User user = userRepository.findById(userId)
+        userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -225,6 +248,10 @@ public class ScheduleService {
         ScheduleDetailCoverLetter scheduleDetailCoverLetter = null;
         ScheduleDetailCompanyAnalysis scheduleDetailCompanyAnalysis = null;
         ScheduleDetailJobRoleSnapshot scheduleDetailJobRoleSnapshot = null;
+
+        if (!schedule.getUser().getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.INVALID_USER); 
+        }
 
         if (schedule.getCoverLetter() != null) {
             CoverLetter coverLetter = coverLetterRepository.getReferenceById(schedule.getCoverLetter().getCoverLetterId());
@@ -242,6 +269,7 @@ public class ScheduleService {
                     .toList();
 
             scheduleDetailCoverLetter = ScheduleDetailCoverLetter.builder()
+                    .coverLetterTitle(coverLetter.getCoverLetterTitle())
                     .coverLetterId(coverLetter.getCoverLetterId())
                     .finish(coverLetter.isFinish())
                     .scheduleCoverLetterContents(scheduleCoverLetterContents)

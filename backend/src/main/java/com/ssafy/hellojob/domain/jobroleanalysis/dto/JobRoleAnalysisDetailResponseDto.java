@@ -24,6 +24,7 @@ public class JobRoleAnalysisDetailResponseDto {
     private Integer jobRoleViewCount;       // 조회수
     private Boolean isPublic;               // 공개 여부 (true/false)
     private JobRoleCategory jobRoleCategory; // 직무 카테고리 (Enum 타입 그대로)
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;         // 최종 수정날짜
     private Integer jobRoleAnalysisBookmarkCount; // 총 즐겨찾기 수
     private Boolean bookmark;                // 현재 유저가 즐겨찾기 했는지 여부

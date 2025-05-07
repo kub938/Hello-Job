@@ -105,6 +105,7 @@ public class JobRoleAnalysisService {
                 .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
                 .isPublic(jobRoleAnalysis.getIsPublic())
                 .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory())
+                .createdAt(jobRoleAnalysis.getCreatedAt())
                 .updatedAt(jobRoleAnalysis.getUpdatedAt())
                 .jobRoleAnalysisBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                 .bookmark(isBookmarked)
@@ -215,6 +216,7 @@ public class JobRoleAnalysisService {
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(true) // 북마크 목록이니까 무조건 true
                     .updatedAt(jobRoleAnalysis.getUpdatedAt())
+                    .createdAt(jobRoleAnalysis.getCreatedAt())
                     .build());
         }
 
@@ -259,6 +261,7 @@ public class JobRoleAnalysisService {
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(true) // 북마크 목록이니까 무조건 true
                     .updatedAt(jobRoleAnalysis.getUpdatedAt())
+                    .createdAt(jobRoleAnalysis.getCreatedAt())
                     .build());
         }
 
@@ -324,6 +327,7 @@ public class JobRoleAnalysisService {
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(bookmarkedAnalysisIds.contains(jobRoleAnalysis.getJobRoleAnalysisId())) // 북마크 여부
                     .updatedAt(jobRoleAnalysis.getUpdatedAt())
+                    .createdAt(jobRoleAnalysis.getCreatedAt())
                     .build());
         }
 
