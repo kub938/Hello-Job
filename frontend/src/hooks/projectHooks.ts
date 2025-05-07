@@ -1,5 +1,5 @@
-import { PostProjectRequest } from "@/api/experienceApi";
 import { projectApi } from "@/api/projectApi";
+import { PostProjectRequest } from "@/types/projectApiTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export interface GetProjectsResponse {
