@@ -1,27 +1,15 @@
 import { Button } from "@/components/Button";
 import { useNavigate, useParams } from "react-router";
 import { useEffect, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { corporateReportApi } from "@/api/corporateReport";
 
-import { FaClock, FaBuildingUser, FaPlus } from "react-icons/fa6";
+import { FaPlus } from "react-icons/fa6";
 import DetailModal from "@/components/Common/DetailModal";
 import CreateCorporate from "./components/CreateCorporate";
 import ReadCorporate from "./components/ReadCorporate";
 import { getCorporateReportListResponse } from "@/types/coporateResearch";
 import CorporateReportCard from "./components/CorporateReportCard";
-
-// 더미 데이터 배열 정의
-interface AnalysisReport {
-  companyAnlaysisId: string;
-  createdAt: string;
-  companyViewCount: number;
-  companyLocation: string;
-  companyIndustry: string;
-  companyAnalysisBookmarkCount: number;
-  bookmark: boolean;
-  public: boolean;
-}
 
 interface CorporateReport {
   companyAnlaysisId: number;
@@ -154,7 +142,7 @@ function CorporateResearch() {
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
-            <CreateCorporate />
+            <CreateCorporate onClose={closeModal} />
           ) : (
             <ReadCorporate onClose={closeModal} id={researchId} />
           )}
