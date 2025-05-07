@@ -18,7 +18,7 @@ public enum ErrorCode {
     ARGUMENT_TYPE_MISMATCH(HttpStatus.BAD_REQUEST, "요청 파라미터 타입이 일치하지 않습니다."),
 
     // 회원
-    USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "사용자를 찾을 수 없습니다."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "사용자를 찾을 수 없습니다."),
     INVALID_USER(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // 인증
