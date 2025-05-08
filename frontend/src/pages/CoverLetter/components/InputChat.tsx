@@ -5,9 +5,10 @@ import { AiOutlineSend } from "react-icons/ai";
 
 export interface InputChatProps {
   onSubmitMessage: () => void;
+  onChangeInput: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-function InputChat({ onSubmitMessage }: InputChatProps) {
+function InputChat({ onSubmitMessage, onChangeInput }: InputChatProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [inputValue, setInputValue] = useState("");
   const { addUserMessage } = useCoverLetterStore();
@@ -21,9 +22,9 @@ function InputChat({ onSubmitMessage }: InputChatProps) {
     }
   }, [inputValue]);
 
-  const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
-  };
+  // const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   setInputValue(e.target.value);
+  // };
 
   const handleAddMessage = (message: string) => {
     addUserMessage(message);
@@ -63,7 +64,7 @@ function InputChat({ onSubmitMessage }: InputChatProps) {
             name="userMessage"
             value={inputValue}
             className="break-all resize-none px-3 py-2 pr-14 max-h-40 overflow-y-auto outline-0 w-full"
-            onChange={handleOnChange}
+            onChange={(e) => onChangeInput(e)}
             onKeyDown={handleKeyDown}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}

@@ -5,8 +5,10 @@ import QuestionStep from "./components/QuestionStep";
 import { useCoverLetterStore } from "@/store/coverLetterStore";
 import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
+import { useSendMessage } from "@/hooks/coverLetterHooks";
 
 function CoverLetter() {
+  const mutation = useSendMessage();
   const data: CoverLetterResponse = {
     coverLetterId: 1, // 자기소개서 id
     summary: {
@@ -40,17 +42,37 @@ function CoverLetter() {
   };
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
-  const [selectQuestion, setSelectQuestion] = useState(1);
+  const [selectQuestion, setSelectQuestion] = useState(0);
   const param = useParams();
   const { chatLog } = useCoverLetterStore();
 
-  const coverLetterId = param.id ? parseInt(param.id, 10) : 0;
+  // inputChat 상태 관리
+  const [inputValue, setInputValue] = useState("");
+  const [contentDetail, setContentDetail] = useState("");
+  const [nowContentLength, setNowContentLength] = useState(
+    data.content.contentDetail.length
+  );
 
+  const onChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputValue(e.target.value);
+  };
+  const onChangeContentDetail = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContentDetail(e.target.value);
+    setNowContentLength(e.target.textLength);
+  };
+
+  const coverLetterId = param.id ? parseInt(param.id, 10) : 0;
   const handleSelectQuestion = (selectNum: number) => {
     setSelectQuestion(selectNum);
   };
 
+  const message = {
+    contentId: selectQuestion,
+    userMessage: inputValue,
+    contentDetail: contentDetail,
+  };
   const onSubmitMessage = useCallback(() => {
+    mutation.mutate(message);
     const chatContainer = chatContainerRef.current;
     setTimeout(() => {
       if (chatContainer) {
@@ -102,7 +124,10 @@ function CoverLetter() {
               ))}
             </div>
             <div className="absolute bottom-0 w-full">
-              <InputChat onSubmitMessage={onSubmitMessage}></InputChat>
+              <InputChat
+                onChangeInput={onChangeInput}
+                onSubmitMessage={onSubmitMessage}
+              ></InputChat>
             </div>
           </div>
         </div>
@@ -110,6 +135,8 @@ function CoverLetter() {
         <CoverLetterEditor
           selectQuestion={selectQuestion}
           coverLetterId={coverLetterId}
+          onChangeContentDetail={onChangeContentDetail}
+          nowContentLength={nowContentLength}
         />
 
         <QuestionStep
