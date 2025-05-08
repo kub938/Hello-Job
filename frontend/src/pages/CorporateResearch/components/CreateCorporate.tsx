@@ -35,6 +35,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
     mutationFn: async (data: postCorporateReportRequest) => {
       return await corporateReportApi.postCorporateReport(data);
     },
+    gcTime: 1000,
     onSuccess: () => {
       toast.success("기업 분석이 완료되었습니다.");
       setIsSubmitting(false);
