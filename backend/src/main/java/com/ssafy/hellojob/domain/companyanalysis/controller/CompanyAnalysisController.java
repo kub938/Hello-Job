@@ -10,11 +10,13 @@ import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/company-analysis")
