@@ -76,6 +76,7 @@ public class CoverLetterService {
                 .build();
 
         coverLetterRepository.save(newCoverLetter);
+        coverLetterRepository.flush();
 
         Integer newCoverLetterId = newCoverLetter.getCoverLetterId();
         log.debug("🌞 coverLetterId : {}", newCoverLetterId);
