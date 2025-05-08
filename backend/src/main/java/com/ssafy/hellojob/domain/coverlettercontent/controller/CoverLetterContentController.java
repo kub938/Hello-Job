@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class CoverLetterContentController {
     public ChatResponseDto sendChat(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer contentId,
-            @RequestBody ChatRequestDto requestDto
+            @Valid @RequestBody ChatRequestDto requestDto
             ) {
         Integer userId = principal.getUserId();
         return coverLetterContentService.getAIChatRequestDto(userId, contentId, requestDto);
