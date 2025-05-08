@@ -43,9 +43,12 @@ public class CoverLetterContentController {
 
     @PostMapping("/{contentId}/chat")
     public ChatResponseDto sendChat(
+            @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer contentId,
             @RequestBody ChatRequestDto requestDto
             ) {
-        return chatLogService.sendChat(contentId, requestDto);
+        Integer userId = principal.getUserId();
+
+        return coverLetterContentService.getAIChatRequestDto(userId, contentId, requestDto);
     }
 }

@@ -61,4 +61,14 @@ public class CoverLetter extends BaseTimeEntity {
     public void updateFinish(boolean finish) {
         this.finish = finish;
     }
+
+    public void addContent(CoverLetterContent content) {
+        this.contents.add(content);
+        content.setCoverLetter(this);
+    }
+
+    public void assignContents(List<CoverLetterContent> contents) {
+        this.contents.clear();
+        contents.forEach(this::addContent);
+    }
 }

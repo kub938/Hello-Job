@@ -2,11 +2,17 @@ package com.ssafy.hellojob.domain.coverletter.service;
 
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.request.*;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterOnlyContentDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.WholeCoverLetterContentDto;
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
 import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -14,6 +20,8 @@ import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
 import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisRepository;
 import com.ssafy.hellojob.domain.jobrolesnapshot.service.JobRoleSnapshotService;
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -33,10 +43,13 @@ import java.util.Map;
 public class CoverLetterService {
 
     private final CoverLetterRepository coverLetterRepository;
+    private final CoverLetterContentRepository coverLetterContentRepository;
     private final CompanyAnalysisRepository companyAnalysisRepository;
     private final JobRoleAnalysisRepository jobRoleAnalysisRepository;
     private final JobRoleSnapshotService jobRoleSnapshotService;
     private final CoverLetterContentService coverLetterContentService;
+    private final UserReadService userReadService;
+    private final FastApiClientService fastApiClientService;
 
     public CoverLetterCreateResponseDto createCoverLetter(User user, CoverLetterRequestDto requestDto) {
         CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
@@ -63,15 +76,74 @@ public class CoverLetterService {
                 .build();
 
         coverLetterRepository.save(newCoverLetter);
+        coverLetterRepository.flush();
 
         Integer newCoverLetterId = newCoverLetter.getCoverLetterId();
+        log.debug("🌞 coverLetterId : {}", newCoverLetterId);
 
-        Integer firstContentId = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents());
+        List<CoverLetterContent> contents = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents());
+        List<AICoverLetterResponseDto> AIResponses = getAIResponses(newCoverLetterId, contents);
+        coverLetterContentService.appendDetail(contents, AIResponses);
 
         return CoverLetterCreateResponseDto.builder()
                 .coverLetterId(newCoverLetterId)
-                .firstContentId(firstContentId)
+                .firstContentId(contents.get(0).getContentId())
                 .build();
+    }
+
+    public List<AICoverLetterResponseDto> getAIResponses(Integer coverLetterId, List<CoverLetterContent> contents) {
+        List<AICoverLetterResponseDto> responseDto;
+
+        CoverLetter coverLetter = getFullDetail(coverLetterId, contents);
+
+        log.debug("🎈 coverLetter : {}", coverLetter.getCoverLetterId());
+        log.debug("🎈 coverLetter content: {}", coverLetter.getContents());
+
+        log.debug("🌞 coverLetter의 content: {}", coverLetter.getContents().stream()
+                .map(c -> String.format("[id=%d, number=%d]", c.getContentId(), c.getContentNumber()))
+                .collect(Collectors.joining(", ")));
+
+        AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
+                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .contents(coverLetter.getContents().stream()
+                        .map(content -> ContentDto.builder()
+                                .content_number(content.getContentNumber())
+                                .content_length(content.getContentLength())
+                                .content_question(content.getContentQuestion())
+                                .content_prompt(content.getContentFirstPrompt())
+                                .experiences(content.getExperiences().stream()
+                                        .map(cle -> cle.getExperience())
+                                        .filter(Objects::nonNull)
+                                        .map(ExperienceDto::from)
+                                        .toList()
+                                )
+                                .projects(content.getExperiences().stream()
+                                        .map(cle -> cle.getProject())
+                                        .filter(Objects::nonNull)
+                                        .map(ProjectDto::from)
+                                        .toList()
+                                )
+                                .build()
+                        ).toList()
+                ).build();
+
+        responseDto = fastApiClientService.getCoverLetterContentDetail(requestDto);
+        return responseDto;
+    }
+
+
+    public CoverLetter getFullDetail(Integer coverLetterId, List<CoverLetterContent> contents) {
+        log.debug("🌞 coverLetterId : {} ", coverLetterId);
+        CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
+
+        contents.forEach(c -> {
+            log.debug("🧩 contentId={}, expSize={}", c.getContentId(), c.getExperiences().size());
+        });
+
+        coverLetter.assignContents(contents);
+
+        return coverLetter;
     }
 
     // 자기소개서 전체 문항 상태 조회
@@ -80,7 +152,7 @@ public class CoverLetterService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
@@ -102,7 +174,7 @@ public class CoverLetterService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
@@ -120,7 +192,7 @@ public class CoverLetterService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        if (!user.getUserId().equals(coverLetter.getUser().getUserId())){
+        if (!user.getUserId().equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
 
@@ -147,5 +219,27 @@ public class CoverLetterService {
     public Page<MyPageCoverLetterDto> getCoverLettersForMaPage(Integer userId, Pageable pageable) {
         Page<MyPageCoverLetterDto> list = coverLetterRepository.getCoverLettersByUser(userId, pageable);
         return list;
+    }
+
+    public WholeCoverLetterContentDto getWholeContentDetail(Integer userId, Integer coverLetterId) {
+        userReadService.findUserByIdOrElseThrow(userId);
+
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        if (!coverLetter.getUser().getUserId().equals(userId)) {
+            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
+        }
+
+        List<CoverLetterOnlyContentDto> contents = coverLetterContentService.getWholeContentDetail(coverLetterId);
+
+        WholeCoverLetterContentDto response = WholeCoverLetterContentDto.builder()
+                .coverLetterId(coverLetterId)
+                .contents(contents)
+                .finish(coverLetter.isFinish())
+                .updatedAt(coverLetter.getUpdatedAt())
+                .build();
+
+        return response;
     }
 }
