@@ -1,6 +1,5 @@
 import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import InputChat from "./components/InputChat";
-import QuestionStep from "./components/QuestionStep";
 import { useCoverLetterStore } from "@/store/coverLetterStore";
 import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
@@ -28,7 +27,7 @@ function CoverLetter() {
   const { data: contents, isLoading: isContentsLoading } =
     useGetCoverLetterContentIds(id || 0);
 
-  const { data, isLoading, isError } = useGetCoverLetter(selectQuestion || 0);
+  const { data, isLoading } = useGetCoverLetter(selectQuestion || 0);
 
   // 데이터가 로드되면 상태 업데이트
   useEffect(() => {
@@ -53,9 +52,9 @@ function CoverLetter() {
     setNowContentLength(e.target.textLength);
   };
 
-  const handleSelectQuestion = (selectNum: number) => {
-    setSelectQuestion(selectNum);
-  };
+  // const handleSelectQuestion = (selectNum: number) => {
+  //   setSelectQuestion(selectNum);
+  // };
 
   const onSubmitMessage = useCallback(() => {
     const message = {

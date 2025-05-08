@@ -1,8 +1,5 @@
 import { Button } from "@/components/Button";
-import Loading from "@/components/Loading/Loading";
-import { useGetCoverLetter } from "@/hooks/coverLetterHooks";
 import { CoverLetterResponse } from "@/types/coverLetterTypes";
-import { useState } from "react";
 
 export interface CoverLetterEditorProps {
   CoverLetterData: CoverLetterResponse;

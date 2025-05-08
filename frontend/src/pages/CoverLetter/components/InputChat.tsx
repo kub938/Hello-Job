@@ -1,6 +1,6 @@
 import { Button } from "@/components/Button";
 import { useCoverLetterStore } from "@/store/coverLetterStore";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 
 export interface InputChatProps {
