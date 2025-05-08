@@ -31,6 +31,7 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
     inputData: {
       companyAnalysisId: null,
       jobRoleAnalysisId: null,
+      coverLetterTitle: "",
       contents: [
         {
           contentQuestion: "",
@@ -43,6 +44,14 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
       ],
     },
 
+    setCoverLetterTitle: (title: string) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          coverLetterTitle: title,
+        },
+      }));
+    },
     setCompanyAnalysisId: (id: number | null) => {
       set((state) => ({
         inputData: {
