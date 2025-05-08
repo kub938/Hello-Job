@@ -6,6 +6,7 @@ import { authApi } from "./instance";
 import {
   getContentStatusResponse,
   getCoverLetterResponse,
+  SaveCoverLetterRequest,
 } from "@/types/coverLetterApiType";
 
 interface sendMessageRequest {
@@ -45,8 +46,11 @@ export const coverLetterApi = {
     );
   },
 
-  saveCoverLetter: (coverLetterId: number) => {
-    return authApi.patch(`/api/v1/cover-letter/${coverLetterId}`);
+  saveCoverLetter: (saveData: SaveCoverLetterRequest) => {
+    return authApi.patch(`/api/v1/cover-letter-content/${saveData.contentId}`, {
+      userDetail: saveData.contentDetail,
+      contentStatus: saveData.contentStatus,
+    });
   },
   deleteCoverLetter: (coverLetterId: number) => {
     return authApi.delete(`/api/v1/cover-letter/${coverLetterId}`);
