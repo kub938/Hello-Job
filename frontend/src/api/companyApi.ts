@@ -6,6 +6,10 @@ export const getCompanies = (companyName: string) => {
   });
 };
 
+export const getCompanyDetail = (companyId: number) => {
+  return authApi.get(`/api/v1/company/${companyId}`);
+};
+
 export const companyAnalysisApi = {
   getCompanyAnalyses: () => {
     return authApi.get("/api/v1/company-analysis/all-analysis");
