@@ -83,9 +83,9 @@ function CorporateResearch() {
       <h2 className="text-2xl font-bold mb-4">기업 분석 검색 결과</h2>
       <h1 className="text-3xl font-bold mb-1">삼성 전자</h1>
       <h1 className="text-3xl font-bold mb-12">기업 분석 레포트 목록입니다</h1>
-      <div className="flex justify-start gap-4 w-[1114px] mx-auto flex-wrap">
+      <div className="flex justify-start gap-4 w-[1164px] mx-auto flex-wrap">
         <button className="cursor-pointer" onClick={openCreateModal}>
-          <div className="w-[210px] h-[180px] rounded-lg group border border-dashed border-[#886BFB] flex flex-col items-center justify-center gap-2 hover:border-[#6F52E0] transition-colors">
+          <div className="w-[220px] h-[180px] rounded-lg group border border-dashed border-[#886BFB] flex flex-col items-center justify-center gap-2 hover:border-[#6F52E0] transition-colors">
             <div className="w-8 h-8 flex items-center justify-center rounded-full bg-[#AF9BFF] group-hover:bg-[#886BFB] transition-colors text-white">
               <FaPlus />
             </div>
@@ -142,7 +142,10 @@ function CorporateResearch() {
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
-            <CreateCorporate onClose={closeModal} />
+            <CreateCorporate
+              onClose={closeModal}
+              corporateId={parseInt(params.id ? params.id : "1")}
+            />
           ) : (
             <ReadCorporate onClose={closeModal} id={researchId} />
           )}
