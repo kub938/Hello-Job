@@ -15,14 +15,17 @@ import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class JobRoleAnalysisService {
@@ -314,6 +317,8 @@ public class JobRoleAnalysisService {
                     }
                     return true; // 조건 없으면 통과
                 })
+                .sorted(Comparator.comparing(JobRoleAnalysis::getUpdatedAt).reversed()) // 최신순 정렬
+                .limit(10) // 최대 10개만
                 .collect(Collectors.toList());
 
         // 3. 결과를 변환
