@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CoverLetterContentRepository extends JpaRepository<CoverLetterContent, Integer> {
 
@@ -46,4 +47,18 @@ public interface CoverLetterContentRepository extends JpaRepository<CoverLetterC
             ORDER BY clc.contentNumber
             """)
     List<CoverLetterOnlyContentDto> findContentByCoverLetterId(@Param("coverLetterId") Integer coverLetterId);
+
+    @Query("""
+            SELECT DISTINCT c
+            FROM CoverLetterContent c
+            LEFT JOIN FETCH c.experiences cle
+            WHERE c.coverLetter.coverLetterId = :coverLetterId
+            """)
+    List<CoverLetterContent> findContentsWithExperiences(@Param("coverLetterId") Integer coverLetterId);
+
+    @Query("""
+    SELECT c.coverLetter.coverLetterId
+    FROM CoverLetterContent c
+    WHERE c.contentId = :contentId""")
+    Optional<Integer> findCoverLetterIdByContentId(@Param("contentId") Integer contentId);
 }

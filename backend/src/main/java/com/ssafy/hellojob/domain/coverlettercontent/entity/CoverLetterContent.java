@@ -73,11 +73,19 @@ public class CoverLetterContent extends BaseTimeEntity {
         }
     }
 
+    public void setCoverLetter(CoverLetter coverLetter) {
+        this.coverLetter = coverLetter;
+    }
+
     public void updateCoverLetterContentWithChat(String contentDetail) {
         this.contentDetail = contentDetail;
     }
 
     public void updateContentStatus(CoverLetterContentStatus status) {
         this.contentStatus = status;
+    }
+
+    public void updateContentDetail(String contentDetail) {
+        this.contentDetail = contentDetail;
     }
 }

@@ -3,7 +3,9 @@ package com.ssafy.hellojob.domain.coverlettercontent.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
+import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.ChatLog;
@@ -11,8 +13,7 @@ import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentStatus;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.ChatLogRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
-import com.ssafy.hellojob.global.exception.BaseException;
-import com.ssafy.hellojob.global.exception.ErrorCode;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ public class ChatLogService {
 
     private final ChatLogRepository chatLogRepository;
     private final CoverLetterContentRepository coverLetterContentRepository;
+    private final CoverLetterRepository coverLetterRepository;
+    private final FastApiClientService fastApiClientService;
 
     // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌
     private final ObjectMapper mapper = new ObjectMapper();
@@ -40,15 +43,7 @@ public class ChatLogService {
 
         if (chatLogString == null || chatLogString.isBlank()) return new ArrayList<>();
 
-        List<ChatMessageDto> chatLog;
-
-        try {
-            chatLog = mapper.readValue(chatLogString, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            log.error("🌞 채팅 로그 파싱 실패: {}", chatLogString);
-            throw new RuntimeException("채팅 로그 JSON 파싱 실패", e);
-        }
+        List<ChatMessageDto> chatLog = parseJson(chatLogString);
 
         log.debug("🌞 chatLog {}", chatLog.toArray().toString());
 
@@ -56,33 +51,30 @@ public class ChatLogService {
     }
 
     @Transactional
-    public ChatResponseDto sendChat(Integer contentId, ChatRequestDto requestDto) {
-        // 사용자 메시지를 받은 다음 AI에 전달
-        // AI로부터 메시지를 받으면 DB에 저장 & contentStatus 확인 후 IN_PROGRESS로 변경
-        // AI 메시지를 받는 로직 들어가야 함
+    public ChatResponseDto sendChat(CoverLetterContent content, AIChatRequestDto aiChatRequestDto) {
+
+        AIChatResponseDto response = sendChatToFastApi(aiChatRequestDto);
+
         ChatMessageDto userMessages = ChatMessageDto.builder()
                 .sender("user")
-                .message(requestDto.getUserMessage())
+                .message(aiChatRequestDto.getEdit_content().getUser_message())
                 .build();
 
         ChatMessageDto aiMessage = ChatMessageDto.builder()
                 .sender("ai")
-                .message("아직 AI 연결 안됐지롱")
+                .message(response.getAi_message())
                 .build();
 
         // 본문 내용 저장
-        String contentDetail = requestDto.getContentDetail();
-
-        CoverLetterContent content = coverLetterContentRepository.findById(contentId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
+        String contentDetail = aiChatRequestDto.getEdit_content().getCover_letter();
 
         content.updateCoverLetterContentWithChat(contentDetail);
 
         // 새로운 채팅 배열
         List<ChatMessageDto> newChats = new ArrayList<>();
 
-        Optional<ChatLog> chatLogOpt = chatLogRepository.findById(contentId);
-        
+        Optional<ChatLog> chatLogOpt = chatLogRepository.findById(content.getContentId());
+
         if (chatLogOpt.isEmpty()) {
             // 기존 로그 없으면 새로 생성
             newChats.add(userMessages);
@@ -118,11 +110,17 @@ public class ChatLogService {
                 .build();
     }
 
+    public AIChatResponseDto sendChatToFastApi(AIChatRequestDto requestDto) {
+        AIChatResponseDto response = fastApiClientService.sendChatToFastApi(requestDto);
+        return response;
+    }
+
     // JSON 형태로 파싱
     private List<ChatMessageDto> parseJson(String json) {
         if (json == null || json.isBlank()) return new ArrayList<>();
         try {
-            return mapper.readValue(json, new TypeReference<>() {});
+            return mapper.readValue(json, new TypeReference<>() {
+            });
         } catch (JsonProcessingException e) {
             throw new RuntimeException("채팅 로그 파싱 실패", e);
         }
