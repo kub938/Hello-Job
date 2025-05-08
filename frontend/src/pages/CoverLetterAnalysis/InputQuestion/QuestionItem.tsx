@@ -79,14 +79,20 @@ function QuestionItem({
     }
   }, [experienceData, selectedExperienceNum]);
   //form 업데이트
-  useEffect(() => {
-    const updatedData: Partial<CoverLetterRequestContent> = {
-      contentQuestion: inputTitle,
-      contentLength: inputLimitNum ? Number(inputLimitNum) : 0,
-      contentFirstPrompt: inputPrompt,
-    };
 
-    onUpdateQuestion(contentIndex, updatedData);
+  useEffect(() => {
+    if (inputTitle !== "" || inputLimitNum !== "" || inputPrompt !== "") {
+      const updatedData: Partial<CoverLetterRequestContent> = {
+        contentQuestion: inputTitle,
+        contentLength: inputLimitNum ? Number(inputLimitNum) : 0,
+        contentFirstPrompt: inputPrompt,
+        contentNumber: contentIndex,
+        contentProjectIds: selectedProjectNum,
+        contentExperienceIds: selectedExperienceNum,
+      };
+
+      onUpdateQuestion(contentIndex, updatedData);
+    }
   }, [inputTitle, inputLimitNum, inputPrompt]);
 
   const toggleForm = () => {
