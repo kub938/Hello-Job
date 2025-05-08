@@ -42,20 +42,6 @@ export interface postJobBookmarkResponse {
   jobRoleAnalysisId: number;
 }
 
-//직무 분석 생성
-export interface postJobRoleAnalysisRequest {
-  companyId: number;
-  jobRoleName: string;
-  jobRoleTitle: string;
-  jobRoleSkills: string;
-  jobRoleWork: string;
-  jobRoleRequirements: string;
-  jobRolePreferences: string;
-  jobRoleEtc: string;
-  jobRoleCategory: JobRoleCategory;
-  isPublic: boolean;
-}
-
 export type JobRoleCategory =
   | "서버백엔드개발자"
   | "프론트엔드개발자"
@@ -78,6 +64,20 @@ export type JobRoleCategory =
   | "블록체인"
   | "기술지원"
   | "기타";
+
+//직무 분석 생성
+export interface postJobRoleAnalysisRequest {
+  companyId: number;
+  jobRoleName: string;
+  jobRoleTitle: string;
+  jobRoleSkills: string;
+  jobRoleWork: string;
+  jobRoleRequirements: string;
+  jobRolePreferences: string;
+  jobRoleEtc: string;
+  jobRoleCategory: JobRoleCategory;
+  isPublic: boolean;
+}
 
 export interface postJobRoleAnalysisResponse {
   jobRoleId: number;
