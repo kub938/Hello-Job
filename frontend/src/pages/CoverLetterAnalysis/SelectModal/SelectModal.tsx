@@ -4,7 +4,7 @@ import { useGetExperiences } from "@/hooks/experienceHooks";
 import { useGetProjects } from "@/hooks/projectHooks";
 import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import { GetProjectsResponse } from "@/types/projectApiTypes";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 export type ModalType = "project" | "experience" | "";
 
