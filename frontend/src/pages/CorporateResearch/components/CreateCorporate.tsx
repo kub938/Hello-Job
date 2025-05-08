@@ -40,6 +40,11 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
       setIsSubmitting(false);
       // 페이지 이동시키기
       navigate("/mypage/bookmarks/companies");
+      //초기화
+      setIsPublic(true);
+      setIsBasic(true);
+      setIsPlus(false);
+      setIsFinancial(false);
     },
     onError: () => {
       toast.error("기업 분석 생성 실패");
@@ -49,6 +54,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
 
   const onValidSubmit = async (data: IForm, e?: React.BaseSyntheticEvent) => {
     e?.preventDefault();
+    console.log(data);
 
     try {
       // 1) api 호출
@@ -59,12 +65,6 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         plus: data.plus,
         financial: data.financial,
       });
-
-      // 메시지 전송 로직 성공 시 input 비우기
-      resetField("isPublic");
-      resetField("basic");
-      resetField("plus");
-      resetField("financial");
     } catch (error) {
       // 에러 처리
       console.error(error);
