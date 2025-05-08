@@ -125,7 +125,10 @@ function JobResearch() {
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
-            <CreateJob onClose={closeModal} />
+            <CreateJob
+              onClose={closeModal}
+              corporateId={parseInt(params.id ? params.id : "1")}
+            />
           ) : (
             <ReadJob onClose={closeModal} id={researchJobId} />
           )}
