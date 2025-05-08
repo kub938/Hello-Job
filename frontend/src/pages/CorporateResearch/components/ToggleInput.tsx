@@ -9,7 +9,6 @@ interface ToggleInputProps {
   name: string;
   required?: boolean;
   requiredMessage?: string;
-  activeColor?: string;
 }
 
 function ToggleInput({
@@ -21,7 +20,6 @@ function ToggleInput({
   name,
   required = false,
   requiredMessage = "필수 입력 항목입니다.",
-  activeColor = "bg-[#886BFB]",
 }: ToggleInputProps) {
   return (
     <div className="flex items-center p-4 bg-white rounded-lg shadow-sm border border-[#E4E8F0]">
@@ -46,7 +44,7 @@ function ToggleInput({
           onChange={(e) => onChange(e.target.checked)}
         />
         <div
-          className={`relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:${activeColor} dark:peer-checked:${activeColor}`}
+          className={`relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-[#886BFB] dark:peer-checked:bg-[#886BFB]`}
         ></div>
       </label>
     </div>
