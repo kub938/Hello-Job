@@ -1,4 +1,4 @@
-import { ContentStatus } from "@/api/coverLetterApi";
+import { ContentStatus } from "./coverLetterApiType";
 
 export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
 export type SenderType = "AI" | "USER";
