@@ -1,8 +1,8 @@
 import { Button } from "@/components/Button";
-import { CoverLetterResponse } from "@/types/coverLetterTypes";
+import { getCoverLetterResponse } from "@/types/coverLetterApiType";
 
 export interface CoverLetterEditorProps {
-  CoverLetterData: CoverLetterResponse;
+  CoverLetterData: getCoverLetterResponse;
   onChangeContentDetail: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   nowContentLength: number;
 }

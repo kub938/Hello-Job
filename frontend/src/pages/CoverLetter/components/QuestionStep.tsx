@@ -5,8 +5,6 @@ function QuestionStep({
   handleSelectQuestion,
   selectQuestion,
 }: QuestionStepProps) {
-  const questions = [1, 2, 3];
-
   const stepStatusStyle = (questionStatus: string) => {
     switch (questionStatus) {
       case "COMPLETED":
@@ -25,16 +23,18 @@ function QuestionStep({
   };
   return (
     <div className="flex flex-col gap-3  justify-center items-center">
-      {questions.map((num, index) => (
+      {QuestionStatuses.map((status, index) => (
         <div
           key={index}
-          onClick={() => handleSelectQuestion(num)}
-          className={`flex flex-col ${stepBlockStyle(num === selectQuestion)}`}
+          onClick={() => handleSelectQuestion(status.contentNumber)}
+          className={`flex flex-col ${stepBlockStyle(
+            status.contentNumber === selectQuestion
+          )}`}
         >
-          <div>{num}</div>
+          <div>{status.contentNumber + 1}</div>
           <div
             className={`size-2 rounded-full ${stepStatusStyle(
-              QuestionStatuses[num].contentStatus
+              status.contentStatus
             )}`}
           ></div>
         </div>
