@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
-import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AIChatResponseDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.ChatLog;
