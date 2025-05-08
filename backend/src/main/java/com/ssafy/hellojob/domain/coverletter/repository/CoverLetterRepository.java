@@ -19,12 +19,22 @@ public interface CoverLetterRepository extends JpaRepository<CoverLetter, Intege
 
     @Query("""
             SELECT new com.ssafy.hellojob.domain.coverletter.dto.response.MyPageCoverLetterDto(
-            cl.coverLetterId, cl.coverLetterTitle, c.companyName, jr.jobRoleSnapshotName, jr.jobRoleSnapshotCategory, cl.finish, cl.updatedAt)
+            cl.coverLetterId,
+            cl.coverLetterTitle,
+            SUBSTRING(con.contentDetail, 1, 100),
+            c.companyName,
+            jr.jobRoleSnapshotName,
+            jr.jobRoleSnapshotCategory,
+            cl.finish,
+            cl.updatedAt)
             FROM CoverLetter cl
             JOIN cl.jobRoleSnapshot jr
             JOIN cl.companyAnalysis ca
             JOIN ca.company c
+            LEFT JOIN cl.contents con ON con.contentNumber = 1
             WHERE cl.user.userId = :userId
             """)
     Page<MyPageCoverLetterDto> getCoverLettersByUser(@Param("userId") Integer userId, Pageable pageable);
+
+
 }
