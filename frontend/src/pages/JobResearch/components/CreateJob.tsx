@@ -41,7 +41,7 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
       return await jobRoleAnalysis.postJobRoleAnalysis(data);
     },
     onSuccess: () => {
-      toast.success("직무 분석이 완료되었습니다.");
+      toast.success("직무 분석이 저장되었습니다.");
       setIsSubmitting(false);
       // 페이지 이동시키기
       navigate("/mypage/bookmarks/jobs");
@@ -86,10 +86,7 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
   };
 
   const onInvalidSubmit = (errors: FieldErrors<IForm>) => {
-    if (errors.isPublic?.type === "required") {
-      // "빈 채팅을 입력할 수 없습니다" 에러 발생 시, 원하는 custom function 실행
-      toast.error(errors.isPublic.message);
-    } else if (errors.jobRoleTitle?.type === "required") {
+    if (errors.jobRoleTitle?.type === "required") {
       toast.error(errors.jobRoleTitle?.message);
     } else if (errors.jobRoleCategory?.type === "required") {
       toast.error(errors.jobRoleCategory?.message);
@@ -143,7 +140,6 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
           onChange={setIsPublic}
           register={register}
           name="isPublic"
-          required={true}
           requiredMessage="필수 입력 항목입니다."
         />
 

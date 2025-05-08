@@ -75,6 +75,12 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
     if (errors.isPublic?.type === "required") {
       // "빈 채팅을 입력할 수 없습니다" 에러 발생 시, 원하는 custom function 실행
       toast.error(errors.isPublic.message);
+    } else if (errors.basic?.type === "required") {
+      toast.error(errors.basic.message);
+    } else if (errors.plus?.type === "required") {
+      toast.error(errors.plus.message);
+    } else if (errors.financial?.type === "required") {
+      toast.error(errors.financial.message);
     }
     setIsSubmitting(false);
   };
@@ -82,7 +88,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const onSubmitClicked = (e: React.BaseSyntheticEvent) => {
     e?.preventDefault();
     if (isSubmitting) return; // 연속 클릭 방지
-    toast.success("분석이 시작되었습니다. 잠시 기다려주세요.");
+    toast.success("분석 요청을 보냈습니다.");
     setIsSubmitting(true);
     handleSubmit(onValidSubmit, onInvalidSubmit)();
   };
@@ -126,8 +132,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           onChange={setIsPublic}
           register={register}
           name="isPublic"
-          required={true}
-          requiredMessage="필수 입력 항목입니다."
+          requiredMessage="공개 여부는 필수 입력 항목입니다."
         />
         <ToggleInput
           label={
@@ -142,8 +147,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           onChange={setIsBasic}
           register={register}
           name="basic"
-          required={true}
-          requiredMessage="필수 입력 항목입니다."
+          requiredMessage="기본 분석 여부는 필수 입력 항목입니다."
         />
         <ToggleInput
           label={
@@ -158,8 +162,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           onChange={setIsPlus}
           register={register}
           name="plus"
-          required={true}
-          requiredMessage="필수 입력 항목입니다."
+          requiredMessage="심화 분석 여부는 필수 입력 항목입니다."
         />
         <ToggleInput
           label={isFinancial ? "재무 데이터 분석" : "재무 데이터 사용하지 않음"}
@@ -172,8 +175,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           onChange={setIsFinancial}
           register={register}
           name="financial"
-          required={true}
-          requiredMessage="필수 입력 항목입니다."
+          requiredMessage="재무 분석 여부는 필수 입력 항목입니다."
         />
 
         <div className="mt-12 flex justify-center gap-4">
