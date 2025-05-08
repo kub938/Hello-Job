@@ -18,6 +18,8 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,13 +49,14 @@ public class CoverLetterService {
         if (requestDto.getJobRoleAnalysisId() == null) {
             jobRoleSnapshot = null;
         } else {
-            JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId().longValue())
+            JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(requestDto.getJobRoleAnalysisId())
                     .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
 
             jobRoleSnapshot = jobRoleSnapshotService.copyJobRoleAnalysis(companyName, jobRoleAnalysis);
         }
 
         CoverLetter newCoverLetter = CoverLetter.builder()
+                .coverLetterTitle(requestDto.getCoverLetterTitle())
                 .user(user)
                 .companyAnalysis(companyAnalysis)
                 .jobRoleSnapshot(jobRoleSnapshot)
@@ -106,6 +109,7 @@ public class CoverLetterService {
         List<Integer> contentIds = coverLetterContentService.getContentIdsByCoverLetterId(coverLetterId);
 
         return CoverLetterSummaryDto.builder()
+                .coverLetterTitle(coverLetter.getCoverLetterTitle())
                 .contentIds(contentIds)
                 .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
                 .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
@@ -137,5 +141,11 @@ public class CoverLetterService {
 
         coverLetterRepository.delete(coverLetter);
         return Map.of("message", "자기소개서가 삭제되었습니다.");
+    }
+
+    // 마이페이지 자기소개서 목록 조회
+    public Page<MyPageCoverLetterDto> getCoverLettersForMaPage(Integer userId, Pageable pageable) {
+        Page<MyPageCoverLetterDto> list = coverLetterRepository.getCoverLettersByUser(userId, pageable);
+        return list;
     }
 }

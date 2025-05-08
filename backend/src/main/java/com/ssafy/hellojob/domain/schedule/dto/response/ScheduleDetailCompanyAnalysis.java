@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 public class ScheduleDetailCompanyAnalysis {
 
-    private Long companyAnalysisId;
+    private Integer companyAnalysisId;
     private String companyName;
     private String newsAnalysisData;
     private List<String> newsAnalysisUrl;

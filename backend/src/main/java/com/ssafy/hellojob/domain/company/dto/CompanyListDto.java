@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CompanyListDto {
 
-    private Long id;
+    private Integer id;
 
     private String companyName;
 
@@ -22,9 +22,6 @@ public class CompanyListDto {
     private CompanySize companySize;
 
     private String companyIndustry;
-
-//    private boolean companyVisible;
-//
     private LocalDateTime updatedAt;
 
 }

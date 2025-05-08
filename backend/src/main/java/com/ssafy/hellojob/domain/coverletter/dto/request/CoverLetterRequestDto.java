@@ -10,7 +10,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CoverLetterRequestDto {
-    private Long companyAnalysisId;
+    private String coverLetterTitle;
+    private Integer companyAnalysisId;
     private Integer jobRoleAnalysisId;
     private List<ContentsDto> contents;
 }

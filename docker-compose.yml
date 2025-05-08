@@ -37,10 +37,10 @@ services:
     build: ./ai
     ports:
       - "8000:8000"
-    networks:
-      default:
-        aliases:
-          - hellojob-app
+    # networks:
+    #   default:
+    #     aliases:
+    #       - hellojob-app
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DART_API_KEY=${DART_API_KEY}
@@ -51,7 +51,7 @@ services:
         condition: service_healthy
     volumes:
       - pip-cache:/root/.cache/pip
-      - ./ai/app:/root/hellojob/app
+      # - ./ai/app:/root/hellojob/app
   
   nginx:
     build: ./nginx
