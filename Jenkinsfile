@@ -58,7 +58,9 @@ pipeline {  // 파이프라인 정의 시작
                         string(credentialsId: 'FRONTEND_URL', variable: 'FRONTEND_URL'),
                         string(credentialsId: 'OPENAI_API_KEY', variable: 'OPENAI_API_KEY'),
                         string(credentialsId: 'DART_API_KEY', variable: 'DART_API_KEY'),
-                        string(credentialsId: 'FASTAPI_URL', variable: 'FASTAPI_URL')
+                        string(credentialsId: 'FASTAPI_URL', variable: 'FASTAPI_URL'),
+                        string(credentialsId: 'NAVER_CLIENT_ID', variable: 'NAVER_CLIENT_ID'),
+                        string(credentialsId: 'NAVER_CLIENT_SECRET', variable: 'NAVER_CLIENT_SECRET')
                     ]) {
                         sh '''
                             echo "🔄 Stopping existing containers..."
@@ -83,7 +85,9 @@ pipeline {  // 파이프라인 정의 시작
                                 --build-arg FRONTEND_URL=$FRONTEND_URL \
                                 --build-arg OPENAI_API_KEY=$OPENAI_API_KEY \
                                 --build-arg DART_API_KEY=$DART_API_KEY \
-                                --build-arg FASTAPI_URL=$FASTAPI_URL
+                                --build-arg FASTAPI_URL=$FASTAPI_URL \
+                                --build-arg NAVER_CLIENT_ID=$NAVER_CLIENT_ID \
+                                --build-arg NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET
 
                             echo "🧹 Removing local Docker images..."
                             docker rmi workspace-backend || true

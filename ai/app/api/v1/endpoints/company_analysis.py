@@ -2,14 +2,14 @@ from fastapi import APIRouter
 from datetime import datetime
 
 from app.schemas import company
-from app.services.company_analysis_service import company_analysis_dart, company_analysis_news
+from app.services.company_analysis_service import company_analysis_all
 
 router = APIRouter(prefix="/company-analysis", tags=["company-analysis"])
 
 
 @router.post("")
 async def company_analysis(request: company.CompanyAnalysisRequest):
-    """_summary_
+    """기업 분석 및 뉴스 데이터를 반환합니다.
 
     Args:
         request (company.CompanyAnalysisRequest): 기업 분석 요청 정보
@@ -19,33 +19,20 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
     base = request.base
     plus = request.plus
     fin = request.fin
+
+    # company_analysis_all 함수를 호출하여 MCP 서버 설정을 한 번만 수행
+    result = await company_analysis_all(company_name, base, plus, fin)
     
-    # TODO: 기업 분석 로직 
-    company_analysis_result = await company_analysis_dart(company_name, base, plus, fin)
-    news_result = await company_analysis_news(company_name)
-    
-    # response = company.CompanyAnalysisResponse(
-    #     company_name=company_name,
-    #     analysis_date=datetime.now().strftime("%Y-%m-%d"),
-    #     company_brand=company_analysis_result["company_brand"],
-    #     company_analysis=company_analysis_result["company_analysis"],
-    #     company_vision=company_analysis_result["company_vision"],
-    #     company_news=news_result
-    # )
-    
-    # 
     response = {
-        "company_name": company_name,
-        "analysis_date": datetime.now().strftime("%Y-%m-%d"),
+        "company_name": company_name,  # 기업 명
+        "analysis_date": datetime.now().strftime("%Y-%m-%d"),  # 기업 분석 일자 
+         
+        "company_brand": result["company_brand"],  # 기업 주요 브랜드 및 제품
+        "company_vision": result["company_vision"],  # 기업 비전
+        "company_analysis": result["company_analysis"],  # 기업 분석 결과
+        "company_finance": result["company_finance"],  # 기업 재무 상태
         
-        "company_brand": company_analysis_result["company_brand"],
-        "company_analysis": company_analysis_result["company_analysis"],
-        "company_vision": company_analysis_result["company_vision"],
-        "company_finance": company_analysis_result["company_finance"],
-        
-        # "news_summary": news_result["summary"],
-        # "news_urls": news_result["urls"]
-        "news_summary": "더미 뉴스 요약 정보",
-        "news_urls": ["더미 뉴스 링크 1", "더미 뉴스 링크 2"]
+        "news_summary": result["news_summary"],  # 기업 뉴스 요약
+        "news_urls": result["news_urls"]  # 기업 뉴스 링크
     }
     return response

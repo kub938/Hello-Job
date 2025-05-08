@@ -1,57 +1,20 @@
 import json
+import os
+import hashlib
 from dotenv import load_dotenv
 from pydantic import BaseModel, create_model
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict, Tuple
 from agents import Agent, Runner
 from agents.mcp import MCPServerStdio
 
 from app.schemas import company
+from app.core.agent_utils import RateLimitedRunner, create_rate_limited_agent
+from app.core.request_queue import get_request_queue
+from app.core.mcp_core import get_mcp_servers
 
 load_dotenv()
 
-async def setup_mcp_servers():
-    servers = []
-    
-    try:
-        # mcp.json 파일에서 설정 읽기
-        with open('app/services/mcp.json', 'r') as f:
-            config = json.load(f)
-        
-        # 구성된 MCP 서버들을 순회
-        for server_name, server_config in config.get('mcpServers', {}).items():
-            try:
-                mcp_server = MCPServerStdio(
-                    params={
-                        "command": server_config.get("command"),
-                        "args": server_config.get("args", [])
-                    },
-                    client_session_timeout_seconds=60,
-                    cache_tools_list=True
-                )
-                print(f"MCP 서버 연결 시도: {server_name}")
-                print(f"명령어: {server_config.get('command')}")
-                print(f"인자: {server_config.get('args', [])}")
-                
-                await mcp_server.connect()
-                servers.append(mcp_server)
-            except FileNotFoundError as e:
-                print(f"MCP 서버 {server_name} 연결 중 파일을 찾을 수 없음: {e}")
-                print(f"찾을 수 없는 파일 경로: {server_config.get('command')} 또는 {server_config.get('args', [])}")
-                raise
-            except Exception as e:
-                print(f"MCP 서버 {server_name} 연결 중 오류 발생: {e}")
-                import traceback
-                traceback.print_exc()
-                raise
-    except Exception as e:
-        print(f"MCP 서버 설정 중 오류 발생: {e}")
-        import traceback
-        traceback.print_exc()
-        raise
-
-    return servers
-
-
+# OpenAI Agent 설정 -> 현재 사용 x 
 async def setup_agent(output_model):
     """OpenAI Agent 설정
 
@@ -62,12 +25,13 @@ async def setup_agent(output_model):
         agent: OpenAI Agent
         mcp_servers: MCP 서버 리스트
     """
-    mcp_servers = await setup_mcp_servers()
+    # mcp_core에서 서버를 가져옴
+    mcp_servers = get_mcp_servers()
     
     agent = Agent(
         name="Company Analysis Assistant",
-        instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다.",
-        model="gpt-4o",
+        instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 다양한 MCP를 활용하여 기업 분석 결과 혹은 뉴스 기사 분석 데이터를 반환합니다.",
+        model="gpt-4.1",
         output_type=output_model,
         mcp_servers=mcp_servers
     )
@@ -152,6 +116,7 @@ async def format_company_analysis(result_obj: Any) -> str:
     return "\n".join(output_lines)
 
 
+# DART 기업 분석 결과 반환 -> 현재 사용 x 
 async def company_analysis_dart(company_name, base, plus, fin):
     """OpenAI Agent 와 dart-mcp를 활용하여 기업 분석 결과를 반환합니다.
 
@@ -202,15 +167,15 @@ async def company_analysis_dart(company_name, base, plus, fin):
         context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow)"
 
     # 정보 부재 시 처리 방법 명시 추가
-    context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 최대한 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
+    context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 Search MCP 를 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
     # 동적으로 Pydantic 모델 생성 (정형화된 agent 출력을 위함)
     CompanyAnalysisOutput = create_model('CompanyAnalysisOutput', **model_fields)
     
     # OpenAI Agent 호출 
     agent, _ = await setup_agent(output_model=CompanyAnalysisOutput)
 
-    # 기업 분석 Agent 실행 
-    result = await Runner.run(agent, context)
+    # 기업 분석 Agent 실행 (RateLimitedRunner 사용)
+    result = await RateLimitedRunner.run(starting_agent=agent, input=context, max_turns=30)
 
     # Agent 결과가 없는 경우 처리
     if not result or not result.final_output:
@@ -281,10 +246,268 @@ async def company_analysis_dart(company_name, base, plus, fin):
     return response
     
     
+# 뉴스 데이터 분석 결과 반환 -> 현재 사용 x 
 async def company_analysis_news(company_name):
     """OpenAI Agent 와 뉴스 데이터를 활용하여 기업 분석 결과를 반환합니다.
 
     Args:
         company_name (str): 기업 이름
     """
-    pass
+    # mcp_core에서 서버를 가져옴
+    mcp_servers = get_mcp_servers()
+    
+    agent = Agent(
+        name="Company News Analyzer",
+        instructions="당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 뉴스 기사 분석 데이터를 반환합니다.",
+        model="gpt-4.1",
+        output_type=company.CompanyNews,
+        mcp_servers=mcp_servers
+    )
+    
+    num_news = 30
+    context = f"뉴스 데이터를 활용하여 {company_name} 기업의 기업 분석 내용을 제공하세요. 뉴스 기사는 최신 순으로 {num_news}개를 가져오며, 뉴스 제목이 중복되는 경우에는 제외합니다. "
+    context += "포함할 내용은 다음과 같습니다: \n"
+    context += "summary, urls" # 필드명 다시 언급
+    
+    # RateLimitedRunner 사용
+    result = await RateLimitedRunner.run(starting_agent=agent, input=context, max_turns=30)
+    
+    return result.final_output
+
+
+# 기업 분석 및 뉴스 데이터 분석 결과 반환 -> 현재 사용 o
+async def company_analysis_all(company_name, base, plus, fin):
+    """OpenAI Agent 와 MCP를 활용하여 기업 분석 및 뉴스 데이터를 한번에 분석하여 반환합니다.
+
+    Args:
+        company_name (str): 기업 이름
+        base (bool): 기본 정보 포함 여부
+        plus (bool): 추가 정보 포함 여부
+        fin (bool): 재무 정보 포함 여부
+    
+    Returns:
+        dict: 기업 분석 및 뉴스 분석 결과를 포함한 딕셔너리
+    """
+    # 요청 큐 가져오기
+    request_queue = get_request_queue()
+    
+    # 전역 MCP 서버 목록 가져오기
+    mcp_servers = get_mcp_servers()
+    
+    # 캐시 키 생성 (company_name + 옵션 조합)
+    options_hash = hashlib.md5(f"{base}_{plus}_{fin}".encode()).hexdigest()
+    cache_key_base = f"company_analysis_{company_name}_{options_hash}"
+    
+    # 1. DART 기업 분석 수행 (우선순위 높음)
+    dart_cache_key = f"{cache_key_base}_dart"
+    
+    # DART 분석을 위한 비동기 함수 정의
+    async def perform_dart_analysis():
+        # 분석 타입 설정
+        analysis_types = []
+        if base:
+            analysis_types.append("base")
+        if plus:
+            analysis_types.append("plus")
+        if fin:
+            analysis_types.append("fin")
+        
+        # Pydantic 모델 필드 정의
+        model_fields = {
+            "used_docs": (List[str], ...),
+            "default": (Optional[company.CompanyAnalysisDefault], None),
+        }
+        
+        if "base" in analysis_types:
+            model_fields["base"] = (Optional[company.CompanyAnalysisBase], None)
+        if "plus" in analysis_types:
+            model_fields["plus"] = (Optional[company.CompanyAnalysisPlus], None)
+        if "fin" in analysis_types:
+            model_fields["fin"] = (Optional[company.CompanyAnalysisFin], None)
+            
+        # 동적으로 Pydantic 모델 생성
+        CompanyAnalysisOutput = create_model('CompanyAnalysisOutput', **model_fields)
+        
+        # Agent 생성 - 미리 설정된 MCP 서버 사용
+        dart_agent = Agent(
+            name="Company Analysis Assistant",
+            instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 다양한 MCP를 활용하여 기업 분석 결과 혹은 뉴스 기사 분석 데이터를 반환합니다.",
+            model="gpt-4.1",
+            output_type=CompanyAnalysisOutput,
+            mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
+        )
+        
+        # 분석 컨텍스트 구성
+        dart_context = f"DART API를 활용하여 {company_name} 기업의 기업 분석 내용을 제공하세요. "
+        dart_context += "**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'를 분석하여 포함해야 합니다.** "
+        dart_context += "분석에 사용한 문서는 문서명과 문서등록일을 포함하여 used_docs에 추가하세요. "
+        dart_context += "포함할 내용은 다음과 같습니다: \n"
+        dart_context += "company_brand, company_vision, "
+        
+        if "base" in analysis_types:
+            dart_context += "사업의 개요(business_overview), 주요 제품 및 서비스(main_products_services), 주요계약 및 연구개발활동(major_contracts_rd_activities), 기타 참고사항(other_references), "
+            dart_context += "매출액(sales_revenue), 영업이익(operating_profit), 당기순이익(net_income), "
+            
+        if "plus" in analysis_types:
+            dart_context += "원재료 및 생산설비(raw_materials_facilities), 매출 및 수주상황(sales_order_status), 위험관리 및 파생거래(risk_management_derivatives), "
+            
+        if "fin" in analysis_types:
+            dart_context += "자산 총계(total_assets), 부채 총계(total_liabilities), 자본 총계(total_equity), "
+            dart_context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow)"
+
+        # 정보 부재 시 처리 방법 추가
+        dart_context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 Search MCP 를 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
+        
+        # DART 분석 실행
+        dart_result = await RateLimitedRunner.run(
+            starting_agent=dart_agent, 
+            input=dart_context,
+            max_turns=30
+        )
+        
+        # 결과 포맷팅
+        if not dart_result or not dart_result.final_output:
+            return {
+                "company_brand": "기업 브랜드 정보를 가져오지 못했습니다.",
+                "company_analysis": "기업 분석 정보를 가져오지 못했습니다.",
+                "company_vision": "기업 비전 정보를 가져오지 못했습니다.",
+                "company_finance": "기업 재정상황 정보를 가져오지 못했습니다.",
+            }
+        
+        # 포맷팅
+        formatted_result = await format_company_analysis(dart_result.final_output)
+        
+        # 재무 정보 포맷팅
+        company_finance = ""
+        if base or fin:
+            finance_data = []
+            
+            # base=True인 경우 기본 재무 정보 추가
+            if base and hasattr(dart_result.final_output, 'base') and dart_result.final_output.base:
+                base_finance = dart_result.final_output.base.model_dump(exclude_none=True)
+                if "sales_revenue" in base_finance:
+                    finance_data.append(f"매출액: {base_finance['sales_revenue']}")
+                if "operating_profit" in base_finance:
+                    finance_data.append(f"영업이익: {base_finance['operating_profit']}")
+                if "net_income" in base_finance:
+                    finance_data.append(f"당기순이익: {base_finance['net_income']}")
+                    
+            # fin=True인 경우 심화 재무 정보 추가
+            if fin and hasattr(dart_result.final_output, 'fin') and dart_result.final_output.fin:
+                fin_finance = dart_result.final_output.fin.model_dump(exclude_none=True)
+                
+                # 재무상태 정보
+                if "total_assets" in fin_finance:
+                    finance_data.append(f"자산 총계: {fin_finance['total_assets']}")
+                if "total_liabilities" in fin_finance:
+                    finance_data.append(f"부채 총계: {fin_finance['total_liabilities']}")
+                if "total_equity" in fin_finance:
+                    finance_data.append(f"자본 총계: {fin_finance['total_equity']}")
+                    
+                # 현금흐름 정보
+                if "operating_cash_flow" in fin_finance:
+                    finance_data.append(f"영업활동 현금흐름: {fin_finance['operating_cash_flow']}")
+                if "investing_cash_flow" in fin_finance:
+                    finance_data.append(f"투자활동 현금흐름: {fin_finance['investing_cash_flow']}")
+                if "financing_cash_flow" in fin_finance:
+                    finance_data.append(f"재무활동 현금흐름: {fin_finance['financing_cash_flow']}")
+                    
+            company_finance = "\n".join(finance_data) if finance_data else "재무 정보가 포함되지 않았습니다."
+
+        # 결과 객체 및 속성 접근 시 None 확인 추가
+        company_brand = "정보 없음"
+        company_vision = "정보 없음"
+        if hasattr(dart_result.final_output, 'default') and dart_result.final_output.default:
+            company_brand = dart_result.final_output.default.company_brand or "정보 없음"
+            company_vision = dart_result.final_output.default.company_vision or "정보 없음"
+
+        return {
+            "company_brand": company_brand,
+            "company_analysis": formatted_result,
+            "company_vision": company_vision,
+            "company_finance": company_finance,
+        }
+    
+    # 2. 뉴스 데이터 분석 (우선순위 낮음)
+    news_cache_key = f"{cache_key_base}_news"
+    
+    # 뉴스 분석을 위한 비동기 함수 정의
+    async def perform_news_analysis():
+        # Agent 생성 - 미리 설정된 MCP 서버 사용
+        news_agent = Agent(
+            name="Company News Analyzer",
+            instructions="당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 뉴스 기사 분석 데이터를 반환합니다.",
+            model="gpt-4.1",
+            output_type=company.CompanyNews,
+            mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
+        )
+        
+        # 분석 컨텍스트 구성
+        num_news = 30
+        news_context = f"뉴스 데이터를 활용하여 {company_name} 기업의 기업 분석 내용을 제공하세요. 뉴스 기사는 최신 순으로 {num_news}개를 가져오며, 뉴스 제목이 중복되는 경우에는 제외합니다. "
+        news_context += "포함할 내용은 다음과 같습니다: \n"
+        news_context += "summary, urls"
+        
+        # 뉴스 분석 실행
+        news_result = await RateLimitedRunner.run(
+            starting_agent=news_agent,
+            input=news_context,
+            max_turns=30
+        )
+        
+        # 결과 포맷팅
+        if not news_result or not news_result.final_output:
+            return {
+                "summary": "뉴스 요약 정보를 가져오지 못했습니다.",
+                "urls": []
+            }
+        
+        return {
+            "summary": news_result.final_output.summary or "뉴스 요약 정보가 없습니다.",
+            "urls": news_result.final_output.urls or []
+        }
+    
+    # 3. 큐를 통해 분석 작업 실행 (DART 분석 우선순위 높게)
+    try:
+        # 두 작업을 큐에 넣고 실행
+        dart_result_task = request_queue.enqueue(
+            perform_dart_analysis,
+            priority=5,  # 낮은 숫자 = 높은 우선순위
+            estimated_tokens=15000,
+            cache_key=dart_cache_key
+        )
+        
+        news_result_task = request_queue.enqueue(
+            perform_news_analysis,
+            priority=10,  # 낮은 숫자 = 높은 우선순위
+            estimated_tokens=10000,
+            cache_key=news_cache_key
+        )
+        
+        # 모든 작업 완료 대기
+        dart_result = await dart_result_task
+        news_result = await news_result_task
+        
+        # 4. 결과 합치기
+        response = {
+            **dart_result,
+            "news_summary": news_result["summary"],
+            "news_urls": news_result["urls"]
+        }
+        
+        return response
+        
+    except Exception as e:
+        # 오류 발생 시 기본 결과 반환
+        import traceback
+        traceback.print_exc()
+        
+        # 기본 결과
+        return {
+            "company_brand": "처리 중 오류 발생",
+            "company_analysis": f"기업 분석 중 오류가 발생했습니다: {str(e)}",
+            "company_vision": "처리 중 오류 발생",
+            "company_finance": "처리 중 오류 발생",
+            "news_summary": "처리 중 오류 발생",
+            "news_urls": []
+        }
