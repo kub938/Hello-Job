@@ -1,44 +1,18 @@
 import { ContentStatus } from "./coverLetterApiType";
 
-export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
-export type SenderType = "AI" | "USER";
-
 export interface QuestionStepProps {
   QuestionStatuses: ContentStatus[];
   handleSelectQuestion: (selectNum: number) => void;
   selectQuestion: number;
 }
 
-export interface QuestionStatus {
-  contentNumber: number;
-  contentStatus: ContentQuestionStatusType;
-}
-
-export interface ContentChatLogType {
-  sender: SenderType;
-  message: string;
-}
-
-export interface CoverLetterResponse {
-  contentId: number;
-  contentQuestion: string;
-  contentNumber: number;
-  contentLength: number;
-  contentDetail: string;
-  contentExperienceIds: number[];
-  contentProjectIds: number[];
-  contentFirstPrompt: string;
-  contentStatus: ContentQuestionStatusType;
-  contentChatLog: ContentChatLogType[];
-  contentUpdatedAt: string;
-}
-export interface CoverLetterSummaryType {
-  totalContentQuestionCount: number;
-  contentQuestionStatuses: QuestionStatus[];
-  companyAnalysisId: number;
-  jobRoleSnapshotId: number;
-  coverLetterUpdatedAt: string;
-}
+// export interface CoverLetterSummaryType {
+//   totalContentQuestionCount: number;
+//   contentQuestionStatuses: QuestionStatus[];
+//   companyAnalysisId: number;
+//   jobRoleSnapshotId: number;
+//   coverLetterUpdatedAt: string;
+// }
 
 // export interface CoverLetterResponse {
 //   coverLetterId: number;

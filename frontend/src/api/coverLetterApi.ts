@@ -3,7 +3,10 @@ import {
   getCoverLetterContentIdsResponse,
 } from "@/types/coverLetterTypes";
 import { authApi } from "./instance";
-import { getContentStatusResponse } from "@/types/coverLetterApiType";
+import {
+  getContentStatusResponse,
+  getCoverLetterResponse,
+} from "@/types/coverLetterApiType";
 
 interface sendMessageRequest {
   contentId: number;
@@ -16,7 +19,9 @@ export const coverLetterApi = {
     return authApi.post("/api/v1/cover-letter", postCoverLetterRequest);
   },
   getCoverLetter: (contentId: number) => {
-    return authApi.get(`/api/v1/cover-letter-content/${contentId}`);
+    return authApi.get<getCoverLetterResponse>(
+      `/api/v1/cover-letter-content/${contentId}`
+    );
   },
   getCoverLetterContentIds: (coverLetterId: number) => {
     return authApi.get<getCoverLetterContentIdsResponse>(
