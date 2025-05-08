@@ -11,9 +11,17 @@ import ExperienceForm from "@/pages/Resume/ExperienceForm";
 export interface QuestionItemProps {
   contentIndex: number;
   content: CoverLetterRequestContent;
+  onUpdateQuestion: (
+    index: number,
+    data: Partial<CoverLetterRequestContent>
+  ) => void;
 }
 
-function QuestionItem({ content, contentIndex }: QuestionItemProps) {
+function QuestionItem({
+  content,
+  contentIndex,
+  onUpdateQuestion,
+}: QuestionItemProps) {
   const headerStyle =
     "w-full text-primary bg-secondary-light rounded-t-2xl py-3 px-4 font-semibold";
 
@@ -34,8 +42,13 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
     GetProjectsResponse[]
   >([]);
   const { inputData } = useCoverLetterInputStore();
-
   const selectedProjectNum = inputData.contents[contentIndex].contentProjectIds;
+
+  /* 입력 값 상태 관리 */
+  // const [localContents, setLocalContents] = useState(inputData.contents[contentIndex]);
+  const [inputTitle, setInputTitle] = useState("");
+  const [inputLimitNum, setInputLimitNum] = useState("");
+  const [inputPrompt, setInputPrompt] = useState("");
 
   useEffect(() => {
     if (data) {
@@ -45,6 +58,17 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
       setSelectedProjects(temp);
     }
   }, [data, selectedProjectNum]);
+
+  //form 업데이트
+  useEffect(() => {
+    const updatedData: Partial<CoverLetterRequestContent> = {
+      contentQuestion: inputTitle,
+      contentLength: inputLimitNum ? Number(inputLimitNum) : 0,
+      contentFirstPrompt: inputPrompt,
+    };
+
+    onUpdateQuestion(contentIndex, updatedData);
+  }, [inputTitle, inputLimitNum, inputPrompt]);
 
   const toggleForm = () => {
     setIsOpen(!isOpen);
@@ -74,7 +98,7 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
     setSelectModalOpen(true);
   };
 
-  //
+  //from 관리
   const onOpenProjectForm = () => {
     setProjectFormOpen(true);
   };
@@ -90,6 +114,20 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
   const onCloseExperienceForm = () => {
     setExperienceFormOpen(false);
   };
+
+  //input 관리 handler
+  const onChangeInputTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputTitle(e.target.value);
+  };
+
+  const onChangeInputLimitNum = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInputLimitNum(e.target.value);
+  };
+
+  const onChangeInputPrompt = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputPrompt(e.target.value);
+    setCharCount(e.target.value.length);
+  };
   return (
     <>
       {selectModalOpen && (
@@ -103,7 +141,6 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
       )}
       {projectFormOpen && <ProjectForm onClose={onCloseProjectForm} />}
       {ExperienceFormOpen && <ExperienceForm onClose={onCloseExperienceForm} />}
-      {/* {projectFormOpen && <SelectForm onClose={handleProjectFormClose} />} */}
       <form action="" className="border w-full rounded-2xl mb-3">
         <div
           className={`${headerStyle} flex justify-between items-center cursor-pointer`}
@@ -124,6 +161,7 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
                   placeholder="문항을 입력해 주세요"
                   width={""}
                   height={""}
+                  onChange={(e) => onChangeInputTitle(e)}
                 />
               </div>
               <div>
@@ -134,6 +172,7 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
                   className="w-30"
                   width={""}
                   height={""}
+                  onChange={(e) => onChangeInputLimitNum(e)}
                 />
               </div>
             </div>
@@ -186,7 +225,7 @@ function QuestionItem({ content, contentIndex }: QuestionItemProps) {
                 rows={8}
                 cols={50}
                 className="bg-white resize-none border rounded-b-xl w-full p-4 pb-10 "
-                onChange={(e) => setCharCount(e.target.value.length)}
+                onChange={(e) => onChangeInputPrompt(e)}
               />
               <span className="bg-white rounded-2xl px-2 absolute mt-10 right-4 bottom-3 text-sm text-text-muted-foreground">
                 {charCount} / 1500
