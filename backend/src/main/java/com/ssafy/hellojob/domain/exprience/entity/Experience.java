@@ -1,7 +1,6 @@
 package com.ssafy.hellojob.domain.exprience.entity;
 
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
-import com.ssafy.hellojob.domain.exprience.dto.response.ExperienceResponseDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

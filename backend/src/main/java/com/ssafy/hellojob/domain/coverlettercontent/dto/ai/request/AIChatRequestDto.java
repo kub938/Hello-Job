@@ -4,7 +4,6 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.request.CompanyAnalysisDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.ExperienceDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.JobRoleAnalysisDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.ProjectDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.EditContentDto;
 import lombok.Builder;
 import lombok.Getter;
 
