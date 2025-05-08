@@ -154,7 +154,7 @@ public class CoverLetterService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
-        coverLetterReadService.checkCoverLetterValidation(userId, coverLetterId);
+        coverLetterReadService.checkCoverLetterValidation(userId, coverLetter);
 
         List<ContentQuestionStatusDto> contentQuestionStatuses = coverLetterContentService.getCoverLetterContentQuestionStatues(coverLetterId);
         int totalContentQuestionCount = contentQuestionStatuses.size();
@@ -174,7 +174,7 @@ public class CoverLetterService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
-        coverLetterReadService.checkCoverLetterValidation(userId, coverLetterId);
+        coverLetterReadService.checkCoverLetterValidation(userId, coverLetter);
 
         List<Integer> contentIds = coverLetterContentService.getContentIdsByCoverLetterId(coverLetterId);
 
@@ -190,7 +190,7 @@ public class CoverLetterService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
-        coverLetterReadService.checkCoverLetterValidation(userId, coverLetterId);
+        coverLetterReadService.checkCoverLetterValidation(userId, coverLetter);
 
         coverLetterContentService.saveAllContents(coverLetter);
         coverLetter.updateFinish(true);
@@ -203,7 +203,7 @@ public class CoverLetterService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
-        coverLetterReadService.checkCoverLetterValidation(userId, coverLetterId);
+        coverLetterReadService.checkCoverLetterValidation(userId, coverLetter);
 
         coverLetterRepository.delete(coverLetter);
         return Map.of("message", "자기소개서가 삭제되었습니다.");
@@ -221,7 +221,7 @@ public class CoverLetterService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
-        coverLetterReadService.checkCoverLetterValidation(userId, coverLetterId);
+        coverLetterReadService.checkCoverLetterValidation(userId, coverLetter);
 
         List<CoverLetterOnlyContentDto> contents = coverLetterContentService.getWholeContentDetail(coverLetterId);
 

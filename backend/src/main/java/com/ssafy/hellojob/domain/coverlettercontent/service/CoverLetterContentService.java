@@ -83,7 +83,7 @@ public class CoverLetterContentService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetterContent coverLetterContent = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        coverLetterContentReadService.checkCoverLetterContentValidation(userId, contentId);
+        coverLetterContentReadService.checkCoverLetterContentValidation(userId, coverLetterContent);
 
         List<Integer> contentExperienceIds =
                 coverLetterExperienceService.getCoverLetterExperienceIds(contentId);
@@ -145,7 +145,7 @@ public class CoverLetterContentService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        coverLetterContentReadService.checkCoverLetterContentValidation(userId, contentId);
+        coverLetterContentReadService.checkCoverLetterContentValidation(userId, content);
 
         content.updateCoverLetterContent(requestDto);
         Integer coverLetterId = content.getCoverLetter().getCoverLetterId();
@@ -176,7 +176,7 @@ public class CoverLetterContentService {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        coverLetterContentReadService.checkCoverLetterContentValidation(userId, contentId);
+        coverLetterContentReadService.checkCoverLetterContentValidation(userId, content);
 
         Integer coverLetterId = coverLetterContentRepository.findCoverLetterIdByContentId(contentId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
