@@ -28,7 +28,9 @@ function CoverLetter() {
   // API 호출 관련 훅
   const { data: contents, isLoading: isContentsLoading } =
     useGetCoverLetterContentIds(coverLetterId || 0);
-  const { data, isLoading } = useGetCoverLetter(selectQuestion || 0);
+  const { data: coverLetter, isLoading } = useGetCoverLetter(
+    selectQuestion || 0
+  );
   const { data: statusData } = useGetContentStatus(coverLetterId || 0);
 
   // 데이터가 로드되면 상태 업데이트
@@ -40,10 +42,10 @@ function CoverLetter() {
   }, [contents]);
 
   useEffect(() => {
-    if (data?.contentDetail) {
-      setNowContentLength(data.contentDetail.length);
-    }
-  }, [data]);
+    if (!coverLetter) return;
+    setContentDetail(coverLetter.contentDetail);
+    setNowContentLength(coverLetter.contentDetail.length);
+  }, [coverLetter]);
   // 이벤트 핸들러
   const onChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
@@ -117,7 +119,7 @@ function CoverLetter() {
     return <div>자기소개서를 가져오는 중 입니다.</div>;
   }
 
-  if (!data) {
+  if (!coverLetter) {
     return <div>자기소개서 데이터를 불러오는데 실패했습니다.</div>;
   }
 
@@ -160,7 +162,7 @@ function CoverLetter() {
         </div>
 
         <CoverLetterEditor
-          CoverLetterData={data}
+          CoverLetterData={coverLetter}
           onChangeContentDetail={onChangeContentDetail}
           nowContentLength={nowContentLength}
         />
