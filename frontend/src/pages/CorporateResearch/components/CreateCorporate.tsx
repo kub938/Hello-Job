@@ -29,7 +29,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
 
   const navigate = useNavigate();
 
-  const { register, handleSubmit, resetField } = useForm<IForm>();
+  const { register, handleSubmit } = useForm<IForm>();
 
   const mutation = useMutation({
     mutationFn: async (data: postCorporateReportRequest) => {
