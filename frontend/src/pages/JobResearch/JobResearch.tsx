@@ -42,6 +42,7 @@ function JobResearch() {
         jobRoleViewCount: jobRoleAnalysis.jobRoleViewCount,
         jobRoleBookmarkCount: jobRoleAnalysis.jobRoleBookmarkCount,
         bookmark: jobRoleAnalysis.bookmark,
+        createdAt: jobRoleAnalysis.createdAt,
         updatedAt: jobRoleAnalysis.updatedAt,
         public: jobRoleAnalysis.public,
       })) || [];
@@ -95,7 +96,7 @@ function JobResearch() {
               jobRoleViewCount={jobResearch.jobRoleViewCount}
               jobRoleBookmarkCount={jobResearch.jobRoleBookmarkCount}
               bookmark={jobResearch.bookmark}
-              updatedAt={jobResearch.updatedAt}
+              createdAt={jobResearch.createdAt}
             />
           ))
         ) : (
@@ -124,7 +125,10 @@ function JobResearch() {
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
-            <CreateJob onClose={closeModal} />
+            <CreateJob
+              onClose={closeModal}
+              corporateId={parseInt(params.id ? params.id : "1")}
+            />
           ) : (
             <ReadJob onClose={closeModal} id={researchJobId} />
           )}

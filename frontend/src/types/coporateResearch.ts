@@ -52,3 +52,16 @@ export interface getCorporateReportDetailResponse {
   dartCategory: string[];
   public: boolean;
 }
+
+//기업 분석 생성 API
+export interface postCorporateReportRequest {
+  companyId: number;
+  isPublic: boolean;
+  basic: boolean;
+  plus: boolean;
+  financial: boolean;
+}
+
+export interface postCorporateReportResponse {
+  companyAnalysisId: number;
+}

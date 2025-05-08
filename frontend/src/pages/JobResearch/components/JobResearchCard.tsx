@@ -8,7 +8,7 @@ interface JobResearchCardProps {
   jobRoleViewCount: number;
   jobRoleBookmarkCount: number;
   bookmark: boolean;
-  updatedAt: string;
+  createdAt: string;
 }
 
 function JobResearchCard({
@@ -19,7 +19,7 @@ function JobResearchCard({
   jobRoleViewCount,
   jobRoleBookmarkCount,
   bookmark,
-  updatedAt,
+  createdAt,
 }: JobResearchCardProps) {
   return (
     <div
@@ -95,7 +95,7 @@ function JobResearchCard({
           </span>
         </div>
         <span className="text-xs text-gray-400">
-          {new Date(updatedAt).toLocaleDateString("ko-KR", {
+          {new Date(createdAt).toLocaleDateString("ko-KR", {
             year: "numeric",
             month: "long",
             day: "numeric",

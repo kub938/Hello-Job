@@ -1,4 +1,7 @@
-import { postBookmarkRequest } from "@/types/coporateResearch";
+import {
+  postBookmarkRequest,
+  postCorporateReportRequest,
+} from "@/types/coporateResearch";
 import { authApi } from "./instance";
 
 export const corporateListApi = {
@@ -23,5 +26,13 @@ export const corporateReportApi = {
     return authApi.delete(
       `/api/v1/company-analysis/bookmark/${companyAnalysisId}`
     );
+  },
+
+  postCorporateReport: (
+    postCorporateReportRequest: postCorporateReportRequest
+  ) => {
+    return authApi.post(`/api/v1/company-analysis`, {
+      postCorporateReportRequest,
+    });
   },
 };
