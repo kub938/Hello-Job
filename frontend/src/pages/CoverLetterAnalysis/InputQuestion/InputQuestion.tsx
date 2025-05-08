@@ -4,8 +4,10 @@ import { useEffect, useState } from "react";
 import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
+import { useCreateCoverLetter } from "@/hooks/coverLetterHooks";
 
 function InputQuestion() {
+  const mutation = useCreateCoverLetter();
   const { addQuestion, inputData, setAllQuestions } =
     useCoverLetterInputStore();
 
@@ -50,7 +52,7 @@ function InputQuestion() {
   };
 
   useEffect(() => {
-    console.log("Zustand 상태 업데이트됨:", inputData.contents);
+    console.log("Zustand 상태 업데이트됨:", inputData);
   }, [inputData.contents]);
 
   // 완료 버튼 클릭 - Zustand 스토어에 저장
@@ -65,13 +67,21 @@ function InputQuestion() {
     //   return;
     // }
 
-    // Zustand 스토어 업데이트
     if (setAllQuestions) {
       setAllQuestions(localContents);
       toast.success("저장되었습니다.");
     } else {
       toast.error("저장 중 오류가 발생했습니다.");
     }
+
+    mutation.mutate(inputData, {
+      onSuccess: (data) => {
+        console.log("데이터 저장 성공", data);
+      },
+      onError: (error) => {
+        console.log("데이터 저장 실패", error);
+      },
+    });
   };
 
   const contentList = inputData.contents;
@@ -92,7 +102,7 @@ function InputQuestion() {
       </div>
       <div className="flex justify-end mt-5">
         <Button className="w-30 h-10" onClick={handleComplete}>
-          완료
+          초안 생성
         </Button>
       </div>
     </>

@@ -74,6 +74,22 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
       }));
     },
 
+    setContentExperienceIds: (
+      contentIndex: number,
+      experienceIds: number[]
+    ) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          contents: state.inputData.contents.map((content, index) =>
+            index === contentIndex
+              ? { ...content, contentExperienceIds: experienceIds }
+              : content
+          ),
+        },
+      }));
+    },
+
     addQuestion: () =>
       set((state) => {
         if (state.inputData.contents.length >= 10) {

@@ -4,7 +4,7 @@ import { useGetExperiences } from "@/hooks/experienceHooks";
 import { useGetProjects } from "@/hooks/projectHooks";
 import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import { GetProjectsResponse } from "@/types/projectApiTypes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type ModalType = "project" | "experience" | "";
 
@@ -25,29 +25,46 @@ function SelectModal({
 }: ProjectModalProps) {
   const { data: projectsData } = useGetProjects();
   const { data: experiencesData } = useGetExperiences();
-  const { setContentProjectIds, inputData } = useCoverLetterInputStore();
+  const { setContentProjectIds, setContentExperienceIds, inputData } =
+    useCoverLetterInputStore();
   const [selectedProjects, setSelectedProjects] = useState<number[]>(
     inputData.contents[contentIndex].contentProjectIds
   );
+  const [selectedExperience, setSelectedExperience] = useState<number[]>(
+    inputData.contents[contentIndex].contentExperienceIds
+  );
 
-  const handleSelectProject = (projectId: number) => {
-    if (selectedProjects.includes(projectId)) {
-      const filterProject = selectedProjects.filter(
-        (item) => item !== projectId
-      );
-      setSelectedProjects(filterProject);
-    } else {
-      setSelectedProjects((prev) => [...prev, projectId]);
+  const handleSelectItems = (id: number) => {
+    if (type === "project") {
+      if (selectedProjects.includes(id)) {
+        const filterProject = selectedProjects.filter((item) => item !== id);
+        setSelectedProjects(filterProject);
+      } else {
+        setSelectedProjects((prev) => [...prev, id]);
+      }
+    } else if (type === "experience") {
+      if (selectedExperience.includes(id)) {
+        const filterExperience = selectedExperience.filter(
+          (item) => item !== id
+        );
+        setSelectedExperience(filterExperience);
+      } else {
+        setSelectedExperience((prev) => [...prev, id]);
+      }
     }
   };
+
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
   const onAccept = (contentIndex: number) => {
-    setContentProjectIds(contentIndex, selectedProjects);
-    console.log(inputData.contents[contentIndex].contentProjectIds);
+    if (type === "project") {
+      setContentProjectIds(contentIndex, selectedProjects);
+    } else if (type === "experience") {
+      setContentExperienceIds(contentIndex, selectedExperience);
+    }
     onClose();
   };
 
@@ -114,18 +131,23 @@ function SelectModal({
           {unifiedData ? (
             unifiedData.map((el) => (
               <div
-                onClick={() => handleSelectProject(el.id)}
+                onClick={() => handleSelectItems(el.id)}
                 key={el.id}
-                className={`cursor-pointer border border-l-4 border-l-primary h-15 my-2 rounded-2xl flex items-center justify-between px-5 hover-block
+                className={`cursor-pointer border border-l-4 border-l-primary h-15 my-2 rounded-2xl grid grid-cols-3 items-center px-5 hover-block
                     ${
-                      selectedProjects.includes(el.id) &&
-                      "border-primary bg-secondary-light"
+                      type === "project"
+                        ? selectedProjects.includes(el.id) &&
+                          "border-primary bg-secondary-light"
+                        : selectedExperience.includes(el.id) &&
+                          "border-primary bg-secondary-light"
                     }
                     `}
               >
                 <span className="font-semibold">{el.name}</span>
-                <span>{el.description}</span>
-                <span>{calculateDaysAgo(el.updatedAt)}</span>
+                <span className="text-center"> {el.description}</span>
+                <span className="text-center ml-23">
+                  {calculateDaysAgo(el.updatedAt)}
+                </span>
               </div>
             ))
           ) : (
