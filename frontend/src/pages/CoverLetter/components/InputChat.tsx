@@ -4,13 +4,19 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 
 export interface InputChatProps {
+  inputValue: string;
+  setInputValue: (input: string) => void;
   onSubmitMessage: () => void;
   onChangeInput: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-function InputChat({ onSubmitMessage, onChangeInput }: InputChatProps) {
+function InputChat({
+  setInputValue,
+  onSubmitMessage,
+  onChangeInput,
+  inputValue,
+}: InputChatProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [inputValue, setInputValue] = useState("");
   const { addUserMessage } = useCoverLetterStore();
   const isComposing = useRef(false);
 
