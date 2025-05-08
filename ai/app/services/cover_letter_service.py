@@ -264,7 +264,7 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
             ],
             temperature=0.7,
             max_tokens=1500,
-            response_format={"type": "json_object"}
+            response_format=EditSuggestionList
         )
         
         # API 응답 JSON 추출 및 파싱
@@ -282,6 +282,8 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
     # JSON 파싱 및 변환
     edit_suggestions = json.loads(suggestion_json)
     
+    print(f"********** edit_suggestions: {edit_suggestions}")
+    
     # 수정 제안 변환
     suggestions_list = EditSuggestionList(suggestions=[
         EditSuggestion(
@@ -289,7 +291,7 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
             edit_reason=suggestion.get("edit_reason", ""),
             edit_suggestion=suggestion.get("edit_suggestion", "")
         )
-        for suggestion in edit_suggestions
+        for suggestion in edit_suggestions["suggestions"]
     ])
     
     # 포맷팅된 결과 반환
