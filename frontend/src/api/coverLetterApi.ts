@@ -3,7 +3,7 @@ import { authApi } from "./instance";
 
 export const coverLetterApi = {
   postCoverLetter: (postCoverLetterRequest: CoverLetterPostRequest) => {
-    return authApi.post("/api/v1/cover-letter", { postCoverLetterRequest });
+    return authApi.post("/api/v1/cover-letter", postCoverLetterRequest);
   },
   getCoverLetter: (coverLetterId: number, coverLetterNumber: number) => {
     return authApi.get(
