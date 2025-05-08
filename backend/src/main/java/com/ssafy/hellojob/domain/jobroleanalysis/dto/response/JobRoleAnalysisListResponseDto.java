@@ -1,4 +1,4 @@
-package com.ssafy.hellojob.domain.jobroleanalysis.dto;
+package com.ssafy.hellojob.domain.jobroleanalysis.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class JobRoleAnalysisListResponseDto {
 
-    private Long jobRoleAnalysisBookmarkId;
-    private Long jobRoleAnalysisId;
+    private Integer jobRoleAnalysisBookmarkId;
+    private Integer jobRoleAnalysisId;
     private String companyName;
     private String jobRoleName;
     private String jobRoleAnalysisTitle;
@@ -22,5 +22,6 @@ public class JobRoleAnalysisListResponseDto {
     private Integer jobRoleBookmarkCount;
     private boolean bookmark;
     private LocalDateTime updatedAt;
+    private LocalDateTime createdAt;
 
 }

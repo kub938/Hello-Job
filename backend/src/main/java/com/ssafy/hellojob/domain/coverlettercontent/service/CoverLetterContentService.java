@@ -4,9 +4,7 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterRespon
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterContentDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.*;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
@@ -162,5 +160,10 @@ public class CoverLetterContentService {
             return Map.of("message", "자기소개서가 임시 저장되었습니다.");
 
         return Map.of("message", "자기소개서가 저장되었습니다.");
+    }
+
+    public List<CoverLetterOnlyContentDto> getWholeContentDetail(Integer coverLetterId) {
+        List<CoverLetterOnlyContentDto> list = coverLetterContentRepository.findContentByCoverLetterId(coverLetterId);
+        return list;
     }
 }

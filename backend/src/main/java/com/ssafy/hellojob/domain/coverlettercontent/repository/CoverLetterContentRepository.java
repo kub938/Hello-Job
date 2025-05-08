@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.coverlettercontent.repository;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterOnlyContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,6 +37,15 @@ public interface CoverLetterContentRepository extends JpaRepository<CoverLetterC
     List<Integer> findContentIdByCoverLetterId(@Param("coverLetterId") Integer coverLetterId);
 
     List<CoverLetterContent> findByCoverLetter(CoverLetter coverLetter);
+
+    @Query("""
+            SELECT new com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterOnlyContentDto(
+            clc.contentId, clc.contentNumber, clc.contentQuestion, clc.contentDetail, clc.contentLength)
+            FROM CoverLetterContent clc
+            WHERE clc.coverLetter.coverLetterId = :coverLetterId
+            ORDER BY clc.contentNumber
+            """)
+    List<CoverLetterOnlyContentDto> findContentByCoverLetterId(@Param("coverLetterId") Integer coverLetterId);
 
     @Query("""
             SELECT DISTINCT c

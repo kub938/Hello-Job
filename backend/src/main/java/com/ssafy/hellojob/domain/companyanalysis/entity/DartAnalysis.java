@@ -14,7 +14,7 @@ public class DartAnalysis {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "dart_analysis_id", nullable = false)
-    private Long dartAnalysisId;
+    private Integer dartAnalysisId;
 
     @Column(name = "dart_brand", columnDefinition = "TEXT")
     private String dartBrand;
