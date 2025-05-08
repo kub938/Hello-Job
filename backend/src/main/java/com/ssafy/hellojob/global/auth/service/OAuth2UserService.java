@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.auth.entity.Auth;
 import com.ssafy.hellojob.global.auth.repository.AuthRepository;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import com.ssafy.hellojob.global.util.AESUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -26,6 +27,7 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
     private final UserRepository userRepository;
     private final AuthRepository authRepository;
+    private final AESUtil aesUtil;
 
 
     @Override
@@ -56,11 +58,12 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private User createUser(String email, String nickname, String provider, String providerId) {
+        String encryptProviderId = aesUtil.encrypt(providerId);
         User user = User.builder()
                 .email(email)
                 .nickname(nickname)
                 .provider(provider.equals("google") ? Provider.GOOGLE : null)
-                .providerId(providerId)
+                .providerId(encryptProviderId)
                 .build();
         return userRepository.save(user);
     }
