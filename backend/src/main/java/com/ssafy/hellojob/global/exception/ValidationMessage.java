@@ -39,4 +39,8 @@ public final class ValidationMessage {
     public static final String SCHEDULE_STATUS_NOT_EMPTY = "스케줄 상태는 필수값입니다.";
     public static final String COVER_LETTER_ID_NOT_EMPTY = "자기소개서 아이디는 필수값입니다.";
 
+    // 자기소개서
+    public static final String USER_MESSAGE_NOT_EMPTY = "메시지는 필수값입니다.";
+    public static final String CONTENT_DETAIL_NOT_EMPTY = "자기소개서 본문 내용은 필수값입니다.";
+
 }

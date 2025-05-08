@@ -48,7 +48,6 @@ public enum ErrorCode {
     COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED(HttpStatus.NO_CONTENT, "일일 기업 분석 요청 횟수를 초과하였습니다."),
     FASTAPI_RESPONSE_NULL(HttpStatus.BAD_REQUEST, "fast API 반환값이 없습니다"),
 
-
     // 자기소개서 관련
     JOB_ROLE_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 스냅샷을 찾을 수 없습니다."),
     COVER_LETTER_CONTENT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 본문을 찾을 수 없습니다."),
