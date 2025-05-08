@@ -43,6 +43,16 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
     onSuccess: () => {
       toast.success("직무 분석이 저장되었습니다.");
       setIsSubmitting(false);
+      // 메시지 전송 로직 성공 시 input 비우기
+      setIsPublic(true);
+      resetField("jobRoleName");
+      resetField("jobRoleTitle");
+      resetField("jobRoleSkills");
+      resetField("jobRoleWork");
+      resetField("jobRoleRequirements");
+      resetField("jobRolePreferences");
+      resetField("jobRoleEtc");
+      resetField("jobRoleCategory");
       // 페이지 이동시키기
       navigate("/mypage/bookmarks/jobs");
     },
@@ -68,17 +78,6 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
         jobRoleEtc: data.jobRoleEtc,
         jobRoleCategory: data.jobRoleCategory,
       });
-
-      // 메시지 전송 로직 성공 시 input 비우기
-      resetField("isPublic");
-      resetField("jobRoleName");
-      resetField("jobRoleTitle");
-      resetField("jobRoleSkills");
-      resetField("jobRoleWork");
-      resetField("jobRoleRequirements");
-      resetField("jobRolePreferences");
-      resetField("jobRoleEtc");
-      resetField("jobRoleCategory");
     } catch (error) {
       // 에러 처리
       console.error(error);
