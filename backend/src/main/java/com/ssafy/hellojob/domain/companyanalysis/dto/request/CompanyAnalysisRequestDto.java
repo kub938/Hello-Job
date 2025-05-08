@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.companyanalysis.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +13,7 @@ import lombok.NoArgsConstructor;
 public class CompanyAnalysisRequestDto {
 
     private Integer companyId;
+    @JsonProperty("isPublic")
     private boolean isPublic;
     private boolean basic;
     private boolean plus;
