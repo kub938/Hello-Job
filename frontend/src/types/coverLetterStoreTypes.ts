@@ -32,5 +32,7 @@ export interface CoverLetterInputStoreType {
 
   setCompanyAnalysisId: (id: number | null) => void;
   setJobRoleAnalysisId: (id: number | null) => void;
+  setContentProjectIds: (contentIndex: number, projectIds: number[]) => void;
   addQuestion: () => void;
+  setAllQuestions: (contents: CoverLetterRequestContent[]) => void;
 }

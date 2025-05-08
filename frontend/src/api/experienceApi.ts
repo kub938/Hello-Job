@@ -1,55 +1,47 @@
 import { authApi } from "./instance";
 
-export interface PostProjectRequest {
-  projectName: string;
-  projectIntro: string;
-  projectRole: string;
-  projectSkills: string;
-  projectStartDate: string;
-  projectEndDate: string;
-  projectDetail: string;
-  projectClient: string;
+// {
+//   "experienceId": 7,
+//   "experienceName": "테스트2",
+//   "experienceRole": "싸피 교육생",
+//   "updatedAt": "2025-04-28T20:56:46.235933"
+// },
+
+export interface PostExperienceRequest {
+  experienceName: string;
+  experienceDetail: string;
+  experienceRole: string;
+  experienceStartDate: string;
+  experienceEndDate: string;
+  experienceClient: string;
 }
 
-export interface PostProjectResponse {
-  projectId: number;
-  message: string;
-}
-
-export interface GetProjectsResponse {
-  projectId: number;
-  projectName: string;
-  projectIntro: string;
-  projectSkills: string;
+export interface GetExperienceResponse {
+  experienceId: number;
+  experienceName: string;
+  experienceRole: string;
   updatedAt: string;
 }
 
-export interface GetProjectResponse {
-  projectId: number;
-  projectName: string;
-  projectIntro: string;
-  projectRole: string;
-  projectSkills: string;
-  projectStartDate: string;
-  projectEndDate: string;
-  projectDetail: string;
-  projectClient: string;
-  updatedAt: string;
-}
 export const experienceApi = {
-  postProject: (projectFormData: PostProjectRequest) => {
-    return authApi.post("/api/v1/project", projectFormData);
+  postExperience: (projectFormData: PostExperienceRequest) => {
+    return authApi.post("/api/v1/experience", projectFormData);
   },
-  getProjects: () => {
-    return authApi.get("/api/v1/project");
+  getExperiences: () => {
+    return authApi.get<GetExperienceResponse[]>("/api/v1/experience");
   },
-  getProject: (projectId: number) => {
-    return authApi.get(`/api/v1/project/${projectId}`);
+  getExperience: (experienceId: number) => {
+    return authApi.get<GetExperienceResponse>(
+      `/api/v1/experience/${experienceId}`
+    );
   },
-  putProject: (projectFormData: PostProjectRequest, projectId: number) => {
-    return authApi.put(`/api/v1/project/${projectId}`, projectFormData);
+  putExperience: (
+    projectFormData: PostExperienceRequest,
+    experienceId: number
+  ) => {
+    return authApi.put(`/api/v1/experience/${experienceId}`, projectFormData);
   },
-  deleteProject: (projectId: number) => {
-    return authApi.delete(`/api/v1/project/${projectId}`);
+  deleteExperience: (experienceId: number) => {
+    return authApi.delete(`/api/v1/experience/${experienceId}`);
   },
 };

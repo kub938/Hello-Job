@@ -2,6 +2,7 @@ import {
   ChatStore,
   CoverLetterInputStoreType,
 } from "@/types/coverLetterStoreTypes";
+import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
 import { toast } from "sonner";
 import { create } from "zustand";
 
@@ -60,6 +61,19 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
       }));
     },
 
+    setContentProjectIds: (contentIndex: number, projectIds: number[]) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          contents: state.inputData.contents.map((content, index) =>
+            index === contentIndex
+              ? { ...content, contentProjectIds: projectIds }
+              : content
+          ),
+        },
+      }));
+    },
+
     addQuestion: () =>
       set((state) => {
         if (state.inputData.contents.length >= 10) {
@@ -84,5 +98,13 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
           },
         };
       }),
+
+    setAllQuestions: (contents: CoverLetterRequestContent[]) =>
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          contents,
+        },
+      })),
   })
 );

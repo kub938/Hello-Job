@@ -1,9 +1,12 @@
-import { PostProjectRequest } from "./experienceApi";
+import {
+  GetProjectsResponse,
+  PostProjectRequest,
+} from "@/types/projectApiTypes";
 import { authApi } from "./instance";
 
 export const projectApi = {
   getProjects: () => {
-    return authApi.get("/api/v1/project");
+    return authApi.get<GetProjectsResponse[]>("/api/v1/project");
   },
   getProject: (projectId: number) => {
     return authApi.get(`/api/v1/project/${projectId}`);

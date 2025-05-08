@@ -1,11 +1,16 @@
-import { PostProjectRequest } from "@/api/experienceApi";
 import { projectApi } from "@/api/projectApi";
+import { PostProjectRequest } from "@/types/projectApiTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-// (projectFormData: PostProjectRequest)
-
+export interface GetProjectsResponse {
+  projectId: number;
+  projectName: string;
+  projectIntro: string;
+  projectSkills: string;
+  updatedAt: string;
+}
 export const useGetProjects = () => {
-  return useQuery({
+  return useQuery<GetProjectsResponse[]>({
     queryKey: ["projects"],
     queryFn: async () => {
       const response = await projectApi.getProjects();
