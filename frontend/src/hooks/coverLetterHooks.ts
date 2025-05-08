@@ -51,3 +51,14 @@ export const useGetCoverLetterContentIds = (coverLetterId: number) => {
     },
   });
 };
+
+export const useGetContentStatus = (coverLetterId: number) => {
+  return useQuery({
+    queryKey: ["cover-letter-status"],
+    queryFn: async () => {
+      const response = await coverLetterApi.getContentStatus(coverLetterId);
+      console.log(response.data);
+      return response.data;
+    },
+  });
+};

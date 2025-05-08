@@ -3,6 +3,10 @@ import {
   getCoverLetterContentIdsResponse,
 } from "@/types/coverLetterTypes";
 import { authApi } from "./instance";
+import {
+  getContentStatusResponse,
+  getCoverLetterResponse,
+} from "@/types/coverLetterApiType";
 
 interface sendMessageRequest {
   contentId: number;
@@ -14,25 +18,17 @@ export const coverLetterApi = {
   postCoverLetter: (postCoverLetterRequest: CoverLetterPostRequest) => {
     return authApi.post("/api/v1/cover-letter", postCoverLetterRequest);
   },
-
   getCoverLetter: (contentId: number) => {
-    return authApi.get(`/api/v1/cover-letter-content/${contentId}`);
+    return authApi.get<getCoverLetterResponse>(
+      `/api/v1/cover-letter-content/${contentId}`
+    );
   },
-
   getCoverLetterContentIds: (coverLetterId: number) => {
     return authApi.get<getCoverLetterContentIdsResponse>(
       `/api/v1/cover-letter/${coverLetterId}`
     );
   },
 
-  draftCoverLetter: (coverLetterId: number, coverLetterNumber: number) => {
-    return authApi.patch(
-      `/api/v1/cover-letter/${coverLetterId}/${coverLetterNumber}`
-    );
-  },
-  saveCoverLetter: (coverLetterId: number) => {
-    return authApi.patch(`/api/v1/cover-letter/${coverLetterId}`);
-  },
   sendMessage: (message: sendMessageRequest) => {
     return authApi.post(
       `/api/v1/cover-letter-content/${message.contentId}/chat`,
@@ -42,15 +38,17 @@ export const coverLetterApi = {
       }
     );
   },
+
+  getContentStatus: (coverLetterId: number) => {
+    return authApi.get<getContentStatusResponse>(
+      `/api/v1/cover-letter/status/${coverLetterId}`
+    );
+  },
+
+  saveCoverLetter: (coverLetterId: number) => {
+    return authApi.patch(`/api/v1/cover-letter/${coverLetterId}`);
+  },
   deleteCoverLetter: (coverLetterId: number) => {
     return authApi.delete(`/api/v1/cover-letter/${coverLetterId}`);
-  },
-  getConnectAnalysisInfo: (
-    CoverLetterId: number,
-    jobRoleSnapshotId: number
-  ) => {
-    return authApi.get(
-      `/api/v1/cover-letter/${CoverLetterId}/${jobRoleSnapshotId}`
-    );
   },
 };
