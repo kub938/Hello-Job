@@ -21,6 +21,7 @@ import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompanyAnalysisService {
@@ -214,7 +216,7 @@ public class CompanyAnalysisService {
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
 
         // 해당 기업의 기업 분석 전체 조회
-        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAllByCompany_CompanyId(companyId);
+        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdAndIsPublicTrueOrderByCreatedAtDesc(companyId);
 
         // 공개된 분석만 필터링하여 DTO 매핑
         return analysisList.stream()
