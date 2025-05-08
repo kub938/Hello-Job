@@ -62,6 +62,8 @@ public class FastApiClientService {
 
         List<AICoverLetterResponseDto> response = responseWrapper.getCover_letters();
 
+        response.forEach(r -> log.debug("🌞 number: {}, detail: {}", r.getContent_number(), r.getCover_letter()));
+
         return response;
     }
 
@@ -82,6 +84,8 @@ public class FastApiClientService {
         if (response == null) {
             throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
         }
+
+        log.debug("🌞 AI 메시지: {}, 유저 메시지 {}", response.getAi_message(), response.getUser_message());
 
         return response;
     }
