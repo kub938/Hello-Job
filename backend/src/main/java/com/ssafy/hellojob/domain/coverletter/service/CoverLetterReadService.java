@@ -18,9 +18,7 @@ public class CoverLetterReadService {
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
     }
 
-    public void checkCoverLetterValidation(Integer userId, Integer coverLetterId) {
-        CoverLetter coverLetter = findCoverLetterByIdOrElseThrow(coverLetterId);
-
+    public void checkCoverLetterValidation(Integer userId, CoverLetter coverLetter) {
         if (!coverLetter.getUser().getUserId().equals(userId)) {
             throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
         }
