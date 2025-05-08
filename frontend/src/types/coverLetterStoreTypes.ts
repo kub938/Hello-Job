@@ -27,9 +27,11 @@ export interface CoverLetterInputStoreType {
   inputData: {
     companyAnalysisId: number | null;
     jobRoleAnalysisId: number | null;
+    coverLetterTitle: string;
     contents: CoverLetterRequestContent[];
   };
 
+  setCoverLetterTitle: (title: string) => void;
   setCompanyAnalysisId: (id: number | null) => void;
   setJobRoleAnalysisId: (id: number | null) => void;
   setContentProjectIds: (contentIndex: number, projectIds: number[]) => void;

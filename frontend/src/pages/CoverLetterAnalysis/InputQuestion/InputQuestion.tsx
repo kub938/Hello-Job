@@ -5,12 +5,14 @@ import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
 import { useCreateCoverLetter } from "@/hooks/coverLetterHooks";
+import FormInput from "@/components/Common/FormInput";
 
 function InputQuestion() {
+  const [createModalOpen, setCreateModalOpen] = useState(false);
   const mutation = useCreateCoverLetter();
-  const { addQuestion, inputData, setAllQuestions } =
+  const { addQuestion, inputData, setAllQuestions, setCoverLetterTitle } =
     useCoverLetterInputStore();
-
+  const [title, setTitle] = useState("");
   const [localContents, setLocalContents] = useState<
     CoverLetterRequestContent[]
   >([]);
@@ -55,8 +57,13 @@ function InputQuestion() {
     console.log("Zustand 상태 업데이트됨:", inputData);
   }, [inputData.contents]);
 
+  const handleOpenCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+
   // 완료 버튼 클릭 - Zustand 스토어에 저장
   const handleComplete = () => {
+    // 로컬에서 새 객체 생성
     // 필수 항목 검증 (선택 사항)
     // const isValid = localContents.every(
     //   (content) => content.contentQuestion && content.contentLength > 0
@@ -67,26 +74,59 @@ function InputQuestion() {
     //   return;
     // }
 
+    const updatedData = {
+      ...inputData,
+      coverLetterTitle: title,
+      contents: localContents,
+    };
+
+    // Zustand 상태 업데이트
+    setCoverLetterTitle(title);
     if (setAllQuestions) {
       setAllQuestions(localContents);
-      toast.success("저장되었습니다.");
+
+      // 새 객체로 API 호출
+      mutation.mutate(updatedData, {
+        onSuccess: (data) => {
+          console.log("데이터 저장 성공", data);
+          toast.success("저장되었습니다.");
+        },
+        onError: (error) => {
+          console.log("데이터 저장 실패", error);
+          toast.error("저장 중 오류가 발생했습니다.");
+        },
+      });
     } else {
       toast.error("저장 중 오류가 발생했습니다.");
     }
-
-    mutation.mutate(inputData, {
-      onSuccess: (data) => {
-        console.log("데이터 저장 성공", data);
-      },
-      onError: (error) => {
-        console.log("데이터 저장 실패", error);
-      },
-    });
   };
 
+  const handleInputTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTitle(e.target.value);
+  };
   const contentList = inputData.contents;
   return (
     <>
+      {createModalOpen && (
+        <div className="modal-overlay">
+          <div className="modal-container h-auto flex flex-col ">
+            <div className="font-semibold">자기소개서 제목을 입력해 주세요</div>
+            <FormInput
+              name="coverLetterTitle"
+              require={true}
+              placeholder="제목 입력"
+              type="text"
+              className="w-90 h-10 "
+              onChange={handleInputTitle}
+            />
+            <div className="flex justify-end">
+              <Button onClick={handleComplete} className="w-15 mt-3">
+                확인
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
       {contentList.map((content, contentIndex) => (
         <QuestionItem
           onUpdateQuestion={updateQuestionData}
@@ -101,7 +141,7 @@ function InputQuestion() {
         + 문항 추가하기
       </div>
       <div className="flex justify-end mt-5">
-        <Button className="w-30 h-10" onClick={handleComplete}>
+        <Button className="w-30 h-10" onClick={handleOpenCreateModal}>
           초안 생성
         </Button>
       </div>
