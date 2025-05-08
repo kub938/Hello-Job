@@ -32,8 +32,6 @@ export const corporateReportApi = {
   postCorporateReport: (
     postCorporateReportRequest: postCorporateReportRequest
   ) => {
-    return authApi.post(`/api/v1/company-analysis`, {
-      postCorporateReportRequest,
-    });
+    return authApi.post(`/api/v1/company-analysis`, postCorporateReportRequest);
   },
 };
