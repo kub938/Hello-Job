@@ -18,9 +18,10 @@ export const corporateReportApi = {
     return authApi.get(`/api/v1/company-analysis/${companyAnalysisId}`);
   },
   postBookmark: (postBookmarkRequest: postBookmarkRequest) => {
-    return authApi.post(`/api/v1/company-analysis/bookmark`, {
-      postBookmarkRequest,
-    });
+    return authApi.post(
+      `/api/v1/company-analysis/bookmark`,
+      postBookmarkRequest
+    );
   },
   deleteBookmark: (companyAnalysisId: number) => {
     return authApi.delete(

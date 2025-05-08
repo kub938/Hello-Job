@@ -21,9 +21,10 @@ export const jobRoleAnalysis = {
   },
 
   postBookmark: (postJobBookmarkRequest: postJobBookmarkRequest) => {
-    return authApi.post(`/api/v1/job-role-analysis/bookmark`, {
-      postJobBookmarkRequest,
-    });
+    return authApi.post(
+      `/api/v1/job-role-analysis/bookmark`,
+      postJobBookmarkRequest
+    );
   },
   deleteBookmark: (jobRoleAnalysisBookmarkId: number) => {
     return authApi.delete(
@@ -34,8 +35,9 @@ export const jobRoleAnalysis = {
   postJobRoleAnalysis: (
     postJobRoleAnalysisRequest: postJobRoleAnalysisRequest
   ) => {
-    return authApi.post(`/api/v1/job-role-analysis`, {
-      postJobRoleAnalysisRequest,
-    });
+    return authApi.post(
+      `/api/v1/job-role-analysis`,
+      postJobRoleAnalysisRequest
+    );
   },
 };
