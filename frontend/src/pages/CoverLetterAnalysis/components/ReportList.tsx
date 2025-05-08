@@ -7,6 +7,9 @@ import {
   JobBookMarkResponse,
   ReportListProps,
 } from "@/types/coverLetterTypes";
+import AddCompanyAnalysisModal from "../AddModal/AddCompanyAnalysisModal";
+import { useState } from "react";
+import AddJobAnalysisModal from "../AddModal/AddJobAnalysisModal";
 
 function ReportList({ nowStep }: ReportListProps) {
   const reportBlockLayout =
@@ -20,6 +23,9 @@ function ReportList({ nowStep }: ReportListProps) {
     useCoverLetterInputStore();
   const companyBookMarksQuery = useGetCompanyBookMarks(company.companyId);
   const jobBookMarksQuery = useGetJobBookMarks(company.companyId);
+  const [addCompanyAnalysisModalOpen, setAddCompanyAnalysisModalOpen] =
+    useState(false);
+  const [addJobAnalysisModalOpen, setAddJobAnalysisModalOpen] = useState(false);
 
   const data =
     nowStep === 1 ? companyBookMarksQuery.data : jobBookMarksQuery.data;
@@ -62,8 +68,28 @@ function ReportList({ nowStep }: ReportListProps) {
   if (!data) return;
   const reports = adaptData(data, nowStep);
 
+  const handleAddCompanyModalClose = () => {
+    setAddCompanyAnalysisModalOpen(false);
+  };
+  const handleAddCompanyModalOpen = () => {
+    setAddCompanyAnalysisModalOpen(true);
+  };
+
+  const handleAddJobModalOpen = () => {
+    setAddJobAnalysisModalOpen(true);
+  };
+  const handleAddJobModalClose = () => {
+    setAddJobAnalysisModalOpen(false);
+  };
+
   return (
     <>
+      {addJobAnalysisModalOpen && (
+        <AddJobAnalysisModal onClose={handleAddJobModalClose} />
+      )}
+      {addCompanyAnalysisModalOpen && (
+        <AddCompanyAnalysisModal onClose={handleAddCompanyModalClose} />
+      )}
       <div className="grid  md:grid-cols-3 grid-cols-2 gap-4 ">
         {reports &&
           reports.map((report) => {
@@ -94,6 +120,9 @@ function ReportList({ nowStep }: ReportListProps) {
             );
           })}
         <div
+          onClick={
+            nowStep === 1 ? handleAddCompanyModalOpen : handleAddJobModalOpen
+          }
           className={`${reportBlockLayout} ${hoverReportBlockLayout} flex-col`}
         >
           <div>{nowStep === 1 ? "기업분석" : "직무분석"} 추가하기</div>

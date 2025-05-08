@@ -57,10 +57,6 @@ function InputQuestion() {
     console.log("Zustand 상태 업데이트됨:", inputData);
   }, [inputData.contents]);
 
-  const handleOpenCreateModal = () => {
-    setCreateModalOpen(true);
-  };
-
   // 완료 버튼 클릭 - Zustand 스토어에 저장
   const handleComplete = () => {
     // 로컬에서 새 객체 생성
@@ -104,11 +100,20 @@ function InputQuestion() {
   const handleInputTitle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTitle(e.target.value);
   };
+
+  const handleOpenCreateModal = () => {
+    setCreateModalOpen(true);
+  };
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    if (e.currentTarget === e.target) {
+      setCreateModalOpen(false);
+    }
+  };
   const contentList = inputData.contents;
   return (
     <>
       {createModalOpen && (
-        <div className="modal-overlay">
+        <div onClick={(e) => handleOverlayClick(e)} className="modal-overlay">
           <div className="modal-container h-auto flex flex-col ">
             <div className="font-semibold">자기소개서 제목을 입력해 주세요</div>
             <FormInput

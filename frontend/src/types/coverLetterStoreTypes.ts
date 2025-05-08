@@ -8,6 +8,7 @@ export type ChatMessage = {
 export type ChatStore = {
   chatLog: ChatMessage[];
   addUserMessage: (message: string) => void;
+  addAiMessage: (message: string) => void;
 };
 
 export interface CompanyState {

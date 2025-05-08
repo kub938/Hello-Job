@@ -1,15 +1,22 @@
 import { Button } from "@/components/Button";
 import { useCoverLetterStore } from "@/store/coverLetterStore";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 
 export interface InputChatProps {
+  inputValue: string;
+  setInputValue: (input: string) => void;
   onSubmitMessage: () => void;
+  onChangeInput: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
 }
 
-function InputChat({ onSubmitMessage }: InputChatProps) {
+function InputChat({
+  setInputValue,
+  onSubmitMessage,
+  onChangeInput,
+  inputValue,
+}: InputChatProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [inputValue, setInputValue] = useState("");
   const { addUserMessage } = useCoverLetterStore();
   const isComposing = useRef(false);
 
@@ -21,9 +28,9 @@ function InputChat({ onSubmitMessage }: InputChatProps) {
     }
   }, [inputValue]);
 
-  const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
-  };
+  // const handleOnChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  //   setInputValue(e.target.value);
+  // };
 
   const handleAddMessage = (message: string) => {
     addUserMessage(message);
@@ -63,7 +70,7 @@ function InputChat({ onSubmitMessage }: InputChatProps) {
             name="userMessage"
             value={inputValue}
             className="break-all resize-none px-3 py-2 pr-14 max-h-40 overflow-y-auto outline-0 w-full"
-            onChange={handleOnChange}
+            onChange={(e) => onChangeInput(e)}
             onKeyDown={handleKeyDown}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
