@@ -1,8 +1,9 @@
 import { ContentStatus } from "./coverLetterApiType";
 
 export interface QuestionStepProps {
+  selectQuestionNumber: number;
   QuestionStatuses: ContentStatus[];
-  handleSelectQuestion: (selectNum: number) => void;
+  handleSelectQuestion: (selectId: number, selectNum: number) => void;
   selectQuestion: number;
 }
 

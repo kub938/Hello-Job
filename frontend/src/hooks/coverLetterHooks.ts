@@ -1,4 +1,5 @@
 import { coverLetterApi } from "@/api/coverLetterApi";
+import { SaveCoverLetterRequest } from "@/types/coverLetterApiType";
 import {
   CoverLetterPostRequest,
   getCoverLetterContentIdsResponse,
@@ -7,7 +8,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useGetCoverLetter = (contentId: number) => {
   return useQuery({
-    queryKey: ["cover-letter-number", "cover-letter"],
+    queryKey: ["cover-letter-number", "cover-letter", contentId],
     queryFn: async () => {
       const response = await coverLetterApi.getCoverLetter(contentId);
       console.log(response);
@@ -58,6 +59,16 @@ export const useGetContentStatus = (coverLetterId: number) => {
     queryFn: async () => {
       const response = await coverLetterApi.getContentStatus(coverLetterId);
       console.log(response.data);
+      return response.data;
+    },
+  });
+};
+
+export const useSaveCoverLetter = () => {
+  return useMutation({
+    mutationKey: [],
+    mutationFn: async (saveData: SaveCoverLetterRequest) => {
+      const response = await coverLetterApi.saveCoverLetter(saveData);
       return response.data;
     },
   });
