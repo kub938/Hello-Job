@@ -1,5 +1,8 @@
 import { coverLetterApi } from "@/api/coverLetterApi";
-import { CoverLetterPostRequest } from "@/types/coverLetterTypes";
+import {
+  CoverLetterPostRequest,
+  getCoverLetterContentIdsResponse,
+} from "@/types/coverLetterTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useGetCoverLetter = (contentId: number) => {
@@ -33,6 +36,18 @@ export const useSendMessage = () => {
     }) => {
       const response = await coverLetterApi.sendMessage(message);
       return response.data;
+    },
+  });
+};
+
+export const useGetCoverLetterContentIds = (coverLetterId: number) => {
+  return useQuery<getCoverLetterContentIdsResponse>({
+    queryKey: ["cover-letter-content-ids", coverLetterId],
+    queryFn: async () => {
+      const response = await coverLetterApi.getCoverLetterContentIds(
+        coverLetterId
+      );
+      return response.data; // API 응답에서 data 속성 반환
     },
   });
 };
