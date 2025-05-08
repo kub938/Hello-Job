@@ -142,7 +142,10 @@ function CorporateResearch() {
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
-            <CreateCorporate onClose={closeModal} />
+            <CreateCorporate
+              onClose={closeModal}
+              corporateId={parseInt(params.id ? params.id : "1")}
+            />
           ) : (
             <ReadCorporate onClose={closeModal} id={researchId} />
           )}
