@@ -7,7 +7,7 @@ import com.ssafy.hellojob.domain.exprience.dto.response.ExperiencesResponseDto;
 import com.ssafy.hellojob.domain.exprience.entity.Experience;
 import com.ssafy.hellojob.domain.exprience.repository.ExperienceRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.repository.UserRepository;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +26,11 @@ import java.util.List;
 public class ExperienceService {
 
     private final ExperienceRepository experienceRepository;
-    private final UserRepository userRepository;
+    private final UserReadService userReadService;
+    private final ExperienceReadService experienceReadService;
 
     public ExperienceCreateResponseDto createExperience(Integer userId, ExperienceRequestDto experienceRequestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         if (experienceRequestDto.getExperienceStartDate().isAfter(experienceRequestDto.getExperienceEndDate())) {
             log.debug("🌞 경험 시작 날짜: " + experienceRequestDto.getExperienceStartDate() + " 경험 종료 날짜: " + experienceRequestDto.getExperienceEndDate());
@@ -56,23 +56,22 @@ public class ExperienceService {
     }
 
     public List<ExperiencesResponseDto> getExperiences(Integer userId) {
+        userReadService.findUserByIdOrElseThrow(userId);
         List<ExperiencesResponseDto> experiences = experienceRepository.findExperiencesByUserId(userId);
-
         return experiences;
     }
 
     public Page<ExperiencesResponseDto> getExperiencesPage(Integer userId, Pageable pageable) {
+        userReadService.findUserByIdOrElseThrow(userId);
         Page<ExperiencesResponseDto> page = experienceRepository.findExperiencesPageByUserId(userId, pageable);
         return page;
     }
 
     public ExperienceResponseDto getExperience(Integer userId, Integer experienceId) {
-        Experience experience = experienceRepository.findByExperienceId(experienceId)
-                .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
 
-        if (!userId.equals(experience.getUser().getUserId())) {
-            throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
+        experienceReadService.checkExperienceValidation(userId, experience);
 
         return ExperienceResponseDto.builder()
                 .experienceId(experience.getExperienceId())
@@ -87,12 +86,10 @@ public class ExperienceService {
     }
 
     public void updateExperience(Integer userId, Integer experienceId, ExperienceRequestDto experienceRequestDto) {
-        Experience experience = experienceRepository.findByExperienceId(experienceId)
-                .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
 
-        if (!userId.equals(experience.getUser().getUserId())) {
-            throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
+        experienceReadService.checkExperienceValidation(userId, experience);
 
         if (experienceRequestDto.getExperienceStartDate().isAfter(experienceRequestDto.getExperienceEndDate())) {
             log.debug("🌞 경험 시작 날짜: " + experienceRequestDto.getExperienceStartDate() + " 경험 종료 날짜: " + experienceRequestDto.getExperienceEndDate());
@@ -103,12 +100,10 @@ public class ExperienceService {
     }
 
     public void deleteExperience(Integer userId, Integer experienceId) {
-        Experience experience = experienceRepository.findByExperienceId(experienceId)
-                .orElseThrow(() -> new BaseException(ErrorCode.EXPERIENCE_NOT_FOUND));
 
-        if (!userId.equals(experience.getUser().getUserId())) {
-            throw new BaseException(ErrorCode.EXPERIENCE_MISMATCH);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
+        experienceReadService.checkExperienceValidation(userId, experience);
 
         experienceRepository.deleteById(experienceId);
     }
