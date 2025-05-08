@@ -9,8 +9,8 @@ interface FormInputProps {
     | "range"
     | "password"
     | "date";
-  width: string;
-  height: string;
+  width?: string;
+  height?: string;
   name: string;
   className?: string;
   label?: string;

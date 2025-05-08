@@ -50,6 +50,7 @@ export interface CoverLetterResponse {
 
 //Post Request Type
 export interface CoverLetterPostRequest {
+  coverLetterTitle: string;
   companyAnalysisId: number | null;
   jobRoleAnalysisId: number | null;
   contents: CoverLetterRequestContent[];
