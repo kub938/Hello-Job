@@ -1,78 +1,78 @@
-import { useCallback, useMemo, useRef, useState } from "react";
-import { CoverLetterResponse } from "@/types/coverLetterTypes";
+import { useCallback, useMemo, useRef, useState, useEffect } from "react";
 import InputChat from "./components/InputChat";
 import QuestionStep from "./components/QuestionStep";
 import { useCoverLetterStore } from "@/store/coverLetterStore";
 import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
-import { useSendMessage } from "@/hooks/coverLetterHooks";
+import {
+  useGetCoverLetter,
+  useGetCoverLetterContentIds,
+  useSendMessage,
+} from "@/hooks/coverLetterHooks";
 
 function CoverLetter() {
+  // 모든 훅을 컴포넌트 최상단에 배치
   const mutation = useSendMessage();
-  const data: CoverLetterResponse = {
-    coverLetterId: 1, // 자기소개서 id
-    summary: {
-      totalContentQuestionCount: 4, // 총 문항 수
-      contentQuestionStatuses: [
-        // 문항별 작성 상태(예: 1번 문항 - 작성 완료)
-        { contentNumber: 1, contentStatus: "COMPLETED" },
-        { contentNumber: 2, contentStatus: "IN_PROGRESS" },
-        { contentNumber: 3, contentStatus: "PENDING" },
-        { contentNumber: 4, contentStatus: "PENDING" },
-      ],
-      companyAnalysisId: 1, // 기업 분석 id
-      jobRoleSnapshotId: 1, // 직무 분석 id(null일 수도 있음)
-      coverLetterUpdatedAt: "2025-04-24T13:03:00", // 전체 자소서 수정일
-    },
-    content: {
-      contentQuestion: "지원 동기를 적어주세요.", // 자기소개서 질문
-      contentNumber: 1, // 자기소개서 문항 번호
-      contentLength: 700, // 글자수 제한
-      contentDetail: "안녕하세요, 저는 프론트엔드 개발자 지망생입니다.....",
-      contentExperienceIds: [1, 2], // 선택한 경험 id
-      contentProjectIds: [3], // 선택한 프로젝트 id
-      contentFirstPrompt: "이거 이렇게 저렇게 요렇게 하고 싶음", // 작성 요청 시의 처음 프롬프트
-      contentStatus: "IN_PROGRESS", // "PENDING": 미작성 | "IN_PROGRESS": 작성 중 | "COMPLETED": 작성 완료,
-      contentChatLog: [
-        { sender: "USER", message: "유저입니다" },
-        { sender: "AI", message: "이렇게 바꿔보세요?" },
-      ],
-      contentUpdatedAt: "2025-04-23T08:50:37.000", // 개별 자소서 문항의 수정일
-    },
-  };
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const { id: idParam } = useParams();
+  const id = idParam ? parseInt(idParam) : undefined;
+  const { chatLog, addAiMessage } = useCoverLetterStore();
 
-  const [selectQuestion, setSelectQuestion] = useState(0);
-  const param = useParams();
-  const { chatLog } = useCoverLetterStore();
-
-  // inputChat 상태 관리
+  // useState 훅 모음
+  const [selectQuestion, setSelectQuestion] = useState(0); // 기본값 설정
   const [inputValue, setInputValue] = useState("");
   const [contentDetail, setContentDetail] = useState("");
-  const [nowContentLength, setNowContentLength] = useState(
-    data.content.contentDetail.length
-  );
+  const [nowContentLength, setNowContentLength] = useState(0);
 
+  // API 호출 관련 훅
+  const { data: contents, isLoading: isContentsLoading } =
+    useGetCoverLetterContentIds(id || 0);
+
+  const { data, isLoading, isError } = useGetCoverLetter(selectQuestion || 0);
+
+  // 데이터가 로드되면 상태 업데이트
+  useEffect(() => {
+    const firstContentId = contents?.contentIds?.[0];
+    if (firstContentId !== undefined) {
+      setSelectQuestion(firstContentId);
+    }
+  }, [contents]);
+
+  useEffect(() => {
+    if (data?.contentDetail) {
+      setNowContentLength(data.contentDetail.length);
+    }
+  }, [data]);
+  // 이벤트 핸들러
   const onChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
   };
+
   const onChangeContentDetail = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContentDetail(e.target.value);
     setNowContentLength(e.target.textLength);
   };
 
-  const coverLetterId = param.id ? parseInt(param.id, 10) : 0;
   const handleSelectQuestion = (selectNum: number) => {
     setSelectQuestion(selectNum);
   };
 
-  const message = {
-    contentId: selectQuestion,
-    userMessage: inputValue,
-    contentDetail: contentDetail,
-  };
   const onSubmitMessage = useCallback(() => {
-    mutation.mutate(message);
+    const message = {
+      contentId: selectQuestion,
+      userMessage: inputValue,
+      contentDetail: contentDetail,
+    };
+    mutation.mutate(message, {
+      onSuccess: (data) => {
+        console.log(data);
+        addAiMessage(data.aiMessage);
+      },
+      onError: (error) => {
+        console.error("메시지 전송 실패: ", error);
+      },
+    });
+
     const chatContainer = chatContainerRef.current;
     setTimeout(() => {
       if (chatContainer) {
@@ -82,9 +82,7 @@ function CoverLetter() {
         });
       }
     }, 0);
-  }, []);
-
-  const QuestionStatuses = data.summary.contentQuestionStatuses;
+  }, [inputValue, contentDetail, selectQuestion]);
 
   const chatStyles = useMemo(
     () => ({
@@ -100,6 +98,29 @@ function CoverLetter() {
     }),
     []
   );
+
+  // 조건부 렌더링 - 모든 훅 선언 이후에 배치
+  if (!id) {
+    return <div>유효하지 않은 자기소개서 ID입니다.</div>;
+  }
+
+  if (isContentsLoading) {
+    return <div>컨텐츠 로딩중 입니다.</div>;
+  }
+
+  if (!contents) {
+    return <div>유효하지 않은 문항 번호 입니다.</div>;
+  }
+
+  if (isLoading) {
+    return <div>자기소개서를 가져오는 중 입니다.</div>;
+  }
+
+  if (!data) {
+    return <div>자기소개서 데이터를 불러오는데 실패했습니다.</div>;
+  }
+
+  // const QuestionStatuses = data.summary.contentQuestionStatuses;
 
   return (
     <>
@@ -125,6 +146,8 @@ function CoverLetter() {
             </div>
             <div className="absolute bottom-0 w-full">
               <InputChat
+                setInputValue={setInputValue}
+                inputValue={inputValue}
                 onChangeInput={onChangeInput}
                 onSubmitMessage={onSubmitMessage}
               ></InputChat>
@@ -133,17 +156,16 @@ function CoverLetter() {
         </div>
 
         <CoverLetterEditor
-          selectQuestion={selectQuestion}
-          coverLetterId={coverLetterId}
+          CoverLetterData={data}
           onChangeContentDetail={onChangeContentDetail}
           nowContentLength={nowContentLength}
         />
 
-        <QuestionStep
+        {/* <QuestionStep
           QuestionStatuses={QuestionStatuses}
           handleSelectQuestion={handleSelectQuestion}
           selectQuestion={selectQuestion}
-        />
+        /> */}
       </div>
     </>
   );
