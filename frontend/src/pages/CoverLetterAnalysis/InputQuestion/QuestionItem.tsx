@@ -7,6 +7,8 @@ import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import ProjectForm from "@/pages/Resume/ProjectForm";
 import SelectModal, { ModalType } from "../SelectModal/SelectModal";
 import ExperienceForm from "@/pages/Resume/ExperienceForm";
+import { GetExperienceResponse } from "@/api/experienceApi";
+import { useGetExperiences } from "@/hooks/experienceHooks";
 
 export interface QuestionItemProps {
   contentIndex: number;
@@ -25,8 +27,8 @@ function QuestionItem({
   const headerStyle =
     "w-full text-primary bg-secondary-light rounded-t-2xl py-3 px-4 font-semibold";
 
-  const { data } = useGetProjects();
-
+  const { data: projectData } = useGetProjects();
+  const { data: experienceData } = useGetExperiences();
   const [isOpen, setIsOpen] = useState(true);
   const [charCount, setCharCount] = useState(0);
 
@@ -38,11 +40,17 @@ function QuestionItem({
   const [selectModalOpen, setSelectModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>("");
 
+  /* 선택한 프로젝트, 경험 관리 */
   const [selectedProjects, setSelectedProjects] = useState<
     GetProjectsResponse[]
   >([]);
+  const [selectedExperience, setSelectedExperience] = useState<
+    GetExperienceResponse[]
+  >([]);
   const { inputData } = useCoverLetterInputStore();
   const selectedProjectNum = inputData.contents[contentIndex].contentProjectIds;
+  const selectedExperienceNum =
+    inputData.contents[contentIndex].contentExperienceIds;
 
   /* 입력 값 상태 관리 */
   // const [localContents, setLocalContents] = useState(inputData.contents[contentIndex]);
@@ -50,15 +58,26 @@ function QuestionItem({
   const [inputLimitNum, setInputLimitNum] = useState("");
   const [inputPrompt, setInputPrompt] = useState("");
 
+  /* 선택한 프로젝트 필터  */
   useEffect(() => {
-    if (data) {
-      const temp = data.filter((project) =>
+    if (projectData) {
+      const temp = projectData.filter((project) =>
         selectedProjectNum.includes(project.projectId)
       );
       setSelectedProjects(temp);
     }
-  }, [data, selectedProjectNum]);
+  }, [projectData, selectedProjectNum]);
 
+  /* 선택한 경험 필터 */
+  useEffect(() => {
+    if (experienceData) {
+      console.log(selectedExperienceNum, experienceData[0].experienceId);
+      const temp = experienceData.filter((exp) =>
+        selectedExperienceNum.includes(exp.experienceId)
+      );
+      setSelectedExperience(temp);
+    }
+  }, [experienceData, selectedExperienceNum]);
   //form 업데이트
   useEffect(() => {
     const updatedData: Partial<CoverLetterRequestContent> = {
@@ -141,7 +160,7 @@ function QuestionItem({
       )}
       {projectFormOpen && <ProjectForm onClose={onCloseProjectForm} />}
       {ExperienceFormOpen && <ExperienceForm onClose={onCloseExperienceForm} />}
-      <form action="" className="border w-full rounded-2xl mb-3">
+      <form className="border w-full rounded-2xl mb-3">
         <div
           className={`${headerStyle} flex justify-between items-center cursor-pointer`}
           onClick={toggleForm}
@@ -201,12 +220,14 @@ function QuestionItem({
               <div className="w-[50%]">
                 <div className={`${headerStyle}`}>경험</div>
                 <div className="flex flex-col gap-2.5 border p-3 rounded-b-xl">
-                  <div
-                    onClick={handleExperienceModalOpen}
-                    className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg"
-                  >
-                    경험입니다?
-                  </div>
+                  {selectedExperience.map((exp) => (
+                    <div
+                      onClick={handleProjectModalOpen}
+                      className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg"
+                    >
+                      {exp.experienceName}
+                    </div>
+                  ))}
                   <div
                     onClick={handleExperienceModalOpen}
                     className="border border-transparent py-3 px-5 text-text-muted-foreground rounded-lg bg-background hover:bg-secondary-light hover:text-black hover:border hover:border-secondary"
