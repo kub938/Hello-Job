@@ -3,9 +3,9 @@ package com.ssafy.hellojob.domain.coverlettercontent.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AIChatResponseDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.ChatLog;
@@ -14,8 +14,6 @@ import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentSta
 import com.ssafy.hellojob.domain.coverlettercontent.repository.ChatLogRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
-import com.ssafy.hellojob.global.exception.BaseException;
-import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +30,7 @@ public class ChatLogService {
 
     private final ChatLogRepository chatLogRepository;
     private final CoverLetterContentRepository coverLetterContentRepository;
+    private final CoverLetterRepository coverLetterRepository;
     private final FastApiClientService fastApiClientService;
 
     // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌
@@ -52,25 +51,13 @@ public class ChatLogService {
     }
 
     @Transactional
-    public ChatResponseDto sendChat(Integer contentId, ChatRequestDto requestDto) {
-        // 사용자 메시지를 받은 다음 AI에 전달
-        // AI로부터 메시지를 받으면 DB에 저장 & contentStatus 확인 후 IN_PROGRESS로 변경
-        // AI 메시지를 받는 로직 들어가야 함
-//        ChatMessageDto userMessages = ChatMessageDto.builder()
-//                .sender("user")
-//                .message(requestDto.getUserMessage())
-//                .build();
-//
-//        ChatMessageDto aiMessage = ChatMessageDto.builder()
-//                .sender("ai")
-//                .message("아직 AI 연결 안됐지롱")
-//                .build();
+    public ChatResponseDto sendChat(CoverLetterContent content, AIChatRequestDto aiChatRequestDto) {
 
-        AIChatResponseDto response = sendChatToFastApi(requestDto);
+        AIChatResponseDto response = sendChatToFastApi(aiChatRequestDto);
 
         ChatMessageDto userMessages = ChatMessageDto.builder()
                 .sender("user")
-                .message(requestDto.getUserMessage())
+                .message(aiChatRequestDto.getEdit_content().getUser_message())
                 .build();
 
         ChatMessageDto aiMessage = ChatMessageDto.builder()
@@ -79,17 +66,14 @@ public class ChatLogService {
                 .build();
 
         // 본문 내용 저장
-        String contentDetail = requestDto.getContentDetail();
-
-        CoverLetterContent content = coverLetterContentRepository.findById(contentId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
+        String contentDetail = aiChatRequestDto.getEdit_content().getCover_letter();
 
         content.updateCoverLetterContentWithChat(contentDetail);
 
         // 새로운 채팅 배열
         List<ChatMessageDto> newChats = new ArrayList<>();
 
-        Optional<ChatLog> chatLogOpt = chatLogRepository.findById(contentId);
+        Optional<ChatLog> chatLogOpt = chatLogRepository.findById(content.getContentId());
 
         if (chatLogOpt.isEmpty()) {
             // 기존 로그 없으면 새로 생성
@@ -126,14 +110,8 @@ public class ChatLogService {
                 .build();
     }
 
-    public AIChatResponseDto sendChatToFastApi(ChatRequestDto requestDto) {
-        AIChatRequestDto request = AIChatRequestDto.builder()
-                .user_message(requestDto.getUserMessage())
-                .cover_letter(requestDto.getContentDetail())
-                .build();
-
-        AIChatResponseDto response = fastApiClientService.sendChatToFastApi(request);
-
+    public AIChatResponseDto sendChatToFastApi(AIChatRequestDto requestDto) {
+        AIChatResponseDto response = fastApiClientService.sendChatToFastApi(requestDto);
         return response;
     }
 

@@ -1,9 +1,7 @@
 package com.ssafy.hellojob.global.common.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisFastApiRequestDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.CompanyAnalysisFastApiResponseDto;
-import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AICoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
@@ -68,6 +66,12 @@ public class FastApiClientService {
     }
 
     public AIChatResponseDto sendChatToFastApi(AIChatRequestDto requestDto) {
+        try {
+            String json = objectMapper.writeValueAsString(requestDto);
+            log.info("🚀 WebClient Request JSON: {}", json);
+        } catch (Exception e) {
+            log.error("❌ JSON 직렬화 실패", e);
+        }
         AIChatResponseDto response = fastApiWebClient.post()
                 .uri("/api/v1/ai/cover-letter/edit")
                 .bodyValue(requestDto)
