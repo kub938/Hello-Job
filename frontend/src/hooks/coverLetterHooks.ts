@@ -1,5 +1,6 @@
 import { coverLetterApi } from "@/api/coverLetterApi";
-import { useQuery } from "@tanstack/react-query";
+import { CoverLetterPostRequest } from "@/types/coverLetterTypes";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useGetCoverLetter = (
   coverLetterId: number,
@@ -13,6 +14,16 @@ export const useGetCoverLetter = (
         coverLetterNumber
       );
       return response;
+    },
+  });
+};
+
+export const useCreateCoverLetter = () => {
+  return useMutation({
+    mutationKey: ["create-cover-letter"],
+    mutationFn: async (inputData: CoverLetterPostRequest) => {
+      const response = await coverLetterApi.postCoverLetter(inputData);
+      return response.data;
     },
   });
 };
