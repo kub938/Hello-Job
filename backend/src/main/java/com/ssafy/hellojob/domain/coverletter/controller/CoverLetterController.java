@@ -5,7 +5,6 @@ import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterCreateRespo
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterSummaryDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
-import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,9 +26,9 @@ public class CoverLetterController {
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestBody CoverLetterRequestDto requestDto
     ) {
-        User user = principal.getUser();
+        Integer userId = principal.getUserId();
 
-        return coverLetterService.createCoverLetter(user, requestDto);
+        return coverLetterService.createCoverLetter(userId, requestDto);
     }
 
     @GetMapping("/status/{coverLetterId}")
@@ -37,8 +36,8 @@ public class CoverLetterController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer coverLetterId
     ) {
-        User user = principal.getUser();
-        return coverLetterService.getCoverLetterStatuses(user, coverLetterId);
+        Integer userId = principal.getUserId();
+        return coverLetterService.getCoverLetterStatuses(userId, coverLetterId);
     }
 
     @GetMapping("/{coverLetterId}")
@@ -46,8 +45,8 @@ public class CoverLetterController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer coverLetterId
     ) {
-        User user = principal.getUser();
-        return coverLetterService.getCoverLetterSummary(user, coverLetterId);
+        Integer userId = principal.getUserId();
+        return coverLetterService.getCoverLetterSummary(userId, coverLetterId);
     }
 
     @PatchMapping("/{coverLetterId}")
@@ -55,8 +54,8 @@ public class CoverLetterController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer coverLetterId
     ) {
-        User user = principal.getUser();
-        return coverLetterService.saveAll(user, coverLetterId);
+        Integer userId = principal.getUserId();
+        return coverLetterService.saveAll(userId, coverLetterId);
     }
 
     @DeleteMapping("/{coverLetterId}")
@@ -64,7 +63,7 @@ public class CoverLetterController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer coverLetterId
     ) {
-        User user = principal.getUser();
-        return coverLetterService.deleteCoverLetter(user, coverLetterId);
+        Integer userId = principal.getUserId();
+        return coverLetterService.deleteCoverLetter(userId, coverLetterId);
     }
 }
