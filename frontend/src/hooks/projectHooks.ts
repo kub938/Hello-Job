@@ -14,7 +14,6 @@ export const useGetProjects = () => {
     queryKey: ["projects"],
     queryFn: async () => {
       const response = await projectApi.getProjects();
-      console.log(response);
       return response.data;
     },
   });
