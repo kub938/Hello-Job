@@ -4,17 +4,19 @@ import { useCoverLetterStore } from "@/store/coverLetterStore";
 import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
 import {
+  useGetContentStatus,
   useGetCoverLetter,
   useGetCoverLetterContentIds,
   useSendMessage,
 } from "@/hooks/coverLetterHooks";
+import QuestionStep from "./components/QuestionStep";
 
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
   const mutation = useSendMessage();
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { id: idParam } = useParams();
-  const id = idParam ? parseInt(idParam) : undefined;
+  const coverLetterId = idParam ? parseInt(idParam) : undefined;
   const { chatLog, addAiMessage } = useCoverLetterStore();
 
   // useState 훅 모음
@@ -25,9 +27,9 @@ function CoverLetter() {
 
   // API 호출 관련 훅
   const { data: contents, isLoading: isContentsLoading } =
-    useGetCoverLetterContentIds(id || 0);
-
+    useGetCoverLetterContentIds(coverLetterId || 0);
   const { data, isLoading } = useGetCoverLetter(selectQuestion || 0);
+  const { data: statusData } = useGetContentStatus(coverLetterId || 0);
 
   // 데이터가 로드되면 상태 업데이트
   useEffect(() => {
@@ -52,9 +54,9 @@ function CoverLetter() {
     setNowContentLength(e.target.textLength);
   };
 
-  // const handleSelectQuestion = (selectNum: number) => {
-  //   setSelectQuestion(selectNum);
-  // };
+  const handleSelectQuestion = (selectNum: number) => {
+    setSelectQuestion(selectNum);
+  };
 
   const onSubmitMessage = useCallback(() => {
     const message = {
@@ -99,7 +101,7 @@ function CoverLetter() {
   );
 
   // 조건부 렌더링 - 모든 훅 선언 이후에 배치
-  if (!id) {
+  if (!coverLetterId) {
     return <div>유효하지 않은 자기소개서 ID입니다.</div>;
   }
 
@@ -119,7 +121,10 @@ function CoverLetter() {
     return <div>자기소개서 데이터를 불러오는데 실패했습니다.</div>;
   }
 
-  // const QuestionStatuses = data.summary.contentQuestionStatuses;
+  if (!statusData) {
+    return <div>statusData를 불러오는데 실패했습니다.</div>;
+  }
+  const QuestionStatuses = statusData.contentQuestionStatuses;
 
   return (
     <>
@@ -160,11 +165,11 @@ function CoverLetter() {
           nowContentLength={nowContentLength}
         />
 
-        {/* <QuestionStep
+        <QuestionStep
           QuestionStatuses={QuestionStatuses}
           handleSelectQuestion={handleSelectQuestion}
           selectQuestion={selectQuestion}
-        /> */}
+        />
       </div>
     </>
   );

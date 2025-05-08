@@ -1,13 +1,10 @@
+import { ContentStatus } from "@/api/coverLetterApi";
+
 export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
 export type SenderType = "AI" | "USER";
 
-export interface QuestionStatus {
-  contentNumber: number;
-  contentStatus: ContentQuestionStatusType;
-}
-
 export interface QuestionStepProps {
-  QuestionStatuses: QuestionStatus[];
+  QuestionStatuses: ContentStatus[];
   handleSelectQuestion: (selectNum: number) => void;
   selectQuestion: number;
 }
