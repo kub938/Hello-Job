@@ -7,7 +7,7 @@ import com.ssafy.hellojob.domain.project.dto.response.ProjectsResponseDto;
 import com.ssafy.hellojob.domain.project.entity.Project;
 import com.ssafy.hellojob.domain.project.repository.ProjectRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.repository.UserRepository;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -26,11 +26,11 @@ import java.util.List;
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
-    private final UserRepository userRepository;
+    private final UserReadService userReadService;
+    private final ProjectReadService projectReadService;
 
     public ProjectCreateResponseDto createProject(Integer userId, ProjectRequestDto projectRequestDto) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         if (projectRequestDto.getProjectStartDate().isAfter(projectRequestDto.getProjectEndDate())) {
             log.debug("🌞 경험 시작 날짜: " + projectRequestDto.getProjectStartDate() + " 경험 종료 날짜: " + projectRequestDto.getProjectEndDate());
@@ -57,28 +57,21 @@ public class ProjectService {
     }
 
     public List<ProjectsResponseDto> getProjects(Integer userId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
         List<ProjectsResponseDto> projects = projectRepository.findByUserId(userId);
-
         return projects;
     }
 
     public Page<ProjectsResponseDto> getProjectsPage(Integer userId, Pageable pageable) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
         Page<ProjectsResponseDto> projects = projectRepository.findPageByUserId(userId, pageable);
-
         return projects;
     }
 
     public ProjectResponseDto getProject(Integer userId, Integer projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
-
-        if (project.getUser().getUserId() != userId) {
-            throw new BaseException(ErrorCode.PROJECT_MISMATCH);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
+        projectReadService.checkProjectValidation(userId, project);
 
         return ProjectResponseDto.builder()
                 .projectId(project.getProjectId())
@@ -95,12 +88,9 @@ public class ProjectService {
     }
 
     public void updateProject(Integer userId, Integer projectId, ProjectRequestDto projectRequestDto) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
-
-        if ( project.getUser().getUserId() != userId ) {
-            throw new BaseException(ErrorCode.PROJECT_MISMATCH);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
+        projectReadService.checkProjectValidation(userId, project);
 
         if (projectRequestDto.getProjectStartDate().isAfter(projectRequestDto.getProjectEndDate())) {
             log.debug("🌞 경험 시작 날짜: " + projectRequestDto.getProjectStartDate() + " 경험 종료 날짜: " + projectRequestDto.getProjectEndDate());
@@ -120,12 +110,9 @@ public class ProjectService {
     }
 
     public void removeProject(Integer userId, Integer projectId) {
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new BaseException(ErrorCode.PROJECT_NOT_FOUND));
-
-        if (project.getUser().getUserId() != userId) {
-            throw new BaseException(ErrorCode.PROJECT_MISMATCH);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
+        projectReadService.checkProjectValidation(userId, project);
 
         projectRepository.deleteById(projectId);
     }
