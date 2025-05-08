@@ -3,7 +3,7 @@ export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
 export interface ContentStatus {
   contentId: number;
   contentNumber: number;
-  contentStatus: string;
+  contentStatus: ContentQuestionStatusType;
 }
 export interface getContentStatusResponse {
   coverLetterId: number;
@@ -34,5 +34,11 @@ export type SenderType = "AI" | "USER";
 
 export interface QuestionStatus {
   contentNumber: number;
+  contentStatus: ContentQuestionStatusType;
+}
+
+export interface SaveCoverLetterRequest {
+  contentId: number;
+  contentDetail: string;
   contentStatus: ContentQuestionStatusType;
 }

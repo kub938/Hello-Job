@@ -1,10 +1,11 @@
 import { QuestionStepProps } from "@/types/coverLetterTypes";
 
 function QuestionStep({
+  selectQuestionNumber,
   QuestionStatuses,
   handleSelectQuestion,
-  selectQuestion,
 }: QuestionStepProps) {
+  console.log(QuestionStatuses);
   const stepStatusStyle = (questionStatus: string) => {
     switch (questionStatus) {
       case "COMPLETED":
@@ -26,9 +27,11 @@ function QuestionStep({
       {QuestionStatuses.map((status, index) => (
         <div
           key={index}
-          onClick={() => handleSelectQuestion(status.contentNumber)}
+          onClick={() =>
+            handleSelectQuestion(status.contentId, status.contentNumber)
+          }
           className={`flex flex-col ${stepBlockStyle(
-            status.contentNumber === selectQuestion
+            status.contentNumber === selectQuestionNumber
           )}`}
         >
           <div>{status.contentNumber + 1}</div>

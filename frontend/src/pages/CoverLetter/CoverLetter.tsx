@@ -7,6 +7,7 @@ import {
   useGetContentStatus,
   useGetCoverLetter,
   useGetCoverLetterContentIds,
+  useSaveCoverLetter,
   useSendMessage,
 } from "@/hooks/coverLetterHooks";
 import QuestionStep from "./components/QuestionStep";
@@ -14,13 +15,15 @@ import QuestionStep from "./components/QuestionStep";
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
   const mutation = useSendMessage();
+  const saveMutation = useSaveCoverLetter();
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { id: idParam } = useParams();
   const coverLetterId = idParam ? parseInt(idParam) : undefined;
   const { chatLog, addAiMessage } = useCoverLetterStore();
 
   // useState 훅 모음
-  const [selectQuestion, setSelectQuestion] = useState(0); // 기본값 설정
+  const [selectQuestionId, setSelectQuestionId] = useState(0); // 기본값 설정
+  const [selectQuestionNumber, setSelectQuestionNumber] = useState(0);
   const [inputValue, setInputValue] = useState("");
   const [contentDetail, setContentDetail] = useState("");
   const [nowContentLength, setNowContentLength] = useState(0);
@@ -29,7 +32,7 @@ function CoverLetter() {
   const { data: contents, isLoading: isContentsLoading } =
     useGetCoverLetterContentIds(coverLetterId || 0);
   const { data: coverLetter, isLoading } = useGetCoverLetter(
-    selectQuestion || 0
+    selectQuestionId || 0
   );
   const { data: statusData } = useGetContentStatus(coverLetterId || 0);
 
@@ -37,7 +40,7 @@ function CoverLetter() {
   useEffect(() => {
     const firstContentId = contents?.contentIds?.[0];
     if (firstContentId !== undefined) {
-      setSelectQuestion(firstContentId);
+      setSelectQuestionId(firstContentId);
     }
   }, [contents]);
 
@@ -47,22 +50,26 @@ function CoverLetter() {
     setNowContentLength(coverLetter.contentDetail.length);
   }, [coverLetter]);
   // 이벤트 핸들러
+
   const onChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
   };
 
   const onChangeContentDetail = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContentDetail(e.target.value);
-    setNowContentLength(e.target.textLength);
+    const newValue = e.target.value;
+    setContentDetail(newValue);
+    setNowContentLength(newValue.length);
   };
 
-  const handleSelectQuestion = (selectNum: number) => {
-    setSelectQuestion(selectNum);
+  const handleSelectQuestion = (selectId: number, selectNum: number) => {
+    onSaveContent();
+    setSelectQuestionId(selectId);
+    setSelectQuestionNumber(selectNum);
   };
 
   const onSubmitMessage = useCallback(() => {
     const message = {
-      contentId: selectQuestion,
+      contentId: selectQuestionId,
       userMessage: inputValue,
       contentDetail: contentDetail,
     };
@@ -85,7 +92,7 @@ function CoverLetter() {
         });
       }
     }, 0);
-  }, [inputValue, contentDetail, selectQuestion]);
+  }, [inputValue, contentDetail, selectQuestionId]);
 
   const chatStyles = useMemo(
     () => ({
@@ -101,6 +108,24 @@ function CoverLetter() {
     }),
     []
   );
+
+  const onSaveContent = () => {
+    if (!statusData) return;
+    const saveData = {
+      contentId: selectQuestionId,
+      contentDetail: contentDetail,
+      contentStatus:
+        statusData?.contentQuestionStatuses[selectQuestionNumber].contentStatus,
+    };
+    saveMutation.mutate(saveData, {
+      onSuccess: (data) => {
+        console.log(data);
+      },
+      onError: (error) => {
+        console.log(error);
+      },
+    });
+  };
 
   // 조건부 렌더링 - 모든 훅 선언 이후에 배치
   if (!coverLetterId) {
@@ -162,15 +187,17 @@ function CoverLetter() {
         </div>
 
         <CoverLetterEditor
+          onSaveContent={onSaveContent}
           CoverLetterData={coverLetter}
           onChangeContentDetail={onChangeContentDetail}
           nowContentLength={nowContentLength}
         />
 
         <QuestionStep
+          selectQuestionNumber={selectQuestionNumber}
           QuestionStatuses={QuestionStatuses}
           handleSelectQuestion={handleSelectQuestion}
-          selectQuestion={selectQuestion}
+          selectQuestion={selectQuestionId}
         />
       </div>
     </>
