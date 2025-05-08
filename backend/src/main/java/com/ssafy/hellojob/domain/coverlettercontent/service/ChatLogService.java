@@ -3,7 +3,6 @@ package com.ssafy.hellojob.domain.coverlettercontent.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
@@ -12,7 +11,6 @@ import com.ssafy.hellojob.domain.coverlettercontent.entity.ChatLog;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentStatus;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.ChatLogRepository;
-import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +27,6 @@ import java.util.Optional;
 public class ChatLogService {
 
     private final ChatLogRepository chatLogRepository;
-    private final CoverLetterContentRepository coverLetterContentRepository;
-    private final CoverLetterRepository coverLetterRepository;
     private final FastApiClientService fastApiClientService;
 
     // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌

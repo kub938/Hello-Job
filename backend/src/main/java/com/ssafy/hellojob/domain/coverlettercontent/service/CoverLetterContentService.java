@@ -79,12 +79,11 @@ public class CoverLetterContentService {
 
     // 자기소개서 문항별 조회 응답
     @Transactional
-    public CoverLetterContentDto getCoverLetterContent(User user, Integer contentId) {
-        CoverLetterContent coverLetterContent = coverLetterContentRepository.findById(contentId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
+    public CoverLetterContentDto getCoverLetterContent(Integer userId, Integer contentId) {
 
-        if (!user.getUserId().equals(coverLetterContent.getCoverLetter().getUser().getUserId()))
-            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
+        userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetterContent coverLetterContent = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
+        coverLetterContentReadService.checkCoverLetterContentValidation(userId, contentId);
 
         List<Integer> contentExperienceIds =
                 coverLetterExperienceService.getCoverLetterExperienceIds(contentId);
@@ -142,16 +141,11 @@ public class CoverLetterContentService {
     }
 
     @Transactional
-    public Map<String, String> updateCoverLetterContent(User user, Integer contentId, CoverLetterUpdateRequestDto requestDto) {
-        CoverLetterContent content = coverLetterContentRepository.findById(contentId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_FOUND));
+    public Map<String, String> updateCoverLetterContent(Integer userId, Integer contentId, CoverLetterUpdateRequestDto requestDto) {
 
-        if (!user.getUserId().equals(content.getCoverLetter().getUser().getUserId()))
-            throw new BaseException(ErrorCode.COVER_LETTER_MISMATCH);
-
-        if (requestDto.getContentStatus() == CoverLetterContentStatus.PENDING) {
-            throw new BaseException(ErrorCode.COVER_LETTER_CONTENT_ALREADY_START);
-        }
+        userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
+        coverLetterContentReadService.checkCoverLetterContentValidation(userId, contentId);
 
         content.updateCoverLetterContent(requestDto);
         Integer coverLetterId = content.getCoverLetter().getCoverLetterId();
