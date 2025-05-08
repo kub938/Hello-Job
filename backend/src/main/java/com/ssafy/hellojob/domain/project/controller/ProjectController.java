@@ -31,7 +31,6 @@ public class ProjectController {
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody ProjectRequestDto projectRequestDto) {
         Integer userId = principal.getUserId();
-        log.debug("🌞 프로젝트 입력 userId: " + userId);
         ProjectCreateResponseDto responseDto = projectService.createProject(userId, projectRequestDto);
         return responseDto;
     }

@@ -4,9 +4,7 @@ import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterContentDto;
-import com.ssafy.hellojob.domain.coverlettercontent.service.ChatLogService;
 import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
-import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,14 +18,13 @@ import java.util.Map;
 public class CoverLetterContentController {
 
     private final CoverLetterContentService coverLetterContentService;
-    private final ChatLogService chatLogService;
 
     @GetMapping("/{contentId}")
     public CoverLetterContentDto getCoverLetterContent(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer contentId) {
-        User user = principal.getUser();
-        CoverLetterContentDto response = coverLetterContentService.getCoverLetterContent(user, contentId);
+        Integer userId = principal.getUserId();
+        CoverLetterContentDto response = coverLetterContentService.getCoverLetterContent(userId, contentId);
         return response;
     }
 
@@ -37,8 +34,8 @@ public class CoverLetterContentController {
             @PathVariable Integer contentId,
             @RequestBody CoverLetterUpdateRequestDto requestDto
     ) {
-        User user = principal.getUser();
-        return coverLetterContentService.updateCoverLetterContent(user, contentId, requestDto);
+        Integer userId = principal.getUserId();
+        return coverLetterContentService.updateCoverLetterContent(userId, contentId, requestDto);
     }
 
     @PostMapping("/{contentId}/chat")
@@ -48,7 +45,6 @@ public class CoverLetterContentController {
             @RequestBody ChatRequestDto requestDto
             ) {
         Integer userId = principal.getUserId();
-
         return coverLetterContentService.getAIChatRequestDto(userId, contentId, requestDto);
     }
 }

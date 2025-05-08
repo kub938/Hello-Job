@@ -4,6 +4,7 @@ import com.ssafy.hellojob.domain.jobrolesnapshot.dto.response.JobRoleSnapshotRes
 import com.ssafy.hellojob.domain.jobrolesnapshot.entity.JobRoleSnapshot;
 import com.ssafy.hellojob.domain.jobrolesnapshot.repository.JobRoleSnapshotRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class JobRoleSnapshotService {
 
     private final JobRoleSnapshotRepository jobRoleSnapshotRepository;
+    private final UserReadService userReadService;
 
     public JobRoleSnapshot copyJobRoleAnalysis(String companyName, JobRoleAnalysis jobRoleAnalysis) {
 
@@ -38,7 +40,8 @@ public class JobRoleSnapshotService {
     }
 
     @Transactional
-    public JobRoleSnapshotResponseDto getJobRoleSnapshot(Integer jobRoleSnapshotId) {
+    public JobRoleSnapshotResponseDto getJobRoleSnapshot(Integer userId, Integer jobRoleSnapshotId) {
+        userReadService.findUserByIdOrElseThrow(userId);
         return jobRoleSnapshotRepository.findByJobRoleSnapshotId(jobRoleSnapshotId)
                 .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_SNAPSHOT_NOT_FOUND));
     }
