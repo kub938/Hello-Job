@@ -22,7 +22,8 @@ export interface ContentChatLogType {
   message: string;
 }
 
-export interface CoverLetterContentType {
+export interface CoverLetterResponse {
+  contentId: number;
   contentQuestion: string;
   contentNumber: number;
   contentLength: number;
@@ -42,11 +43,11 @@ export interface CoverLetterSummaryType {
   coverLetterUpdatedAt: string;
 }
 
-export interface CoverLetterResponse {
-  coverLetterId: number;
-  summary: CoverLetterSummaryType;
-  content: CoverLetterContentType;
-}
+// export interface CoverLetterResponse {
+//   coverLetterId: number;
+//   summary: CoverLetterSummaryType;
+//   content: CoverLetterContentType;
+// }
 
 //Post Request Type
 export interface CoverLetterPostRequest {
@@ -95,4 +96,11 @@ export interface CompanyBookMarkResponse {
   companyAnalysisBookmarkCount: number;
   bookmark: boolean;
   public: boolean;
+}
+
+export interface getCoverLetterContentIdsResponse {
+  coverLetterTitle: string;
+  contentIds: number[];
+  companyAnalysisId: number; // 기업 분석 id
+  jobRoleSnapshotId: number; //
 }
