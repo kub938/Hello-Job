@@ -27,3 +27,6 @@ frontend:
 
 server:
   domain: ${SERVER_DOMAIN}
+
+aes:
+  secret: ${AES_SECRET_KEY}
