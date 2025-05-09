@@ -54,6 +54,11 @@ public class CompanyAnalysisController {
                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
 
+        companyAnalysisService.TokenCheck(userId);
+
+        log.debug("프론트에서 기업 분석 요청 들어옴");
+        log.debug("{}", responseDto.getCompany_name());
+
         CompanyAnalysisRequestDto requestDto = CompanyAnalysisRequestDto.builder()
                 .companyId(1)
                 .isPublic(true)
@@ -74,6 +79,9 @@ public class CompanyAnalysisController {
                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
+
+        companyAnalysisService.TokenCheck(userId);
+
         String companyName = companyService.getCompanyNameByCompanyId(requestDto.getCompanyId());
         
         log.debug("프론트에서 기업 분석 요청 들어옴");
