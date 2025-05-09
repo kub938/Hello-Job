@@ -27,6 +27,7 @@ public class InterviewAnswer extends BaseTimeEntity {
     @Column(name = "interview_answer")
     private String interviewAnswer;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "interview_question_category")
     private InterviewQuestionCategory interviewQuestionCategory;
 
