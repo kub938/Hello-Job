@@ -41,7 +41,6 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
   const { data: corporateReportListData, isLoading } = useQuery({
     queryKey: ["corporateReportList", params.id, companyId],
     queryFn: async () => {
-      console.log(companyId);
       let id;
       if (params.id) {
         id = parseInt(params.id);
@@ -59,9 +58,15 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
   const { data: companyDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ["companyDetail", params.id],
     queryFn: async () => {
-      const response = await getCompanyDetail(
-        parseInt(params.id ? params.id : "1")
-      );
+      let id;
+      if (params.id) {
+        id = parseInt(params.id);
+      } else if (companyId) {
+        id = companyId;
+      } else {
+        id = 1;
+      }
+      const response = await getCompanyDetail(id);
       return response.data;
     },
   });
@@ -114,7 +119,7 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
         <h1 className="text-3xl font-bold mb-1">불러오는 중...</h1>
       ) : (
         <h1 className="text-3xl font-bold mb-1">
-          {type !== "modal" && companyDetail?.companyName}
+          {companyDetail?.companyName}
         </h1>
       )}
 
