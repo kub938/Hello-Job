@@ -10,6 +10,8 @@ import traceback
 from datetime import datetime, timedelta
 from dotenv import load_dotenv
 import logging # 로깅 모듈 임포트
+import binascii # 바이너리 데이터 디버깅을 위한 모듈 추가
+import hashlib # 파일 해시 계산을 위한 모듈 추가
 
 # 특정 런타임 에러 로그 필터링 설정
 class IgnoreRuntimeErrorFilter(logging.Filter):
@@ -149,26 +151,53 @@ async def get_corp_code_by_name(corp_name: str) -> Tuple[str, str]:
     """
     url = f"{BASE_URL}/corpCode.xml?crtfc_key={API_KEY}"
     
+    logger.info(f"회사 코드 검색 시작: 회사명='{corp_name}', URL={url}")
+    
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             try:
+                logger.info(f"DART API 요청 시작: corpCode.xml API 호출 중")
                 response = await client.get(url)
                 
-                logger.info(f"get_corp_code_by_name API 요청 응답 길이: {len(response.content)}")
+                logger.info(f"DART API 요청 완료: 응답 상태코드={response}")
+                
+                # 응답 데이터 기본 정보 로깅
+                content_type = response.headers.get('content-type', '알 수 없음')
+                content_length = len(response.content)
+                content_md5 = hashlib.md5(response.content).hexdigest()
+                
+                logger.info(f"corpCode API 응답 정보: 상태코드={response.status_code}, Content-Type={content_type}, 크기={content_length}바이트, MD5={content_md5}")
                 
                 if response.status_code != 200:
+                    logger.error(f"corpCode API 요청 실패: HTTP 상태 코드 {response.status_code}")
                     return ("", f"API 요청 실패: HTTP 상태 코드 {response.status_code}")
                 
                 try:
+                    logger.info("ZIP 파일 압축 해제 시도")
                     with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
                         try:
+                            file_list = zip_file.namelist()
+                            logger.info(f"ZIP 파일 내 파일 목록: {file_list}")
+                            
+                            if 'CORPCODE.xml' not in file_list:
+                                logger.error("ZIP 파일 내에 CORPCODE.xml이 없습니다")
+                                return ("", "ZIP 파일 내에 CORPCODE.xml이 없습니다")
+                            
+                            logger.info("CORPCODE.xml 파일 열기 시도")
                             with zip_file.open('CORPCODE.xml') as xml_file:
                                 try:
+                                    logger.info("XML 파싱 시도")
                                     tree = ET.parse(xml_file)
                                     root = tree.getroot()
                                     
+                                    # XML 기본 정보 로깅
+                                    company_count = len(root.findall('.//list'))
+                                    logger.info(f"전체 회사 목록 수: {company_count}개")
+                                    
                                     # 검색어를 포함하는 모든 회사 찾기
+                                    logger.info(f"'{corp_name}' 검색어로 회사 검색 시작")
                                     matches = []
+                                    match_count = 0
                                     for company in root.findall('.//list'):
                                         name = company.find('corp_name').text
                                         stock_code = company.find('stock_code').text
@@ -178,6 +207,7 @@ async def get_corp_code_by_name(corp_name: str) -> Tuple[str, str]:
                                             continue
                                             
                                         if name and corp_name in name:
+                                            match_count += 1
                                             # 일치도 점수 계산 (낮을수록 더 정확히 일치)
                                             score = 0
                                             if name != corp_name:
@@ -187,30 +217,49 @@ async def get_corp_code_by_name(corp_name: str) -> Tuple[str, str]:
                                             
                                             code = company.find('corp_code').text
                                             matches.append((name, code, score))
+                                            
+                                            if match_count <= 5:  # 처음 5개 회사만 로깅
+                                                logger.info(f"검색 결과 후보: 이름='{name}', 코드={code}, 주식코드={stock_code}, 일치도점수={score}")
+                                    
+                                    # 검색 결과 요약 로깅
+                                    logger.info(f"총 {match_count}개 회사가 '{corp_name}' 검색어와 일치")
                                     
                                     # 일치하는 회사가 없는 경우
                                     if not matches:
+                                        logger.warning(f"'{corp_name}' 회사를 찾을 수 없습니다.")
                                         return ("", f"'{corp_name}' 회사를 찾을 수 없습니다.")
                                     
                                     # 일치도 점수가 가장 낮은 (가장 일치하는) 회사 반환
                                     matches.sort(key=lambda x: x[2])
                                     matched_name = matches[0][0]
                                     matched_code = matches[0][1]
+                                    logger.info(f"가장 일치하는 회사 선택: 이름='{matched_name}', 코드={matched_code}")
                                     return (matched_code, matched_name)
                                 except ET.ParseError as e:
+                                    logger.error(f"XML 파싱 오류: {str(e)}")
                                     return ("", f"XML 파싱 오류: {str(e)}")
                         except Exception as e:
+                            logger.error(f"ZIP 파일 내부 파일 접근 오류: {str(e)}")
                             return ("", f"ZIP 파일 내부 파일 접근 오류: {str(e)}")
                 except zipfile.BadZipFile:
+                    logger.error(f"유효하지 않은 ZIP 파일: URL={url}, Content-Type={content_type}, 크기={content_length}바이트")
+                    
+                    # 파일 시작 부분(처음 50~100바이트) 16진수로 덤프하여 로깅
+                    content_head = response.content[:100]
+                    hex_dump = binascii.hexlify(content_head).decode('utf-8')
+                    hex_formatted = ' '.join(hex_dump[i:i+2] for i in range(0, len(hex_dump), 2))
+                    logger.error(f"유효하지 않은 ZIP 파일 헤더 덤프(100바이트): {hex_formatted}")
+                    
                     return ("", "다운로드한 파일이 유효한 ZIP 파일이 아닙니다.")
                 except Exception as e:
+                    logger.error(f"ZIP 파일 처리 중 오류 발생: {str(e)}")
                     return ("", f"ZIP 파일 처리 중 오류 발생: {str(e)}")
             except httpx.RequestError as e:
+                logger.error(f"API 요청 중 네트워크 오류 발생: {str(e)}")
                 return ("", f"API 요청 중 네트워크 오류 발생: {str(e)}")
     except Exception as e:
+        logger.error(f"회사 코드 조회 중 예상치 못한 오류 발생: {str(e)}, 스택트레이스: {traceback.format_exc()}")
         return ("", f"회사 코드 조회 중 예상치 못한 오류 발생: {str(e)}")
-    
-    return ("", "알 수 없는 오류로 회사 정보를 찾을 수 없습니다.")
 
 
 async def get_disclosure_list(corp_code: str, start_date: str, end_date: str) -> Tuple[List[Dict[str, Any]], Optional[str]]:
@@ -228,30 +277,76 @@ async def get_disclosure_list(corp_code: str, start_date: str, end_date: str) ->
     # 정기공시(A) 유형만 조회
     url = f"{BASE_URL}/list.json?crtfc_key={API_KEY}&corp_code={corp_code}&bgn_de={start_date}&end_de={end_date}&pblntf_ty=A&page_count=100"
     
+    logger.info(f"공시 목록 조회 시작: 회사코드={corp_code}, 시작일={start_date}, 종료일={end_date}")
+    logger.info(f"공시 목록 API URL: {url}")
+    
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             try:
+                logger.info("DART 공시 목록 API 요청 시작")
                 response = await client.get(url)
                 
+                # 응답 데이터 기본 정보 로깅
+                content_type = response.headers.get('content-type', '알 수 없음')
+                content_length = len(response.content)
+                
+                logger.info(f"공시 목록 API 응답 정보: 상태코드={response.status_code}, Content-Type={content_type}, 크기={content_length}바이트")
+                
                 if response.status_code != 200:
+                    logger.error(f"공시 목록 API 요청 실패: HTTP 상태 코드 {response.status_code}")
                     return [], f"API 요청 실패: HTTP 상태 코드 {response.status_code}"
                 
                 try:
+                    logger.info("JSON 응답 파싱 시도")
                     result = response.json()
                     
-                    if result.get('status') != '000':
-                        status = result.get('status', '알 수 없음')
-                        msg = result.get('message', '알 수 없는 오류')
+                    status = result.get('status')
+                    msg = result.get('message', '메시지 없음')
+                    
+                    if status != '000':
+                        logger.error(f"DART API 오류 응답: status={status}, message={msg}")
                         return [], f"DART API 오류: {status} - {msg}"
                     
-                    return result.get('list', []), None
-                except Exception as e:
+                    # 정상 응답 처리
+                    disclosure_list = result.get('list', [])
+                    disclosure_count = len(disclosure_list)
+                    
+                    if disclosure_count > 0:
+                        logger.info(f"공시 목록 조회 성공: {disclosure_count}개 공시 발견")
+                        # 첫 5개 공시만 로깅
+                        for i, disclosure in enumerate(disclosure_list[:5]):
+                            report_nm = disclosure.get('report_nm', '제목 없음')
+                            rcept_dt = disclosure.get('rcept_dt', '날짜 없음')
+                            rcept_no = disclosure.get('rcept_no', '번호 없음')
+                            logger.info(f"공시 {i+1}: 제목='{report_nm}', 접수일={rcept_dt}, 접수번호={rcept_no}")
+                    else:
+                        logger.warning(f"공시 목록이 비어 있음: 회사코드={corp_code}, 기간={start_date}~{end_date}")
+                    
+                    return disclosure_list, None
+                    
+                except ValueError as e:
+                    logger.error(f"JSON 파싱 오류: {str(e)}")
+                    
+                    # 응답 내용 일부 로깅 (JSON이 아닐 경우)
+                    try:
+                        content_preview = response.content[:500].decode('utf-8')
+                        logger.error(f"JSON이 아닌 응답 내용(일부): {content_preview}")
+                    except UnicodeDecodeError:
+                        logger.error("응답 내용을 UTF-8로 디코딩할 수 없음 (바이너리 데이터)")
+                        
                     return [], f"응답 JSON 파싱 오류: {str(e)}"
+                except Exception as e:
+                    logger.error(f"응답 처리 중 오류: {str(e)}")
+                    return [], f"응답 JSON 파싱 오류: {str(e)}"
+                    
             except httpx.RequestError as e:
+                logger.error(f"공시 목록 API 요청 중 네트워크 오류: {str(e)}")
                 return [], f"API 요청 중 네트워크 오류 발생: {str(e)}"
     except Exception as e:
+        logger.error(f"공시 목록 조회 중 예상치 못한 오류: {str(e)}, 스택트레이스: {traceback.format_exc()}")
         return [], f"공시 목록 조회 중 예상치 못한 오류 발생: {str(e)}"
     
+    logger.error("get_disclosure_list 함수가 예상치 못하게 종료됨")
     return [], "알 수 없는 오류로 공시 목록을 조회할 수 없습니다."
 
 
@@ -274,6 +369,13 @@ async def get_financial_statement_xbrl(rcept_no: str, reprt_code: str) -> str:
 
             if response.status_code != 200:
                 return f"API 요청 실패: HTTP 상태 코드 {response.status_code}"
+            
+            # 응답 데이터 기본 정보 로깅
+            content_type = response.headers.get('content-type', '알 수 없음')
+            content_length = len(response.content)
+            content_md5 = hashlib.md5(response.content).hexdigest()
+            
+            logger.info(f"DART API 응답 정보: URL={url}, 상태코드={response.status_code}, Content-Type={content_type}, 크기={content_length}바이트, MD5={content_md5}")
 
             try:
                 with zipfile.ZipFile(BytesIO(response.content)) as zip_file:
@@ -299,26 +401,84 @@ async def get_financial_statement_xbrl(rcept_no: str, reprt_code: str) -> str:
 
             except zipfile.BadZipFile:
                 # 응답이 ZIP 파일 형식이 아닐 경우 (DART API 오류 메시지 등)
+                logger.error(f"유효하지 않은 ZIP 파일: URL={url}, Content-Type={content_type}, 크기={content_length}바이트")
+                
+                # 파일 시작 부분(처음 50~100바이트) 16진수로 덤프하여 로깅
+                content_head = response.content[:100]
+                hex_dump = binascii.hexlify(content_head).decode('utf-8')
+                hex_formatted = ' '.join(hex_dump[i:i+2] for i in range(0, len(hex_dump), 2))
+                logger.error(f"유효하지 않은 ZIP 파일 헤더 덤프(100바이트): {hex_formatted}")
+                
                 try:
-                    error_content = response.content.decode('utf-8')
+                    # 여러 인코딩으로 해석 시도하고 내용 로깅
+                    encodings_to_try = ['utf-8', 'euc-kr', 'cp949', 'latin-1']
+                    decoded_contents = {}
+                    
+                    for encoding in encodings_to_try:
+                        try:
+                            content_preview = response.content[:1000].decode(encoding)
+                            content_preview = content_preview.replace('\n', ' ')[:200]  # 줄바꿈 제거, 200자로 제한
+                            decoded_contents[encoding] = content_preview
+                            logger.info(f"{encoding} 인코딩으로 해석한 내용(일부): {content_preview}")
+                        except UnicodeDecodeError:
+                            logger.info(f"{encoding} 인코딩으로 해석 실패")
+                    
+                    # XML 파싱 시도
                     try:
-                        root = ET.fromstring(error_content)
-                        status = root.findtext('status')
-                        message = root.findtext('message')
-                        if status and message:
-                            return f"DART API 오류: {status} - {message}"
-                        else:
-                            return f"유효하지 않은 ZIP 파일이며, 오류 메시지 파싱 실패: {error_content[:200]}"
-                    except ET.ParseError:
-                         return f"유효하지 않은 ZIP 파일이며, XML 파싱 불가: {error_content[:200]}"
-                except Exception:
-                    return "다운로드한 파일이 유효한 ZIP 파일이 아닙니다 (내용 확인 불가)."
+                        error_content = response.content.decode('utf-8')
+                        try:
+                            root = ET.fromstring(error_content)
+                            status = root.findtext('status')
+                            message = root.findtext('message')
+                            if status and message:
+                                logger.info(f"API 응답을 XML로 파싱 성공: status={status}, message={message}")
+                                return f"DART API 오류: {status} - {message}"
+                            else:
+                                return f"유효하지 않은 ZIP 파일이며, 오류 메시지 파싱 실패: {error_content[:200]}"
+                        except ET.ParseError as xml_err:
+                            logger.error(f"XML 파싱 오류: {xml_err}")
+                            return f"유효하지 않은 ZIP 파일이며, XML 파싱 불가: {error_content[:200]}"
+                    except UnicodeDecodeError as decode_err:
+                        logger.error(f"응답 내용 디코딩 오류: {decode_err}")
+                        # 디코딩 실패 시 바이너리 데이터 추가 정보 로깅
+                        try:
+                            # 파일 시그니처 확인 (처음 4~8바이트)
+                            file_sig_hex = binascii.hexlify(response.content[:8]).decode('utf-8')
+                            logger.info(f"파일 시그니처(HEX): {file_sig_hex}")
+                            
+                            # 일반적인 파일 형식들의 시그니처와 비교
+                            known_signatures = {
+                                "504b0304": "ZIP 파일(정상)",
+                                "3c3f786d": "XML 문서",
+                                "7b227374": "JSON 문서",
+                                "1f8b0800": "GZIP 압축파일",
+                                "ffd8ffe0": "JPEG 이미지",
+                                "89504e47": "PNG 이미지",
+                                "25504446": "PDF 문서"
+                            }
+                            
+                            for sig, desc in known_signatures.items():
+                                if file_sig_hex.startswith(sig):
+                                    logger.info(f"파일 형식 인식: {desc}")
+                            
+                            return "다운로드한 파일이 유효한 ZIP 파일이 아닙니다 (바이너리 내용 디버깅 로그 확인)."
+                        except Exception as bin_err:
+                            logger.error(f"바이너리 데이터 분석 중 오류: {bin_err}")
+                            return "다운로드한 파일이 유효한 ZIP 파일이 아닙니다 (내용 확인 불가)."
+                
+                except Exception as decode_err:
+                    logger.error(f"응답 내용 분석 중 오류: {decode_err}")
+                    return f"다운로드한 파일 분석 중 오류 발생: {str(decode_err)}"
+            
             except Exception as e:
+                logger.error(f"ZIP 파일 처리 중 오류: {e}")
                 return f"ZIP 파일 처리 중 오류 발생: {str(e)}"
 
     except httpx.RequestError as e:
+        logger.error(f"API 요청 중 네트워크 오류: {e}")
         return f"API 요청 중 네트워크 오류 발생: {str(e)}"
     except Exception as e:
+        logger.error(f"XBRL 데이터 처리 중 예상치 못한 오류: {e}")
         return f"XBRL 데이터 처리 중 예상치 못한 오류 발생: {str(e)}"
 
 
@@ -723,7 +883,15 @@ async def get_original_document(rcept_no: str) -> Tuple[str, Optional[bytes]]:
         async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.get(url)
             
+            # 응답 데이터 기본 정보 로깅
+            content_type = response.headers.get('content-type', '알 수 없음')
+            content_length = len(response.content)
+            content_md5 = hashlib.md5(response.content).hexdigest()
+            
+            logger.info(f"DART API 원본 문서 응답 정보: URL={url}, 상태코드={response.status_code}, Content-Type={content_type}, 크기={content_length}바이트, MD5={content_md5}")
+            
             if response.status_code != 200:
+                logger.error(f"원본 문서 API 요청 실패: HTTP 상태 코드 {response.status_code}")
                 return f"API 요청 실패: HTTP 상태 코드 {response.status_code}", None
             
             # API 오류 메시지 확인 시도 (XML 형식일 수 있음)
@@ -732,6 +900,7 @@ async def get_original_document(rcept_no: str) -> Tuple[str, Optional[bytes]]:
                 status = root.findtext('status')
                 message = root.findtext('message')
                 if status and message:
+                    logger.error(f"DART API 오류 응답: status={status}, message={message}")
                     return f"DART API 오류: {status} - {message}", None
             except ET.ParseError:
                 # 파싱 오류는 정상적인 ZIP 파일일 수 있으므로 계속 진행
@@ -743,12 +912,16 @@ async def get_original_document(rcept_no: str) -> Tuple[str, Optional[bytes]]:
                     # 압축 파일 내의 파일 목록
                     file_list = zip_file.namelist()
                     
+                    logger.info(f"ZIP 파일 내 파일 목록: {file_list}")
+                    
                     if not file_list:
                         return "ZIP 파일 내에 파일이 없습니다.", None
                     
                     # 파일명이 가장 짧은 파일 선택 (일반적으로 메인 파일일 가능성이 높음)
                     target_file = min(file_list, key=len)
                     file_ext = target_file.split('.')[-1].lower()
+                    
+                    logger.info(f"선택된 대상 파일: {target_file}, 확장자: {file_ext}")
                     
                     # 파일 내용 읽기
                     with zip_file.open(target_file) as doc_file:
@@ -763,24 +936,81 @@ async def get_original_document(rcept_no: str) -> Tuple[str, Optional[bytes]]:
                             for encoding in encodings:
                                 try:
                                     text_content = file_content.decode(encoding)
+                                    logger.info(f"파일 {target_file} 디코딩 성공 (인코딩: {encoding})")
                                     break
                                 except UnicodeDecodeError:
+                                    logger.info(f"파일 {target_file} {encoding} 디코딩 실패")
                                     continue
                             
                             if text_content:
                                 return text_content, file_content
                             else:
+                                logger.error(f"파일 {target_file} 모든 인코딩 디코딩 실패")
                                 return "파일을 텍스트로 변환할 수 없습니다 (인코딩 문제).", file_content
                         # PDF 또는 기타 바이너리 파일
                         else:
+                            logger.info(f"비텍스트 파일 형식 감지: {file_ext}")
                             return f"파일이 텍스트 형식이 아닙니다 (형식: {file_ext}).", file_content
                         
             except zipfile.BadZipFile:
+                logger.error(f"유효하지 않은 ZIP 파일: URL={url}, Content-Type={content_type}, 크기={content_length}바이트")
+                
+                # 파일 시작 부분(처음 50~100바이트) 16진수로 덤프하여 로깅
+                content_head = response.content[:100]
+                hex_dump = binascii.hexlify(content_head).decode('utf-8')
+                hex_formatted = ' '.join(hex_dump[i:i+2] for i in range(0, len(hex_dump), 2))
+                logger.error(f"유효하지 않은 ZIP 파일 헤더 덤프(100바이트): {hex_formatted}")
+                
+                # 여러 인코딩으로 해석 시도하고 내용 로깅
+                encodings_to_try = ['utf-8', 'euc-kr', 'cp949', 'latin-1']
+                for encoding in encodings_to_try:
+                    try:
+                        content_preview = response.content[:1000].decode(encoding)
+                        content_preview = content_preview.replace('\n', ' ')[:200]  # 줄바꿈 제거, 200자로 제한
+                        logger.info(f"{encoding} 인코딩으로 해석한 내용(일부): {content_preview}")
+                        
+                        # XML 형식인지 확인
+                        if content_preview.strip().startswith('<?xml') or content_preview.strip().startswith('<'):
+                            logger.info(f"응답 데이터가 XML 형식일 가능성이 있음 (인코딩: {encoding})")
+                            try:
+                                error_root = ET.fromstring(response.content.decode(encoding))
+                                error_status = error_root.findtext('status')
+                                error_message = error_root.findtext('message')
+                                if error_status and error_message:
+                                    logger.info(f"오류 XML 파싱 성공: {error_status} - {error_message}")
+                                    return f"DART API 오류: {error_status} - {error_message}", None
+                            except ET.ParseError as xml_err:
+                                logger.error(f"XML 파싱 시도 실패: {xml_err}")
+                            
+                    except UnicodeDecodeError:
+                        logger.info(f"{encoding} 인코딩으로 해석 실패")
+                
+                # 파일 시그니처 확인 (처음 4~8바이트)
+                file_sig_hex = binascii.hexlify(response.content[:8]).decode('utf-8')
+                logger.info(f"파일 시그니처(HEX): {file_sig_hex}")
+                
+                # 일반적인 파일 형식들의 시그니처와 비교
+                known_signatures = {
+                    "504b0304": "ZIP 파일(정상)",
+                    "3c3f786d": "XML 문서",
+                    "7b227374": "JSON 문서",
+                    "1f8b0800": "GZIP 압축파일",
+                    "ffd8ffe0": "JPEG 이미지",
+                    "89504e47": "PNG 이미지",
+                    "25504446": "PDF 문서"
+                }
+                
+                for sig, desc in known_signatures.items():
+                    if file_sig_hex.startswith(sig):
+                        logger.info(f"파일 형식 인식: {desc}")
+                
                 return "다운로드한 파일이 유효한 ZIP 파일이 아닙니다.", None
                 
     except httpx.RequestError as e:
+        logger.error(f"원본 문서 API 요청 중 네트워크 오류: {e}")
         return f"API 요청 중 네트워크 오류 발생: {str(e)}", None
     except Exception as e:
+        logger.error(f"공시 원본 다운로드 중 예상치 못한 오류: {e}, 스택트레이스: {traceback.format_exc()}")
         return f"공시 원본 다운로드 중 예상치 못한 오류 발생: {str(e)}", None
 
 
@@ -799,8 +1029,8 @@ async def search_disclosure(
     
     Args:
         company_name: 회사명 (예: 삼성전자, 네이버 등)
-        start_date: 시작일 (YYYYMMDD 형식, 예: 20230101)
-        end_date: 종료일 (YYYYMMDD 형식, 예: 20231231)
+        start_date: 시작일 (YYYYMMDD 형식, 예: 20250101)
+        end_date: 종료일 (YYYYMMDD 형식, 예: 20251231)
         ctx: MCP Context 객체
         requested_items: 사용자가 요청한 재무 항목 이름 리스트 (예: ["매출액", "영업이익"]). None이면 모든 주요 항목을 대상으로 함. 사용 가능한 항목: 매출액, 영업이익, 당기순이익, 영업활동 현금흐름, 투자활동 현금흐름, 재무활동 현금흐름, 자산총계, 부채총계, 자본총계
         
@@ -992,8 +1222,8 @@ async def search_detailed_financial_data(
     
     Args:
         company_name: 회사명 (예: 삼성전자, 네이버 등)
-        start_date: 시작일 (YYYYMMDD 형식, 예: 20230101)
-        end_date: 종료일 (YYYYMMDD 형식, 예: 20231231)
+        start_date: 시작일 (YYYYMMDD 형식, 예: 20250101)
+        end_date: 종료일 (YYYYMMDD 형식, 예: 20251231)
         ctx: MCP Context 객체
         statement_type: 재무제표 유형 ("재무상태표", "손익계산서", "현금흐름표" 중 하나 또는 None)
                        None인 경우 모든 유형의 재무제표 정보를 반환합니다.
@@ -1184,8 +1414,8 @@ async def search_business_information(
     
     Args:
         company_name: 회사명 (예: 삼성전자, 네이버 등)
-        start_date: 시작일 (YYYYMMDD 형식, 예: 20230101)
-        end_date: 종료일 (YYYYMMDD 형식, 예: 20231231)
+        start_date: 시작일 (YYYYMMDD 형식, 예: 20250101)
+        end_date: 종료일 (YYYYMMDD 형식, 예: 20251231)
         information_type: 조회할 정보 유형 
             '사업의 개요' - 회사의 전반적인 사업 내용
             '주요 제품 및 서비스' - 회사의 주요 제품과 서비스 정보
