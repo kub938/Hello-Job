@@ -12,8 +12,8 @@ import java.util.List;
 public class CoverLetterContentDto {
     private Integer contentId;
     private String contentQuestion;
-    private int contentNumber;
-    private int contentLength;
+    private Integer contentNumber;
+    private Integer contentLength;
     private String contentDetail;
     private List<Integer> contentExperienceIds;
     private List<Integer> contentProjectIds;
