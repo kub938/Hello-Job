@@ -61,6 +61,11 @@ export const useGetContentStatus = (coverLetterId: number) => {
       console.log(response.data);
       return response.data;
     },
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
 };
 
