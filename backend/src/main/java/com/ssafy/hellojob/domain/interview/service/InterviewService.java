@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
 import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionDto;
 import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
@@ -43,6 +44,8 @@ public class InterviewService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterRepository coverLetterRepository;
+    private final InterviewReadService interviewReadService;
+    private final CoverLetterReadService coverLetterReadService;
 
     private final UserReadService userReadService;
 

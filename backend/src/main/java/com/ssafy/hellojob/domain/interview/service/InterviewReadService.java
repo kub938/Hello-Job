@@ -21,7 +21,7 @@ public class InterviewReadService {
     private final InterviewQuestionMemoRepository interviewQuestionMemoRepository;
 
     public CoverLetterInterview findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(User user, CoverLetter coverLetter) {
-        return coverLetterInterviewRepository.findByUserAndCoverLetter(coverLetter, user)
+        return coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseThrow(() -> new BaseException(COVER_LETTER_INTERVIEW_NOT_FOUND));
     }
 
