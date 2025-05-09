@@ -18,6 +18,7 @@ services:
       - SERVER_DOMAIN=${SERVER_DOMAIN}
       - FASTAPI_URL=${FASTAPI_URL}
       - AES_SECRET_KEY=${AES_SECRET_KEY}
+      - MATTERMOST_WEBHOOK=${MATTERMOST_WEBHOOK}
     depends_on:          # 의존성 설정
       mysql:
         condition: service_healthy
