@@ -68,9 +68,7 @@ public class CoverLetterContent extends BaseTimeEntity {
 
     public void updateCoverLetterContent(CoverLetterUpdateRequestDto requestDto) {
         this.contentDetail = requestDto.getContentDetail();
-        if (requestDto.getContentStatus() != null) {
-            this.contentStatus = requestDto.getContentStatus();
-        }
+        this.contentStatus = requestDto.getContentStatus();
     }
 
     public void setCoverLetter(CoverLetter coverLetter) {
