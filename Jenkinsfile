@@ -11,11 +11,10 @@ pipeline {  // 파이프라인 정의 시작
          stage('Notification - Build Started') {
             steps {
                 script {
-                    // 변경을 일으킨 사용자 정보 가져오기
+                    // 사용자 정보 추출 코드
                     def causes = currentBuild.getBuildCauses()
                     def gitlabUserName = "Unknown"
                     
-                    // GitLab 웹훅 이벤트에서 사용자 이름 추출
                     for (cause in causes) {
                         if (cause._class.contains('GitLab')) {
                             if (cause.userName) {
@@ -26,24 +25,18 @@ pipeline {  // 파이프라인 정의 시작
                         }
                     }
                     
-                    // 환경 변수로 저장
                     env.GITLAB_USER_NAME = gitlabUserName
+                    
+                    // 보안 경고 없이 웹훅 요청
+                    withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
+                        // 단순화된 메시지와 채널 파라미터 제외
+                        sh '''
+                            curl -X POST -H "Content-Type: application/json" -d '{
+                                "text": "🚀 ''' + env.GITLAB_USER_NAME + '''가 요청한 빌드 시작! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                            }' $WEBHOOK_URL
+                        '''
+                    }
                 }
-                
-                // 빌드 시작 알림
-                // mattermostSend color: 'good', 
-                //               message: "🚀 ${env.GITLAB_USER_NAME}가 요청한 빌드 시작! ${env.JOB_NAME} #${env.BUILD_NUMBER}", 
-                //               channel: 'b105_webhook', 
-                //               endpoint: "${MATTERMOST_WEBHOOK}"
-                sh """
-                        curl -X POST -H 'Content-Type: application/json' -d '{
-                            "text": "🚀 ${env.GITLAB_USER_NAME}가 요청한 빌드 시작! ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                            "channel": "b105_webhook",
-                            "attachments": [{
-                                "color": "#00FF00"
-                            }]
-                        }' ${MATTERMOST_WEBHOOK}
-                    """
             }
         }
         
@@ -149,15 +142,13 @@ pipeline {  // 파이프라인 정의 시작
          success {
             echo '✅ Pipeline succeeded!'
 
-            sh """
-                curl -X POST -H 'Content-Type: application/json' -d '{
-                    "text": "✅ ${env.GITLAB_USER_NAME}가 요청한 빌드 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    "channel": "b105_webhook",
-                    "attachments": [{
-                        "color": "#00FF00"
-                    }]
-                }' ${MATTERMOST_WEBHOOK}
-            """
+            withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
+                sh '''
+                    curl -X POST -H "Content-Type: application/json" -d '{
+                        "text": "✅ ''' + env.GITLAB_USER_NAME + '''가 요청한 빌드 성공! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                    }' $WEBHOOK_URL
+                '''
+            }
         }
         failure {
             echo '❌ Pipeline failed!'
@@ -165,15 +156,13 @@ pipeline {  // 파이프라인 정의 시작
             sh "${DOCKER_COMPOSE} down"
             sh "${DOCKER_COMPOSE} logs > pipeline_failure.log"  // 실패 시 로그 저장  
 
-            sh """
-                curl -X POST -H 'Content-Type: application/json' -d '{
-                    "text": "❌ ${env.GITLAB_USER_NAME}가 요청한 빌드 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    "channel": "b105_webhook",
-                    "attachments": [{
-                        "color": "#FF0000"
-                    }]
-                }' ${MATTERMOST_WEBHOOK}
-            """
+            withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
+                sh '''
+                    curl -X POST -H "Content-Type: application/json" -d '{
+                        "text": "❌ ''' + env.GITLAB_USER_NAME + '''가 요청한 빌드 실패! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                    }' $WEBHOOK_URL
+                '''
+            }
         }
     }
 }
