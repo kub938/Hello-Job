@@ -26,4 +26,11 @@ public class CoverLetterInterview {
     @JoinColumn(name = "cover_letter_id")
     private CoverLetter coverLetter;
 
+    public static CoverLetterInterview of(User user, CoverLetter coverLetter){
+        CoverLetterInterview interview = new CoverLetterInterview();
+        interview.user = user;
+        interview.coverLetter = coverLetter;
+        return interview;
+    }
+
 }

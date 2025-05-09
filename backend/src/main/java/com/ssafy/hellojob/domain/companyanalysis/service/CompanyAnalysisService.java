@@ -135,7 +135,7 @@ public class CompanyAnalysisService {
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
-                            .companyAnlaysisId(analysis.getCompanyAnalysisId())
+                            .companyAnalysisId(analysis.getCompanyAnalysisId())
                             .companyName(analysis.getCompany().getCompanyName())
                             .createdAt(analysis.getCreatedAt())
                             .companyViewCount(analysis.getCompanyAnalysisViewCount())
@@ -250,7 +250,7 @@ public class CompanyAnalysisService {
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
-                            .companyAnlaysisId(analysis.getCompanyAnalysisId())
+                            .companyAnalysisId(analysis.getCompanyAnalysisId())
                             .companyName(analysis.getCompany().getCompanyName())
                             .createdAt(analysis.getCreatedAt())
                             .companyViewCount(analysis.getCompanyAnalysisViewCount())
