@@ -6,12 +6,14 @@ spring:
       local:
         - oauth
         - db-local
+        - mattermost-local
         #        - cloud
       dev:
         - oauth
         - db-dev
+        - mattermost-dev
         #        - cloud
-    include: db, oauth
+    include: db, oauth, mattermost
 
 logging:
   level:
