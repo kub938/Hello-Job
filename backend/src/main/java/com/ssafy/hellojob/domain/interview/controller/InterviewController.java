@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
+import com.ssafy.hellojob.domain.interview.dto.request.ModifyMemoRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
@@ -13,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -65,5 +67,10 @@ public class InterviewController {
     @PostMapping("/question/memo")
     public WriteMemoResponseDto writeMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return interviewService.createMemo(requestDto, userPrincipal.getUserId());
+    }
+
+    @PatchMapping("/question/{memoId}")
+    public Map<String, String> modifyMemo(@RequestBody ModifyMemoRequestDto requestDto, @PathVariable Integer memoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.updateMemo(requestDto.getMemo(), memoId, userPrincipal.getUserId());
     }
 }

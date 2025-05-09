@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
@@ -184,5 +185,16 @@ public class InterviewService {
     }
 
 
+    public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
 
+        if(!memo.getUser().equals(user)) {
+            throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+        }
+
+        memo.updateMemo(newMemo);
+        interviewQuestionMemoRepository.save(memo);
+        return Map.of("message", "성공적으로 수정되었습니다.");
+    }
 }

@@ -40,6 +40,11 @@ public class InterviewReadService {
                 .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_NOT_FOUND));
     }
 
+    public InterviewQuestionMemo findInterviewQuestionMemoWithUserByIdOrElseThrow(Integer interviewQuestionMemoId) {
+        return interviewQuestionMemoRepository.findByIdWithUser(interviewQuestionMemoId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND));
+    }
+
     public InterviewQuestionMemo findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(User user, CsQuestionBank csQuestionBank) {
         return interviewQuestionMemoRepository.findByUserAndCsQuestionBank(user, csQuestionBank)
                 .orElse(null);
