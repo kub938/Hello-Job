@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterSummaryDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -24,7 +25,7 @@ public class CoverLetterController {
     @PostMapping
     public CoverLetterCreateResponseDto createCoverLetter(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestBody CoverLetterRequestDto requestDto
+            @Valid @RequestBody CoverLetterRequestDto requestDto
     ) {
         Integer userId = principal.getUserId();
 
