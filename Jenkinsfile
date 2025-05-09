@@ -3,7 +3,6 @@ pipeline {  // 파이프라인 정의 시작
     
     environment {  // 파이프라인에서 사용할 환경 변수 정의
         DOCKER_COMPOSE = 'docker-compose'  // docker-compose 명령어를 환경 변수로 설정
-        DETECTED_USER = '김아무개'
     }
     
     stages {  // 파이프라인의 주요 단계들 정의
@@ -11,25 +10,15 @@ pipeline {  // 파이프라인 정의 시작
         stage('Notification - Build Started') {
             steps {
                 script {
-                    // 디버깅 및 사용자 감지 로직
-                    def userName = "김아무개"
-                    
-                    // Git 커밋 정보 사용
-                    try {
-                        userName = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
-                    } catch (Exception e) {
-                        echo "Git author extraction failed: ${e.message}"
-                    }
-                    
-                    echo "Final detected user: ${userName}"
-                    // 환경 변수를 파이프라인 전체에서 사용할 수 있도록 설정
-                    env.DETECTED_USER = userName
+                    // 사용자 감지 로직
+                    def userName = getUserName()
+                    echo "Detected user for build start: ${userName}"
                     
                     // 알림 전송
                     withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                         sh '''
                             curl -X POST -H "Content-Type: application/json" -d '{
-                                "text": "🚀 ''' + env.DETECTED_USER + '''가 요청한 빌드 시작! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                                "text": "🚀 ''' + userName + '''가 요청한 빌드 시작! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
                             }' $WEBHOOK_URL
                         '''
                     }
@@ -139,12 +128,17 @@ pipeline {  // 파이프라인 정의 시작
          success {
             echo '✅ Pipeline succeeded!'
 
-            withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
-                sh '''
-                    curl -X POST -H "Content-Type: application/json" -d '{
-                        "text": "✅ ''' + env.DETECTED_USER + '''가 요청한 빌드 성공! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
-                    }' $WEBHOOK_URL
-                '''
+            script {
+                // 성공 시 사용자 이름 다시 가져오기
+                def userName = getUserName()
+                
+                withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
+                    sh """
+                        curl -X POST -H 'Content-Type: application/json' -d '{
+                            "text": "✅ ${userName}가 요청한 빌드 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                        }' \$WEBHOOK_URL
+                    """
+                }
             }
         }
         failure {
@@ -153,13 +147,30 @@ pipeline {  // 파이프라인 정의 시작
             sh "${DOCKER_COMPOSE} down"
             sh "${DOCKER_COMPOSE} logs > pipeline_failure.log"  // 실패 시 로그 저장  
 
-            withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
-                sh '''
-                    curl -X POST -H "Content-Type: application/json" -d '{
-                        "text": "❌ ''' + env.DETECTED_USER + '''가 요청한 빌드 실패! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
-                    }' $WEBHOOK_URL
-                '''
+             script {
+                // 실패 시 사용자 이름 다시 가져오기
+                def userName = getUserName()
+                
+                withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
+                    sh """
+                        curl -X POST -H 'Content-Type: application/json' -d '{
+                            "text": "❌ ${userName}가 요청한 빌드 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                        }' \$WEBHOOK_URL
+                    """
+                }
             }
         }
     }
+}
+
+
+// 사용자 이름 가져오는 함수 정의
+def getUserName() {
+    def userName = "Unknown"
+    try {
+        userName = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+    } catch (Exception e) {
+        echo "Git author extraction failed: ${e.message}"
+    }
+    return userName ?: "Unknown"
 }
