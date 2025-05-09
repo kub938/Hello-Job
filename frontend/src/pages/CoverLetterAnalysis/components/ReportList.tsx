@@ -69,17 +69,17 @@ function ReportList({ nowStep }: ReportListProps) {
   const reports = adaptData(data, nowStep);
 
   const handleAddCompanyModalClose = () => {
-    setAddCompanyAnalysisModalOpen(false);
+    companyDataRefetch().then(() => setAddCompanyAnalysisModalOpen(false));
   };
   const handleAddCompanyModalOpen = () => {
-    jobDataRefetch().then(() => setAddCompanyAnalysisModalOpen(true));
+    setAddCompanyAnalysisModalOpen(true);
   };
 
   const handleAddJobModalOpen = () => {
     setAddJobAnalysisModalOpen(true);
   };
   const handleAddJobModalClose = () => {
-    companyDataRefetch().then(() => setAddJobAnalysisModalOpen(false));
+    jobDataRefetch().then(() => setAddJobAnalysisModalOpen(false));
   };
 
   return (
