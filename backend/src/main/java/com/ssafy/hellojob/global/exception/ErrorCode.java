@@ -58,8 +58,11 @@ public enum ErrorCode {
     // 일정
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 일정을 찾을 수 없습니다."),
     COVER_LETTER_ALREADY_IN_USE(HttpStatus.BAD_REQUEST, "이미 해당 자기소개서로 등록된 일정이 있습니다."),
-    SCHEDULE_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상태를 찾을 수 없습니다.")
+    SCHEDULE_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상태를 찾을 수 없습니다."),
 
+    // 면접
+    COVER_LETTER_INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 면접을 찾을 수 없습니다,"),
+    INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접을 찾을 수 없습니다,")
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.
