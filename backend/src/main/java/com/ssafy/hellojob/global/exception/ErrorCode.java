@@ -62,7 +62,9 @@ public enum ErrorCode {
 
     // 면접
     COVER_LETTER_INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 면접을 찾을 수 없습니다,"),
-    INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접을 찾을 수 없습니다,")
+    INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접을 찾을 수 없습니다,"),
+    INTERVIEW_VIDEO_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접 영상을 찾을 수 없습니다."),
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 질문을 찾을 수 없습니다.")
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.

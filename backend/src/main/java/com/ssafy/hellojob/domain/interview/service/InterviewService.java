@@ -2,6 +2,8 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
+import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.InterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionAndAnswerListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
@@ -262,6 +264,75 @@ public class InterviewService {
                 .interviewVideoId(video.getInterviewVideoId())
                 .questionList(questionList)
                 .build();
+
+    }
+
+    public void saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+
+        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
+            Integer questionId = dto.getQuestionBankId();
+
+            CsQuestionBank question = csQuestionBankRepository.findById(questionId)
+                    .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
+
+            InterviewAnswer answer = InterviewAnswer.of(
+                    video,
+                    question.getCsQuestion(),
+                    InterviewQuestionCategory.valueOf(question.getCsCategory().name())
+            );
+            interviewAnswerRepository.save(answer);
+        }
+
+
+    }
+
+    public void savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+
+        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
+            Integer questionId = dto.getQuestionBankId();
+
+            PersonalityQuestionBank question = personalityQuestionBankRepository.findById(questionId)
+                    .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
+
+            InterviewAnswer answer = InterviewAnswer.of(
+                    video,
+                    question.getPersonalityQuestion(),
+                    InterviewQuestionCategory.valueOf("인성면접")
+            );
+            interviewAnswerRepository.save(answer);
+        }
+
+
+    }
+
+    public void saveCoverLetterQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+
+        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
+            Integer questionId = dto.getQuestionBankId();
+
+            CoverLetterQuestionBank question = coverLetterQuestionBankRepository.findById(questionId)
+                    .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
+
+            InterviewAnswer answer = InterviewAnswer.of(
+                    video,
+                    question.getCoverLetterQuestion(),
+                    InterviewQuestionCategory.valueOf("자기소개서면접")
+            );
+            interviewAnswerRepository.save(answer);
+        }
+
 
     }
 
