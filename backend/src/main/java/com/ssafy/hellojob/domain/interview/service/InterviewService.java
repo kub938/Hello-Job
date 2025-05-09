@@ -1,11 +1,10 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
-import com.ssafy.hellojob.domain.interview.entity.CoverLetterInterview;
-import com.ssafy.hellojob.domain.interview.entity.CoverLetterQuestionBank;
-import com.ssafy.hellojob.domain.interview.entity.CsQuestionBank;
-import com.ssafy.hellojob.domain.interview.entity.PersonalityQuestionBank;
+import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
+import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
+import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
@@ -13,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -71,6 +71,54 @@ public class InterviewService {
                         .question(q.getCoverLetterQuestion())
                         .build())
                 .toList();
+    }
+
+    public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        Interview interview = interviewRepository.findByUserAndCs(user, true)
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_NOT_FOUND));
+
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        interviewVideoRepository.save(video);
+
+        return SelectInterviewStartResponseDto.builder()
+                .interviewId(interview.getInterviewId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .build();
+
+    }
+
+    public SelectInterviewStartResponseDto startPersonalitySelectInterview(Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        Interview interview = interviewRepository.findByUserAndCs(user, false)
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_NOT_FOUND));
+
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        interviewVideoRepository.save(video);
+
+        return SelectInterviewStartResponseDto.builder()
+                .interviewId(interview.getInterviewId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .build();
+
+    }
+
+    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        CoverLetterInterview interview = coverLetterInterviewRepository.findByUser(user)
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_NOT_FOUND));
+
+        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
+        interviewVideoRepository.save(video);
+
+        return SelectInterviewStartResponseDto.builder()
+                .interviewId(interview.getCoverLettterInterviewId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .build();
+
     }
 
 }
