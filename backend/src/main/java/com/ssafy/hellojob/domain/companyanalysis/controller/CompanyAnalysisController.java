@@ -54,6 +54,11 @@ public class CompanyAnalysisController {
                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();
 
+        companyAnalysisService.TokenCheck(userId);
+
+        log.debug("프론트에서 기업 분석 요청 들어옴");
+        log.debug("{}", responseDto.getCompany_name());
+
         CompanyAnalysisRequestDto requestDto = CompanyAnalysisRequestDto.builder()
                 .companyId(1)
                 .isPublic(true)
@@ -74,7 +79,18 @@ public class CompanyAnalysisController {
                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
+
+        companyAnalysisService.TokenCheck(userId);
+
         String companyName = companyService.getCompanyNameByCompanyId(requestDto.getCompanyId());
+        
+        log.debug("프론트에서 기업 분석 요청 들어옴");
+        log.debug("기업명: {}", companyName);
+        log.debug("기업ID: {}", requestDto.getCompanyId());
+        log.debug("isPublic: {}", requestDto.isPublic());
+        log.debug("isBasic: {}", requestDto.isBasic());
+        log.debug("isPlus: {}", requestDto.isPlus());
+        log.debug("isFinancial: {}", requestDto.isFinancial());
 
         CompanyAnalysisFastApiRequestDto fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
                 .company_name(companyName)
@@ -83,10 +99,14 @@ public class CompanyAnalysisController {
                 .fin(requestDto.isFinancial())
                 .build();
 
+        log.debug("fast API로 요청 보냄 !!! ");
+
         CompanyAnalysisFastApiResponseDto responseDto = fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto);
 
-        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, requestDto, responseDto);
+        log.debug("fast API에서 응답 받음 !!! ");
+        log.debug("비전 : {}", responseDto.getCompany_vision());
 
+        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, requestDto, responseDto);
         return result;
 
     }
@@ -114,12 +134,12 @@ public class CompanyAnalysisController {
     }
 
     // 기업 분석 북마크 해제
-    @DeleteMapping("/bookmark/{companyAnalysisBookmarkId}")
-    public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisBookmarkId") Integer companyAnalysisBookmarkId,
+    @DeleteMapping("/bookmark/{companyAnalysisId}")
+    public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisId") Integer companyAnalysisId,
                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
-        companyAnalysisService.deleteCompanyAnalysisBookmark(companyAnalysisBookmarkId, userId);
+        companyAnalysisService.deleteCompanyAnalysisBookmark(companyAnalysisId, userId);
     }
 
     // 기업 분석 북마크 목록 조회

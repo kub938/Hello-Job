@@ -163,18 +163,19 @@ public class JobRoleAnalysisService {
 
     // 북마크 삭제
     @Transactional
-    public void deleteJobRoleBookmark(Integer jobRoleAnalysisBookmarkId, Integer userId) {
-        
-        // 북마크 조회
-        JobRoleAnalysisBookmark bookmark = jobRoleAnalysisBookmarkRepository.findById(jobRoleAnalysisBookmarkId)
-                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_BOOKMARK_NOT_FOUND));
+    public void deleteJobRoleBookmark(Integer jobRoleAnalysisId, Integer userId) {
 
         // 유저 조회
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         // 직무 분석 데이터 조회
-        JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
+        JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisRepository.findById(jobRoleAnalysisId)
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_NOT_FOUND));
+
+        // 북마크 조회
+        JobRoleAnalysisBookmark bookmark = jobRoleAnalysisBookmarkRepository.findByUserAndJobRoleAnalysis(user, jobRoleAnalysis)
+                .orElseThrow(() -> new BaseException(ErrorCode.JOB_ROLE_ANALYSIS_BOOKMARK_NOT_FOUND));
 
         // 유저 아이디와 북마크에 저장된 유저 아이디가 같을 때 요청 실행
         if(userId.equals(bookmark.getUser().getUserId())){

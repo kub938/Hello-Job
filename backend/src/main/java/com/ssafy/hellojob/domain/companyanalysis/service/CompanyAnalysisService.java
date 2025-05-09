@@ -41,6 +41,19 @@ public class CompanyAnalysisService {
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final UserRepository userRepository;
 
+    // 토큰 확인
+    public boolean TokenCheck(Integer userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getToken() <= 0) {
+            throw new BaseException(ErrorCode.COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED);
+        }
+
+        return true;
+    }
+
+
     // 기업 분석 저장
     @Transactional
     public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId,
@@ -218,6 +231,9 @@ public class CompanyAnalysisService {
         // 해당 기업의 기업 분석 전체 조회
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdAndIsPublicTrueOrderByCreatedAtDesc(companyId);
 
+        log.debug("기업 분석 목록 조회");
+        log.debug("검색된 기업 분석 갯수: {}", analysisList.size());
+
         // 공개된 분석만 필터링하여 DTO 매핑
         return analysisList.stream()
                 .filter(CompanyAnalysis::isPublic)
@@ -295,14 +311,17 @@ public class CompanyAnalysisService {
 
     // 기업 분석 북마크 해제
     @Transactional
-    public void deleteCompanyAnalysisBookmark(Integer companyAnalysisBookmarkId, Integer userId){
+    public void deleteCompanyAnalysisBookmark(Integer companyAnalysisId, Integer userId){
 
         // 유저 조회
-        userRepository.findById(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
+        CompanyAnalysis bookmarkCompanyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
+
         // 북마크 정보 조회
-        CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findById(companyAnalysisBookmarkId)
+        CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findByUserAndCompanyAnalysis(user, bookmarkCompanyAnalysis)
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND));
 
         // 기업 분석 데이터 조회
