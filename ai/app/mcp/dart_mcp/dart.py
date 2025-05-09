@@ -154,6 +154,8 @@ async def get_corp_code_by_name(corp_name: str) -> Tuple[str, str]:
             try:
                 response = await client.get(url)
                 
+                logger.info(f"get_corp_code_by_name API 요청 응답 길이: {len(response.content)}")
+                
                 if response.status_code != 200:
                     return ("", f"API 요청 실패: HTTP 상태 코드 {response.status_code}")
                 

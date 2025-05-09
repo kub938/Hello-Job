@@ -2,7 +2,7 @@
     "mcpServers": {
         "dart-mcp": {
             "command": "python", 
-            "args": ["/root/hellojob/app/mcp/dart-mcp/dart.py"]
+            "args": ["/root/hellojob/app/mcp/dart_mcp/dart.py"]
         },
         "naver-search": {
             "command": "/usr/bin/node",
