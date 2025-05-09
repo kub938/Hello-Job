@@ -33,7 +33,7 @@ public class CoverLetterContentController {
     public Map<String, String> updateCoverLetterContent(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer contentId,
-            @RequestBody CoverLetterUpdateRequestDto requestDto
+            @Valid @RequestBody CoverLetterUpdateRequestDto requestDto
     ) {
         Integer userId = principal.getUserId();
         return coverLetterContentService.updateCoverLetterContent(userId, contentId, requestDto);

@@ -12,6 +12,6 @@ import lombok.NoArgsConstructor;
 public class ChatRequestDto {
     @NotBlank(message = ValidationMessage.USER_MESSAGE_NOT_EMPTY)
     private String userMessage;
-    @NotBlank(message = ValidationMessage.CONTENT_DETAIL_NOT_EMPTY)
+    @NotBlank(message = ValidationMessage.COVER_LETTER_CONTENT_DETAIL_NOT_EMPTY)
     private String contentDetail;
 }
