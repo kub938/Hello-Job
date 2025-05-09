@@ -36,5 +36,8 @@ public class InterviewQuestionMemo {
     @Column(name = "memo", nullable = false)
     private String memo;
 
+    public void updateMemo(String memo) {
+        this.memo = memo;
+    }
 
 }

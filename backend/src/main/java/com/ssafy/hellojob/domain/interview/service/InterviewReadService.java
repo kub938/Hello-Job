@@ -1,14 +1,8 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
-import com.ssafy.hellojob.domain.interview.entity.CoverLetterInterview;
-import com.ssafy.hellojob.domain.interview.entity.CoverLetterQuestionBank;
-import com.ssafy.hellojob.domain.interview.entity.CsQuestionBank;
-import com.ssafy.hellojob.domain.interview.entity.PersonalityQuestionBank;
-import com.ssafy.hellojob.domain.interview.repository.CoverLetterInterviewRepository;
-import com.ssafy.hellojob.domain.interview.repository.CoverLetterQuestionBankRepository;
-import com.ssafy.hellojob.domain.interview.repository.CsQuestionBankRepository;
-import com.ssafy.hellojob.domain.interview.repository.PersonalityQuestionBankRepository;
+import com.ssafy.hellojob.domain.interview.entity.*;
+import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +18,7 @@ public class InterviewReadService {
     private final CsQuestionBankRepository csQuestionBankRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterQuestionBankRepository coverLetterQuestionBankRepository;
+    private final InterviewQuestionMemoRepository interviewQuestionMemoRepository;
 
     public CoverLetterInterview findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(User user, CoverLetter coverLetter) {
         return coverLetterInterviewRepository.findByUserAndCoverLetter(coverLetter, user)
@@ -43,6 +38,21 @@ public class InterviewReadService {
     public CoverLetterQuestionBank findCoverLetterQuestionByIdOrElseThrow(Integer coverLetterQuestionBankId) {
         return coverLetterQuestionBankRepository.findById(coverLetterQuestionBankId)
                 .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_NOT_FOUND));
+    }
+
+    public InterviewQuestionMemo findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(User user, CsQuestionBank csQuestionBank) {
+        return interviewQuestionMemoRepository.findByUserAndCsQuestionBank(user, csQuestionBank)
+                .orElse(null);
+    }
+
+    public InterviewQuestionMemo findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(User user, PersonalityQuestionBank personalityQuestionBank) {
+        return interviewQuestionMemoRepository.findByUserAndPersonalityQuestionBank(user, personalityQuestionBank)
+                .orElse(null);
+    }
+
+    public InterviewQuestionMemo findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(User user, CoverLetterQuestionBank coverLetterQuestionBank) {
+        return interviewQuestionMemoRepository.findByUserAndCoverLetterQuestionBank(user, coverLetterQuestionBank)
+                .orElse(null);
     }
 
 }

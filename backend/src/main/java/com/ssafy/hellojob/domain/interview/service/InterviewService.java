@@ -149,26 +149,34 @@ public class InterviewService {
         CoverLetterQuestionBank coverLetterQuestionBank = null;
         CoverLetterInterview coverLetterInterview = null;
         CoverLetter coverLetter = null;
+        InterviewQuestionMemo memo = null;
 
         if(requestDto.getCsQuestionBankId() != null) {
             csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
         } else if(requestDto.getPersonalityQuestionBankId() != null) {
             personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
         } else if(requestDto.getCoverLetterQuestionBankId() != null) {
             coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdOrElseThrow(requestDto.getCoverLetterQuestionBankId());
             coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
             coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
         } else {
             throw new BaseException(QUESTION_TYPE_REQUIRED);
         }
 
-        InterviewQuestionMemo memo = InterviewQuestionMemo.builder()
-                .user(user)
-                .csQuestionBank(csQuestionBank)
-                .personalityQuestionBank(personalityQuestionBank)
-                .coverLetterQuestionBank(coverLetterQuestionBank)
-                .memo(requestDto.getMemo())
-                .build();
+        if(memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(csQuestionBank)
+                    .personalityQuestionBank(personalityQuestionBank)
+                    .coverLetterQuestionBank(coverLetterQuestionBank)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
 
         interviewQuestionMemoRepository.save(memo);
 
