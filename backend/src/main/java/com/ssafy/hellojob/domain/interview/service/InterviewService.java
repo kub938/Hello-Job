@@ -2,12 +2,11 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionDto;
+import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
 import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.response.InterviewStartResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.QuestionAndAnswerListResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.response.*;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -19,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -334,6 +334,33 @@ public class InterviewService {
         }
 
 
+    }
+
+    public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
+
+        for(CoverLetterQuestionDto dto: requestDto.getCoverLetterQuestion()){
+            String newQuestion = dto.getCoverLetterQuestion();
+            CoverLetterQuestionBank newQuestions = CoverLetterQuestionBank.of(coverLetterInterview, newQuestion);
+            coverLetterQuestionBankRepository.save(newQuestions);
+            questionIdList.add(CoverLetterQuestionIdDto.builder()
+                            .coverLetterQuestionBankId(newQuestions.getCoverLetterQuestionBankId())
+                    .build());
+        }
+
+        return CoverLetterQuestionSaveResponseDto.builder()
+                .coverLetterId(coverLetter.getCoverLetterId())
+                .coverLetterInterviewId(coverLetterInterview.getCoverLettterInterviewId())
+                .coverLetterQuestionSaveId(questionIdList)
+                .build();
     }
 
 

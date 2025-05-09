@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.*;
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
@@ -18,6 +19,8 @@ import com.ssafy.hellojob.domain.companyanalysis.repository.DartAnalysisReposito
 import com.ssafy.hellojob.domain.companyanalysis.repository.NewsAnalysisRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +43,8 @@ public class CompanyAnalysisService {
     private final DartAnalysisRepository dartAnalysisRepository;
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final UserRepository userRepository;
+    private final UserReadService userReadService;
+    private final FastApiClientService fastApiClientService;
 
     // 토큰 확인
     public boolean TokenCheck(Integer userId){
@@ -53,31 +58,51 @@ public class CompanyAnalysisService {
         return true;
     }
 
-
     // 기업 분석 저장
     @Transactional
-    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId,
-                                                                       CompanyAnalysisRequestDto requestDto,
-                                                                       CompanyAnalysisFastApiResponseDto responseDto) {
-        // 유저 조회 및 토큰(기업 분석 가능 횟수) 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId, CompanyAnalysisRequestDto requestDto) {
 
-        if (user.getToken() <= 0) {
-            throw new BaseException(ErrorCode.COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED);
-        }
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        // 유저 토큰 확인
+        this.TokenCheck(userId);
 
         if(userId != 3){
             // 토큰 감소(종훈오빠 제외)
             user.decreaseToken();
         }
 
-
-        // 회사 조회
+        // 회사 이름 가져오기
         Company company = companyRepository.findById(requestDto.getCompanyId())
                 .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
 
-        // DartAnalysis 저장
+        String companyName = company.getCompanyName();
+
+        log.debug("프론트에서 기업 분석 요청 들어옴");
+        log.debug("기업명: {}", companyName);
+        log.debug("기업ID: {}", requestDto.getCompanyId());
+        log.debug("isPublic: {}", requestDto.isPublic());
+        log.debug("isBasic: {}", requestDto.isBasic());
+        log.debug("isPlus: {}", requestDto.isPlus());
+        log.debug("isFinancial: {}", requestDto.isFinancial());
+
+        // FastAPI 요청 객체 생성
+        CompanyAnalysisFastApiRequestDto fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
+                .company_name(companyName)
+                .base(requestDto.isBasic())
+                .plus(requestDto.isPlus())
+                .fin(requestDto.isFinancial())
+                .build();
+
+        log.debug("fast API로 요청 보냄 !!!");
+
+        // FastAPI 호출
+        CompanyAnalysisFastApiResponseDto responseDto = fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto);
+
+        log.debug("fast API에서 응답 받음 !!!");
+        log.debug("기업 분석 : {}", responseDto.getCompany_analysis());
+
+        // dart 정보 저장
         DartAnalysis dart = DartAnalysis.of(
                 responseDto.getCompany_brand(),
                 responseDto.getCompany_analysis(),
