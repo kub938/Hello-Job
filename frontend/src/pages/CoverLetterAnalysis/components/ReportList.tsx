@@ -42,10 +42,10 @@ function ReportList({ nowStep }: ReportListProps) {
     }
   };
 
-  function adaptData(
+  const adaptData = (
     data: JobBookMarkResponse[] | CompanyBookMarkResponse[],
     nowStep: number
-  ) {
+  ) => {
     if (!data || data.length === 0) {
       return [];
     }
@@ -63,7 +63,7 @@ function ReportList({ nowStep }: ReportListProps) {
         industry: item.jobRoleAnalysisTitle ?? "",
       }));
     }
-  }
+  };
 
   if (!data) return;
   const reports = adaptData(data, nowStep);
@@ -72,16 +72,14 @@ function ReportList({ nowStep }: ReportListProps) {
     setAddCompanyAnalysisModalOpen(false);
   };
   const handleAddCompanyModalOpen = () => {
-    jobDataRefetch();
-    setAddCompanyAnalysisModalOpen(true);
+    jobDataRefetch().then(() => setAddCompanyAnalysisModalOpen(true));
   };
 
   const handleAddJobModalOpen = () => {
     setAddJobAnalysisModalOpen(true);
   };
   const handleAddJobModalClose = () => {
-    companyDataRefetch();
-    setAddJobAnalysisModalOpen(false);
+    companyDataRefetch().then(() => setAddJobAnalysisModalOpen(false));
   };
 
   return (
