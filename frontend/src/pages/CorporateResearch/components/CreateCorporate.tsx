@@ -7,6 +7,7 @@ import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import ToggleInput from "./ToggleInput";
 import { useNavigate } from "react-router";
+import { FaSpinner } from "react-icons/fa";
 
 interface CreateCorporateProps {
   onClose: () => void;
@@ -47,8 +48,12 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
       setIsPlus(false);
       setIsFinancial(false);
     },
-    onError: () => {
-      toast.error("기업 분석 생성 실패");
+    onError: (error: any) => {
+      if (error.response && error.response.status === 402) {
+        toast.error("토큰이 부족합니다");
+      } else {
+        toast.error("기업 분석 생성 실패");
+      }
       setIsSubmitting(false);
     },
   });
@@ -189,7 +194,13 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
             variant="default"
             disabled={isSubmitting || mutation.isPending}
           >
-            {isSubmitting || mutation.isPending ? "분석 중..." : "생성하기"}
+            {isSubmitting || mutation.isPending ? (
+              <span className="flex items-center gap-2">
+                분석 중... <FaSpinner className="animate-spin" />
+              </span>
+            ) : (
+              "생성하기"
+            )}
           </Button>
         </div>
       </form>
