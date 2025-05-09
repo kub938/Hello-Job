@@ -1,17 +1,39 @@
 import { Button } from "@/components/Button";
 import MypageHeader from "./MypageHeader";
 import { useState } from "react";
-import { FaPlus, FaSearch } from "react-icons/fa";
+import { FaPlus } from "react-icons/fa";
 import { Link } from "react-router";
 import DetailModal from "@/components/Common/DetailModal";
 import ReadCoverLetter from "./ReadCoverLetter";
+import { useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router";
+import { getCoverLetterList } from "@/api/mypageApi";
+import { GetCoverLetterListResponse } from "@/types/mypage";
 
 function CoverLetterList() {
-  const [searchTerm, setSearchTerm] = useState("");
+  // const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("최신순");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchId, setResearchId] = useState<number>(1);
+  const [searchParams] = useSearchParams();
+  const page = searchParams.get("page") || "0";
+
+  const { data: coverLetterListData, isLoading } = useQuery({
+    queryKey: ["coverLetterList", page],
+    queryFn: async () => {
+      const response = await getCoverLetterList(Number(page));
+      debugger;
+      return response.data as GetCoverLetterListResponse;
+    },
+  });
+
+  // 페이지네이션 설정
+  const itemsPerPage = coverLetterListData?.pageable?.pageSize || 10;
+  const totalPages = coverLetterListData?.totalPages || 1;
+  // const [itemsPerPage, setItemsPerPage] = useState(10);
+  // const [totalPages, setTotalPages] = useState(1);
+  //Math.ceil(coverLetters.length / itemsPerPage)
 
   const openReadModal = (id: number) => {
     setResearchId(id);
@@ -21,79 +43,16 @@ function CoverLetterList() {
   const closeModal = () => {
     setIsModalOpen(false);
   };
-
-  const [coverLetters] = useState([
-    {
-      coverLetterId: 1,
-      title: "삼성전자 하드웨어 엔지니어 자원서",
-      companyName: "기업",
-      jobRoleName: "IT/웹",
-      description:
-        "컴퓨터공학 전공자로서 반도체 분야 및 메모리 시스템 개발에서 3년간 연구 경험이 있습니다...",
-      updatedAt: "2023년 4월 7일",
-    },
-    {
-      coverLetterId: 2,
-      title: "카카오 백엔드 개발자 - 경력 기술서",
-      companyName: "기업",
-      jobRoleName: "IT/웹",
-      description:
-        "고성능 서비스 개발 및 대규모 트래픽 처리 경험으로, Spring과 Kotlin을 활용하여...",
-      updatedAt: "2023년 3월 23일",
-    },
-    {
-      coverLetterId: 3,
-      title: "라인 모바일 앱 개발자 자기소개서",
-      companyName: "기업",
-      jobRoleName: "IT/웹",
-      description:
-        "Flutter와 Dart를 기반으로 크로스플랫폼 앱 개발 경험이 풍부합니다. UI/UX에 대한 이해도가 높으며...",
-      updatedAt: "2023년 2월 15일",
-    },
-    {
-      coverLetterId: 4,
-      title: "라인 모바일 앱 개발자 자기소개서",
-      companyName: "기업",
-      jobRoleName: "IT/웹",
-      description:
-        "Flutter와 Dart를 기반으로 크로스플랫폼 앱 개발 경험이 풍부합니다. UI/UX에 대한 이해도가 높으며...",
-      updatedAt: "2023년 2월 15일",
-    },
-    {
-      coverLetterId: 5,
-      title: "라인 모바일 앱 개발자 자기소개서",
-      companyName: "기업",
-      jobRoleName: "IT/웹",
-      description:
-        "Flutter와 Dart를 기반으로 크로스플랫폼 앱 개발 경험이 풍부합니다. UI/UX에 대한 이해도가 높으며...",
-      updatedAt: "2023년 2월 15일",
-    },
-    {
-      coverLetterId: 6,
-      title: "라인 모바일 앱 개발자 자기소개서",
-      companyName: "기업",
-      jobRoleName: "IT/웹",
-      description:
-        "Flutter와 Dart를 기반으로 크로스플랫폼 앱 개발 경험이 풍부합니다. UI/UX에 대한 이해도가 높으며...",
-      updatedAt: "2023년 2월 15일",
-    },
-  ]);
-
-  // 페이지네이션 설정
-  const itemsPerPage = 5;
-  const totalPages = Math.ceil(coverLetters.length / itemsPerPage);
-
   // 검색어에 따른 필터링
-  const filteredCoverLetters = coverLetters.filter(
-    (letter) =>
-      letter.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      letter.description.toLowerCase().includes(searchTerm.toLowerCase())
+  // 현재 페이지에서만임. 수정 필요. 현재 사용하지 않는 로직
+  const filteredCoverLetters = coverLetterListData?.content?.filter(
+    (letter) => letter
   );
 
   // 현재 페이지에 표시할 항목들
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredCoverLetters.slice(
+  const currentItems = filteredCoverLetters?.slice(
     indexOfFirstItem,
     indexOfLastItem
   );
@@ -109,10 +68,10 @@ function CoverLetterList() {
   };
 
   // 검색어 변경 핸들러
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1); // 검색 시 첫 페이지로 이동
-  };
+  // const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   setSearchTerm(e.target.value);
+  //   setCurrentPage(1); // 검색 시 첫 페이지로 이동
+  // };
 
   return (
     <div className="w-full p-4 md:p-6 md:ml-56 transition-all duration-300">
@@ -133,7 +92,7 @@ function CoverLetterList() {
               <option value="직무명">직무명</option> */}
             </select>
           </div>
-          <div className="relative w-full md:w-64">
+          {/* <div className="relative w-full md:w-64">
             <input
               type="text"
               placeholder="검색어를 입력하세요..."
@@ -144,7 +103,7 @@ function CoverLetterList() {
             <button className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
               <FaSearch />
             </button>
-          </div>
+          </div> */}
         </div>
         <Button variant="default">
           <Link to="/mypage/cover-letter/new" className="flex items-center">
@@ -154,7 +113,11 @@ function CoverLetterList() {
       </div>
 
       <div className="space-y-4">
-        {currentItems.length > 0 ? (
+        {isLoading ? (
+          <div className="text-center py-10 text-gray-500">
+            자기소개서 목록을 불러오고 있습니다...
+          </div>
+        ) : currentItems && currentItems.length > 0 ? (
           currentItems.map((coverLetter) => (
             <div
               key={coverLetter.coverLetterId}
@@ -162,18 +125,22 @@ function CoverLetterList() {
               onClick={() => openReadModal(coverLetter.coverLetterId)}
             >
               <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-medium">{coverLetter.title}</h3>
+                <h3 className="text-lg font-medium">
+                  {coverLetter.coverLetterTitle}
+                </h3>
                 <div className="flex space-x-2">
                   <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
                     {coverLetter.companyName}
                   </span>
-                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                    {coverLetter.jobRoleName}
-                  </span>
+                  {coverLetter.jobRoleName ? (
+                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                      {coverLetter.jobRoleName}
+                    </span>
+                  ) : null}
                 </div>
               </div>
               <p className="text-gray-600 mb-3 text-sm line-clamp-2">
-                {coverLetter.description}
+                {coverLetter.firstContentDetail}
               </p>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">
@@ -190,7 +157,7 @@ function CoverLetterList() {
       </div>
 
       {/* 페이지네이션 (하단) */}
-      {filteredCoverLetters.length > itemsPerPage && (
+      {filteredCoverLetters && (
         <div className="flex justify-center mt-6">
           <nav className="flex space-x-1">
             <button

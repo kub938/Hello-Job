@@ -5,7 +5,7 @@ interface ReadCoverLetterProps {
   onClose: () => void;
 }
 
-function ReadCoverLetter({ onClose, id }: ReadCoverLetterProps) {
+function ReadCoverLetter({ onClose }: ReadCoverLetterProps) {
   return (
     <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
       <header className="flex w-full justify-between items-end mb-4">
