@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
 import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
@@ -35,6 +36,8 @@ public class InterviewService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterRepository coverLetterRepository;
+    private final CoverLetterReadService coverLetterReadService;
+    private final InterviewReadService interviewReadService;
 
     private final UserReadService userReadService;
 
@@ -144,13 +147,17 @@ public class InterviewService {
         CsQuestionBank csQuestionBank = null;
         PersonalityQuestionBank personalityQuestionBank = null;
         CoverLetterQuestionBank coverLetterQuestionBank = null;
+        CoverLetterInterview coverLetterInterview = null;
+        CoverLetter coverLetter = null;
 
         if(requestDto.getCsQuestionBankId() != null) {
-            csQuestionBank = findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
+            csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
         } else if(requestDto.getPersonalityQuestionBankId() != null) {
-            personalityQuestionBank = findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
+            personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
         } else if(requestDto.getCoverLetterQuestionBankId() != null) {
-            coverLetterQuestionBank = findCoverLetterQuestionByIdOrElseThrow(requestDto.getCoverLetterQuestionBankId());
+            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdOrElseThrow(requestDto.getCoverLetterQuestionBankId());
+            coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
+            coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
         } else {
             throw new BaseException(QUESTION_TYPE_REQUIRED);
         }
@@ -168,19 +175,6 @@ public class InterviewService {
         return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
     }
 
-    public CsQuestionBank findCsQuestionByIdOrElseThrow(Integer csQuestionBankId) {
-        return csQuestionBankRepository.findById(csQuestionBankId)
-                .orElseThrow(() -> new BaseException(CS_QUESTION_NOT_FOUND));
-    }
 
-    public PersonalityQuestionBank findPersonalityQuestionByIdOrElseThrow(Integer personalityQuestionBankId) {
-        return personalityQuestionBankRepository.findById(personalityQuestionBankId)
-                .orElseThrow(() -> new BaseException(PERSONALITY_QUESTION_NOT_FOUND));
-    }
-
-    public CoverLetterQuestionBank findCoverLetterQuestionByIdOrElseThrow(Integer coverLetterQuestionBankId) {
-        return coverLetterQuestionBankRepository.findById(coverLetterQuestionBankId)
-                .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_NOT_FOUND));
-    }
 
 }
