@@ -3,9 +3,49 @@ pipeline {  // 파이프라인 정의 시작
     
     environment {  // 파이프라인에서 사용할 환경 변수 정의
         DOCKER_COMPOSE = 'docker-compose'  // docker-compose 명령어를 환경 변수로 설정
+        MATTERMOST_WEBHOOK = credentials('MATTERMOST_WEBHOOK')
     }
     
     stages {  // 파이프라인의 주요 단계들 정의
+
+         stage('Notification - Build Started') {
+            steps {
+                script {
+                    // 변경을 일으킨 사용자 정보 가져오기
+                    def causes = currentBuild.getBuildCauses()
+                    def gitlabUserName = "Unknown"
+                    
+                    // GitLab 웹훅 이벤트에서 사용자 이름 추출
+                    for (cause in causes) {
+                        if (cause._class.contains('GitLab')) {
+                            if (cause.userName) {
+                                gitlabUserName = cause.userName
+                            } else if (cause.data && cause.data.userName) {
+                                gitlabUserName = cause.data.userName
+                            }
+                        }
+                    }
+                    
+                    // 환경 변수로 저장
+                    env.GITLAB_USER_NAME = gitlabUserName
+                }
+                
+                // 빌드 시작 알림
+                // mattermostSend color: 'good', 
+                //               message: "🚀 ${env.GITLAB_USER_NAME}가 요청한 빌드 시작! ${env.JOB_NAME} #${env.BUILD_NUMBER}", 
+                //               channel: 'b105_webhook', 
+                //               endpoint: "${MATTERMOST_WEBHOOK}"
+                sh """
+                        curl -X POST -H 'Content-Type: application/json' -d '{
+                            "text": "🚀 ${env.GITLAB_USER_NAME}가 요청한 빌드 시작! ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                            "channel": "b105_webhook",
+                            "attachments": [{
+                                "color": "#00FF00"
+                            }]
+                        }' ${MATTERMOST_WEBHOOK}
+                    """
+            }
+        }
         
         stage('Checkout') {  // 첫 번째 단계: 코드 체크아웃
             steps {
@@ -108,11 +148,32 @@ pipeline {  // 파이프라인 정의 시작
     post {  // 파이프라인 종료 후 처리
          success {
             echo '✅ Pipeline succeeded!'
+
+            sh """
+                curl -X POST -H 'Content-Type: application/json' -d '{
+                    "text": "✅ ${env.GITLAB_USER_NAME}가 요청한 빌드 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    "channel": "b105_webhook",
+                    "attachments": [{
+                        "color": "#00FF00"
+                    }]
+                }' ${MATTERMOST_WEBHOOK}
+            """
         }
         failure {
             echo '❌ Pipeline failed!'
+
             sh "${DOCKER_COMPOSE} down"
             sh "${DOCKER_COMPOSE} logs > pipeline_failure.log"  // 실패 시 로그 저장  
+
+            sh """
+                curl -X POST -H 'Content-Type: application/json' -d '{
+                    "text": "❌ ${env.GITLAB_USER_NAME}가 요청한 빌드 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                    "channel": "b105_webhook",
+                    "attachments": [{
+                        "color": "#FF0000"
+                    }]
+                }' ${MATTERMOST_WEBHOOK}
+            """
         }
     }
 }
