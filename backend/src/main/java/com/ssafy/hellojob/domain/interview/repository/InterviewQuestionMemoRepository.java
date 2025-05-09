@@ -7,6 +7,7 @@ import com.ssafy.hellojob.domain.interview.entity.PersonalityQuestionBank;
 import com.ssafy.hellojob.domain.user.entity.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
@@ -22,6 +23,7 @@ public interface InterviewQuestionMemoRepository extends JpaRepository<Interview
     Optional<InterviewQuestionMemo> findByUserAndCoverLetterQuestionBank(User user, CoverLetterQuestionBank coverLetterQuestionBank);
 
     @EntityGraph(attributePaths = {"user"})
+    @Query("SELECT i FROM InterviewQuestionMemo i WHERE i.interviewQuestionMemoId = :interviewQuestionMemoId")
     Optional<InterviewQuestionMemo> findByIdWithUser(@NonNull Integer interviewQuestionMemoId);
     
 }
