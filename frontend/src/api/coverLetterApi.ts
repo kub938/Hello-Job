@@ -48,7 +48,7 @@ export const coverLetterApi = {
 
   saveCoverLetter: (saveData: SaveCoverLetterRequest) => {
     return authApi.patch(`/api/v1/cover-letter-content/${saveData.contentId}`, {
-      userDetail: saveData.contentDetail,
+      contentDetail: saveData.contentDetail,
       contentStatus: saveData.contentStatus,
     });
   },
