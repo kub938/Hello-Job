@@ -13,8 +13,8 @@ import JobResearchCard from "./components/JobResearchCard";
 import { getCompanyDetail } from "@/api/companyApi";
 
 export interface JobResearchProps {
-  type: "modal";
-  companyId: number;
+  type?: "modal";
+  companyId?: number;
 }
 
 function JobResearch({ type, companyId }: JobResearchProps) {

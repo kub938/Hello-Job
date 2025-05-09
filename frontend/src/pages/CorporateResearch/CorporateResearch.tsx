@@ -25,8 +25,8 @@ interface CorporateReport {
 }
 
 export interface CorporateResearchProps {
-  type: "modal";
-  companyId: number;
+  type?: "modal";
+  companyId?: number;
 }
 
 function CorporateResearch({ type, companyId }: CorporateResearchProps) {
