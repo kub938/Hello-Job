@@ -37,4 +37,12 @@ public class InterviewAnswer extends BaseTimeEntity {
     @Column(name = "interview_follow_up_question")
     private String interviewFollowUpQuestion;
 
+    public static InterviewAnswer of(InterviewVideo interviewVideo, String interviewQuestion, InterviewQuestionCategory interviewQuestionCategory){
+        InterviewAnswer answer = new InterviewAnswer();
+        answer.interviewVideo = interviewVideo;
+        answer.interviewQuestion = interviewQuestion;
+        answer.interviewQuestionCategory = interviewQuestionCategory;
+        return answer;
+    }
+
 }

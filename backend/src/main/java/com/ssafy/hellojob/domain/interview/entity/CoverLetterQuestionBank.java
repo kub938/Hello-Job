@@ -24,4 +24,11 @@ public class CoverLetterQuestionBank extends BaseTimeEntity {
     @Column(name = "cover_letter_question")
     private String coverLetterQuestion;
 
+    public static CoverLetterQuestionBank of(CoverLetterInterview coverLetterInterview, String coverLetterQuestion){
+        CoverLetterQuestionBank coverLetterQuestionBank = new CoverLetterQuestionBank();
+        coverLetterQuestionBank.coverLetterInterview = coverLetterInterview;
+        coverLetterQuestionBank.coverLetterQuestion = coverLetterQuestion;
+        return coverLetterQuestionBank;
+    }
+
 }

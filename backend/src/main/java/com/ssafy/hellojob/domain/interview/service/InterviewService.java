@@ -2,7 +2,11 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
-import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
+import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionDto;
+import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
+import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.response.*;
 import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
@@ -18,6 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -37,10 +43,10 @@ public class InterviewService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterRepository coverLetterRepository;
-    private final CoverLetterReadService coverLetterReadService;
-    private final InterviewReadService interviewReadService;
 
     private final UserReadService userReadService;
+
+    private final Integer QUESTION_SIZE = 3;
 
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId){
         userReadService.findUserByIdOrElseThrow(userId);
@@ -74,7 +80,7 @@ public class InterviewService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(coverLetter, user)
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_INTERVIEW_NOT_FOUND));
 
         List<CoverLetterQuestionBank> questionList = coverLetterQuestionBankRepository.findByCoverLetterInterview(coverLetterInterview);
@@ -91,7 +97,10 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         Interview interview = interviewRepository.findByUserAndCs(user, true)
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_NOT_FOUND));
+                .orElseGet(() -> {
+                    Interview newInterview = Interview.of(user, true);
+                    return interviewRepository.save(newInterview);
+                });
 
         InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
         interviewVideoRepository.save(video);
@@ -107,7 +116,10 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         Interview interview = interviewRepository.findByUserAndCs(user, false)
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_NOT_FOUND));
+                .orElseGet(() -> {
+                    Interview newInterview = Interview.of(user, false);
+                    return interviewRepository.save(newInterview);
+                });
 
         InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
         interviewVideoRepository.save(video);
@@ -125,7 +137,7 @@ public class InterviewService {
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
-        CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(coverLetter, user)
+        CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
                     CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); // 팩토리 메서드 예시
                     return coverLetterInterviewRepository.save(newInterview);
@@ -140,6 +152,222 @@ public class InterviewService {
                 .interviewVideoId(video.getInterviewVideoId())
                 .build();
 
+    }
+
+    public InterviewStartResponseDto startCsRandomInterview(Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        Interview interview = interviewRepository.findByUserAndCs(user, true)
+                .orElseGet(() -> {
+                    Interview newInterview = Interview.of(user, true);
+                    return interviewRepository.save(newInterview);
+                });
+
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        interviewVideoRepository.save(video);
+
+        List<CsQuestionBank> all = csQuestionBankRepository.findAll();
+        Collections.shuffle(all); // Java 내부에서 무작위 섞기
+        List<CsQuestionBank> selectedQuestion = all.stream()
+                .limit(QUESTION_SIZE)
+                .toList();
+
+        List<QuestionAndAnswerListResponseDto> questionList = selectedQuestion.stream()
+                .map(q -> {
+                    InterviewAnswer answer = InterviewAnswer.of(video, q.getCsQuestion(), InterviewQuestionCategory.valueOf(q.getCsCategory().name()));
+                    interviewAnswerRepository.save(answer);
+
+                    return QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(q.getCsQuestionBankId())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .question(q.getCsQuestion())
+                            .build();
+                })
+                .toList();
+
+        return InterviewStartResponseDto.builder()
+                .interviewId(interview.getInterviewId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
+
+    }
+
+    public InterviewStartResponseDto startPersonalityRandomInterview(Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        Interview interview = interviewRepository.findByUserAndCs(user, true)
+                .orElseGet(() -> {
+                    Interview newInterview = Interview.of(user, true);
+                    return interviewRepository.save(newInterview);
+                });
+
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        interviewVideoRepository.save(video);
+
+        List<PersonalityQuestionBank> all = personalityQuestionBankRepository.findAll();
+        Collections.shuffle(all); // Java 내부에서 무작위 섞기
+        List<PersonalityQuestionBank> selectedQuestion = all.stream()
+                .limit(QUESTION_SIZE)
+                .toList();
+
+        List<QuestionAndAnswerListResponseDto> questionList = selectedQuestion.stream()
+                .map(q -> {
+                    InterviewAnswer answer = InterviewAnswer.of(video, q.getPersonalityQuestion(), InterviewQuestionCategory.valueOf("인성면접"));
+                    interviewAnswerRepository.save(answer);
+
+                    return QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(q.getPersonalityQuestionBankId())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .question(q.getPersonalityQuestion())
+                            .build();
+                })
+                .toList();
+
+        return InterviewStartResponseDto.builder()
+                .interviewId(interview.getInterviewId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
+
+    }
+
+    public InterviewStartResponseDto startCoverLetterRandomInterview(Integer coverLetterId, Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); // 팩토리 메서드 예시
+                    return coverLetterInterviewRepository.save(newInterview);
+                });
+
+        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
+        interviewVideoRepository.save(video);
+
+        List<CoverLetterQuestionBank> all = coverLetterQuestionBankRepository.findByCoverLetterInterview(interview);
+        Collections.shuffle(all); // Java 내부에서 무작위 섞기
+        List<CoverLetterQuestionBank> selectedQuestion = all.stream()
+                .limit(QUESTION_SIZE)
+                .toList();
+
+        List<QuestionAndAnswerListResponseDto> questionList = selectedQuestion.stream()
+                .map(q -> {
+                    InterviewAnswer answer = InterviewAnswer.of(video, q.getCoverLetterQuestion(), InterviewQuestionCategory.valueOf("자기소개서면접"));
+                    interviewAnswerRepository.save(answer);
+
+                    return QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(q.getCoverLetterQuestionBankId())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .question(q.getCoverLetterQuestion())
+                            .build();
+                })
+                .toList();
+
+        return InterviewStartResponseDto.builder()
+                .interviewId(interview.getCoverLettterInterviewId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
+
+    }
+
+    public void saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+
+        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
+            Integer questionId = dto.getQuestionBankId();
+
+            CsQuestionBank question = csQuestionBankRepository.findById(questionId)
+                    .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
+
+            InterviewAnswer answer = InterviewAnswer.of(
+                    video,
+                    question.getCsQuestion(),
+                    InterviewQuestionCategory.valueOf(question.getCsCategory().name())
+            );
+            interviewAnswerRepository.save(answer);
+        }
+
+
+    }
+
+    public void savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+
+        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
+            Integer questionId = dto.getQuestionBankId();
+
+            PersonalityQuestionBank question = personalityQuestionBankRepository.findById(questionId)
+                    .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
+
+            InterviewAnswer answer = InterviewAnswer.of(
+                    video,
+                    question.getPersonalityQuestion(),
+                    InterviewQuestionCategory.valueOf("인성면접")
+            );
+            interviewAnswerRepository.save(answer);
+        }
+
+
+    }
+
+    public void saveCoverLetterQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
+                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+
+        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
+            Integer questionId = dto.getQuestionBankId();
+
+            CoverLetterQuestionBank question = coverLetterQuestionBankRepository.findById(questionId)
+                    .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
+
+            InterviewAnswer answer = InterviewAnswer.of(
+                    video,
+                    question.getCoverLetterQuestion(),
+                    InterviewQuestionCategory.valueOf("자기소개서면접")
+            );
+            interviewAnswerRepository.save(answer);
+        }
+
+
+    }
+
+    public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
+
+        for(CoverLetterQuestionDto dto: requestDto.getCoverLetterQuestion()){
+            String newQuestion = dto.getCoverLetterQuestion();
+            CoverLetterQuestionBank newQuestions = CoverLetterQuestionBank.of(coverLetterInterview, newQuestion);
+            coverLetterQuestionBankRepository.save(newQuestions);
+            questionIdList.add(CoverLetterQuestionIdDto.builder()
+                            .coverLetterQuestionBankId(newQuestions.getCoverLetterQuestionBankId())
+                    .build());
+        }
+
+        return CoverLetterQuestionSaveResponseDto.builder()
+                .coverLetterId(coverLetter.getCoverLetterId())
+                .coverLetterInterviewId(coverLetterInterview.getCoverLettterInterviewId())
+                .coverLetterQuestionSaveId(questionIdList)
+                .build();
     }
 
     public WriteMemoResponseDto createMemo(WriteMemoRequestDto requestDto, Integer userId) {
