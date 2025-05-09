@@ -19,6 +19,7 @@ services:
       - FASTAPI_URL=${FASTAPI_URL}
       - AES_SECRET_KEY=${AES_SECRET_KEY}
       - MATTERMOST_WEBHOOK=${MATTERMOST_WEBHOOK}
+      - OPENAI_API_URL=${OPENAI_API_URL}
     depends_on:          # 의존성 설정
       mysql:
         condition: service_healthy
