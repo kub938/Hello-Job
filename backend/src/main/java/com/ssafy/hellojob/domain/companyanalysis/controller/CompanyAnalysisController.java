@@ -78,6 +78,11 @@ public class CompanyAnalysisController {
         
         log.debug("프론트에서 기업 분석 요청 들어옴");
         log.debug("기업명: {}", companyName);
+        log.debug("기업ID: {}", requestDto.getCompanyId());
+        log.debug("isPublic: {}", requestDto.isPublic());
+        log.debug("isBasic: {}", requestDto.isBasic());
+        log.debug("isPlus: {}", requestDto.isPlus());
+        log.debug("isFinancial: {}", requestDto.isFinancial());
 
         CompanyAnalysisFastApiRequestDto fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
                 .company_name(companyName)
