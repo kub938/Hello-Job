@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
+import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.service.InterviewService;
@@ -31,10 +32,10 @@ public class InterviewController {
         return responseDto;
     }
 
-    @GetMapping("/cover-letter/{coverLetterInterviewId}")
-    public List<QuestionListResponseDto> coverLetterQuestionList(@PathVariable("coverLetterInterviewId") Integer coverLetterInterviewId,
+    @GetMapping("/cover-letter/{coverLetterId}")
+    public List<QuestionListResponseDto> coverLetterQuestionList(@PathVariable("coverLetterId") Integer coverLetterId,
                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<QuestionListResponseDto> responseDto = interviewService.getCoverLetterQuestionList(coverLetterInterviewId, userPrincipal.getUserId());
+        List<QuestionListResponseDto> responseDto = interviewService.getCoverLetterQuestionList(coverLetterId, userPrincipal.getUserId());
         return responseDto;
     }
 
@@ -49,8 +50,14 @@ public class InterviewController {
     }
 
     @PostMapping("/select/cover-letter")
-    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(@AuthenticationPrincipal UserPrincipal userPrincipal){
-        return interviewService.startCoverLetterSelectInterview(userPrincipal.getUserId());
+    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(@RequestBody StartCoverLetterInterviewRequestDto requestDto,
+                                                                           @AuthenticationPrincipal UserPrincipal userPrincipal){
+        return interviewService.startCoverLetterSelectInterview(requestDto.getCoverLetterId(), userPrincipal.getUserId());
     }
+
+//    @PostMapping("/cover-letter")
+//    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(@AuthenticationPrincipal UserPrincipal userPrincipal){
+//        return interviewService.startCoverLetterSelectInterview(userPrincipal.getUserId());
+//    }
 
 }
