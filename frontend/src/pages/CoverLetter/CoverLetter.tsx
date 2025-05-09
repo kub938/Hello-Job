@@ -11,6 +11,9 @@ import {
   useSendMessage,
 } from "@/hooks/coverLetterHooks";
 import QuestionStep from "./components/QuestionStep";
+import { useIsMutating } from "@tanstack/react-query";
+import { SyncLoader } from "react-spinners";
+import { SaveCoverLetterRequest } from "@/types/coverLetterApiType";
 
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
@@ -27,7 +30,8 @@ function CoverLetter() {
   const [inputValue, setInputValue] = useState("");
   const [contentDetail, setContentDetail] = useState("");
   const [nowContentLength, setNowContentLength] = useState(0);
-
+  //
+  const sendLoading = useIsMutating({ mutationKey: ["send-message"] });
   // API 호출 관련 훅
   const { data: contents, isLoading: isContentsLoading } =
     useGetCoverLetterContentIds(coverLetterId || 0);
@@ -62,7 +66,7 @@ function CoverLetter() {
   };
 
   const handleSelectQuestion = (selectId: number, selectNum: number) => {
-    onSaveContent();
+    onSaveContent("changeStep");
     setSelectQuestionId(selectId);
     setSelectQuestionNumber(selectNum);
   };
@@ -109,14 +113,26 @@ function CoverLetter() {
     []
   );
 
-  const onSaveContent = () => {
-    if (!statusData) return;
-    const saveData = {
+  const onSaveContent = (type: "changeStep" | "draft" | "save") => {
+    const saveData: SaveCoverLetterRequest = {
       contentId: selectQuestionId,
       contentDetail: contentDetail,
-      contentStatus:
-        statusData?.contentQuestionStatuses[selectQuestionNumber].contentStatus,
+      contentStatus: "IN_PROGRESS",
     };
+
+    if (type === "changeStep") {
+      const status =
+        statusData?.contentQuestionStatuses[selectQuestionNumber].contentStatus;
+      if (status === "PENDING") {
+        saveData.contentStatus = "IN_PROGRESS";
+      } else if (status === "COMPLETED") {
+        saveData.contentStatus = "COMPLETED";
+      }
+    }
+    if (type === "save") {
+      saveData.contentStatus = "COMPLETED";
+    }
+
     saveMutation.mutate(saveData, {
       onSuccess: (data) => {
         console.log(data);
@@ -151,6 +167,7 @@ function CoverLetter() {
   if (!statusData) {
     return <div>statusData를 불러오는데 실패했습니다.</div>;
   }
+
   const QuestionStatuses = statusData.contentQuestionStatuses;
 
   return (
@@ -174,9 +191,16 @@ function CoverLetter() {
                   </div>
                 </div>
               ))}
+
+              {sendLoading > 0 && (
+                <div className="w-20 h-15 mb-4  border-black">
+                  <SyncLoader color="#886bfb" size={10} />
+                </div>
+              )}
             </div>
             <div className="absolute bottom-0 w-full">
               <InputChat
+                sendLoading={sendLoading}
                 setInputValue={setInputValue}
                 inputValue={inputValue}
                 onChangeInput={onChangeInput}

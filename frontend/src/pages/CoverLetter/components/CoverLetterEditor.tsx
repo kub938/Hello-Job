@@ -3,7 +3,7 @@ import { Button } from "@/components/Button";
 import { getCoverLetterResponse } from "@/types/coverLetterApiType";
 
 export interface CoverLetterEditorProps {
-  onSaveContent: () => void;
+  onSaveContent: (type: "changeStep" | "draft" | "save") => void;
   CoverLetterData: getCoverLetterResponse;
   onChangeContentDetail: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   nowContentLength: number;
@@ -58,10 +58,14 @@ function CoverLetterEditor({
         {nowContentLength} / {contentLength}
       </div>
       <div className="mt-4 flex justify-end gap-3">
-        <Button onClick={onSaveContent} variant={"white"} className="w-20">
+        <Button
+          onClick={() => onSaveContent("draft")}
+          variant={"white"}
+          className="w-20"
+        >
           임시저장
         </Button>
-        <Button onClick={onSaveContent} className="w-20">
+        <Button onClick={() => onSaveContent("save")} className="w-20">
           저장
         </Button>
       </div>

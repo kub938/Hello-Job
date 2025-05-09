@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { AiOutlineSend } from "react-icons/ai";
 
 export interface InputChatProps {
+  sendLoading: number;
   inputValue: string;
   setInputValue: (input: string) => void;
   onSubmitMessage: () => void;
@@ -11,6 +12,7 @@ export interface InputChatProps {
 }
 
 function InputChat({
+  sendLoading,
   setInputValue,
   onSubmitMessage,
   onChangeInput,
@@ -39,6 +41,7 @@ function InputChat({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (sendLoading > 0) return;
     if (e.key === "Enter" && !e.shiftKey) {
       if (isComposing.current) {
         return;
@@ -82,7 +85,7 @@ function InputChat({
               aria-label="메시지 전송"
               className="flex-shrink-0"
               onClick={() => handleAddMessage(inputValue)}
-              disabled={inputValue.trim() === ""}
+              disabled={inputValue.trim() === "" || sendLoading > 0}
             >
               <AiOutlineSend className="size-4" />
             </Button>
