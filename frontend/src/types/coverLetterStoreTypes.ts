@@ -1,12 +1,13 @@
 import { CoverLetterRequestContent } from "./coverLetterTypes";
 
 export type ChatMessage = {
-  sender: "USER" | "AI";
+  sender: "user" | "ai";
   message: string;
 };
 
 export type ChatStore = {
   chatLog: ChatMessage[];
+  setChatLog: (chatLog: ChatMessage[]) => void;
   addUserMessage: (message: string) => void;
   addAiMessage: (message: string) => void;
 };

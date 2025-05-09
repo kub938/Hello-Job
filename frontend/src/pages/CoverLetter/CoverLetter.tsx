@@ -22,7 +22,7 @@ function CoverLetter() {
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const { id: idParam } = useParams();
   const coverLetterId = idParam ? parseInt(idParam) : undefined;
-  const { chatLog, addAiMessage } = useCoverLetterStore();
+  const { chatLog, addAiMessage, setChatLog } = useCoverLetterStore();
 
   // useState 훅 모음
   const [selectQuestionId, setSelectQuestionId] = useState(0); // 기본값 설정
@@ -30,8 +30,8 @@ function CoverLetter() {
   const [inputValue, setInputValue] = useState("");
   const [contentDetail, setContentDetail] = useState("");
   const [nowContentLength, setNowContentLength] = useState(0);
-  //
   const sendLoading = useIsMutating({ mutationKey: ["send-message"] });
+
   // API 호출 관련 훅
   const { data: contents, isLoading: isContentsLoading } =
     useGetCoverLetterContentIds(coverLetterId || 0);
@@ -52,6 +52,7 @@ function CoverLetter() {
     if (!coverLetter) return;
     setContentDetail(coverLetter.contentDetail);
     setNowContentLength(coverLetter.contentDetail.length);
+    setChatLog(coverLetter.contentChatLog);
   }, [coverLetter]);
   // 이벤트 핸들러
 
@@ -100,12 +101,12 @@ function CoverLetter() {
 
   const chatStyles = useMemo(
     () => ({
-      USER: {
+      user: {
         container: "flex flex-row-reverse",
         chatBubble:
           "break-all border max-w-92 px-3 py-3 rounded-xl bg-primary text-white",
       },
-      AI: {
+      ai: {
         container: "flex",
         chatBubble: "break-all border max-w-92 px-3 py-3 rounded-xl bg-muted",
       },
