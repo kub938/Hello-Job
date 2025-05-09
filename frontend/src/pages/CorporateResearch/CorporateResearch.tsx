@@ -8,11 +8,12 @@ import { FaPlus } from "react-icons/fa6";
 import DetailModal from "@/components/Common/DetailModal";
 import CreateCorporate from "./components/CreateCorporate";
 import ReadCorporate from "./components/ReadCorporate";
-import { getCorporateReportListResponse } from "@/types/coporateResearch";
+
 import CorporateReportCard from "./components/CorporateReportCard";
+import { getCompanyDetail } from "@/api/companyApi";
 
 interface CorporateReport {
-  companyAnlaysisId: number;
+  companyAnalysisId: number;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -37,7 +38,18 @@ function CorporateResearch() {
       const response = await corporateReportApi.getCorporateReportList(
         parseInt(params.id ? params.id : "1")
       );
-      return response.data as getCorporateReportListResponse[];
+      return response.data;
+    },
+  });
+
+  // 특정 기업 상세 정보 불러오기
+  const { data: companyDetail, isLoading: isDetailLoading } = useQuery({
+    queryKey: ["companyDetail", params.id],
+    queryFn: async () => {
+      const response = await getCompanyDetail(
+        parseInt(params.id ? params.id : "1")
+      );
+      return response.data;
     },
   });
 
@@ -48,7 +60,7 @@ function CorporateResearch() {
   useEffect(() => {
     const temp =
       corporateReportListData?.map((corporateReport) => ({
-        companyAnlaysisId: corporateReport.companyAnlaysisId,
+        companyAnalysisId: corporateReport.companyAnalysisId,
         companyName: corporateReport.companyName,
         createdAt: corporateReport.createdAt,
         companyViewCount: corporateReport.companyViewCount,
@@ -81,7 +93,14 @@ function CorporateResearch() {
   return (
     <div className="flex flex-col justify-between w-full h-full p-6">
       <h2 className="text-2xl font-bold mb-4">기업 분석 검색 결과</h2>
-      <h1 className="text-3xl font-bold mb-1">삼성 전자</h1>
+      {isDetailLoading ? (
+        <h1 className="text-3xl font-bold mb-1">불러오는 중...</h1>
+      ) : (
+        <h1 className="text-3xl font-bold mb-1">
+          {companyDetail?.companyName}
+        </h1>
+      )}
+
       <h1 className="text-3xl font-bold mb-12">기업 분석 레포트 목록입니다</h1>
       <div className="flex justify-start gap-4 w-[1164px] mx-auto flex-wrap">
         <button className="cursor-pointer" onClick={openCreateModal}>
@@ -99,9 +118,9 @@ function CorporateResearch() {
         ) : corporateReportList.length > 0 ? (
           corporateReportList.map((corporateReport) => (
             <CorporateReportCard
-              key={corporateReport.companyAnlaysisId}
+              key={corporateReport.companyAnalysisId}
               onClick={() => {
-                openReadModal(corporateReport.companyAnlaysisId);
+                openReadModal(corporateReport.companyAnalysisId);
               }}
               companyName={corporateReport.companyName}
               createdAt={corporateReport.createdAt}

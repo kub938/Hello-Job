@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { getAllJobList } from "@/types/jobResearch";
 import JobResearchCard from "./components/JobResearchCard";
+import { getCompanyDetail } from "@/api/companyApi";
 
 function JobResearch() {
   const params = useParams();
@@ -26,7 +27,18 @@ function JobResearch() {
       const response = await jobRoleAnalysis.getAllJobList(
         parseInt(params.id ? params.id : "1")
       );
-      return response.data as getAllJobList[];
+      return response.data;
+    },
+  });
+
+  // 특정 기업 상세 정보 불러오기
+  const { data: companyDetail, isLoading: isDetailLoading } = useQuery({
+    queryKey: ["companyDetail", params.id],
+    queryFn: async () => {
+      const response = await getCompanyDetail(
+        parseInt(params.id ? params.id : "1")
+      );
+      return response.data;
     },
   });
 
@@ -68,7 +80,13 @@ function JobResearch() {
   return (
     <div className="flex flex-col justify-between w-full h-full p-6">
       <h2 className="text-2xl font-bold mb-4">직무 분석 검색 결과</h2>
-      <h1 className="text-3xl font-bold mb-1">삼성 전자</h1>
+      {isDetailLoading ? (
+        <h1 className="text-3xl font-bold mb-1">불러오는 중...</h1>
+      ) : (
+        <h1 className="text-3xl font-bold mb-1">
+          {companyDetail?.companyName}
+        </h1>
+      )}
       <h1 className="text-3xl font-bold mb-12">직무 분석 레포트 목록입니다</h1>
       <div className="flex justify-start gap-2 w-[800px] mx-auto flex-wrap">
         <button className="cursor-pointer" onClick={openCreateModal}>

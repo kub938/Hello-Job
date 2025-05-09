@@ -1,4 +1,5 @@
 import {
+  ChatMessage,
   ChatStore,
   CoverLetterInputStoreType,
 } from "@/types/coverLetterStoreTypes";
@@ -7,21 +8,30 @@ import { toast } from "sonner";
 import { create } from "zustand";
 
 export const useCoverLetterStore = create<ChatStore>((set) => ({
-  chatLog: [
-    {
-      sender: "AI",
-      message:
-        "안녕하세요! 초안작성을 도와드립니다! 궁금하신점을 수정할 수 있도록 도와드려요!",
-    },
-  ],
+  chatLog: [],
+
+  setChatLog: (chatLogData: ChatMessage[]) => {
+    console.log("chatLogData: ", ...chatLogData);
+    set(() => ({
+      chatLog: [
+        {
+          sender: "ai",
+          message:
+            "안녕하세요! 초안작성을 도와드립니다! 궁금하신점을 수정할 수 있도록 도와드려요!",
+        },
+        ...chatLogData,
+      ],
+    }));
+  },
+
   addUserMessage: (message: string) => {
     set((prev) => ({
-      chatLog: [...prev.chatLog, { sender: "USER", message }],
+      chatLog: [...prev.chatLog, { sender: "user", message }],
     }));
   },
   addAiMessage: (message: string) => {
     set((prev) => ({
-      chatLog: [...prev.chatLog, { sender: "AI", message }],
+      chatLog: [...prev.chatLog, { sender: "ai", message }],
     }));
   },
 }));
