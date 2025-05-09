@@ -1,3 +1,5 @@
+import { ChatMessage } from "./coverLetterStoreTypes";
+
 export type ContentQuestionStatusType = "COMPLETED" | "IN_PROGRESS" | "PENDING";
 
 export interface ContentStatus {
@@ -21,13 +23,8 @@ export interface getCoverLetterResponse {
   contentExperienceIds: number[];
   contentProjectIds: number[];
   contentFirstPrompt: string;
-  contentChatLog: ContentChatLogType[];
+  contentChatLog: ChatMessage[];
   contentUpdatedAt: string;
-}
-
-export interface ContentChatLogType {
-  sender: SenderType;
-  message: string;
 }
 
 export type SenderType = "AI" | "USER";

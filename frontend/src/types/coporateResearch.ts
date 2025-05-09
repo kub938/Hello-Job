@@ -18,7 +18,7 @@ export interface postBookmarkResponse {
 
 //특정 기업 분석 레포트 목록 API
 export interface getCorporateReportListResponse {
-  companyAnlaysisId: number;
+  companyAnalysisId: number;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
