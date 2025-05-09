@@ -41,6 +41,11 @@ public final class ValidationMessage {
 
     // 자기소개서
     public static final String USER_MESSAGE_NOT_EMPTY = "메시지는 필수값입니다.";
-    public static final String CONTENT_DETAIL_NOT_EMPTY = "자기소개서 본문 내용은 필수값입니다.";
+    public static final String COVER_LETTER_CONTENT_DETAIL_NOT_EMPTY = "자기소개서 본문 내용은 필수값입니다.";
+    public static final String COVER_LETTER_CONTENT_STATUS_NOT_EMPTY = "자기소개서 상태는 필수값입니다.";
+    public static final String COVER_LETTER_TITLE_NOT_EMPTY = "자기소개서 제목은 필수값입니다.";
+    public static final String COVER_LETTER_COMPANY_ANALYSIS_NOT_EMPTY = "자기소개서 기업분석은 필수값입니다.";
+    public static final String COVER_LETTER_CONTENT_NUMBER = "문항 번호는 필수값입니다.";
+    public static final String COVER_LETTER_CONTENT_QUESTION = "문항 질문은 필수값입니다.";
 
 }
