@@ -2,13 +2,13 @@ package com.ssafy.hellojob.domain.interview.entity;
 
 import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "interview_question_memo")
 public class InterviewQuestionMemo {
 

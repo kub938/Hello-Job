@@ -2,8 +2,10 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.response.WriteMemoResponseDto;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -16,6 +18,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -132,6 +136,51 @@ public class InterviewService {
                 .interviewVideoId(video.getInterviewVideoId())
                 .build();
 
+    }
+
+    public WriteMemoResponseDto createMemo(WriteMemoRequestDto requestDto, Integer userId) {
+
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CsQuestionBank csQuestionBank = null;
+        PersonalityQuestionBank personalityQuestionBank = null;
+        CoverLetterQuestionBank coverLetterQuestionBank = null;
+
+        if(requestDto.getCsQuestionBankId() != null) {
+            csQuestionBank = findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
+        } else if(requestDto.getPersonalityQuestionBankId() != null) {
+            personalityQuestionBank = findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
+        } else if(requestDto.getCoverLetterQuestionBankId() != null) {
+            coverLetterQuestionBank = findCoverLetterQuestionByIdOrElseThrow(requestDto.getCoverLetterQuestionBankId());
+        } else {
+            throw new BaseException(QUESTION_TYPE_REQUIRED);
+        }
+
+        InterviewQuestionMemo memo = InterviewQuestionMemo.builder()
+                .user(user)
+                .csQuestionBank(csQuestionBank)
+                .personalityQuestionBank(personalityQuestionBank)
+                .coverLetterQuestionBank(coverLetterQuestionBank)
+                .memo(requestDto.getMemo())
+                .build();
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+    }
+
+    public CsQuestionBank findCsQuestionByIdOrElseThrow(Integer csQuestionBankId) {
+        return csQuestionBankRepository.findById(csQuestionBankId)
+                .orElseThrow(() -> new BaseException(CS_QUESTION_NOT_FOUND));
+    }
+
+    public PersonalityQuestionBank findPersonalityQuestionByIdOrElseThrow(Integer personalityQuestionBankId) {
+        return personalityQuestionBankRepository.findById(personalityQuestionBankId)
+                .orElseThrow(() -> new BaseException(PERSONALITY_QUESTION_NOT_FOUND));
+    }
+
+    public CoverLetterQuestionBank findCoverLetterQuestionByIdOrElseThrow(Integer coverLetterQuestionBankId) {
+        return coverLetterQuestionBankRepository.findById(coverLetterQuestionBankId)
+                .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_NOT_FOUND));
     }
 
 }

@@ -1,8 +1,10 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
 import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.response.WriteMemoResponseDto;
 import com.ssafy.hellojob.domain.interview.service.InterviewService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -60,4 +62,8 @@ public class InterviewController {
 //        return interviewService.startCoverLetterSelectInterview(userPrincipal.getUserId());
 //    }
 
+    @PostMapping("/question/memo")
+    public WriteMemoResponseDto writeMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createMemo(requestDto, userPrincipal.getUserId());
+    }
 }

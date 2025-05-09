@@ -48,4 +48,7 @@ public final class ValidationMessage {
     public static final String COVER_LETTER_CONTENT_NUMBER = "문항 번호는 필수값입니다.";
     public static final String COVER_LETTER_CONTENT_QUESTION = "문항 질문은 필수값입니다.";
 
+    // 메모
+    public static final String MEMO_NOT_EMPTY = "메모는 필수값입니다.";
+
 }
