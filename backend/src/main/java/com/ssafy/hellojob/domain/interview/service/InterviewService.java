@@ -1,5 +1,7 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
+import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.entity.*;
@@ -28,6 +30,7 @@ public class InterviewService {
     private final InterviewQuestionMemoRepository interviewQuestionMemoRepository;
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
+    private final CoverLetterRepository coverLetterRepository;
 
     private final UserReadService userReadService;
 
@@ -57,10 +60,13 @@ public class InterviewService {
                 .toList();
     }
 
-    public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterInterviewId, Integer userId){
-        userReadService.findUserByIdOrElseThrow(userId);
+    public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findById(coverLetterInterviewId)
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(coverLetter, user)
                 .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_INTERVIEW_NOT_FOUND));
 
         List<CoverLetterQuestionBank> questionList = coverLetterQuestionBankRepository.findByCoverLetterInterview(coverLetterInterview);
@@ -105,11 +111,18 @@ public class InterviewService {
 
     }
 
-    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer userId){
+    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer coverLetterId, Integer userId){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        CoverLetterInterview interview = coverLetterInterviewRepository.findByUser(user)
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_NOT_FOUND));
+        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(coverLetter, user)
+                .orElseGet(() -> {
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); // 팩토리 메서드 예시
+                    return coverLetterInterviewRepository.save(newInterview);
+                });
+
 
         InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
         interviewVideoRepository.save(video);
