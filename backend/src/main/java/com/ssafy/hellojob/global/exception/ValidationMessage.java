@@ -50,4 +50,7 @@ public final class ValidationMessage {
 
     public static final String QUESTION_BANK_ID_NOT_EMPTY = "질문 아이디는 필수값입니다.";
 
+    // 메모
+    public static final String MEMO_NOT_EMPTY = "메모는 필수값입니다.";
+
 }

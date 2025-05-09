@@ -64,7 +64,19 @@ public enum ErrorCode {
     COVER_LETTER_INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 면접을 찾을 수 없습니다,"),
     INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접을 찾을 수 없습니다,"),
     INTERVIEW_VIDEO_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접 영상을 찾을 수 없습니다."),
-    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 질문을 찾을 수 없습니다.")
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 질문을 찾을 수 없습니다."),
+    CS_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "CS 면접 질문을 찾을 수 없습니다."),
+    PERSONALITY_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "인성 면접 질문을 찾을 수 없습니다."),
+    COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
+
+    // 메모
+    QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
+    INTERVIEW_QUESTION_MEMO_NOT_FOUND(HttpStatus.BAD_REQUEST, "면접 문항 메모를 찾을 수 없습니다."),
+    INTERVIEW_QUESTION_MEMO_MISMATCH(HttpStatus.FORBIDDEN, "메모 작성자와 요청 유저가 일치하지 않습니다.")
+
+
+
+
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.

@@ -2,11 +2,16 @@ package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
 import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionDto;
 import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
 import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
+import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.response.WriteMemoResponseDto;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -21,6 +26,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -36,6 +44,8 @@ public class InterviewService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterRepository coverLetterRepository;
+    private final InterviewReadService interviewReadService;
+    private final CoverLetterReadService coverLetterReadService;
 
     private final UserReadService userReadService;
 
@@ -363,5 +373,59 @@ public class InterviewService {
                 .build();
     }
 
+    public WriteMemoResponseDto createMemo(WriteMemoRequestDto requestDto, Integer userId) {
 
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CsQuestionBank csQuestionBank = null;
+        PersonalityQuestionBank personalityQuestionBank = null;
+        CoverLetterQuestionBank coverLetterQuestionBank = null;
+        CoverLetterInterview coverLetterInterview = null;
+        CoverLetter coverLetter = null;
+        InterviewQuestionMemo memo = null;
+
+        if(requestDto.getCsQuestionBankId() != null) {
+            csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
+        } else if(requestDto.getPersonalityQuestionBankId() != null) {
+            personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
+        } else if(requestDto.getCoverLetterQuestionBankId() != null) {
+            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdOrElseThrow(requestDto.getCoverLetterQuestionBankId());
+            coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
+            coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
+        } else {
+            throw new BaseException(QUESTION_TYPE_REQUIRED);
+        }
+
+        if(memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(csQuestionBank)
+                    .personalityQuestionBank(personalityQuestionBank)
+                    .coverLetterQuestionBank(coverLetterQuestionBank)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+    }
+
+
+    public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
+
+        if(!memo.getUser().equals(user)) {
+            throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+        }
+
+        memo.updateMemo(newMemo);
+        interviewQuestionMemoRepository.save(memo);
+        return Map.of("message", "성공적으로 수정되었습니다.");
+    }
 }

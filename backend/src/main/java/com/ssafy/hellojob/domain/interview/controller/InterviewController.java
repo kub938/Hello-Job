@@ -9,12 +9,17 @@ import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.service.InterviewService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import com.ssafy.hellojob.domain.interview.dto.request.ModifyMemoRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.response.WriteMemoResponseDto;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -99,5 +104,13 @@ public class InterviewController {
         return interviewService.saveNewCoverLetterQuestion(userPrincipal.getUserId(), requestDto);
     }
 
+    @PostMapping("/question/memo")
+    public WriteMemoResponseDto writeMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createMemo(requestDto, userPrincipal.getUserId());
+    }
 
+    @PatchMapping("/question/{memoId}")
+    public Map<String, String> modifyMemo(@RequestBody ModifyMemoRequestDto requestDto, @PathVariable Integer memoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.updateMemo(requestDto.getMemo(), memoId, userPrincipal.getUserId());
+    }
 }
