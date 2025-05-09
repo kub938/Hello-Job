@@ -41,6 +41,19 @@ public class CompanyAnalysisService {
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final UserRepository userRepository;
 
+    // 토큰 확인
+    public boolean TokenCheck(Integer userId){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+
+        if (user.getToken() <= 0) {
+            throw new BaseException(ErrorCode.COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED);
+        }
+
+        return true;
+    }
+
+
     // 기업 분석 저장
     @Transactional
     public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId,
