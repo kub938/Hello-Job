@@ -21,15 +21,15 @@ public class InterviewQuestionMemo {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cs_question_bank_id")
     private CsQuestionBank csQuestionBank;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "personality_question_bank_id")
     private PersonalityQuestionBank personalityQuestionBank;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_question_bank_id")
     private CoverLetterQuestionBank coverLetterQuestionBank;
 
