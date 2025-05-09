@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CoverLetterOnlyContentDto {
     private Integer contentId;
-    private int contentNumber;
+    private Integer contentNumber;
     private String contentQuestion;
     private String contentDetail;
-    private int contentLength;
+    private Integer contentLength;
 }

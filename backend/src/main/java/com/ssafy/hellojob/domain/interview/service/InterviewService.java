@@ -151,7 +151,7 @@ public class InterviewService {
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
-                .interviewId(interview.getCoverLettterInterviewId())
+                .interviewId(interview.getCoverLetterInterviewId())
                 .interviewVideoId(video.getInterviewVideoId())
                 .build();
 
@@ -270,7 +270,7 @@ public class InterviewService {
                 .toList();
 
         return InterviewStartResponseDto.builder()
-                .interviewId(interview.getCoverLettterInterviewId())
+                .interviewId(interview.getCoverLetterInterviewId())
                 .interviewVideoId(video.getInterviewVideoId())
                 .questionList(questionList)
                 .build();
@@ -368,7 +368,7 @@ public class InterviewService {
 
         return CoverLetterQuestionSaveResponseDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
-                .coverLetterInterviewId(coverLetterInterview.getCoverLettterInterviewId())
+                .coverLetterInterviewId(coverLetterInterview.getCoverLetterInterviewId())
                 .coverLetterQuestionSaveId(questionIdList)
                 .build();
     }
@@ -380,7 +380,6 @@ public class InterviewService {
         PersonalityQuestionBank personalityQuestionBank = null;
         CoverLetterQuestionBank coverLetterQuestionBank = null;
         CoverLetterInterview coverLetterInterview = null;
-        CoverLetter coverLetter = null;
         InterviewQuestionMemo memo = null;
 
         if(requestDto.getCsQuestionBankId() != null) {
@@ -390,9 +389,11 @@ public class InterviewService {
             personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
             memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
         } else if(requestDto.getCoverLetterQuestionBankId() != null) {
-            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdOrElseThrow(requestDto.getCoverLetterQuestionBankId());
-            coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
-            coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
+            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getCoverLetterQuestionBankId());
+            coverLetterInterview = interviewReadService.findCoverLetterInterviewByIWithUserdOrElseThrow(requestDto.getInterviewId());
+            if(!coverLetterQuestionBank.getCoverLetterInterview().equals(coverLetterInterview) || !coverLetterInterview.getUser().equals(user)) {
+                throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+            }
             memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
         } else {
             throw new BaseException(QUESTION_TYPE_REQUIRED);
@@ -414,7 +415,6 @@ public class InterviewService {
 
         return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
     }
-
 
     public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
