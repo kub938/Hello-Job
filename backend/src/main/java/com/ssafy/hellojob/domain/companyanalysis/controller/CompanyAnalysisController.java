@@ -2,9 +2,11 @@ package com.ssafy.hellojob.domain.companyanalysis.controller;
 
 import com.ssafy.hellojob.domain.company.service.CompanyService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
-import com.ssafy.hellojob.domain.companyanalysis.dto.response.*;
+import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisBookmarkListResponseDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisBookmarkSaveResponseDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisDetailResponseDto;
+import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisListResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
@@ -48,68 +50,14 @@ public class CompanyAnalysisController {
         return result;
     }
 
-    // 테스트용 post 요청 코드
-    @PostMapping("/test")
-    public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@RequestBody CompanyAnalysisFastApiResponseDto responseDto,
-                                                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
-        Integer userId = userPrincipal.getUserId();
+    @PostMapping
+    public CompanyAnalysisBookmarkSaveRequestDto requestCompanyAnalysis(
+            @RequestBody CompanyAnalysisRequestDto requestDto,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        companyAnalysisService.TokenCheck(userId);
-
-        log.debug("프론트에서 기업 분석 요청 들어옴");
-        log.debug("{}", responseDto.getCompany_name());
-
-        CompanyAnalysisRequestDto requestDto = CompanyAnalysisRequestDto.builder()
-                .companyId(1)
-                .isPublic(true)
-                .basic(true)
-                .plus(false)
-                .financial(true)
-                .build();
-
-        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, requestDto, responseDto);
-
-        return result;
-
+        return companyAnalysisService.createCompanyAnalysis(userPrincipal.getUserId(), requestDto);
     }
 
-    // fast API 구현 코드
-    @PostMapping()
-    public CompanyAnalysisBookmarkSaveRequestDto CompanyAnalysisRequest(@RequestBody CompanyAnalysisRequestDto requestDto,
-                                                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
-
-        Integer userId = userPrincipal.getUserId();
-
-        companyAnalysisService.TokenCheck(userId);
-
-        String companyName = companyService.getCompanyNameByCompanyId(requestDto.getCompanyId());
-        
-        log.debug("프론트에서 기업 분석 요청 들어옴");
-        log.debug("기업명: {}", companyName);
-        log.debug("기업ID: {}", requestDto.getCompanyId());
-        log.debug("isPublic: {}", requestDto.isPublic());
-        log.debug("isBasic: {}", requestDto.isBasic());
-        log.debug("isPlus: {}", requestDto.isPlus());
-        log.debug("isFinancial: {}", requestDto.isFinancial());
-
-        CompanyAnalysisFastApiRequestDto fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
-                .company_name(companyName)
-                .base(requestDto.isBasic())
-                .plus(requestDto.isPlus())
-                .fin(requestDto.isFinancial())
-                .build();
-
-        log.debug("fast API로 요청 보냄 !!! ");
-
-        CompanyAnalysisFastApiResponseDto responseDto = fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto);
-
-        log.debug("fast API에서 응답 받음 !!! ");
-        log.debug("비전 : {}", responseDto.getCompany_vision());
-
-        CompanyAnalysisBookmarkSaveRequestDto result = companyAnalysisService.createCompanyAnalysis(userId, requestDto, responseDto);
-        return result;
-
-    }
 
     // 기업 분석 검색
     @GetMapping("/search/{companyId}")
