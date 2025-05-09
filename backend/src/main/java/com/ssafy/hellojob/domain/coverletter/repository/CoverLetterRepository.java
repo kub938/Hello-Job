@@ -27,7 +27,7 @@ public interface CoverLetterRepository extends JpaRepository<CoverLetter, Intege
             cl.finish,
             cl.updatedAt)
             FROM CoverLetter cl
-            JOIN cl.jobRoleSnapshot jr
+            LEFT JOIN cl.jobRoleSnapshot jr
             JOIN cl.companyAnalysis ca
             JOIN ca.company c
             LEFT JOIN cl.contents con ON con.contentNumber = 1
