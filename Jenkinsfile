@@ -3,93 +3,26 @@ pipeline {  // 파이프라인 정의 시작
     
     environment {  // 파이프라인에서 사용할 환경 변수 정의
         DOCKER_COMPOSE = 'docker-compose'  // docker-compose 명령어를 환경 변수로 설정
-        MATTERMOST_WEBHOOK = credentials('MATTERMOST_WEBHOOK')
+        DETECTED_USER = '김아무개'
     }
     
     stages {  // 파이프라인의 주요 단계들 정의
 
-        //  stage('Notification - Build Started') {
-        //     steps {
-        //         script {
-        //             // 사용자 정보 추출 코드
-        //             def causes = currentBuild.getBuildCauses()
-        //             def gitlabUserName = "Unknown"
-                    
-        //             for (cause in causes) {
-        //                 if (cause._class.contains('GitLab')) {
-        //                     if (cause.userName) {
-        //                         gitlabUserName = cause.userName
-        //                     } else if (cause.data && cause.data.userName) {
-        //                         gitlabUserName = cause.data.userName
-        //                     }
-        //                 }
-        //             }
-                    
-        //             env.GITLAB_USER_NAME = gitlabUserName
-                    
-        //             // 보안 경고 없이 웹훅 요청
-        //             withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
-        //                 // 단순화된 메시지와 채널 파라미터 제외
-        //                 sh '''
-        //                     curl -X POST -H "Content-Type: application/json" -d '{
-        //                         "text": "🚀 ''' + env.GITLAB_USER_NAME + '''가 요청한 빌드 시작! ''' + ''' #''' + env.BUILD_NUMBER + '''"
-        //                     }' $WEBHOOK_URL
-        //                 '''
-        //             }
-        //         }
-        //     }
-        // }
-
-        stage('Debug and Notification') {
+        stage('Notification - Build Started') {
             steps {
                 script {
-                    // 디버깅 정보 출력
-                    def causes = currentBuild.getBuildCauses()
-                    echo "Build causes: ${causes}"
+                    // 디버깅 및 사용자 감지 로직
+                    def userName = "김아무개"
                     
-                    // 개선된 사용자 감지 로직
-                    def userName = "Unknown"
-                    
-                    // 여러 가능한 위치 확인
-                    if (env.gitlabUserName) {
-                        userName = env.gitlabUserName
-                    } else if (env.GITLAB_USER_NAME) {
-                        userName = env.GITLAB_USER_NAME
-                    } else {
-                        for (cause in causes) {
-                            if (cause._class.contains('GitLab')) {
-                                // 모든 속성을 출력해 확인
-                                cause.properties.each { prop, value ->
-                                    echo "Property ${prop}: ${value}"
-                                }
-                                
-                                // 다양한 위치 시도
-                                if (cause.userName) {
-                                    userName = cause.userName
-                                } else if (cause.data && cause.data.userName) {
-                                    userName = cause.data.userName
-                                } else if (cause.user && cause.user.name) {
-                                    userName = cause.user.name
-                                } else if (cause.pushedBy) {
-                                    userName = cause.pushedBy
-                                }
-                            }
-                        }
-                    }
-                    
-                    // 최후의 방법: Git 커밋 정보 사용
-                    if (userName == "Unknown") {
-                        try {
-                            def gitAuthor = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
-                            if (gitAuthor) {
-                                userName = gitAuthor
-                            }
-                        } catch (Exception e) {
-                            echo "Git author extraction failed: ${e.message}"
-                        }
+                    // Git 커밋 정보 사용
+                    try {
+                        userName = sh(script: 'git log -1 --pretty=%an', returnStdout: true).trim()
+                    } catch (Exception e) {
+                        echo "Git author extraction failed: ${e.message}"
                     }
                     
                     echo "Final detected user: ${userName}"
+                    // 환경 변수를 파이프라인 전체에서 사용할 수 있도록 설정
                     env.DETECTED_USER = userName
                     
                     // 알림 전송
@@ -209,7 +142,7 @@ pipeline {  // 파이프라인 정의 시작
             withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                 sh '''
                     curl -X POST -H "Content-Type: application/json" -d '{
-                        "text": "✅ ''' + env.GITLAB_USER_NAME + '''가 요청한 빌드 성공! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                        "text": "✅ ''' + env.DETECTED_USER + '''가 요청한 빌드 성공! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
                     }' $WEBHOOK_URL
                 '''
             }
@@ -223,7 +156,7 @@ pipeline {  // 파이프라인 정의 시작
             withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                 sh '''
                     curl -X POST -H "Content-Type: application/json" -d '{
-                        "text": "❌ ''' + env.GITLAB_USER_NAME + '''가 요청한 빌드 실패! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                        "text": "❌ ''' + env.DETECTED_USER + '''가 요청한 빌드 실패! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
                     }' $WEBHOOK_URL
                 '''
             }
