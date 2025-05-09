@@ -20,6 +20,7 @@ public class CsQuestionBank extends BaseTimeEntity {
     @Column(name = "cs_question", nullable = false)
     private String csQuestion;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "cs_category", nullable = false)
     private CsCategory csCategory;
 }
