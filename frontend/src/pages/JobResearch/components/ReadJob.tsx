@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
-import { getJobRoleDetail } from "@/types/jobResearch";
 import { Button } from "@/components/Button";
 
 interface ReadJobProps {
@@ -28,7 +27,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
     queryKey: ["jobRoleDetail", id],
     queryFn: async () => {
       const response = await jobRoleAnalysis.getJobDetail(id);
-      return response.data as getJobRoleDetail;
+      return response.data;
     },
     enabled: isValidId,
   });

@@ -4,7 +4,6 @@ import { useState } from "react";
 import SelectModal from "./components/SelectModal";
 import { corporateListApi } from "@/api/corporateReport";
 import { useQuery } from "@tanstack/react-query";
-import { getCorporateListResponse } from "@/types/coporateResearch";
 
 // 인터페이스 수정
 interface CorporateData {
@@ -28,7 +27,7 @@ function CorporateSearch() {
     queryFn: async () => {
       const response = await corporateListApi.getCorporateList(searchKeyword);
       debugger;
-      return response.data as getCorporateListResponse[];
+      return response.data;
     },
   });
 

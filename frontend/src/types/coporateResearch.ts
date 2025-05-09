@@ -6,6 +6,15 @@ export interface getCorporateListResponse {
   companySize: string;
   companyIndustry: string;
 }
+//특정 기업 상세 API
+export interface getCompanyDetailResponse {
+  id: number;
+  companyName: string;
+  companyLocation: string;
+  companySize: string;
+  companyIndustry: string;
+  updatedAt: string;
+}
 
 //북마크 추가 API
 export interface postBookmarkRequest {

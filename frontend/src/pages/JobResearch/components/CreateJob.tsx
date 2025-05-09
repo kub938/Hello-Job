@@ -355,7 +355,7 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
             variant="default"
             disabled={isSubmitting || mutation.isPending}
           >
-            {isSubmitting || mutation.isPending ? "분석 중..." : "생성하기"}
+            {isSubmitting || mutation.isPending ? "저장 중..." : "생성하기"}
           </Button>
         </div>
       </form>

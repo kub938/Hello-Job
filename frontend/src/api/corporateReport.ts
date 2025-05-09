@@ -1,4 +1,7 @@
 import {
+  getCorporateListResponse,
+  getCorporateReportDetailResponse,
+  getCorporateReportListResponse,
   postBookmarkRequest,
   postCorporateReportRequest,
 } from "@/types/coporateResearch";
@@ -6,16 +9,22 @@ import { authApi } from "./instance";
 
 export const corporateListApi = {
   getCorporateList: (companyName: string) => {
-    return authApi.get(`/api/v1/company/search?companyName=${companyName}`);
+    return authApi.get<getCorporateListResponse[]>(
+      `/api/v1/company/search?companyName=${companyName}`
+    );
   },
 };
 
 export const corporateReportApi = {
   getCorporateReportList: (companyId: number) => {
-    return authApi.get(`/api/v1/company-analysis/search/${companyId}`);
+    return authApi.get<getCorporateReportListResponse[]>(
+      `/api/v1/company-analysis/search/${companyId}`
+    );
   },
   getCorporateReportDetail: (companyAnalysisId: number) => {
-    return authApi.get(`/api/v1/company-analysis/${companyAnalysisId}`);
+    return authApi.get<getCorporateReportDetailResponse>(
+      `/api/v1/company-analysis/${companyAnalysisId}`
+    );
   },
   postBookmark: (postBookmarkRequest: postBookmarkRequest) => {
     return authApi.post(

@@ -1,4 +1,6 @@
 import {
+  getAllJobList,
+  getJobRoleDetail,
   postJobBookmarkRequest,
   postJobRoleAnalysisRequest,
 } from "@/types/jobResearch";
@@ -7,11 +9,15 @@ import { authApi } from "./instance";
 
 export const jobRoleAnalysis = {
   getJobDetail: (jobRoleAnalysisId: number) => {
-    return authApi.get(`/api/v1/job-role-analysis/${jobRoleAnalysisId}`);
+    return authApi.get<getJobRoleDetail>(
+      `/api/v1/job-role-analysis/${jobRoleAnalysisId}`
+    );
   },
 
   getAllJobList: (companyId: number) => {
-    return authApi.get(`/api/v1/job-role-analysis/${companyId}/search`);
+    return authApi.get<getAllJobList[]>(
+      `/api/v1/job-role-analysis/${companyId}/search`
+    );
   },
 
   getJobBookMarks: (companyId: number) => {
