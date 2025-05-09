@@ -3,11 +3,8 @@ import os
 import logging
 from typing import List, Any
 from agents.mcp import MCPServerStdio
-from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
-
-load_dotenv()
 
 async def setup_mcp_servers():
     """MCP 서버 설정 및 연결
