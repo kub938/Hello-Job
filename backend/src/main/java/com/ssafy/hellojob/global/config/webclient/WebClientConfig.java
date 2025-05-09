@@ -17,6 +17,7 @@ import org.springframework.http.codec.json.Jackson2JsonEncoder;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -58,4 +59,10 @@ public class WebClientConfig {
                 .exchangeStrategies(strategies)
                 .build();
     }
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
 }
