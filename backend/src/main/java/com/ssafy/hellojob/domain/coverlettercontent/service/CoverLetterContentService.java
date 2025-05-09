@@ -6,16 +6,16 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.request.JobRoleAnalysisDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.ProjectDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.EditContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.*;
-import com.ssafy.hellojob.domain.coverletter.entity.*;
-import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentStatus;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterContentRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
@@ -147,8 +147,15 @@ public class CoverLetterContentService {
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
         coverLetterContentReadService.checkCoverLetterContentValidation(userId, content);
 
+        if (requestDto.getContentStatus() == CoverLetterContentStatus.PENDING) {
+            throw new BaseException(ErrorCode.COVER_LETTER_CONTENT_ALREADY_START);
+        }
+
+        log.debug("🌞 저장 요청된 content 내용: {}, status: {}", requestDto.getContentDetail(), requestDto.getContentStatus());
         content.updateCoverLetterContent(requestDto);
         Integer coverLetterId = content.getCoverLetter().getCoverLetterId();
+
+        log.debug("👉 저장된 content 내용: {}, status: {}", content.getContentDetail(), content.getContentStatus());
 
         List<ContentQuestionStatusDto> statuses = getCoverLetterContentQuestionStatues(coverLetterId);
         boolean isWholeContentCompleted = isWholeContentCompleted(statuses);
