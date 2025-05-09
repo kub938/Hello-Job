@@ -67,8 +67,11 @@ public class CompanyAnalysisService {
             throw new BaseException(ErrorCode.COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED);
         }
 
-        // 토큰 감소
-        user.decreaseToken();
+        if(userId != 3){
+            // 토큰 감소(종훈오빠 제외)
+            user.decreaseToken();
+        }
+
 
         // 회사 조회
         Company company = companyRepository.findById(requestDto.getCompanyId())
