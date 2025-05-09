@@ -1,7 +1,9 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
+import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.response.CoverLetterQuestionSaveResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.InterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
@@ -22,19 +24,19 @@ public class InterviewController {
 
     private final InterviewService interviewService;
 
-    @GetMapping("/cs")
+    @GetMapping("/question/cs")
     public List<QuestionListResponseDto> csQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
         List<QuestionListResponseDto> responseDto = interviewService.getCsQuestionList(userPrincipal.getUserId());
         return responseDto;
     }
 
-    @GetMapping("/personality")
+    @GetMapping("/question/personality")
     public List<QuestionListResponseDto> personalityQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
         List<QuestionListResponseDto> responseDto = interviewService.getPersonalityQuestionList(userPrincipal.getUserId());
         return responseDto;
     }
 
-    @GetMapping("/cover-letter/{coverLetterId}")
+    @GetMapping("/question/cover-letter/{coverLetterId}")
     public List<QuestionListResponseDto> coverLetterQuestionList(@PathVariable("coverLetterId") Integer coverLetterId,
                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
         List<QuestionListResponseDto> responseDto = interviewService.getCoverLetterQuestionList(coverLetterId, userPrincipal.getUserId());
@@ -90,5 +92,12 @@ public class InterviewController {
                                           @AuthenticationPrincipal UserPrincipal userPrincipal){
         interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
     }
+
+    @PostMapping("/question/cover-letter/save")
+    public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(@RequestBody CoverLetterQuestionSaveRequestDto requestDto,
+                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
+        return interviewService.saveNewCoverLetterQuestion(userPrincipal.getUserId(), requestDto);
+    }
+
 
 }
