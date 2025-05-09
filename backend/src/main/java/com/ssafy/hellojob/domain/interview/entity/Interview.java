@@ -24,4 +24,11 @@ public class Interview {
     @Column(name = "cs", nullable = false)
     private boolean cs;
 
+    public static Interview of(User user, boolean cs){
+        Interview interview = new Interview();
+        interview.user = user;
+        interview.cs = cs;
+        return interview;
+    }
+
 }
