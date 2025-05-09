@@ -16,7 +16,7 @@ public class InterviewVideo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interview_video", nullable = false)
-    private Integer interviewVideo;
+    private Integer interviewVideoId;
 
     @ManyToOne
     @JoinColumn(name = "cover_letter_interview")
@@ -41,6 +41,15 @@ public class InterviewVideo {
     @Column(name = "end")
     private LocalDateTime end;
 
+    public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start){
+        InterviewVideo video = new InterviewVideo();
+        video.coverLetterInterview = coverLetterInterview;
+        video.interview = interview;
+        video.selectQuestion = selectQuestion;
+        video.start = start;
+
+        return video;
+    }
 
 
 }

@@ -16,7 +16,7 @@ public class CoverLetterInterview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cover_letter_interview_id", nullable = false)
-    private Integer coverLettterInterviewId;
+    private Integer coverLetterInterviewId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -25,5 +25,12 @@ public class CoverLetterInterview {
     @ManyToOne
     @JoinColumn(name = "cover_letter_id")
     private CoverLetter coverLetter;
+
+    public static CoverLetterInterview of(User user, CoverLetter coverLetter){
+        CoverLetterInterview interview = new CoverLetterInterview();
+        interview.user = user;
+        interview.coverLetter = coverLetter;
+        return interview;
+    }
 
 }

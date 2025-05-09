@@ -58,7 +58,24 @@ public enum ErrorCode {
     // 일정
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 일정을 찾을 수 없습니다."),
     COVER_LETTER_ALREADY_IN_USE(HttpStatus.BAD_REQUEST, "이미 해당 자기소개서로 등록된 일정이 있습니다."),
-    SCHEDULE_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상태를 찾을 수 없습니다.")
+    SCHEDULE_STATUS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 상태를 찾을 수 없습니다."),
+
+    // 면접
+    COVER_LETTER_INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 면접을 찾을 수 없습니다,"),
+    INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접을 찾을 수 없습니다,"),
+    INTERVIEW_VIDEO_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접 영상을 찾을 수 없습니다."),
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 질문을 찾을 수 없습니다."),
+    CS_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "CS 면접 질문을 찾을 수 없습니다."),
+    PERSONALITY_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "인성 면접 질문을 찾을 수 없습니다."),
+    COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
+
+    // 메모
+    QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
+    INTERVIEW_QUESTION_MEMO_NOT_FOUND(HttpStatus.BAD_REQUEST, "면접 문항 메모를 찾을 수 없습니다."),
+    INTERVIEW_QUESTION_MEMO_MISMATCH(HttpStatus.FORBIDDEN, "메모 작성자와 요청 유저가 일치하지 않습니다.")
+
+
+
 
 
     /**
