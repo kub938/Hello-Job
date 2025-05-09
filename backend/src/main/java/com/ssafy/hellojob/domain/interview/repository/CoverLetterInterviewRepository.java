@@ -11,6 +11,6 @@ import java.util.Optional;
 @Repository
 public interface CoverLetterInterviewRepository extends JpaRepository<CoverLetterInterview, Integer> {
 
-    Optional<CoverLetterInterview> findByUserAndCoverLetter(CoverLetter coverLetter, User user);
+    Optional<CoverLetterInterview> findByUserAndCoverLetter(User user, CoverLetter coverLetter);
 
 }

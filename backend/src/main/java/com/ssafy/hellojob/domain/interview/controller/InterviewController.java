@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
 import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.response.InterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.service.InterviewService;
@@ -55,9 +56,20 @@ public class InterviewController {
         return interviewService.startCoverLetterSelectInterview(requestDto.getCoverLetterId(), userPrincipal.getUserId());
     }
 
-//    @PostMapping("/cover-letter")
-//    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(@AuthenticationPrincipal UserPrincipal userPrincipal){
-//        return interviewService.startCoverLetterSelectInterview(userPrincipal.getUserId());
-//    }
+    @PostMapping("/cs")
+    public InterviewStartResponseDto startCsRandomInterview(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        return interviewService.startCsRandomInterview(userPrincipal.getUserId());
+    }
+
+    @PostMapping("/personality")
+    public InterviewStartResponseDto startPersonalityRandomInterview(@AuthenticationPrincipal UserPrincipal userPrincipal){
+        return interviewService.startPersonalityRandomInterview(userPrincipal.getUserId());
+    }
+
+    @PostMapping("/cover-letter")
+    public InterviewStartResponseDto startCoverLetterRandomInterview(@RequestBody StartCoverLetterInterviewRequestDto requestDto,
+                                                                     @AuthenticationPrincipal UserPrincipal userPrincipal){
+        return interviewService.startCoverLetterRandomInterview(requestDto.getCoverLetterId(), userPrincipal.getUserId());
+    }
 
 }
