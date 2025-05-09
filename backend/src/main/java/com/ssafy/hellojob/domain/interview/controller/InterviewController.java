@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
+import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.InterviewStartResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
@@ -70,6 +71,24 @@ public class InterviewController {
     public InterviewStartResponseDto startCoverLetterRandomInterview(@RequestBody StartCoverLetterInterviewRequestDto requestDto,
                                                                      @AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.startCoverLetterRandomInterview(requestDto.getCoverLetterId(), userPrincipal.getUserId());
+    }
+
+    @PostMapping("/practice/question/cs")
+    public void selectCsQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+                                 @AuthenticationPrincipal UserPrincipal userPrincipal){
+        interviewService.saveCsQuestions(userPrincipal.getUserId(), requestDto);
+    }
+
+    @PostMapping("/practice/question/personality")
+    public void selectPersonalityQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+                                 @AuthenticationPrincipal UserPrincipal userPrincipal){
+        interviewService.savePersonalityQuestions(userPrincipal.getUserId(), requestDto);
+    }
+
+    @PostMapping("/practice/question/cover-letter")
+    public void selectCoverLetterQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+                                          @AuthenticationPrincipal UserPrincipal userPrincipal){
+        interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
     }
 
 }
