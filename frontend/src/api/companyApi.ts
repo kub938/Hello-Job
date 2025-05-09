@@ -1,3 +1,4 @@
+import { getCompanyDetailResponse } from "@/types/coporateResearch";
 import { authApi } from "./instance";
 
 export const getCompanies = (companyName: string) => {
@@ -7,7 +8,7 @@ export const getCompanies = (companyName: string) => {
 };
 
 export const getCompanyDetail = (companyId: number) => {
-  return authApi.get(`/api/v1/company/${companyId}`);
+  return authApi.get<getCompanyDetailResponse>(`/api/v1/company/${companyId}`);
 };
 
 export const companyAnalysisApi = {

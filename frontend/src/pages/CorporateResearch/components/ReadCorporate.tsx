@@ -33,7 +33,7 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
     queryKey: ["corporateReportDetail", id],
     queryFn: async () => {
       const response = await corporateReportApi.getCorporateReportDetail(id);
-      return response.data as getCorporateReportDetailResponse;
+      return response.data;
     },
     enabled: isValidId,
   });

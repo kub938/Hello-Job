@@ -11,7 +11,6 @@ import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { getAllJobList } from "@/types/jobResearch";
 import JobResearchCard from "./components/JobResearchCard";
 import { getCompanyDetail } from "@/api/companyApi";
-import { getCompanyDetailResponse } from "@/types/coporateResearch";
 
 function JobResearch() {
   const params = useParams();
@@ -28,7 +27,7 @@ function JobResearch() {
       const response = await jobRoleAnalysis.getAllJobList(
         parseInt(params.id ? params.id : "1")
       );
-      return response.data as getAllJobList[];
+      return response.data;
     },
   });
 
@@ -39,7 +38,7 @@ function JobResearch() {
       const response = await getCompanyDetail(
         parseInt(params.id ? params.id : "1")
       );
-      return response.data as getCompanyDetailResponse;
+      return response.data;
     },
   });
 

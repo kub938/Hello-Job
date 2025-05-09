@@ -8,10 +8,7 @@ import { FaPlus } from "react-icons/fa6";
 import DetailModal from "@/components/Common/DetailModal";
 import CreateCorporate from "./components/CreateCorporate";
 import ReadCorporate from "./components/ReadCorporate";
-import {
-  getCompanyDetailResponse,
-  getCorporateReportListResponse,
-} from "@/types/coporateResearch";
+
 import CorporateReportCard from "./components/CorporateReportCard";
 import { getCompanyDetail } from "@/api/companyApi";
 
@@ -41,7 +38,7 @@ function CorporateResearch() {
       const response = await corporateReportApi.getCorporateReportList(
         parseInt(params.id ? params.id : "1")
       );
-      return response.data as getCorporateReportListResponse[];
+      return response.data;
     },
   });
 
@@ -52,7 +49,7 @@ function CorporateResearch() {
       const response = await getCompanyDetail(
         parseInt(params.id ? params.id : "1")
       );
-      return response.data as getCompanyDetailResponse;
+      return response.data;
     },
   });
 
