@@ -3,11 +3,25 @@ import MypageHeader from "./MypageHeader";
 import { useState } from "react";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import { Link } from "react-router";
+import DetailModal from "@/components/Common/DetailModal";
+import ReadCoverLetter from "./ReadCoverLetter";
 
 function CoverLetterList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("최신순");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [researchId, setResearchId] = useState<number>(1);
+
+  const openReadModal = (id: number) => {
+    setResearchId(id);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   const [coverLetters] = useState([
     {
       coverLetterId: 1,
@@ -145,6 +159,7 @@ function CoverLetterList() {
             <div
               key={coverLetter.coverLetterId}
               className="bg-white cursor-pointer p-6 rounded-lg shadow-sm border border-gray-100 pl-[27px] hover:pl-6 hover:shadow-md hover:border-l-primary hover:border-l-4 hover:rounded-l-sm transition-shadow"
+              onClick={() => openReadModal(coverLetter.coverLetterId)}
             >
               <div className="flex justify-between items-start mb-3">
                 <h3 className="text-lg font-medium">{coverLetter.title}</h3>
@@ -219,6 +234,11 @@ function CoverLetterList() {
             </button>
           </nav>
         </div>
+      )}
+      {isModalOpen && (
+        <DetailModal isOpen={isModalOpen} onClose={closeModal}>
+          <ReadCoverLetter onClose={closeModal} id={researchId} />
+        </DetailModal>
       )}
     </div>
   );
