@@ -120,11 +120,10 @@ public class GlobalExceptionHandler {
                 username = authentication.getName();
             }
         }
-//        log.error("비즈니스 로직 처리 중 오류 발생. 에러 코드: {}, 메시지: {}", e.getErrorCode(), e.getMessage());
         log.error("비즈니스 로직 처리 중 오류 발생. 사용자: {}, URL: {}, 메서드: {}, 에러 코드: {}, 메시지: {}",
                 username, requestUrl, httpMethod, e.getErrorCode(), e.getMessage());
 
-        if (mattermostEnabled && StringUtils.hasText(mattermostWebhookUrl)) {
+        if (mattermostEnabled && StringUtils.hasText(mattermostWebhookUrl) && checkExceptionForMattermost(requestUrl)) {
             sendMattermostNotification(e, requestUrl, httpMethod, username);
         }
 
@@ -194,6 +193,13 @@ public class GlobalExceptionHandler {
             // 알림 전송 실패해도 원래 에러 처리는 계속 진행
             log.error("Mattermost 알림 구성 중 오류 발생", ex);
         }
+    }
+
+    public boolean checkExceptionForMattermost(String requestUrl) {
+        if(requestUrl.endsWith("/bookmark")) {
+            return false;
+        }
+        return true;
     }
 
 }
