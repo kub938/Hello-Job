@@ -1,13 +1,8 @@
-import os
 import json
 import hashlib
-from dotenv import load_dotenv
-from openai import OpenAI
 from app.schemas.cover_letter import *
 from app.core.openai_utils import get_rate_limiter
 from app.core.request_queue import get_request_queue
-
-load_dotenv()
 
 async def create_cover_letter(content: ContentItem, 
                               company_analysis: CompanyAnalysis, 

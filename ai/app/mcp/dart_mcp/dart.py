@@ -8,7 +8,6 @@ from io import BytesIO, StringIO
 import re
 import traceback
 from datetime import datetime, timedelta
-from dotenv import load_dotenv
 import logging # 로깅 모듈 임포트
 import binascii # 바이너리 데이터 디버깅을 위한 모듈 추가
 import hashlib # 파일 해시 계산을 위한 모듈 추가
@@ -26,10 +25,10 @@ class IgnoreRuntimeErrorFilter(logging.Filter):
 logger = logging.getLogger()
 logger.addFilter(IgnoreRuntimeErrorFilter())
 
-load_dotenv()
 # 상수 정의
 # API 설정
-API_KEY = os.environ.get("DART_API_KEY")  # 환경 변수에서 API 키 로드, 없으면 기본값 사용
+API_KEY = os.getenv("DART_API_KEY")
+
 BASE_URL = "https://opendart.fss.or.kr/api"
 
 # 보고서 코드

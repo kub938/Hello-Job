@@ -1,18 +1,15 @@
 import json
 import os
 import hashlib
-from dotenv import load_dotenv
 from pydantic import BaseModel, create_model
 from typing import List, Optional, Any, Dict, Tuple
-from agents import Agent, Runner
-from agents.mcp import MCPServerStdio
+from agents import Agent
 
 from app.schemas import company
-from app.core.agent_utils import RateLimitedRunner, create_rate_limited_agent
+from app.core.agent_utils import RateLimitedRunner
 from app.core.request_queue import get_request_queue
 from app.core.mcp_core import get_mcp_servers
 
-load_dotenv()
 
 # OpenAI Agent 설정 -> 현재 사용 x 
 async def setup_agent(output_model):
