@@ -12,7 +12,7 @@ import { getCorporateReportListResponse } from "@/types/coporateResearch";
 import CorporateReportCard from "./components/CorporateReportCard";
 
 interface CorporateReport {
-  companyAnlaysisId: number;
+  companyAnalysisId: number;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -48,7 +48,7 @@ function CorporateResearch() {
   useEffect(() => {
     const temp =
       corporateReportListData?.map((corporateReport) => ({
-        companyAnlaysisId: corporateReport.companyAnlaysisId,
+        companyAnalysisId: corporateReport.companyAnalysisId,
         companyName: corporateReport.companyName,
         createdAt: corporateReport.createdAt,
         companyViewCount: corporateReport.companyViewCount,
@@ -99,9 +99,9 @@ function CorporateResearch() {
         ) : corporateReportList.length > 0 ? (
           corporateReportList.map((corporateReport) => (
             <CorporateReportCard
-              key={corporateReport.companyAnlaysisId}
+              key={corporateReport.companyAnalysisId}
               onClick={() => {
-                openReadModal(corporateReport.companyAnlaysisId);
+                openReadModal(corporateReport.companyAnalysisId);
               }}
               companyName={corporateReport.companyName}
               createdAt={corporateReport.createdAt}
