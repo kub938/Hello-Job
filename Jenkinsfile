@@ -18,7 +18,7 @@ pipeline {  // 파이프라인 정의 시작
                     withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                         sh '''
                             curl -X POST -H "Content-Type: application/json" -d '{
-                                "text": "🚀 ''' + userName + '''가 요청한 빌드 시작! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
+                                "text": "🚀 ''' + userName + '''(이)가 요청한 빌드 시작! ''' + env.JOB_NAME + ''' #''' + env.BUILD_NUMBER + '''"
                             }' $WEBHOOK_URL
                         '''
                     }
@@ -137,7 +137,7 @@ pipeline {  // 파이프라인 정의 시작
                 withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                     sh """
                         curl -X POST -H 'Content-Type: application/json' -d '{
-                            "text": "✅ ${userName}가 요청한 빌드 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                            "text": "✅ ${userName}(이)가 요청한 빌드 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
                         }' \$WEBHOOK_URL
                     """
                 }
@@ -156,7 +156,7 @@ pipeline {  // 파이프라인 정의 시작
                 withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                     sh """
                         curl -X POST -H 'Content-Type: application/json' -d '{
-                            "text": "❌ ${userName}가 요청한 빌드 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
+                            "text": "❌ ${userName}(이)가 요청한 빌드 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
                         }' \$WEBHOOK_URL
                     """
                 }
