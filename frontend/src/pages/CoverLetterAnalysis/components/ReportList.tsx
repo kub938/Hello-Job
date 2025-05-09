@@ -7,9 +7,8 @@ import {
   JobBookMarkResponse,
   ReportListProps,
 } from "@/types/coverLetterTypes";
-import AddCompanyAnalysisModal from "../AddModal/AddCompanyAnalysisModal";
 import { useState } from "react";
-import AddJobAnalysisModal from "../AddModal/AddJobAnalysisModal";
+import AddAnalysisModal from "../AddModal/AddAnalysisModal";
 
 function ReportList({ nowStep }: ReportListProps) {
   const reportBlockLayout =
@@ -26,7 +25,8 @@ function ReportList({ nowStep }: ReportListProps) {
   const [addCompanyAnalysisModalOpen, setAddCompanyAnalysisModalOpen] =
     useState(false);
   const [addJobAnalysisModalOpen, setAddJobAnalysisModalOpen] = useState(false);
-
+  const companyDataRefetch = companyBookMarksQuery.refetch;
+  const jobDataRefetch = jobBookMarksQuery.refetch;
   const data =
     nowStep === 1 ? companyBookMarksQuery.data : jobBookMarksQuery.data;
 
@@ -72,6 +72,7 @@ function ReportList({ nowStep }: ReportListProps) {
     setAddCompanyAnalysisModalOpen(false);
   };
   const handleAddCompanyModalOpen = () => {
+    jobDataRefetch();
     setAddCompanyAnalysisModalOpen(true);
   };
 
@@ -79,16 +80,17 @@ function ReportList({ nowStep }: ReportListProps) {
     setAddJobAnalysisModalOpen(true);
   };
   const handleAddJobModalClose = () => {
+    companyDataRefetch();
     setAddJobAnalysisModalOpen(false);
   };
 
   return (
     <>
-      {addJobAnalysisModalOpen && (
-        <AddJobAnalysisModal onClose={handleAddJobModalClose} />
-      )}
       {addCompanyAnalysisModalOpen && (
-        <AddCompanyAnalysisModal onClose={handleAddCompanyModalClose} />
+        <AddAnalysisModal type="company" onClose={handleAddCompanyModalClose} />
+      )}
+      {addJobAnalysisModalOpen && (
+        <AddAnalysisModal type="job" onClose={handleAddJobModalClose} />
       )}
       <div className="grid  md:grid-cols-3 grid-cols-2 gap-4 ">
         {reports &&

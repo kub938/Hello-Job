@@ -12,7 +12,12 @@ import { getAllJobList } from "@/types/jobResearch";
 import JobResearchCard from "./components/JobResearchCard";
 import { getCompanyDetail } from "@/api/companyApi";
 
-function JobResearch() {
+export interface JobResearchProps {
+  type?: "modal";
+  companyId?: number;
+}
+
+function JobResearch({ type, companyId }: JobResearchProps) {
   const params = useParams();
   const navigate = useNavigate();
 
@@ -24,9 +29,15 @@ function JobResearch() {
   const { data: jobResearchListData, isLoading } = useQuery({
     queryKey: ["jobResearchList", params.id],
     queryFn: async () => {
-      const response = await jobRoleAnalysis.getAllJobList(
-        parseInt(params.id ? params.id : "1")
-      );
+      let id;
+      if (params.id) {
+        id = parseInt(params.id);
+      } else if (companyId) {
+        id = companyId;
+      } else {
+        id = 1;
+      }
+      const response = await jobRoleAnalysis.getAllJobList(id);
       return response.data;
     },
   });
@@ -35,9 +46,15 @@ function JobResearch() {
   const { data: companyDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ["companyDetail", params.id],
     queryFn: async () => {
-      const response = await getCompanyDetail(
-        parseInt(params.id ? params.id : "1")
-      );
+      let id;
+      if (params.id) {
+        id = parseInt(params.id);
+      } else if (companyId) {
+        id = companyId;
+      } else {
+        id = 1;
+      }
+      const response = await getCompanyDetail(id);
       return response.data;
     },
   });
@@ -78,7 +95,7 @@ function JobResearch() {
   };
 
   return (
-    <div className="flex flex-col justify-between w-full h-full p-6">
+    <div className=" w-full h-full p-6">
       <h2 className="text-2xl font-bold mb-4">직무 분석 검색 결과</h2>
       {isDetailLoading ? (
         <h1 className="text-3xl font-bold mb-1">불러오는 중...</h1>
@@ -88,6 +105,7 @@ function JobResearch() {
         </h1>
       )}
       <h1 className="text-3xl font-bold mb-12">직무 분석 레포트 목록입니다</h1>
+      {type === "modal" && <h2>직무 분석을 북마크 해주세요!</h2>}
       <div className="flex justify-start gap-2 w-[800px] mx-auto flex-wrap">
         <button className="cursor-pointer" onClick={openCreateModal}>
           <div className="w-[800px] h-[110px] rounded-lg group border border-dashed border-[#886BFB] flex flex-col items-center justify-center gap-2 hover:border-[#6F52E0] transition-colors">
@@ -124,22 +142,25 @@ function JobResearch() {
           </div>
         )}
       </div>
-      <footer className="fixed left-0 bottom-0 w-full flex justify-center gap-4 pb-6 pt-10 bg-gradient-to-t from-[#FFFFFF]/70 via-[#FFFFFF]/70 to-transparent ">
-        <Button
-          onClick={() => navigate(-1)}
-          variant={"white"}
-          className="text-base"
-        >
-          이전
-        </Button>
-        <Button
-          onClick={() => navigate("/")}
-          variant={"default"}
-          className="text-base"
-        >
-          홈으로
-        </Button>
-      </footer>
+      {type !== "modal" && (
+        <footer className="fixed left-0 bottom-0 w-full flex justify-center gap-4 pb-6 pt-10 bg-gradient-to-t from-[#FFFFFF]/70 via-[#FFFFFF]/70 to-transparent ">
+          <Button
+            onClick={() => navigate(-1)}
+            variant={"white"}
+            className="text-base"
+          >
+            이전
+          </Button>
+          <Button
+            onClick={() => navigate("/")}
+            variant={"default"}
+            className="text-base"
+          >
+            홈으로
+          </Button>
+        </footer>
+      )}
+
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
