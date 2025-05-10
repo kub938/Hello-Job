@@ -8,28 +8,25 @@ import ReadCoverLetter from "./ReadCoverLetter";
 import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
 import { getCoverLetterList } from "@/api/mypageApi";
-import { GetCoverLetterListResponse } from "@/types/mypage";
 
 function CoverLetterList() {
   // const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("최신순");
-  const [currentPage, setCurrentPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchId, setResearchId] = useState<number>(1);
-  const [searchParams] = useSearchParams();
-  const page = searchParams.get("page") || "0";
+  const [searchParams, setSearchParams] = useSearchParams();
+  const page = parseInt(searchParams.get("page") || "0");
 
   const { data: coverLetterListData, isLoading } = useQuery({
     queryKey: ["coverLetterList", page],
     queryFn: async () => {
       const response = await getCoverLetterList(Number(page));
-      debugger;
-      return response.data as GetCoverLetterListResponse;
+      return response.data;
     },
   });
 
   // 페이지네이션 설정
-  const itemsPerPage = coverLetterListData?.pageable?.pageSize || 10;
+  // const itemsPerPage = coverLetterListData?.pageable?.pageSize || 10;
   const totalPages = coverLetterListData?.totalPages || 1;
   // const [itemsPerPage, setItemsPerPage] = useState(10);
   // const [totalPages, setTotalPages] = useState(1);
@@ -49,17 +46,9 @@ function CoverLetterList() {
     (letter) => letter
   );
 
-  // 현재 페이지에 표시할 항목들
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredCoverLetters?.slice(
-    indexOfFirstItem,
-    indexOfLastItem
-  );
-
   // 페이지 변경 핸들러
   const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber);
+    setSearchParams({ page: String(pageNumber - 1) });
   };
 
   // 선택 카테고리 변경 핸들러
@@ -117,11 +106,11 @@ function CoverLetterList() {
           <div className="text-center py-10 text-gray-500">
             자기소개서 목록을 불러오고 있습니다...
           </div>
-        ) : currentItems && currentItems.length > 0 ? (
-          currentItems.map((coverLetter) => (
+        ) : filteredCoverLetters && filteredCoverLetters.length > 0 ? (
+          filteredCoverLetters.map((coverLetter) => (
             <div
               key={coverLetter.coverLetterId}
-              className="bg-white cursor-pointer p-6 rounded-lg shadow-sm border border-gray-100 pl-[27px] hover:pl-6 hover:shadow-md hover:border-l-primary hover:border-l-4 hover:rounded-l-sm transition-shadow"
+              className="bg-white cursor-pointer p-6 rounded-lg shadow-sm border border-gray-100 hover:pl-[27px] pl-6 hover:shadow-md border-l-primary border-l-4 hover:rounded-l-sm rounded-l-none hover:bg-purple-50/30 hover:border-purple-200 hover:border-l-[1px] transition-shadow"
               onClick={() => openReadModal(coverLetter.coverLetterId)}
             >
               <div className="flex justify-between items-start mb-3">
@@ -161,38 +150,37 @@ function CoverLetterList() {
         <div className="flex justify-center mt-6">
           <nav className="flex space-x-1">
             <button
-              onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-              disabled={currentPage === 1}
+              onClick={() => handlePageChange(Math.max(1, page))}
+              disabled={page === 0}
               className={`px-3 py-1 rounded-md ${
-                currentPage === 1
+                page === 0
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
             >
               이전
             </button>
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-              (number) => (
-                <button
-                  key={number}
-                  onClick={() => handlePageChange(number)}
-                  className={`px-3 py-1 rounded-md cursor-pointer ${
-                    currentPage === number
-                      ? "bg-primary text-white"
-                      : "text-gray-600 hover:bg-gray-100"
-                  }`}
-                >
-                  {number}
-                </button>
-              )
-            )}
+            {Array.from(
+              { length: Math.min(totalPages - Math.floor(page / 10) * 10, 10) },
+              (_, i) => Math.floor(page / 10) * 10 + 1 + i
+            ).map((number) => (
+              <button
+                key={number}
+                onClick={() => handlePageChange(number)}
+                className={`px-3 py-1 rounded-md cursor-pointer ${
+                  page === number - 1
+                    ? "bg-primary text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
             <button
-              onClick={() =>
-                handlePageChange(Math.min(totalPages, currentPage + 1))
-              }
-              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(Math.min(totalPages, page + 2))}
+              disabled={page === totalPages - 1}
               className={`px-3 py-1 rounded-md ${
-                currentPage === totalPages
+                page === totalPages - 1
                   ? "text-gray-400 cursor-not-allowed"
                   : "text-gray-600 hover:bg-gray-100"
               }`}
