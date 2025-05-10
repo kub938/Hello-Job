@@ -27,7 +27,7 @@ function JobCompanyForm() {
       <div className="flex w-full h-auto  justify-center  gap-5 ">
         <div className="border rounded-xl w-full p-5 ">
           <div className="font-semibold  text-xl">기업 선택</div>
-          {company.companyId !== 0 ? (
+          {company.companyId !== -1 ? (
             <div
               onClick={handleCompanyClick}
               className="mt-2 cursor-pointer text-sm border rounded-xl grid grid-cols-10 items-center h-11 px-3 hover:border-primary hover:border-2 transition-all duration-150 hover:bg-secondary-light group:active:bg-primary  "
