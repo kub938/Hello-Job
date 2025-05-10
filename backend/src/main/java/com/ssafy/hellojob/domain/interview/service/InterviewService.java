@@ -4,12 +4,20 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterOnlyContentDto;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterExperienceRepository;
+import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
+import com.ssafy.hellojob.domain.exprience.entity.Experience;
+import com.ssafy.hellojob.domain.exprience.service.ExperienceReadService;
 import com.ssafy.hellojob.domain.interview.dto.request.*;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
+import com.ssafy.hellojob.domain.project.entity.Project;
+import com.ssafy.hellojob.domain.project.service.ProjectReadService;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -26,10 +34,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
@@ -47,10 +52,14 @@ public class InterviewService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterRepository coverLetterRepository;
+    private final CoverLetterExperienceRepository coverLetterExperienceRepository;
+    private final ExperienceReadService experienceReadService;
+    private final ProjectReadService projectReadService;
     private final InterviewReadService interviewReadService;
     private final CoverLetterReadService coverLetterReadService;
-
     private final UserReadService userReadService;
+    private final CoverLetterContentService coverLetterContentService;
+    private final FastApiClientService fastApiClientService;
 
     private final Integer QUESTION_SIZE = 3;
 
@@ -499,6 +508,93 @@ public class InterviewService {
         }
         
         interviewAnswer.addInterviewAnswer(answer);
+    }
+
+    @Transactional
+    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
+
+        if(!userId.equals(coverLetter.getUser().getUserId())){
+            throw new BaseException(INVALID_USER);
+        }
+
+        List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(requestDto.getCoverLetterId());
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
+
+        for(CoverLetterOnlyContentDto content:coverLetterContents){
+            coverLetterContentFastAPIRequestDto.add(
+                    CoverLetterContentFastAPIRequestDto.builder()
+                            .cover_letter_content_number(content.getContentNumber())
+                            .cover_letter_content_question(content.getContentQuestion())
+                            .cover_letter_content_detail(content.getContentDetail())
+                            .build()
+            );
+        }
+
+        CoverLetterFastAPIRequestDto coverLetterFastAPIRequestDto = CoverLetterFastAPIRequestDto.builder()
+                .cover_letter_id(coverLetter.getCoverLetterId())
+                .cover_letter_contents(coverLetterContentFastAPIRequestDto)
+                .build();
+
+        List<Integer> experienceIds = new ArrayList<>();
+        List<Integer> projectIds = new ArrayList<>();
+
+        for(CoverLetterOnlyContentDto content:coverLetterContents){
+            experienceIds = coverLetterExperienceRepository.findExperiencesByContentId(content.getContentId());
+            projectIds = coverLetterExperienceRepository.findProjectsByContentId(content.getContentId());
+        }
+
+        List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
+        List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
+        if(!experienceIds.isEmpty()){
+            for(Integer experienceId: experienceIds){
+                Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
+                experiences.add(
+                        ExperienceFastAPIRequestDto.builder()
+                                .experience_name(experience.getExperienceName())
+                                .experience_role(experience.getExperienceRole())
+                                .experience_client(experience.getExperienceClient())
+                                .experience_detail(experience.getExperienceDetail())
+                                .experience_start_date(experience.getExperienceStartDate())
+                                .experience_end_date(experience.getExperienceEndDate())
+                                .build()
+                );
+            }
+        }
+
+        if(!projects.isEmpty()){
+            for(Integer projectId:projectIds){
+                Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
+                projects.add(
+                        ProjectFastAPIRequestDto.builder()
+                                .project_name(project.getProjectName())
+                                .project_role(project.getProjectRole())
+                                .project_skills(project.getProjectSkills())
+                                .project_client(project.getProjectClient())
+                                .project_intro(project.getProjectIntro())
+                                .project_detail(project.getProjectDetail())
+                                .project_start_date(project.getProjectStartDate())
+                                .project_end_date(project.getProjectEndDate())
+                                .build()
+                );
+            }
+        }
+
+        CreateCoverLetterFastAPIRequestDto createCoverLetterFastAPIRequestDto = CreateCoverLetterFastAPIRequestDto.builder()
+                .cover_letter(coverLetterFastAPIRequestDto)
+                .experiences(experiences)
+                .projects(projects)
+                .build();
+
+        CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
+
+        CreateCoverLetterQuestionResponseDto responseDto = CreateCoverLetterQuestionResponseDto.builder()
+                .coverLetterInterviewId(coverLetter.getCoverLetterId())
+                .coverLetterQuestionList(fastAPIResponseDto.getExpected_questions())
+                .build();
+
+        return responseDto;
     }
 
 }

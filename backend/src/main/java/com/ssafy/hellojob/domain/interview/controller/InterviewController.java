@@ -115,4 +115,10 @@ public class InterviewController {
         interviewService.saveInterviewAnswer(userPrincipal.getUserId(), result, interviewInfo);
     }
 
+    @PostMapping("/question/cover-letter")
+    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(@RequestBody CoverLetterIdRequestDto coverLetterIdRequestDto,
+                                                                          @AuthenticationPrincipal UserPrincipal userPrincipal){
+        return interviewService.createCoverLetterQuestion(userPrincipal.getUserId(), coverLetterIdRequestDto);
+    }
+
 }
