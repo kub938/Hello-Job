@@ -3,15 +3,8 @@ package com.ssafy.hellojob.domain.interview.service;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
-import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionDto;
-import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
-import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.request.*;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
-import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.WriteMemoResponseDto;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -20,15 +13,28 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.http.HttpHeaders;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.*;
+import static com.ssafy.hellojob.global.exception.ErrorCode.INTERVIEW_QUESTION_MEMO_MISMATCH;
+import static com.ssafy.hellojob.global.exception.ErrorCode.QUESTION_TYPE_REQUIRED;
 
 @Slf4j
 @Service
@@ -50,6 +56,12 @@ public class InterviewService {
     private final UserReadService userReadService;
 
     private final Integer QUESTION_SIZE = 3;
+
+    @Value("${OPENAI_API_URL}")
+    private String openAiUrl;
+
+    @Value("${OPENAI_API_KEY}")
+    private String openAiKey;
 
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId){
         userReadService.findUserByIdOrElseThrow(userId);
@@ -428,4 +440,41 @@ public class InterviewService {
         interviewQuestionMemoRepository.save(memo);
         return Map.of("message", "성공적으로 수정되었습니다.");
     }
+
+    public String transcribeAudio(MultipartFile audioFile) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 파일 리소스로 변환
+        Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
+            @Override
+            public String getFilename() {
+                return audioFile.getOriginalFilename();
+            }
+        };
+
+        // Form 데이터 생성
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", audioResource);
+        body.add("model", "whisper-1");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBearerAuth(openAiKey);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                openAiUrl,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            return response.getBody(); // JSON 결과 포함
+        } else {
+            throw new RuntimeException("OpenAI API 요청 실패: " + response.getStatusCode());
+        }
+    }
+
 }
