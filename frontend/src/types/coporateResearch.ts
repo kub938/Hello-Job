@@ -5,6 +5,7 @@ export interface getCorporateListResponse {
   companyLocation: string;
   companySize: string;
   companyIndustry: string;
+  updatedAt: string;
 }
 //특정 기업 상세 API
 export interface getCompanyDetailResponse {

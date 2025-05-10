@@ -4,6 +4,7 @@ import { useState } from "react";
 import SelectModal from "./components/SelectModal";
 import { corporateListApi } from "@/api/corporateReport";
 import { useQuery } from "@tanstack/react-query";
+import { timeParser } from "@/hooks/timeParser";
 
 // 인터페이스 수정
 interface CorporateData {
@@ -39,7 +40,7 @@ function CorporateSearch() {
       corSize: company.companySize,
       industryName: company.companyIndustry,
       region: company.companyLocation,
-      updatedAt: "1시간 전", // 하드코딩된 업데이트 시간
+      updatedAt: company.updatedAt, // 하드코딩된 업데이트 시간
     })) || [];
 
   const handleCardClick = (corName: string, id: string) => {
@@ -86,7 +87,7 @@ function CorporateSearch() {
                 corSize={corporate.corSize}
                 industryName={corporate.industryName}
                 region={corporate.region}
-                updatedAt={corporate.updatedAt}
+                updatedAt={timeParser(corporate.updatedAt)}
                 isGradient={true}
                 onClick={() => handleCardClick(corporate.corName, corporate.id)}
               />
