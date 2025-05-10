@@ -54,7 +54,7 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
       resetField("jobRoleEtc");
       resetField("jobRoleCategory");
       // 페이지 이동시키기
-      navigate("/mypage/bookmarks/jobs");
+      navigate(`/job-research/${corporateId}`);
     },
     onError: () => {
       toast.error("직무 분석 생성 실패");
