@@ -112,6 +112,7 @@ public class InterviewController {
                                   @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
 
         String result = interviewService.transcribeAudio(audioFile);
+        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), result, interviewInfo);
     }
 
 }

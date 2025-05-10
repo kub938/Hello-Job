@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
@@ -16,25 +17,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import org.springframework.http.HttpHeaders;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.INTERVIEW_QUESTION_MEMO_MISMATCH;
-import static com.ssafy.hellojob.global.exception.ErrorCode.QUESTION_TYPE_REQUIRED;
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -471,10 +468,37 @@ public class InterviewService {
         );
 
         if (response.getStatusCode().is2xxSuccessful()) {
-            return response.getBody(); // JSON 결과 포함
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String text = objectMapper.readTree(response.getBody()).get("text").asText();
+
+            return text;
         } else {
             throw new RuntimeException("OpenAI API 요청 실패: " + response.getStatusCode());
         }
+    }
+
+    @Transactional
+    public void saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
+        userReadService.findUserByIdOrElseThrow(userId);
+
+
+        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
+
+        if(interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")){
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if(!userId.equals(interview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        }
+        
+        interviewAnswer.addInterviewAnswer(answer);
     }
 
 }
