@@ -1,13 +1,15 @@
 package com.ssafy.hellojob.global.common.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
-import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AICoverLetterRequestDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
-import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
-import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseWrapperDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisFastApiResponseDto;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AICoverLetterRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
+import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseWrapperDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.request.CreateCoverLetterFastAPIRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.response.CreateCoverLetterFastAPIResponseDto;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -86,6 +88,25 @@ public class FastApiClientService {
         }
 
         log.debug("🌞 AI 메시지: {}, 유저 메시지 {}", response.getAi_message(), response.getUser_message());
+
+        return response;
+    }
+
+    public CreateCoverLetterFastAPIResponseDto sendCoverLetterToFastApi(CreateCoverLetterFastAPIRequestDto requestDto) {
+
+        CreateCoverLetterFastAPIResponseDto response = fastApiWebClient.post()
+                .uri("/api/v1/interview/question/cover-letter")
+                .bodyValue(requestDto)
+                .retrieve()
+                .bodyToMono(CreateCoverLetterFastAPIResponseDto.class)
+                .block();
+
+        if (response == null) {
+            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+        }
+
+        log.debug("자소서 생성 요청 성공");
+        log.debug("자소서 ID: {}, 질문 1: {}", response.getCover_letter_id(), response.getExpected_questions().get(0 ));
 
         return response;
     }
