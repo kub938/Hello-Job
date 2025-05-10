@@ -520,17 +520,7 @@ public class InterviewService {
         }
 
         List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(requestDto.getCoverLetterId());
-        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
-
-        for(CoverLetterOnlyContentDto content:coverLetterContents){
-            coverLetterContentFastAPIRequestDto.add(
-                    CoverLetterContentFastAPIRequestDto.builder()
-                            .cover_letter_content_number(content.getContentNumber())
-                            .cover_letter_content_question(content.getContentQuestion())
-                            .cover_letter_content_detail(content.getContentDetail())
-                            .build()
-            );
-        }
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
 
         CoverLetterFastAPIRequestDto coverLetterFastAPIRequestDto = CoverLetterFastAPIRequestDto.builder()
                 .cover_letter_id(coverLetter.getCoverLetterId())
@@ -548,37 +538,11 @@ public class InterviewService {
         List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
         List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
         if(!experienceIds.isEmpty()){
-            for(Integer experienceId: experienceIds){
-                Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
-                experiences.add(
-                        ExperienceFastAPIRequestDto.builder()
-                                .experience_name(experience.getExperienceName())
-                                .experience_role(experience.getExperienceRole())
-                                .experience_client(experience.getExperienceClient())
-                                .experience_detail(experience.getExperienceDetail())
-                                .experience_start_date(experience.getExperienceStartDate())
-                                .experience_end_date(experience.getExperienceEndDate())
-                                .build()
-                );
-            }
+            experiences = searchExperiencesByCoverLetterContentId(experienceIds);
         }
 
         if(!projects.isEmpty()){
-            for(Integer projectId:projectIds){
-                Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
-                projects.add(
-                        ProjectFastAPIRequestDto.builder()
-                                .project_name(project.getProjectName())
-                                .project_role(project.getProjectRole())
-                                .project_skills(project.getProjectSkills())
-                                .project_client(project.getProjectClient())
-                                .project_intro(project.getProjectIntro())
-                                .project_detail(project.getProjectDetail())
-                                .project_start_date(project.getProjectStartDate())
-                                .project_end_date(project.getProjectEndDate())
-                                .build()
-                );
-            }
+            projects = searchProjectsByCoverLetterContentId(projectIds);
         }
 
         CreateCoverLetterFastAPIRequestDto createCoverLetterFastAPIRequestDto = CreateCoverLetterFastAPIRequestDto.builder()
@@ -595,6 +559,60 @@ public class InterviewService {
                 .build();
 
         return responseDto;
+    }
+
+    public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents){
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
+        for(CoverLetterOnlyContentDto content:coverLetterContents){
+            coverLetterContentFastAPIRequestDto.add(
+                    CoverLetterContentFastAPIRequestDto.builder()
+                            .cover_letter_content_number(content.getContentNumber())
+                            .cover_letter_content_question(content.getContentQuestion())
+                            .cover_letter_content_detail(content.getContentDetail())
+                            .build()
+            );
+        }
+        return coverLetterContentFastAPIRequestDto;
+    }
+
+    public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds){
+        List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
+        if(!experienceIds.isEmpty()){
+            for(Integer experienceId: experienceIds){
+                Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
+                experiences.add(
+                        ExperienceFastAPIRequestDto.builder()
+                                .experience_name(experience.getExperienceName())
+                                .experience_role(experience.getExperienceRole())
+                                .experience_client(experience.getExperienceClient())
+                                .experience_detail(experience.getExperienceDetail())
+                                .experience_start_date(experience.getExperienceStartDate())
+                                .experience_end_date(experience.getExperienceEndDate())
+                                .build()
+                );
+            }
+        }
+        return experiences;
+    }
+
+    public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds){
+        List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
+        for(Integer projectId:projectIds){
+            Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
+            projects.add(
+                    ProjectFastAPIRequestDto.builder()
+                            .project_name(project.getProjectName())
+                            .project_role(project.getProjectRole())
+                            .project_skills(project.getProjectSkills())
+                            .project_client(project.getProjectClient())
+                            .project_intro(project.getProjectIntro())
+                            .project_detail(project.getProjectDetail())
+                            .project_start_date(project.getProjectStartDate())
+                            .project_end_date(project.getProjectEndDate())
+                            .build()
+            );
+        }
+        return projects;
     }
 
 }
