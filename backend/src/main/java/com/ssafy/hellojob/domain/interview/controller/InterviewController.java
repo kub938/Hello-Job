@@ -1,22 +1,14 @@
 package com.ssafy.hellojob.domain.interview.controller;
 
-import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.request.StartCoverLetterInterviewRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.response.CoverLetterQuestionSaveResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.InterviewStartResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.QuestionListResponseDto;
-import com.ssafy.hellojob.domain.interview.dto.response.SelectInterviewStartResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.request.*;
+import com.ssafy.hellojob.domain.interview.dto.response.*;
 import com.ssafy.hellojob.domain.interview.service.InterviewService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
-import com.ssafy.hellojob.domain.interview.dto.request.ModifyMemoRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.request.WriteMemoRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.response.WriteMemoResponseDto;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -113,4 +105,14 @@ public class InterviewController {
     public Map<String, String> modifyMemo(@RequestBody ModifyMemoRequestDto requestDto, @PathVariable Integer memoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return interviewService.updateMemo(requestDto.getMemo(), memoId, userPrincipal.getUserId());
     }
+
+    @PostMapping("/practice/voice")
+    public void stopVoiceRecoding(@RequestPart("interviewInfo") InterviewInfo interviewInfo,
+                                  @RequestPart("audioFile") MultipartFile audioFile,
+                                  @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
+
+        String result = interviewService.transcribeAudio(audioFile);
+        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), result, interviewInfo);
+    }
+
 }

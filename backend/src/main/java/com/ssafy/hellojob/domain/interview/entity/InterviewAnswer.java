@@ -45,4 +45,8 @@ public class InterviewAnswer extends BaseTimeEntity {
         return answer;
     }
 
+    public void addInterviewAnswer(String interviewAnswer){
+        this.interviewAnswer = interviewAnswer;
+    }
+
 }
