@@ -11,7 +11,7 @@ interface ReadCorporateProps {
 }
 
 // 탭 타입 정의
-type TabType = "공시 정보" | "뉴스 정보" | "분석 요약" | "최신 후기";
+type TabType = "공시 정보" | "뉴스 정보" | "분석 요약";
 
 function ReadCorporate({ onClose, id }: ReadCorporateProps) {
   const queryClient = useQueryClient();
@@ -33,6 +33,7 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
     queryKey: ["corporateReportDetail", id],
     queryFn: async () => {
       const response = await corporateReportApi.getCorporateReportDetail(id);
+      console.log(response.data);
       return response.data;
     },
     enabled: isValidId,
@@ -144,7 +145,6 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
             {activeTab === "분석 요약" && (
               <AnalysisSummary reportDetail={reportDetail} />
             )}
-            {activeTab === "최신 후기" && <LatestReviews />}
           </>
         )}
       </div>
@@ -175,29 +175,52 @@ function PublicInformation({
   if (!reportDetail) return null;
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 pb-12">
       <section>
-        <h2 className="text-xl font-bold mb-6">기업 공시 기본 정보</h2>
+        <h2 className="text-xl font-bold mb-6">기업 기본 정보</h2>
         <div className="bg-gray-50 p-8 rounded-lg">
-          <div className="space-y-4">
-            <p>
-              <span className="font-medium">설립일:</span> 2015년 3월 15일
-            </p>
-            <p>
-              <span className="font-medium">직원 수:</span> 158명
-            </p>
-            <p>
-              <span className="font-medium">산업 분야:</span> IT 서비스
-            </p>
-            <p>
-              <span className="font-medium">매출액:</span> 187억 (2024년 기준)
-            </p>
-          </div>
+          <h1 className="mb-4">bookmark: {reportDetail.bookmark}</h1>
+          <h1 className="mb-4">
+            companyAnalysisBookmarkCount:{" "}
+            {reportDetail.companyAnalysisBookmarkCount}
+          </h1>
+          <h1 className="mb-4">
+            companyAnalysisId: {reportDetail.companyAnalysisId}
+          </h1>
+          <h1 className="mb-4">
+            companyIndustry: {reportDetail.companyIndustry}
+          </h1>
+          <h1 className="mb-4">
+            companyLocation: {reportDetail.companyLocation}
+          </h1>
+          <h1 className="mb-4">companyName: {reportDetail.companyName}</h1>
+          <h1 className="mb-4">companySize: {reportDetail.companySize}</h1>
+          <h1 className="mb-4">
+            companyViewCount: {reportDetail.companyViewCount}
+          </h1>
+          <h1 className="mb-4">createdAt: {reportDetail.createdAt}</h1>
+          <h1 className="mb-4">dartBrand: {reportDetail.dartBrand}</h1>
+          <h1 className="mb-4">dartCategory: {reportDetail.dartCategory}</h1>
+          <h1 className="mb-4">dartCurrIssue: {reportDetail.dartCurrIssue}</h1>
+          <h1 className="mb-4">
+            dartFinancialSummery: {reportDetail.dartFinancialSummery}
+          </h1>
+          <h1 className="mb-4">dartVision: {reportDetail.dartVision}</h1>
+          <h1 className="mb-4">
+            newsAnalysisData: {reportDetail.newsAnalysisData}
+          </h1>
+          <h1 className="mb-4">
+            newsAnalysisDate: {reportDetail.newsAnalysisDate}
+          </h1>
+          <h1 className="mb-4">
+            newsAnalysisUrl: {reportDetail.newsAnalysisUrl}
+          </h1>
+          <h1 className="mb-4">public: {reportDetail.public}</h1>
         </div>
       </section>
 
       <section>
-        <h2 className="text-xl font-bold mb-6">기업 공시 사업 계획</h2>
+        <h2 className="text-xl font-bold mb-6">기업 공시 기본 정보</h2>
         <div className="bg-gray-50 p-8 rounded-lg">
           <div className="space-y-4">
             <p>
@@ -225,6 +248,26 @@ function PublicInformation({
               성과급의 50% 이상, 부사장은 70% 이상, 사장은 80% 이상을 자사주로
               수령해야 하며, 등기임원은 100% 자사주로 지급받습니다. 자사주는
               지급 후 일정 기간 동안 매도가 제한됩니다.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold mb-6">기업 공시 상세 정보</h2>
+        <div className="bg-gray-50 p-8 rounded-lg">
+          <div className="space-y-4">
+            <p>
+              삼성전자는 1969년에 설립되어 경기도 수원시에 본사를 두고 있는
+              글로벌 전자 기업입니다. 대표이사는 전명헌이며, 약 12만 9천 명의
+              직원을 보유하고 있습니다. 주요 사업 분야로는 소비자가전, 모바일,
+              반도체, 디스플레이 네트워크 및 컴퓨팅 솔루션 등이 있습니다.
+            </p>
+            <p>
+              2024년 삼성전자의 연간 매출은 약 300조 9천억 원으로, 전년 대비
+              16.2% 증가하였으며, 영업이익은 약 32조 7천억 원으로
+              집계되었습니다. 이는 2022년에 이어 역대 두 번째로 높은 매출을
+              기록한 것입니다.
             </p>
           </div>
         </div>
@@ -322,51 +365,6 @@ function AnalysisSummary({
           ))}
         </div>
       </section>
-    </div>
-  );
-}
-
-// 최신 후기 컴포넌트
-function LatestReviews() {
-  // 실제 데이터가 없으므로 예시 데이터 사용
-  const reviews = [
-    {
-      id: 1,
-      user: "사용자1",
-      date: "2024-07-01",
-      content:
-        "기업 분석 보고서가 매우 상세하고 정확합니다. 투자 결정에 큰 도움이 되었습니다.",
-    },
-    {
-      id: 2,
-      user: "사용자2",
-      date: "2024-06-28",
-      content:
-        "최근 이슈에 대한 분석이 잘 되어있어 기업의 방향성을 이해하는데 도움이 되었습니다.",
-    },
-    {
-      id: 3,
-      user: "사용자3",
-      date: "2024-06-25",
-      content:
-        "재무 분석이 상세하게 되어있어 기업의 건전성을 파악하기 좋았습니다.",
-    },
-  ];
-
-  return (
-    <div>
-      <h2 className="text-xl font-bold mb-6">최신 후기</h2>
-      <div className="space-y-4">
-        {reviews.map((review) => (
-          <div key={review.id} className="border rounded-lg p-6 bg-gray-50">
-            <div className="flex justify-between items-center mb-3">
-              <p className="font-medium">{review.user}</p>
-              <p className="text-sm text-gray-500">{review.date}</p>
-            </div>
-            <p>{review.content}</p>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
