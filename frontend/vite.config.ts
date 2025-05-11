@@ -42,11 +42,6 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
-    terserOptions: {
-      compress: {
-        drop_console: true,
-      },
-    },
   },
   resolve: {
     alias: {
