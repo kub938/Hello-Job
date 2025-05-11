@@ -51,5 +51,12 @@ public class InterviewVideo {
         return video;
     }
 
+    public void addInterviewFeedback(String interviewFeedback){
+        this.interviewFeedback = interviewFeedback;
+    }
+
+    public void addInterviewVideoUrl(String interviewVideoUrl){
+        this.interviewVideoUrl = interviewVideoUrl;
+    }
 
 }

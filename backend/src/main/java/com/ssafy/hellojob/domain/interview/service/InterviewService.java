@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -34,7 +35,10 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
@@ -491,7 +495,6 @@ public class InterviewService {
     public void saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
         userReadService.findUserByIdOrElseThrow(userId);
 
-
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
 
@@ -506,7 +509,7 @@ public class InterviewService {
                 throw new BaseException(INVALID_USER);
             }
         }
-        
+
         interviewAnswer.addInterviewAnswer(answer);
     }
 
@@ -559,6 +562,74 @@ public class InterviewService {
                 .build();
 
         return responseDto;
+    }
+
+    @Transactional
+    public void endInterview(Integer userId, String url, VideoInfo videoInfo){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
+        List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+
+        if(interviewVideo.getCoverLetterInterview() != null){
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if(!userId.equals(interview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        }
+
+        interviewVideo.addInterviewVideoUrl(url);
+
+        List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto = searchInterviewQuestionAndAnswer(interviewAnswers);
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
+
+        if(interviewVideo.getCoverLetterInterview() != null){
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(coverLetterInterview.getCoverLetter().getCoverLetterId());
+            coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
+        }
+
+        InterviewFeedbackFastAPIRequestDto fastAPIRequestDto = InterviewFeedbackFastAPIRequestDto.builder()
+                .interview_question_answer_pairs(interviewQuestionAndAnswerRequestDto)
+                .cover_letter_contents(coverLetterContentFastAPIRequestDto)
+                .build();
+
+        // fast API 호출
+        InterviewFeedbackFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto);
+        interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
+
+        for(SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback:fastAPIResponseDto.getSingle_feedbacks()){
+
+            String jsonFeedbacks;
+            try {
+                jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("꼬리 질문 직렬화 실패", e);
+            }
+
+            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
+            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewFollowUpQuestion(jsonFeedbacks);
+        }
+
+    }
+
+    public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers){
+        List<InterviewQuestionAndAnswerRequestDto> result = new ArrayList<>();
+        for(InterviewAnswer answer:interviewAnswers){
+            result.add(
+                    InterviewQuestionAndAnswerRequestDto.builder()
+                            .interview_answer_id(answer.getInterviewAnswerId())
+                            .interview_question(answer.getInterviewQuestion())
+                            .interview_answer(answer.getInterviewAnswer())
+                            .interview_question_category(answer.getInterviewQuestionCategory().name())
+                            .build()
+            );
+        }
+        return result;
     }
 
     public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents){
