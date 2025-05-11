@@ -13,6 +13,15 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("");
 
+  console.log(`
+    ██╗  ██╗███████╗██╗     ██╗      ██████╗      ██╗ ██████╗ ██████╗ 
+    ██║  ██║██╔════╝██║     ██║     ██╔═══██╗     ██║██╔═══██╗██╔══██╗
+    ███████║█████╗  ██║     ██║     ██║   ██║     ██║██║   ██║██████╔╝
+    ██╔══██║██╔══╝  ██║     ██║     ██║   ██║██   ██║██║   ██║██╔══██╗
+    ██║  ██║███████╗███████╗███████╗╚██████╔╝╚█████╔╝╚██████╔╝██████╔╝
+    ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝  ╚════╝  ╚═════╝ ╚═════╝ 
+    `);
+
   const openModal = ({ title }: { title: string }) => {
     setModalTitle(title);
     setIsModalOpen(true);

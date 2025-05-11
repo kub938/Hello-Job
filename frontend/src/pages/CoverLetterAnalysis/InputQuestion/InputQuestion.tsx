@@ -6,9 +6,17 @@ import { toast } from "sonner";
 import { Button } from "@/components/Button";
 import { useCreateCoverLetter } from "@/hooks/coverLetterHooks";
 import FormInput from "@/components/Common/FormInput";
+import { useNavigate } from "react-router";
 
-function InputQuestion() {
-  const [createModalOpen, setCreateModalOpen] = useState(false);
+interface InputQuestionProps {
+  createModalOpen: boolean;
+  setCreateModalOpen: (state: boolean) => void;
+}
+
+function InputQuestion({
+  createModalOpen,
+  setCreateModalOpen,
+}: InputQuestionProps) {
   const mutation = useCreateCoverLetter();
   const { addQuestion, inputData, setAllQuestions, setCoverLetterTitle } =
     useCoverLetterInputStore();
@@ -16,6 +24,9 @@ function InputQuestion() {
   const [localContents, setLocalContents] = useState<
     CoverLetterRequestContent[]
   >([]);
+  const navigate = useNavigate();
+
+  console.log(inputData.contents);
 
   useEffect(() => {
     setLocalContents(inputData.contents);
@@ -57,27 +68,28 @@ function InputQuestion() {
     console.log("Zustand 상태 업데이트됨:", inputData);
   }, [inputData.contents]);
 
-  // 완료 버튼 클릭 - Zustand 스토어에 저장
+  // 초안 생성
   const handleComplete = () => {
-    // 로컬에서 새 객체 생성
-    // 필수 항목 검증 (선택 사항)
-    // const isValid = localContents.every(
-    //   (content) => content.contentQuestion && content.contentLength > 0
-    // );
+    const isValid = localContents.every(
+      (content) => content.contentQuestion.trim() && content.contentLength > 0
+    );
 
-    // if (!isValid) {
-    //   toast.error("모든 문항을 작성해주세요.");
-    //   return;
-    // }
+    if (!isValid) {
+      toast.error("모든 문항의 질문과 글자수를 입력해주세요?.");
+      return;
+    }
 
+    if (!title.trim()) {
+      toast.error("제목을 입력해 주세요");
+      return;
+    }
     const updatedData = {
       ...inputData,
       coverLetterTitle: title,
       contents: localContents,
     };
-
-    // Zustand 상태 업데이트
     setCoverLetterTitle(title);
+
     if (setAllQuestions) {
       setAllQuestions(localContents);
 
@@ -85,6 +97,7 @@ function InputQuestion() {
       mutation.mutate(updatedData, {
         onSuccess: (data) => {
           console.log("데이터 저장 성공", data);
+          navigate(`${data.coverLetterId}`);
           toast.success("저장되었습니다.");
         },
         onError: (error) => {
@@ -93,7 +106,7 @@ function InputQuestion() {
         },
       });
     } else {
-      toast.error("저장 중 오류가 발생했습니다.");
+      toast.error("초안 생성 중 오류가 발생했습니다 다시 시도해 주세요.");
     }
   };
 
@@ -101,9 +114,6 @@ function InputQuestion() {
     setTitle(e.target.value);
   };
 
-  const handleOpenCreateModal = () => {
-    setCreateModalOpen(true);
-  };
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.currentTarget === e.target) {
       setCreateModalOpen(false);
@@ -144,11 +154,6 @@ function InputQuestion() {
         className="mt-2 py-3 px-5 border text-text-muted-foreground rounded-lg bg-background hover:bg-secondary-light hover:text-black hover:border hover:border-secondary"
       >
         + 문항 추가하기
-      </div>
-      <div className="flex justify-end mt-5">
-        <Button className="w-30 h-10" onClick={handleOpenCreateModal}>
-          초안 생성
-        </Button>
       </div>
     </>
   );
