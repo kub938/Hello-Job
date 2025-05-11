@@ -7,6 +7,7 @@ import { Button } from "@/components/Button";
 import { useCreateCoverLetter } from "@/hooks/coverLetterHooks";
 import FormInput from "@/components/Common/FormInput";
 import { useNavigate } from "react-router";
+import { Loader2 } from "lucide-react"; // Lucide 아이콘 사용
 
 interface InputQuestionProps {
   createModalOpen: boolean;
@@ -25,8 +26,6 @@ function InputQuestion({
     CoverLetterRequestContent[]
   >([]);
   const navigate = useNavigate();
-
-  console.log(inputData.contents);
 
   useEffect(() => {
     setLocalContents(inputData.contents);
@@ -64,18 +63,19 @@ function InputQuestion({
     setLocalContents(newContents);
   };
 
-  useEffect(() => {
-    console.log("Zustand 상태 업데이트됨:", inputData);
-  }, [inputData.contents]);
-
   // 초안 생성
   const handleComplete = () => {
+    // 이미 처리 중이면 중복 제출 방지
+    if (mutation.isPending) {
+      return;
+    }
+
     const isValid = localContents.every(
       (content) => content.contentQuestion.trim() && content.contentLength > 0
     );
 
     if (!isValid) {
-      toast.error("모든 문항의 질문과 글자수를 입력해주세요?.");
+      toast.error("모든 문항의 질문과 글자수를 입력해주세요.");
       return;
     }
 
@@ -92,7 +92,7 @@ function InputQuestion({
 
     if (setAllQuestions) {
       setAllQuestions(localContents);
-
+      setCreateModalOpen(false);
       // 새 객체로 API 호출
       mutation.mutate(updatedData, {
         onSuccess: (data) => {
@@ -135,15 +135,39 @@ function InputQuestion({
               onChange={handleInputTitle}
             />
             <div className="flex justify-end">
-              <Button onClick={handleComplete} className="w-15 mt-3">
-                확인
+              <Button
+                onClick={handleComplete}
+                className="w-15 mt-3"
+                disabled={mutation.isPending}
+              >
+                {mutation.isPending ? (
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>처리 중...</span>
+                  </div>
+                ) : (
+                  "확인"
+                )}
               </Button>
             </div>
           </div>
         </div>
       )}
+
+      {/* 전체 페이지에 로딩 오버레이 표시 (옵션) */}
+      {mutation.isPending && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-lg flex flex-col items-center">
+            <Loader2 className="h-10 w-10 animate-spin text-primary mb-2" />
+            <p className="text-lg font-medium">자기소개서 생성 중...</p>
+            <p className="text-sm text-gray-500">잠시만 기다려주세요</p>
+          </div>
+        </div>
+      )}
+
       {contentList.map((content, contentIndex) => (
         <QuestionItem
+          key={contentIndex}
           onUpdateQuestion={updateQuestionData}
           content={content}
           contentIndex={contentIndex}
