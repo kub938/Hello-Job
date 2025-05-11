@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/Button";
 import { useCreateCoverLetter } from "@/hooks/coverLetterHooks";
 import FormInput from "@/components/Common/FormInput";
+import { useNavigate } from "react-router";
 
 interface InputQuestionProps {
   createModalOpen: boolean;
@@ -23,6 +24,7 @@ function InputQuestion({
   const [localContents, setLocalContents] = useState<
     CoverLetterRequestContent[]
   >([]);
+  const navigate = useNavigate();
 
   console.log(inputData.contents);
 
@@ -87,6 +89,7 @@ function InputQuestion({
       contents: localContents,
     };
     setCoverLetterTitle(title);
+
     if (setAllQuestions) {
       setAllQuestions(localContents);
 
@@ -94,6 +97,7 @@ function InputQuestion({
       mutation.mutate(updatedData, {
         onSuccess: (data) => {
           console.log("데이터 저장 성공", data);
+          navigate(`${data.coverLetterId}`);
           toast.success("저장되었습니다.");
         },
         onError: (error) => {
