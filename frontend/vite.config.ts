@@ -2,12 +2,16 @@ import path from "path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
+import removeConsole from "vite-plugin-remove-console";
 // import { visualizer } from "rollup-plugin-visualizer";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    removeConsole({
+      external: ["src/pages/Home/Home.tsx"],
+    }),
     // visualizer({
     //   //번들 시각화를 위함
     //   open: true, // 빌드 후 자동으로 시각화 파일 열기
