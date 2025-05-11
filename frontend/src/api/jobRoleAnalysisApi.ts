@@ -14,9 +14,10 @@ export const jobRoleAnalysis = {
     );
   },
 
-  getAllJobList: (companyId: number) => {
+  getAllJobList: (companyId: number, jobRoleCategory?: string) => {
     return authApi.get<getAllJobList[]>(
-      `/api/v1/job-role-analysis/${companyId}/search`
+      `/api/v1/job-role-analysis/${companyId}/search`,
+      { params: { jobRoleCategory } }
     );
   },
 

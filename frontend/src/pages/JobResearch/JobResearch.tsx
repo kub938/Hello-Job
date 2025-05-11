@@ -11,6 +11,7 @@ import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { getAllJobList } from "@/types/jobResearch";
 import JobResearchCard from "./components/JobResearchCard";
 import { getCompanyDetail } from "@/api/companyApi";
+import { useSelectJobStore } from "@/store/coverLetterAnalysisStore";
 
 export interface JobResearchProps {
   type?: "modal";
@@ -24,6 +25,7 @@ function JobResearch({ type, companyId }: JobResearchProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalView, setModalView] = useState<"create" | "read">("create");
   const [researchJobId, setResearchJobId] = useState<number>(1);
+  const { jobRoleCategory } = useSelectJobStore();
 
   // tanstack query를 사용한 데이터 불러오기
   const { data: jobResearchListData, isLoading } = useQuery({
@@ -37,8 +39,17 @@ function JobResearch({ type, companyId }: JobResearchProps) {
       } else {
         id = 1;
       }
-      const response = await jobRoleAnalysis.getAllJobList(id);
-      return response.data;
+      if (type === "modal" && jobRoleCategory.trim() !== "") {
+        console.log(jobRoleCategory);
+        const response = await jobRoleAnalysis.getAllJobList(
+          id,
+          jobRoleCategory.replace(/\s+/g, "")
+        );
+        return response.data;
+      } else {
+        const response = await jobRoleAnalysis.getAllJobList(id);
+        return response.data;
+      }
     },
   });
 
@@ -102,6 +113,9 @@ function JobResearch({ type, companyId }: JobResearchProps) {
       ) : (
         <h1 className="text-3xl font-bold mb-1">
           {companyDetail?.companyName}
+          {type === "modal" && jobRoleCategory.trim() !== "" && (
+            <span className="text-lg"> {jobRoleCategory}</span>
+          )}
         </h1>
       )}
       <h1 className="text-3xl font-bold mb-12">직무 분석 레포트 목록입니다</h1>
