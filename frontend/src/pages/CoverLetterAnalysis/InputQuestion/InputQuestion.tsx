@@ -24,6 +24,8 @@ function InputQuestion({
     CoverLetterRequestContent[]
   >([]);
 
+  console.log(inputData.contents);
+
   useEffect(() => {
     setLocalContents(inputData.contents);
   }, []);
@@ -66,16 +68,16 @@ function InputQuestion({
 
   // 초안 생성
   const handleComplete = () => {
-    const isValid = localContents.every((content) => {
-      content.contentQuestion.trim() && content.contentLength > 0;
-    });
+    const isValid = localContents.every(
+      (content) => content.contentQuestion.trim() && content.contentLength > 0
+    );
 
     if (!isValid) {
-      toast.error("모든 문항의 질문과 글자수를 입력해주세요.");
+      toast.error("모든 문항의 질문과 글자수를 입력해주세요?.");
       return;
     }
 
-    if (title.trim()) {
+    if (!title.trim()) {
       toast.error("제목을 입력해 주세요");
       return;
     }
@@ -84,7 +86,6 @@ function InputQuestion({
       coverLetterTitle: title,
       contents: localContents,
     };
-
     setCoverLetterTitle(title);
     if (setAllQuestions) {
       setAllQuestions(localContents);
