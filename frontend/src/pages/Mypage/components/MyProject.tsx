@@ -172,7 +172,7 @@ function MyProject() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <div></div>
+          <div>{projectId}번 프로젝트 상세 정보 출력 페이지 구현 해야함</div>
         </DetailModal>
       )}
     </div>

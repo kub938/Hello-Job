@@ -168,7 +168,7 @@ function MyExperience() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <div></div>
+          <div>{experienceId}번 경험 상세 정보 출력 페이지 구현 해야함</div>
         </DetailModal>
       )}
     </div>
