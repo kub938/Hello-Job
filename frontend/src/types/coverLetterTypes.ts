@@ -67,6 +67,7 @@ export interface CompanyBookMarkResponse {
   companyIndustry: string;
   companyAnalysisBookmarkCount: number;
   bookmark: boolean;
+  dartCategory: string[];
   public: boolean;
 }
 
