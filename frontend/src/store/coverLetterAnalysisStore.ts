@@ -6,7 +6,7 @@ import { create } from "zustand/react";
 
 export const useSelectCompanyStore = create<SelectCompanyState>((set) => ({
   company: {
-    companyId: 0,
+    companyId: -1,
     companyName: "",
     companyLocation: "",
     companySize: "",

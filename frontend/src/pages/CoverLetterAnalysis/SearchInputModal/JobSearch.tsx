@@ -1,6 +1,7 @@
 import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
-import { useState } from "react";
+import { useSelectJobStore } from "@/store/coverLetterAnalysisStore";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 function JobSearch() {
@@ -35,6 +36,7 @@ function JobSearch() {
   const [selectJob, setSelectJob] = useState("");
   const [isOpenInput, setIsOpenInput] = useState(false);
   const [inputJob, setInputJob] = useState("");
+  const { setJobRoleCategory, jobRoleCategory } = useSelectJobStore();
 
   const handleSelectTopCategory = (id: number) => {
     setSelectTopCategory(id);
@@ -42,6 +44,7 @@ function JobSearch() {
 
   const handleSelectJob = (jobName: string) => {
     setSelectJob(jobName.trim());
+    setJobRoleCategory(jobName.trim());
     console.log(selectJob);
   };
 
@@ -52,6 +55,10 @@ function JobSearch() {
   const handleInputJob = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputJob(e.target.value);
   };
+
+  useEffect(() => {
+    setSelectJob(jobRoleCategory);
+  });
 
   return (
     <div className=" border rounded-xl w-full p-5">
@@ -114,7 +121,7 @@ function JobSearch() {
           <Button
             className="ml-1 h-10 w-14"
             onClick={() => {
-              handleSelectJob(inputJob);
+              setSelectJob(inputJob);
               toast.info("저장되었습니다.");
             }}
           >
