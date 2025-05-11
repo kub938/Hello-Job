@@ -5,6 +5,7 @@ export interface getCorporateListResponse {
   companyLocation: string;
   companySize: string;
   companyIndustry: string;
+  updatedAt: string;
 }
 //특정 기업 상세 API
 export interface getCompanyDetailResponse {
@@ -55,7 +56,7 @@ export interface getCorporateReportDetailResponse {
   newsAnalysisDate: string;
   newsAnalysisUrl: string[];
   dartBrand: string;
-  dartCurrIssue: string;
+  dartCompanyAnalysis: string;
   dartVision: string;
   dartFinancialSummery: string;
   dartCategory: string[];

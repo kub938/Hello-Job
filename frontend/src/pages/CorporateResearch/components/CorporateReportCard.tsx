@@ -1,4 +1,5 @@
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { timeParser } from "../../../hooks/timeParser";
 
 interface CorporateReportCardProps {
   onClick: () => void;
@@ -38,9 +39,7 @@ function CorporateReportCard({
           )}
         </div>
         <p className="text-sm text-gray-600 mt-1 truncate">{companyLocation}</p>
-        <p className="text-sm text-gray-500 mt-1">
-          {new Date(createdAt).toLocaleDateString()}
-        </p>
+        <p className="text-sm text-gray-500 mt-1">{timeParser(createdAt)}</p>
 
         <div className="flex flex-wrap gap-1 mt-2 min-h-[40px]">
           {dartCategory?.map((category, index) => (
