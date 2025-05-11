@@ -115,6 +115,7 @@ function ExperienceForm({ onClose }: ExperienceFormProps) {
               type="text"
               width="41rem"
               height="2.8rem"
+              require={true}
               name="experienceDetail"
               label="경험 상세내용"
               placeholder="경험 상세 내용을 입력해 주세요"
