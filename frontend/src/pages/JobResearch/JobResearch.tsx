@@ -76,7 +76,6 @@ function JobResearch({ type, companyId }: JobResearchProps) {
         public: jobRoleAnalysis.public,
       })) || [];
     setJobResearchList(temp);
-    debugger;
   }, [jobResearchListData]);
 
   const openCreateModal = () => {
