@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import ReportList from "./components/ReportList";
-import { useLocation, useNavigate } from "react-router";
 import CoverLetterAnalysisLayout from "./components/CoverLetterAnalysisLayout";
 import InputQuestion from "./InputQuestion/InputQuestion";
 import JobCompanyForm from "./components/JobCompanyForm";
