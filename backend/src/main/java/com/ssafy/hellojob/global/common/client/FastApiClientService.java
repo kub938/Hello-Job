@@ -9,7 +9,9 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterRespon
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.request.CreateCoverLetterFastAPIRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.request.InterviewFeedbackFastAPIRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.CreateCoverLetterFastAPIResponseDto;
+import com.ssafy.hellojob.domain.interview.dto.response.InterviewFeedbackFastAPIResponseDto;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -108,6 +110,23 @@ public class FastApiClientService {
         log.debug("자소서 생성 요청 성공");
         log.debug("자소서 ID: {}, 질문 1: {}", response.getCover_letter_id(), response.getExpected_questions().get(0 ));
 
+        return response;
+    }
+
+    public InterviewFeedbackFastAPIResponseDto sendInterviewAnswerToFastApi(InterviewFeedbackFastAPIRequestDto requestDto) {
+
+        InterviewFeedbackFastAPIResponseDto response = fastApiWebClient.post()
+                .uri("/api/v1/interview/question/cover-letter")
+                .bodyValue(requestDto)
+                .retrieve()
+                .bodyToMono(InterviewFeedbackFastAPIResponseDto.class)
+                .block();
+
+        if (response == null) {
+            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+        }
+
+        log.debug("인터뷰 피드백 생성 요청 성공");
         return response;
     }
 
