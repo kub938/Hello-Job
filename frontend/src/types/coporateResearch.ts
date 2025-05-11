@@ -56,7 +56,7 @@ export interface getCorporateReportDetailResponse {
   newsAnalysisDate: string;
   newsAnalysisUrl: string[];
   dartBrand: string;
-  dartCurrIssue: string;
+  dartCompanyAnalysis: string;
   dartVision: string;
   dartFinancialSummery: string;
   dartCategory: string[];

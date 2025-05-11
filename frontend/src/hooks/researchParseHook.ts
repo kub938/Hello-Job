@@ -6,10 +6,10 @@
 // (원재료 및 설비) : {주요 원재료는 전산장비(서버 등, 매입비중 28%)와 외주용역(매입비중 72%)으로, 소프트웨어 및 IT 인프라가 사업의 기반. 주요 설비는 파주·광주 데이터센터와 재해복구센터임. 물적 제조가 아닌 용역서비스 제공이 중심.}
 // `;
 
-type Section = {
+export interface Section {
   type: "title" | "subtitle" | "content";
   content: string;
-};
+}
 
 export const parseData = (data: string): Section[] => {
   const lines = data.trim().split("\n");
