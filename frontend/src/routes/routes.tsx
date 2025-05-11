@@ -23,6 +23,8 @@ import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
+import MyExperience from "@/pages/Mypage/components/MyExperience";
+import MyProject from "@/pages/Mypage/components/MyProject";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -143,6 +145,14 @@ const router = createBrowserRouter([
               {
                 path: "account",
                 element: <Account />,
+              },
+              {
+                path: "my-experience",
+                element: <MyExperience />,
+              },
+              {
+                path: "my-project",
+                element: <MyProject />,
               },
             ],
           },

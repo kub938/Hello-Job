@@ -7,8 +7,8 @@ function Schedule() {
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">일정 관리</h2>
         <div className="bg-gray-50 p-4 rounded-md text-center">
-          <p>일정 관리 컴포넌트입니다.</p>
-          <p>이곳에서 면접 일정 및 지원 일정을 관리할 수 있습니다.</p>
+          <p>일정 관리 페이지입니다.</p>
+          <p>2차 배포에서 추후 추가 될 기능입니다.</p>
         </div>
       </div>
     </div>
