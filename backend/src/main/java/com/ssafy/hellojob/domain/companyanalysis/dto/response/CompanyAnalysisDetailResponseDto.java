@@ -15,6 +15,7 @@ public class CompanyAnalysisDetailResponseDto {
 
     private Integer companyAnalysisId;
     private String companyName;
+    private String userPrompt;
     private LocalDateTime createdAt;
     private Integer companyViewCount;
     private String companyLocation;

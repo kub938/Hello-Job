@@ -19,4 +19,6 @@ public class CompanyAnalysisRequestDto {
     private boolean plus;
     private boolean financial;
 
+    private String userPrompt;
+
 }
