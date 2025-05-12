@@ -86,6 +86,21 @@ public class InterviewService {
                 .toList();
     }
 
+    public QuestionDetailResponseDto findCsQuestionDetail(Integer questionId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CsQuestionBank questionBank = csQuestionBankRepository.findById(questionId)
+                .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
+
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, questionBank);
+        if(memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+
+        return QuestionDetailResponseDto.builder()
+                .questionBankId(questionId)
+                .question(questionBank.getCsQuestion())
+                .memo(memo.getMemo())
+                .build();
+    }
+
     public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId){
         userReadService.findUserByIdOrElseThrow(userId);
 
@@ -97,6 +112,21 @@ public class InterviewService {
                         .question(q.getPersonalityQuestion())
                         .build())
                 .toList();
+    }
+
+    public QuestionDetailResponseDto findPersonalityQuestionDetail(Integer questionId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        PersonalityQuestionBank questionBank = personalityQuestionBankRepository.findById(questionId)
+                .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
+
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, questionBank);
+        if(memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+
+        return QuestionDetailResponseDto.builder()
+                .questionBankId(questionId)
+                .question(questionBank.getPersonalityQuestion())
+                .memo(memo.getMemo())
+                .build();
     }
 
     public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId){
@@ -116,6 +146,29 @@ public class InterviewService {
                         .question(q.getCoverLetterQuestion())
                         .build())
                 .toList();
+    }
+
+    public QuestionDetailResponseDto findCoverLetterQuestionDetail(Integer questionId, Integer coverLetterId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetterIdWithGraph(user, coverLetterId)
+                .orElseThrow(() -> new BaseException(COVER_LETTER_INTERVIEW_NOT_FOUND));
+
+        CoverLetterQuestionBank questionBank = coverLetterQuestionBankRepository.findByIdWithCoverLetterInterview(questionId)
+                .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
+
+        if(!questionBank.getCoverLetterInterview().equals(coverLetterInterview))
+            throw new BaseException(COVER_LETTER_QUESTION_MISMATCH);
+
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, questionBank);
+        if(memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+
+        return QuestionDetailResponseDto.builder()
+                .questionBankId(questionId)
+                .question(questionBank.getCoverLetterQuestion())
+                .memo(memo.getMemo())
+                .build();
     }
 
     public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId){

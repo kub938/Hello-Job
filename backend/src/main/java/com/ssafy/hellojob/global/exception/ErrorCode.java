@@ -69,6 +69,7 @@ public enum ErrorCode {
     CS_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "CS 면접 질문을 찾을 수 없습니다."),
     PERSONALITY_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "인성 면접 질문을 찾을 수 없습니다."),
     COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
+    COVER_LETTER_QUESTION_MISMATCH(HttpStatus.FORBIDDEN, "자기속개서 기반 면접 질문의 소유자와 요청 유저가 일치하지 않습니다."),
 
     // 메모
     QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
