@@ -12,10 +12,10 @@ import AddAnalysisModal from "../AddModal/AddAnalysisModal";
 
 function ReportList({ nowStep }: ReportListProps) {
   const reportBlockLayout =
-    "p-5 border w-full rounded-2xl h-35 flex justify-center items-center cursor-pointer ";
+    "p-5 w-full border rounded-2xl h-35 flex justify-center items-center cursor-pointer ";
   const hoverReportBlockLayout =
-    "duration-100 hover:border-2 hover:border-primary hover:bg-secondary-light";
-  const selectedStyle = "border-2 border-primary bg-secondary-light ";
+    "duration-100 hover:outline-2 hover:outline-primary hover:bg-secondary-light";
+  const selectedStyle = "outline-2 outline-primary bg-secondary-light ";
 
   const { company } = useSelectCompanyStore();
   const { setCompanyAnalysisId, setJobRoleAnalysisId, inputData } =
@@ -55,12 +55,14 @@ function ReportList({ nowStep }: ReportListProps) {
         id: item.companyAnalysisId,
         name: item.companyName ?? "",
         industry: item.companyIndustry ?? "",
+        categories: item.dartCategory ?? [""],
       }));
     } else if (nowStep === 2) {
       return (data as JobBookMarkResponse[]).map((item) => ({
         id: item.jobRoleAnalysisId,
         name: item.jobRoleAnalysisTitle ?? "",
         industry: item.jobRoleName ?? "",
+        categories: [""],
       }));
     }
   };
@@ -90,7 +92,7 @@ function ReportList({ nowStep }: ReportListProps) {
       {addJobAnalysisModalOpen && (
         <AddAnalysisModal type="job" onClose={handleAddJobModalClose} />
       )}
-      <div className="grid  md:grid-cols-3 grid-cols-2 gap-4 ">
+      <div className="grid md:grid-cols-3 grid-cols-2 gap-4 ">
         {reports &&
           reports.map((report) => {
             const isSelected =
@@ -114,6 +116,19 @@ function ReportList({ nowStep }: ReportListProps) {
                   </div>
                   <div className="text-sm line-clamp-2 text-muted-foreground">
                     {report.industry}
+                  </div>
+                  <div className="flex flex-wrap ">
+                    {report.categories.map(
+                      (category, index) =>
+                        category !== "" && (
+                          <div
+                            key={index}
+                            className="mr-1 my-0.5 border rounded-3xl bg-secondary-light text-primary px-3 text-xs"
+                          >
+                            {category}
+                          </div>
+                        )
+                    )}
                   </div>
                 </div>
               </div>

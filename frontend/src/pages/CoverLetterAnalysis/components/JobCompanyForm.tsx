@@ -5,6 +5,7 @@ import JobSearch from "../SearchInputModal/JobSearch";
 import CompanySearch from "../SearchInputModal/CompanySearch";
 import { BsClockHistory } from "react-icons/bs"; // 검색 기록 아이콘
 import { CompanyState } from "@/types/coverLetterStoreTypes";
+import { formatDate } from "@/utils/formatDate";
 
 export type SearchType = "job" | "company" | "";
 
@@ -70,17 +71,6 @@ function JobCompanyForm() {
 
   // 최근 검색 기록 표시 (최대 3개)
   const recentSearches = searchHistory.slice(0, 3);
-
-  // 날짜 포맷 함수
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${
-      date.getMonth() + 1
-    }/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(
-      2,
-      "0"
-    )}`;
-  };
 
   return (
     <>
