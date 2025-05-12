@@ -451,6 +451,18 @@ public class InterviewService {
         return Map.of("message", "성공적으로 수정되었습니다.");
     }
 
+    public Map<String, String> deleteMemo(Integer memoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
+
+        if(!memo.getUser().equals(user)) {
+            throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+        }
+
+        interviewQuestionMemoRepository.delete(memo);
+        return Map.of("message", "메모가 삭제되었습니다.");
+    }
+
     public String transcribeAudio(MultipartFile audioFile) throws Exception {
         RestTemplate restTemplate = new RestTemplate();
 
