@@ -58,6 +58,11 @@ export interface GetCoverLetterListResponse {
   empty: boolean; // 현재 페이지 데이터가 비어있는지 여부
 }
 
+// 자기소개서 삭제 응답 인터페이스
+export interface DeleteCoverLetterResponse {
+  message: string;
+}
+
 // 내 프로젝트 불러오기기
 export interface MyProject {
   projectId: number;
