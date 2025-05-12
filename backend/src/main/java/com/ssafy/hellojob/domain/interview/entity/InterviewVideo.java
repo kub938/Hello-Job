@@ -62,4 +62,12 @@ public class InterviewVideo {
         this.interviewVideoUrl = interviewVideoUrl;
     }
 
+    public void addEndTime(LocalDateTime end){
+        this.end = end;
+    }
+
+    public void addVideoLength(String videoLength){
+        this.videoLength = videoLength;
+    }
+
 }
