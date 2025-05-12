@@ -494,7 +494,7 @@ async def get_chat_type(user_message: str) -> str:
     return chat_type
 
 
-async def chat_with_cover_letter_service(request: ChatCoverLetterRequest) -> str:
+async def chat_with_cover_letter_service(request: ChatCoverLetterRequest) -> dict:
     """
     자기소개서 관련 채팅 기능을 제공하는 서비스
     
@@ -504,54 +504,91 @@ async def chat_with_cover_letter_service(request: ChatCoverLetterRequest) -> str
     Returns:
         str - AI 응답 메시지
     """
-    logger.info(f"chat_with_cover_letter_service 호출")
-    logger.info(f"user_message: {request.user_message}")
-    
-    request_queue = get_request_queue()
-    
-    async def perform_api_call(
-        model="gpt-4.1", 
-        system_prompt="", 
-        user_message="", 
-        temperature=0.3,
-        max_tokens=100, 
-        response_format=None):
+    try: 
+        logger.info(f"chat_with_cover_letter_service 호출")
+        logger.info(f"user_message: {request.user_message}")
         
-        rate_limiter = get_rate_limiter()
-        
-        response = await rate_limiter.chat_completion(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message}
-            ],
-            temperature=temperature,
-            max_tokens=max_tokens,
-            response_format=response_format if response_format else None
-        )
-        
-        # API 응답 반환
-        return response
+        request_queue = get_request_queue()
     
-    chat_type = await get_chat_type(request.user_message)
+        async def perform_api_call(
+            model="gpt-4.1", 
+            system_prompt="", 
+            user_message="", 
+            temperature=0.3,
+            max_tokens=100, 
+            response_format=None):
+            
+            try: 
+                rate_limiter = get_rate_limiter()
+            
+                response = await rate_limiter.chat_completion(
+                    model=model,
+                    messages=[
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_message}
+                    ],
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    response_format=response_format if response_format else None
+                )
+            
+                return response 
+            except Exception as e:
+                logger.error(f"OpenAI API 호출 중 오류 발생: {e}")
+                return {
+                    "status": "error",
+                    "content": f"OpenAI API 호출 중 오류 발생: {e}"
+                }
     
-    system_prompt_chat = await get_chat_system_prompt(chat_type=chat_type, request=request)
+        try:
+            chat_type = await get_chat_type(request.user_message)
+        except Exception as e:
+            logger.error(f"chat_type 결정 중 오류 발생: {e}")
+            return {
+                "status": "error",
+                "content": f"chat_type 결정 중 오류 발생: {e}"
+            }
+        
+        try:
+            system_prompt_chat = await get_chat_system_prompt(chat_type=chat_type, request=request)
+        except Exception as e:
+            logger.error(f"system_prompt_chat 생성 중 오류 발생: {e}")
+            return {
+                "status": "error",
+                "content": f"system_prompt_chat 생성 중 오류 발생: {e}"
+            }
 
-    # step2: 프롬프트 분기에 따른 응답 반환
-    chat_response = await request_queue.enqueue(
-        perform_api_call,
-        kwargs={
-            "model": "gpt-4.1",
-            "system_prompt": system_prompt_chat,
-            "user_message": request.user_message,
-            "temperature": 0.3,
-            "max_tokens": 3000,
-        },
-        priority=3,  # 우선순위 (낮을수록 우선)
-    )
-    
-    # 응답 형식에 따른 파싱
-    chat_response_str = chat_response.choices[0].message.content.strip()
-    logger.info(f"chat_response_str: {chat_response_str}")
-    # 응답 반환
-    return chat_response_str
+        try:
+            # step2: 프롬프트 분기에 따른 응답 반환
+            chat_response = await request_queue.enqueue(
+                perform_api_call,
+                kwargs={
+                    "model": "gpt-4.1",
+                    "system_prompt": system_prompt_chat,
+                    "user_message": request.user_message,
+                    "temperature": 0.3,
+                    "max_tokens": 3000,
+                },
+                priority=3,  # 우선순위 (낮을수록 우선)
+            )
+            
+            # 응답 형식에 따른 파싱
+            chat_response_str = chat_response.choices[0].message.content.strip()
+            logger.info(f"chat_response_str: {chat_response_str}")
+            # 응답 반환
+            return {
+                "status": "success",
+                "content": chat_response_str
+            }
+        except Exception as e:
+            logger.error(f"응답 생성 중 오류 발생: {e}")
+            return {
+                "status": "error",
+                "content": f"응답 생성 중 오류 발생: {e}"
+            }
+    except Exception as e:
+        logger.error(f"cover_letter_service 오류: {e}")
+        return {
+            "status": "error",
+            "content": f"cover_letter_service 오류: {e}"
+        }

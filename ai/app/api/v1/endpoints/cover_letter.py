@@ -29,8 +29,13 @@ async def chat_with_cover_letter(request: ChatCoverLetterRequest):
     """자기소개서 관련 채팅 기능을 제공합니다."""
     response = await chat_with_cover_letter_service(request)
     
-    return ChatCoverLetterResponse(
-        user_message=request.user_message,
-        ai_message=response
-    )
-    
+    if response["status"] == "success":
+        return ChatCoverLetterResponse(
+            user_message=request.user_message,
+            ai_message=response["content"]
+        )
+    else:
+        return ChatCoverLetterResponse(
+            user_message=request.user_message,
+            ai_message=response["content"]
+        )
