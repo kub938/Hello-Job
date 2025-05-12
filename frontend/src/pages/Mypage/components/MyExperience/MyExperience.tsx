@@ -7,10 +7,12 @@ import { Button } from "@/components/Button";
 import { FaPlus } from "react-icons/fa";
 import DetailModal from "@/components/Common/DetailModal";
 import ReadMyExperience from "./ReadMyExperience";
+import ExperienceForm from "@/pages/Resume/ExperienceForm";
 
 function MyExperience() {
   const [selectedCategory, setSelectedCategory] = useState("최신순");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [experienceId, setExperienceId] = useState<number>(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "0");
@@ -81,10 +83,8 @@ function MyExperience() {
             </button>
           </div> */}
         </div>
-        <Button variant="default">
-          <Link to="/" className="flex items-center">
-            <FaPlus className="mr-2" /> 기타 경험 작성
-          </Link>
+        <Button onClick={() => setIsPostModalOpen(true)} variant="default">
+          <FaPlus className="mr-2" /> 기타 경험 작성
         </Button>
       </div>
 
@@ -175,6 +175,9 @@ function MyExperience() {
             id={experienceId}
           />
         </DetailModal>
+      )}
+      {isPostModalOpen && (
+        <ExperienceForm onClose={() => setIsPostModalOpen(false)} />
       )}
     </div>
   );
