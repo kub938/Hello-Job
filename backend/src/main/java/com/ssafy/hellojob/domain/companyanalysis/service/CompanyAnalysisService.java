@@ -92,6 +92,7 @@ public class CompanyAnalysisService {
                 .base(requestDto.isBasic())
                 .plus(requestDto.isPlus())
                 .fin(requestDto.isFinancial())
+                .user_prompt(requestDto.getUserPrompt())
                 .build();
 
         log.debug("fast API로 요청 보냄 !!!");
@@ -132,7 +133,7 @@ public class CompanyAnalysisService {
         newsAnalysisRepository.save(news);
 
         // CompanyAnalysis 저장
-        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, requestDto.isPublic());
+        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, requestDto.isPublic(), requestDto.getUserPrompt());
         companyAnalysisRepository.save(companyAnalysis);
 
         // 기업 테이블 업데이트
@@ -228,6 +229,7 @@ public class CompanyAnalysisService {
         return CompanyAnalysisDetailResponseDto.builder()
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
                 .companyName(companyAnalysis.getCompany().getCompanyName())
+                .userPrompt(companyAnalysis.getUserPrompt())
                 .createdAt(companyAnalysis.getCreatedAt())
                 .companyViewCount(companyAnalysis.getCompanyAnalysisViewCount())
                 .companyLocation(companyAnalysis.getCompany().getCompanyLocation())
