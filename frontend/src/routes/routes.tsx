@@ -23,8 +23,8 @@ import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
-import MyExperience from "@/pages/Mypage/components/MyExperience";
-import MyProject from "@/pages/Mypage/components/MyProject";
+import MyExperience from "@/pages/Mypage/components/MyExperience/MyExperience";
+import MyProject from "@/pages/Mypage/components/MyProject/MyProject";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")

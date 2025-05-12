@@ -1,11 +1,12 @@
 import { useState } from "react";
-import MypageHeader from "./MypageHeader";
+import MypageHeader from "../MypageHeader";
 import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyProjectList } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
 import { FaPlus } from "react-icons/fa";
 import DetailModal from "@/components/Common/DetailModal";
+import ReadMyProject from "./ReadMyProject";
 
 function MyProject() {
   const [selectedCategory, setSelectedCategory] = useState("최신순");
@@ -172,7 +173,7 @@ function MyProject() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <div>{projectId}번 프로젝트 상세 정보 출력 페이지 구현 해야함</div>
+          <ReadMyProject onClose={closeModal} id={projectId} page={page} />
         </DetailModal>
       )}
     </div>
