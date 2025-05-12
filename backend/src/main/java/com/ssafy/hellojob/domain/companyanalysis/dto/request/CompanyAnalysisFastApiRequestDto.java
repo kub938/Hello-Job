@@ -13,5 +13,6 @@ public class CompanyAnalysisFastApiRequestDto {
     private boolean base;
     private boolean plus;
     private boolean fin;
+    private String user_prompt;
 
 }
