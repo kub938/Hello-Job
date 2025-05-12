@@ -5,12 +5,13 @@ import { toast } from "sonner";
 import { addCookies } from "./utils/addCookies";
 import { useAuthStore } from "./store/userStore";
 import { userAuthApi } from "./api/userAuth";
+import useSSE from "./hooks/sse";
 
 function App() {
   addCookies();
   const navigate = useNavigate();
   //isLoginAlert는 로그인 페이지로 강제 이동하는 기능을 대체하는 역할이다.
-  const { isLoginAlert, setIsLoggedIn, setUserName, setIsLoginAlert } =
+  const { isLoginAlert, setIsLoggedIn, setUserName, setIsLoginAlert, isLoggedIn } =
     useAuthStore();
 
   useEffect(() => {
@@ -42,6 +43,9 @@ function App() {
       setIsLoginAlert(false);
     }
   }, [isLoginAlert, setIsLoginAlert, navigate]);
+
+  // 로그인된 경우에만 SSE 연결
+  useSSE(isLoggedIn);
 
   return (
     <div id="wrap" className="bg-background min-h-screen flex flex-col">
