@@ -1,4 +1,9 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 500MB
+      max-request-size: 500MB
+
   profiles:
     active:
       - local
@@ -7,13 +12,14 @@ spring:
         - oauth
         - db-local
         - mattermost-local
+        - s3-local
         #        - cloud
       dev:
         - oauth
         - db-dev
         - mattermost-dev
         #        - cloud
-    include: db, oauth, mattermost
+    include: db, oauth, mattermost, s3
 
 logging:
   level:

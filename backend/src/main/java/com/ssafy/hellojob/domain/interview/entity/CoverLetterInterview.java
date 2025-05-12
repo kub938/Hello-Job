@@ -16,7 +16,7 @@ public class CoverLetterInterview {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "cover_letter_interview_id", nullable = false)
-    private Integer coverLettterInterviewId;
+    private Integer coverLetterInterviewId;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)

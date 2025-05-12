@@ -1,26 +1,46 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
-import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionDto;
-import com.ssafy.hellojob.domain.interview.dto.request.CoverLetterQuestionSaveRequestDto;
-import com.ssafy.hellojob.domain.interview.dto.request.QuestionBankIdDto;
-import com.ssafy.hellojob.domain.interview.dto.request.SelectQuestionRequestDto;
+import com.ssafy.hellojob.domain.coverletter.service.CoverLetterReadService;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.response.CoverLetterOnlyContentDto;
+import com.ssafy.hellojob.domain.coverlettercontent.repository.CoverLetterExperienceRepository;
+import com.ssafy.hellojob.domain.coverlettercontent.service.CoverLetterContentService;
+import com.ssafy.hellojob.domain.exprience.entity.Experience;
+import com.ssafy.hellojob.domain.exprience.service.ExperienceReadService;
+import com.ssafy.hellojob.domain.interview.dto.request.*;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
+import com.ssafy.hellojob.domain.project.entity.Project;
+import com.ssafy.hellojob.domain.project.service.ProjectReadService;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
+import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -36,10 +56,22 @@ public class InterviewService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterRepository coverLetterRepository;
-
+    private final CoverLetterExperienceRepository coverLetterExperienceRepository;
+    private final ExperienceReadService experienceReadService;
+    private final ProjectReadService projectReadService;
+    private final InterviewReadService interviewReadService;
+    private final CoverLetterReadService coverLetterReadService;
     private final UserReadService userReadService;
+    private final CoverLetterContentService coverLetterContentService;
+    private final FastApiClientService fastApiClientService;
 
     private final Integer QUESTION_SIZE = 3;
+
+    @Value("${OPENAI_API_URL}")
+    private String openAiUrl;
+
+    @Value("${OPENAI_API_KEY}")
+    private String openAiKey;
 
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId){
         userReadService.findUserByIdOrElseThrow(userId);
@@ -141,7 +173,7 @@ public class InterviewService {
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
-                .interviewId(interview.getCoverLettterInterviewId())
+                .interviewId(interview.getCoverLetterInterviewId())
                 .interviewVideoId(video.getInterviewVideoId())
                 .build();
 
@@ -260,7 +292,7 @@ public class InterviewService {
                 .toList();
 
         return InterviewStartResponseDto.builder()
-                .interviewId(interview.getCoverLettterInterviewId())
+                .interviewId(interview.getCoverLetterInterviewId())
                 .interviewVideoId(video.getInterviewVideoId())
                 .questionList(questionList)
                 .build();
@@ -358,10 +390,312 @@ public class InterviewService {
 
         return CoverLetterQuestionSaveResponseDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
-                .coverLetterInterviewId(coverLetterInterview.getCoverLettterInterviewId())
+                .coverLetterInterviewId(coverLetterInterview.getCoverLetterInterviewId())
                 .coverLetterQuestionSaveId(questionIdList)
                 .build();
     }
 
+    public WriteMemoResponseDto createMemo(WriteMemoRequestDto requestDto, Integer userId) {
+
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CsQuestionBank csQuestionBank = null;
+        PersonalityQuestionBank personalityQuestionBank = null;
+        CoverLetterQuestionBank coverLetterQuestionBank = null;
+        CoverLetterInterview coverLetterInterview = null;
+        InterviewQuestionMemo memo = null;
+
+        if(requestDto.getCsQuestionBankId() != null) {
+            csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
+        } else if(requestDto.getPersonalityQuestionBankId() != null) {
+            personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
+        } else if(requestDto.getCoverLetterQuestionBankId() != null) {
+            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getCoverLetterQuestionBankId());
+            coverLetterInterview = interviewReadService.findCoverLetterInterviewByIWithUserdOrElseThrow(requestDto.getInterviewId());
+            if(!coverLetterQuestionBank.getCoverLetterInterview().equals(coverLetterInterview) || !coverLetterInterview.getUser().equals(user)) {
+                throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+            }
+            memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
+        } else {
+            throw new BaseException(QUESTION_TYPE_REQUIRED);
+        }
+
+        if(memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(csQuestionBank)
+                    .personalityQuestionBank(personalityQuestionBank)
+                    .coverLetterQuestionBank(coverLetterQuestionBank)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+    }
+
+    public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
+
+        if(!memo.getUser().equals(user)) {
+            throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+        }
+
+        memo.updateMemo(newMemo);
+        interviewQuestionMemoRepository.save(memo);
+        return Map.of("message", "성공적으로 수정되었습니다.");
+    }
+
+    public Map<String, String> deleteMemo(Integer memoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
+
+        if(!memo.getUser().equals(user)) {
+            throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
+        }
+
+        interviewQuestionMemoRepository.delete(memo);
+        return Map.of("message", "메모가 삭제되었습니다.");
+    }
+
+    public String transcribeAudio(MultipartFile audioFile) throws Exception {
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 파일 리소스로 변환
+        Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
+            @Override
+            public String getFilename() {
+                return audioFile.getOriginalFilename();
+            }
+        };
+
+        // Form 데이터 생성
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        body.add("file", audioResource);
+        body.add("model", "whisper-1");
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        headers.setBearerAuth(openAiKey);
+
+        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                openAiUrl,
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+        );
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            String text = objectMapper.readTree(response.getBody()).get("text").asText();
+
+            return text;
+        } else {
+            throw new RuntimeException("OpenAI API 요청 실패: " + response.getStatusCode());
+        }
+    }
+
+    @Transactional
+    public void saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
+        userReadService.findUserByIdOrElseThrow(userId);
+
+        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
+
+        if(interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")){
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if(!userId.equals(interview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        }
+
+        interviewAnswer.addInterviewAnswer(answer);
+    }
+
+    @Transactional
+    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
+
+        if(!userId.equals(coverLetter.getUser().getUserId())){
+            throw new BaseException(INVALID_USER);
+        }
+
+        List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(requestDto.getCoverLetterId());
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
+
+        CoverLetterFastAPIRequestDto coverLetterFastAPIRequestDto = CoverLetterFastAPIRequestDto.builder()
+                .cover_letter_id(coverLetter.getCoverLetterId())
+                .cover_letter_contents(coverLetterContentFastAPIRequestDto)
+                .build();
+
+        List<Integer> experienceIds = new ArrayList<>();
+        List<Integer> projectIds = new ArrayList<>();
+
+        for(CoverLetterOnlyContentDto content:coverLetterContents){
+            experienceIds = coverLetterExperienceRepository.findExperiencesByContentId(content.getContentId());
+            projectIds = coverLetterExperienceRepository.findProjectsByContentId(content.getContentId());
+        }
+
+        List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
+        List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
+        if(!experienceIds.isEmpty()){
+            experiences = searchExperiencesByCoverLetterContentId(experienceIds);
+        }
+
+        if(!projects.isEmpty()){
+            projects = searchProjectsByCoverLetterContentId(projectIds);
+        }
+
+        CreateCoverLetterFastAPIRequestDto createCoverLetterFastAPIRequestDto = CreateCoverLetterFastAPIRequestDto.builder()
+                .cover_letter(coverLetterFastAPIRequestDto)
+                .experiences(experiences)
+                .projects(projects)
+                .build();
+
+        CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
+
+        CreateCoverLetterQuestionResponseDto responseDto = CreateCoverLetterQuestionResponseDto.builder()
+                .coverLetterInterviewId(coverLetter.getCoverLetterId())
+                .coverLetterQuestionList(fastAPIResponseDto.getExpected_questions())
+                .build();
+
+        return responseDto;
+    }
+
+    @Transactional
+    public void endInterview(Integer userId, String url, VideoInfo videoInfo){
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
+        List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+
+        if(interviewVideo.getCoverLetterInterview() != null){
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if(!userId.equals(interview.getUser().getUserId())){
+                throw new BaseException(INVALID_USER);
+            }
+        }
+
+        interviewVideo.addInterviewVideoUrl(url);
+
+        List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto = searchInterviewQuestionAndAnswer(interviewAnswers);
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
+
+        if(interviewVideo.getCoverLetterInterview() != null){
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(coverLetterInterview.getCoverLetter().getCoverLetterId());
+            coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
+        }
+
+        InterviewFeedbackFastAPIRequestDto fastAPIRequestDto = InterviewFeedbackFastAPIRequestDto.builder()
+                .interview_question_answer_pairs(interviewQuestionAndAnswerRequestDto)
+                .cover_letter_contents(coverLetterContentFastAPIRequestDto)
+                .build();
+
+        // fast API 호출
+        InterviewFeedbackFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto);
+        interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
+
+        for(SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback:fastAPIResponseDto.getSingle_feedbacks()){
+
+            String jsonFeedbacks;
+            try {
+                jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException("꼬리 질문 직렬화 실패", e);
+            }
+
+            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
+            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewFollowUpQuestion(jsonFeedbacks);
+        }
+
+    }
+
+    public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers){
+        List<InterviewQuestionAndAnswerRequestDto> result = new ArrayList<>();
+        for(InterviewAnswer answer:interviewAnswers){
+            result.add(
+                    InterviewQuestionAndAnswerRequestDto.builder()
+                            .interview_answer_id(answer.getInterviewAnswerId())
+                            .interview_question(answer.getInterviewQuestion())
+                            .interview_answer(answer.getInterviewAnswer())
+                            .interview_question_category(answer.getInterviewQuestionCategory().name())
+                            .build()
+            );
+        }
+        return result;
+    }
+
+    public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents){
+        List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
+        for(CoverLetterOnlyContentDto content:coverLetterContents){
+            coverLetterContentFastAPIRequestDto.add(
+                    CoverLetterContentFastAPIRequestDto.builder()
+                            .cover_letter_content_number(content.getContentNumber())
+                            .cover_letter_content_question(content.getContentQuestion())
+                            .cover_letter_content_detail(content.getContentDetail())
+                            .build()
+            );
+        }
+        return coverLetterContentFastAPIRequestDto;
+    }
+
+    public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds){
+        List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
+        if(!experienceIds.isEmpty()){
+            for(Integer experienceId: experienceIds){
+                Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
+                experiences.add(
+                        ExperienceFastAPIRequestDto.builder()
+                                .experience_name(experience.getExperienceName())
+                                .experience_role(experience.getExperienceRole())
+                                .experience_client(experience.getExperienceClient())
+                                .experience_detail(experience.getExperienceDetail())
+                                .experience_start_date(experience.getExperienceStartDate())
+                                .experience_end_date(experience.getExperienceEndDate())
+                                .build()
+                );
+            }
+        }
+        return experiences;
+    }
+
+    public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds){
+        List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
+        for(Integer projectId:projectIds){
+            Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
+            projects.add(
+                    ProjectFastAPIRequestDto.builder()
+                            .project_name(project.getProjectName())
+                            .project_role(project.getProjectRole())
+                            .project_skills(project.getProjectSkills())
+                            .project_client(project.getProjectClient())
+                            .project_intro(project.getProjectIntro())
+                            .project_detail(project.getProjectDetail())
+                            .project_start_date(project.getProjectStartDate())
+                            .project_end_date(project.getProjectEndDate())
+                            .build()
+            );
+        }
+        return projects;
+    }
 
 }

@@ -46,7 +46,7 @@ public enum ErrorCode {
     COMPANY_ANALYSIS_ALREADY_BOOKMARK(HttpStatus.NOT_FOUND, "이미 즐겨찾기에 추가된 항목입니다."),
     COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 즐겨찾기 항목을 찾을 수 없습니다."),
     COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED(HttpStatus.PAYMENT_REQUIRED, "일일 기업 분석 요청 횟수를 초과하였습니다."),
-    FASTAPI_RESPONSE_NULL(HttpStatus.BAD_REQUEST, "fast API 반환값이 없습니다"),
+    FAST_API_RESPONSE_NULL(HttpStatus.BAD_REQUEST, "fast API 반환값이 없습니다"),
 
     // 자기소개서 관련
     JOB_ROLE_SNAPSHOT_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 직무 분석 스냅샷을 찾을 수 없습니다."),
@@ -63,8 +63,21 @@ public enum ErrorCode {
     // 면접
     COVER_LETTER_INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 자기소개서 면접을 찾을 수 없습니다,"),
     INTERVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접을 찾을 수 없습니다,"),
+    INTERVIEW_ANSWER_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접 답변을 찾을 수 없습니다,"),
     INTERVIEW_VIDEO_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 면접 영상을 찾을 수 없습니다."),
-    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 질문을 찾을 수 없습니다.")
+    QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 질문을 찾을 수 없습니다."),
+    CS_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "CS 면접 질문을 찾을 수 없습니다."),
+    PERSONALITY_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "인성 면접 질문을 찾을 수 없습니다."),
+    COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
+
+    // 메모
+    QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
+    INTERVIEW_QUESTION_MEMO_NOT_FOUND(HttpStatus.BAD_REQUEST, "면접 문항 메모를 찾을 수 없습니다."),
+    INTERVIEW_QUESTION_MEMO_MISMATCH(HttpStatus.FORBIDDEN, "메모 작성자와 요청 유저가 일치하지 않습니다."),
+
+    // FastAPI
+    FAST_API_RESPONSE_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "AI 응답 중 에러가 발생하였습니다. 잠시 후 다시 시도해주세요.")
+
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.

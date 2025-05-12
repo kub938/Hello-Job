@@ -3,7 +3,9 @@ package com.ssafy.hellojob.domain.coverlettercontent.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatForEditResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
@@ -12,6 +14,8 @@ import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContent;
 import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterContentStatus;
 import com.ssafy.hellojob.domain.coverlettercontent.repository.ChatLogRepository;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
+import com.ssafy.hellojob.global.exception.BaseException;
+import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -47,13 +51,14 @@ public class ChatLogService {
     }
 
     @Transactional
-    public ChatResponseDto sendChat(CoverLetterContent content, AIChatRequestDto aiChatRequestDto) {
+    public ChatResponseDto sendChatForEdit(CoverLetterContent content, AIChatForEditRequestDto aiChatForEditRequestDto) {
 
-        AIChatResponseDto response = sendChatToFastApi(aiChatRequestDto);
+        // FastAPI 요청
+        AIChatForEditResponseDto response = fastApiClientService.sendChatForEditToFastApi(aiChatForEditRequestDto);
 
-        ChatMessageDto userMessages = ChatMessageDto.builder()
+        ChatMessageDto userMessage = ChatMessageDto.builder()
                 .sender("user")
-                .message(aiChatRequestDto.getEdit_content().getUser_message())
+                .message(aiChatForEditRequestDto.getEdit_content().getUser_message())
                 .build();
 
         ChatMessageDto aiMessage = ChatMessageDto.builder()
@@ -62,18 +67,62 @@ public class ChatLogService {
                 .build();
 
         // 본문 내용 저장
-        String contentDetail = aiChatRequestDto.getEdit_content().getCover_letter();
-
+        String contentDetail = aiChatForEditRequestDto.getEdit_content().getCover_letter();
         content.updateCoverLetterContentWithChat(contentDetail);
 
-        // 새로운 채팅 배열
+        // 채팅 저장
+        saveNewChatLog(content, userMessage, aiMessage);
+
+        updateContentStatus(content);
+
+        return ChatResponseDto.builder()
+                .aiMessage(aiMessage.getMessage())
+                .contentStatus(content.getContentStatus())
+                .build();
+    }
+
+    @Transactional
+    public ChatResponseDto sendChat(CoverLetterContent content, AIChatRequestDto aiChatRequestDto) {
+        // FastAPI 요청
+        AIChatResponseDto response = fastApiClientService.sendChatToFastApi(aiChatRequestDto);
+
+        if (response.getStatus().equals("error") || response.getAi_message() == null || response.getAi_message().isBlank()) {
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_ERROR);
+        }
+
+        ChatMessageDto userMessage = ChatMessageDto.builder()
+                .sender("user")
+                .message(aiChatRequestDto.getUser_message())
+                .build();
+
+        ChatMessageDto aiMessage = ChatMessageDto.builder()
+                .sender("ai")
+                .message(response.getAi_message())
+                .build();
+
+        // 본문 내용 저장
+        String contentDetail = aiChatRequestDto.getCover_letter().getCover_letter();
+        content.updateCoverLetterContentWithChat(contentDetail);
+
+        // 채팅 저장
+        saveNewChatLog(content, userMessage, aiMessage);
+
+        updateContentStatus(content);
+
+        return ChatResponseDto.builder()
+                .aiMessage(aiMessage.getMessage())
+                .contentStatus(content.getContentStatus())
+                .build();
+    }
+
+    public void saveNewChatLog(CoverLetterContent content, ChatMessageDto userMessage, ChatMessageDto aiMessage) {
         List<ChatMessageDto> newChats = new ArrayList<>();
 
         Optional<ChatLog> chatLogOpt = chatLogRepository.findById(content.getContentId());
 
         if (chatLogOpt.isEmpty()) {
             // 기존 로그 없으면 새로 생성
-            newChats.add(userMessages);
+            newChats.add(userMessage);
             newChats.add(aiMessage);
 
             ChatLog newChat = ChatLog.builder()
@@ -89,26 +138,18 @@ public class ChatLogService {
 
             newChats = parseJson(existingLog.getChatLogContent());
 
-            newChats.add(userMessages);
+            newChats.add(userMessage);
             newChats.add(aiMessage);
 
             existingLog.updateChatLog(toJson(newChats));
         }
+    }
 
+    public void updateContentStatus(CoverLetterContent content) {
         // 작성 중이 아니라면 작성 중으로 상태 변경
         if (content.getContentStatus() != CoverLetterContentStatus.IN_PROGRESS) {
             content.updateContentStatus(CoverLetterContentStatus.IN_PROGRESS);
         }
-
-        return ChatResponseDto.builder()
-                .aiMessage(aiMessage.getMessage())
-                .contentStatus(content.getContentStatus())
-                .build();
-    }
-
-    public AIChatResponseDto sendChatToFastApi(AIChatRequestDto requestDto) {
-        AIChatResponseDto response = fastApiClientService.sendChatToFastApi(requestDto);
-        return response;
     }
 
     // JSON 형태로 파싱

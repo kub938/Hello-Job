@@ -43,7 +43,6 @@ public interface CoverLetterRepository extends JpaRepository<CoverLetter, Intege
             JOIN FETCH ca.company co
             JOIN FETCH ca.dartAnalysis da
             LEFT JOIN FETCH ca.newsAnalysis na
-            LEFT JOIN FETCH cl.contents c
             WHERE cl.coverLetterId = :coverLetterId
             """)
     CoverLetter findFullCoverLetterDetail(@Param("coverLetterId") Integer coverLetterId);

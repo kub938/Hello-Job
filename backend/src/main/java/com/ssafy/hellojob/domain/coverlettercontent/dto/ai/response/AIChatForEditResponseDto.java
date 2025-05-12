@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class AIChatResponseDto {
-    private String status;
+public class AIChatForEditResponseDto {
     private String user_message;
     private String ai_message;
 }
