@@ -109,6 +109,11 @@ public class InterviewController {
         return interviewService.updateMemo(requestDto.getMemo(), memoId, userPrincipal.getUserId());
     }
 
+    @DeleteMapping("/question/{memoId}")
+    public Map<String, String> deleteMemo(@PathVariable Integer memoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.deleteMemo(memoId, userPrincipal.getUserId());
+    }
+
     @PostMapping("/practice/voice")
     public void stopVoiceRecoding(@RequestPart("interviewInfo") InterviewInfo interviewInfo,
                                   @RequestPart("audioFile") MultipartFile audioFile,
