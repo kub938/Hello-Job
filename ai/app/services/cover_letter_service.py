@@ -82,10 +82,10 @@ async def create_cover_letter(
     1. 기업의 비전과 분석 내용에 부합하는 내용으로 작성해주세요.
     2. 직무에 필요한 역량과 스킬을 지원자의 경험/프로젝트와 연결하여 작성해주세요.
     3. 지원자의 경험과 프로젝트 중 해당 직무와 가장 관련성이 높은 내용을 중심으로 작성해주세요.
-    4. 지원자가 요청한 사항({content.content_prompt})을 반영해주세요.
+    4. **지원자가 요청한 사항({content.content_prompt})을 반드시 반영해주세요.**
     5. {content.content_length}자 내외로 작성해주세요.
-    6. 한국어로 작성해주세요.
-    7. 항목 질문({content.content_question})에 직접적으로 답하는 방식으로 작성해주세요.
+    6. **자기소개서 내용만을 작성해주세요. 자기소개서 내용 외의 내용은 작성하지 마세요.**
+    7. 한국어로 작성해주세요.
     """
     
     # 실제 OpenAI API 호출을 수행하는 함수
@@ -98,11 +98,12 @@ async def create_cover_letter(
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
-            max_tokens=1500
+            max_tokens=1500,
+            response_format=CoverLetterItem
         )
         
         # API 응답에서 자기소개서 내용 추출
-        cover_letter = response.choices[0].message.content.strip()
+        cover_letter = response.choices[0].message.parsed
         return cover_letter
     
     # 요청 큐에 넣고 실행 (캐싱 적용)
@@ -113,10 +114,12 @@ async def create_cover_letter(
         cache_key=cache_key
     )
     
-    return CoverLetterItem(content_number=content.content_number, cover_letter=cover_letter)
+    return cover_letter
 
 
 async def create_cover_letter_all(request: CreateCoverLetterRequest) -> list[CoverLetterItem]:  
+    
+    logger.info(f"자기소개서 초안 작성 요청")
     
     # 기업 분석 정보
     company_analysis = request.company_analysis
@@ -126,9 +129,12 @@ async def create_cover_letter_all(request: CreateCoverLetterRequest) -> list[Cov
     contents = request.contents
     
     # 자기소개서 항목 생성
-    cover_letters = []
-    for content in contents:
+    cover_letters = []                              
+    for idx, content in enumerate(contents, 1):
+        
+        logger.info(f"자기소개서 항목 {idx} 생성 시작")
         cover_letter = await create_cover_letter(content, company_analysis, job_role_analysis)
+        logger.info(f"자기소개서 항목 {idx} 생성 완료")
         cover_letters.append(cover_letter)
         
     return cover_letters
