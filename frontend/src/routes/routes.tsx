@@ -23,6 +23,8 @@ import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
+import Interview from "@/pages/Interview/Interview";
+import StandardLayout from "@/components/layouts/standardLayout";
 import MyExperience from "@/pages/Mypage/components/MyExperience";
 import MyProject from "@/pages/Mypage/components/MyProject";
 
@@ -36,13 +38,26 @@ function SuspenseWrapper({ children }: { children: ReactNode }) {
 
 const router = createBrowserRouter([
   {
-    // 모든 라우터들의 컨테이너 개념. home router도 이 하위에 작성한다다
     path: "/",
     element: <App />,
     errorElement: <RouterErrorHandler />,
     children: [
       {
-        // 헤더가 있는 레이아웃
+        element: <StandardLayout />,
+        children: [
+          {
+            path: "cover-letter/:id",
+            element: (
+              <SuspenseWrapper>
+                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                  <CoverLetter />,
+                </ErrorBoundary>
+              </SuspenseWrapper>
+            ),
+          },
+        ],
+      },
+      {
         element: <DefaultLayout />,
         children: [
           {
@@ -66,16 +81,7 @@ const router = createBrowserRouter([
               },
             ],
           },
-          {
-            path: "cover-letter/:id",
-            element: (
-              <SuspenseWrapper>
-                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <CoverLetter />,
-                </ErrorBoundary>
-              </SuspenseWrapper>
-            ),
-          },
+
           {
             path: "corporate-search",
             element: <CorporateSearch />,
@@ -96,6 +102,16 @@ const router = createBrowserRouter([
               <SuspenseWrapper>
                 <ErrorBoundary FallbackComponent={RenderErrorFallback}>
                   <CorporateResearch />
+                </ErrorBoundary>
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: "interview",
+            element: (
+              <SuspenseWrapper>
+                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                  <Interview />
                 </ErrorBoundary>
               </SuspenseWrapper>
             ),
