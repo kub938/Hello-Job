@@ -57,3 +57,78 @@ export interface GetCoverLetterListResponse {
   numberOfElements: number; // 현재 페이지에 남긴 데이터 개수
   empty: boolean; // 현재 페이지 데이터가 비어있는지 여부
 }
+
+// 내 프로젝트 불러오기기
+export interface MyProject {
+  projectId: number;
+  projectName: string;
+  projectIntro: string;
+  projectSkills: string;
+  updatedAt: string;
+}
+
+export interface GetMyProjectListResponse {
+  content: MyProject[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  numberOfElements: number;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  empty: boolean;
+}
+
+// 내 경험 불러오기
+export interface MyExperience {
+  experienceId: number;
+  experienceName: string;
+  experienceRole: string;
+  updatedAt: string;
+}
+
+export interface GetMyExperienceListResponse {
+  content: MyExperience[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  numberOfElements: number;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  empty: boolean;
+}

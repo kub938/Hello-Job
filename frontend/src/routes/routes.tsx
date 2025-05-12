@@ -25,6 +25,8 @@ import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
 import Interview from "@/pages/Interview/Interview";
 import StandardLayout from "@/components/layouts/standardLayout";
+import MyExperience from "@/pages/Mypage/components/MyExperience";
+import MyProject from "@/pages/Mypage/components/MyProject";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -159,6 +161,14 @@ const router = createBrowserRouter([
               {
                 path: "account",
                 element: <Account />,
+              },
+              {
+                path: "my-experience",
+                element: <MyExperience />,
+              },
+              {
+                path: "my-project",
+                element: <MyProject />,
               },
             ],
           },

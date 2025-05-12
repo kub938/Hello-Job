@@ -33,6 +33,8 @@ function Mypage() {
     { path: "cover-letter-list", label: "자기소개서 목록" },
     { path: "bookmarks/companies", label: "기업 분석 즐겨찾기" },
     { path: "bookmarks/jobs", label: "직무 분석 즐겨찾기" },
+    { path: "my-project", label: "나의 프로젝트" },
+    { path: "my-experience", label: "나의 경험" },
     { path: "interviews-videos", label: "모의 면접 영상" },
     { path: "account", label: "계정 설정" },
   ];
