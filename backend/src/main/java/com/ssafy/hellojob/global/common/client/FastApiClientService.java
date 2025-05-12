@@ -6,7 +6,9 @@ import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisFas
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AICoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseWrapperDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatForEditResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.request.CreateCoverLetterFastAPIRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.InterviewFeedbackFastAPIRequestDto;
@@ -39,20 +41,14 @@ public class FastApiClientService {
                 .block();
 
         if (response == null) {
-            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
         }
 
         return response;
     }
 
     public List<AICoverLetterResponseDto> getCoverLetterContentDetail(AICoverLetterRequestDto requestDto) {
-        try {
-            String json = objectMapper.writeValueAsString(requestDto);
-            log.info("🚀 WebClient Request JSON: {}", json);
-        } catch (Exception e) {
-            log.error("❌ JSON 직렬화 실패", e);
-        }
-
+        logJsonToString(requestDto);
         AICoverLetterResponseWrapperDto responseWrapper = fastApiWebClient.post()
                 .uri("/api/v1/ai/cover-letter")
                 .bodyValue(requestDto)
@@ -61,7 +57,7 @@ public class FastApiClientService {
                 .block();
 
         if (responseWrapper == null || responseWrapper.getCover_letters() == null) {
-            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
         }
 
         List<AICoverLetterResponseDto> response = responseWrapper.getCover_letters();
@@ -71,22 +67,35 @@ public class FastApiClientService {
         return response;
     }
 
-    public AIChatResponseDto sendChatToFastApi(AIChatRequestDto requestDto) {
-        try {
-            String json = objectMapper.writeValueAsString(requestDto);
-            log.info("🚀 WebClient Request JSON: {}", json);
-        } catch (Exception e) {
-            log.error("❌ JSON 직렬화 실패", e);
-        }
-        AIChatResponseDto response = fastApiWebClient.post()
+    public AIChatForEditResponseDto sendChatForEditToFastApi(AIChatForEditRequestDto requestDto) {
+        logJsonToString(requestDto);
+        AIChatForEditResponseDto response = fastApiWebClient.post()
                 .uri("/api/v1/ai/cover-letter/edit")
+                .bodyValue(requestDto)
+                .retrieve()
+                .bodyToMono(AIChatForEditResponseDto.class)
+                .block();
+
+        if (response == null) {
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
+        }
+
+        log.debug("🌞 AI 메시지: {}, 유저 메시지 {}", response.getAi_message(), response.getUser_message());
+
+        return response;
+    }
+
+    public AIChatResponseDto sendChatToFastApi(AIChatRequestDto requestDto) {
+        logJsonToString(requestDto);
+        AIChatResponseDto response = fastApiWebClient.post()
+                .uri("/api/v1/ai/cover-letter/chat")
                 .bodyValue(requestDto)
                 .retrieve()
                 .bodyToMono(AIChatResponseDto.class)
                 .block();
 
         if (response == null) {
-            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
         }
 
         log.debug("🌞 AI 메시지: {}, 유저 메시지 {}", response.getAi_message(), response.getUser_message());
@@ -104,7 +113,7 @@ public class FastApiClientService {
                 .block();
 
         if (response == null) {
-            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
         }
 
         log.debug("자소서 생성 요청 성공");
@@ -123,11 +132,19 @@ public class FastApiClientService {
                 .block();
 
         if (response == null) {
-            throw new BaseException(ErrorCode.FASTAPI_RESPONSE_NULL);
+            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
         }
 
         log.debug("인터뷰 피드백 생성 요청 성공");
         return response;
     }
 
+    public void logJsonToString(Object object) {
+        try {
+            String json = objectMapper.writeValueAsString(object);
+            log.info("🚀 WebClient Request JSON: {}", json);
+        } catch (Exception e) {
+            log.error("❌ JSON 직렬화 실패", e);
+        }
+    }
 }

@@ -39,13 +39,23 @@ public class CoverLetterContentController {
         return coverLetterContentService.updateCoverLetterContent(userId, contentId, requestDto);
     }
 
-    @PostMapping("/{contentId}/chat")
-    public ChatResponseDto sendChat(
+    @PostMapping("/{contentId}/edit")
+    public ChatResponseDto sendChatFotEdit(
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer contentId,
             @Valid @RequestBody ChatRequestDto requestDto
             ) {
         Integer userId = principal.getUserId();
-        return coverLetterContentService.getAIChatRequestDto(userId, contentId, requestDto);
+        return coverLetterContentService.getAIChatForEdit(userId, contentId, requestDto);
+    }
+
+    @PostMapping("/{contentId}/chat")
+    public ChatResponseDto sendChat(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @PathVariable Integer contentId,
+            @Valid @RequestBody ChatRequestDto requestDto
+    ) {
+        Integer userId = principal.getUserId();
+        return coverLetterContentService.sendChat(userId, contentId, requestDto);
     }
 }
