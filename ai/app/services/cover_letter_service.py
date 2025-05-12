@@ -293,3 +293,18 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
     ai_message_str = await parse_edit_suggestion(suggestions_list)
     
     return ai_message_str
+
+
+async def chat_with_cover_letter_service(request):
+    """
+    자기소개서 관련 채팅 기능을 제공하는 서비스
+    
+    Args:
+        request: ChatCoverLetterRequest - 채팅 요청 정보
+        
+    Returns:
+        str - AI 응답 메시지
+    """
+    # TODO: 실제 채팅 구현 - 이 부분은 실제 AI 모델과 연동하여 구현해야 함
+    # 현재는 예시 응답만 반환
+    return f"안녕하세요! 자기소개서 작성을 도와드릴게요. '{request.user_message}'에 대한 답변입니다."
