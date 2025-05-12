@@ -82,7 +82,9 @@ pipeline {  // 파이프라인 정의 시작
                         string(credentialsId: 'NAVER_CLIENT_SECRET', variable: 'NAVER_CLIENT_SECRET'),
                         string(credentialsId: 'AES_SECRET_KEY', variable: 'AES_SECRET_KEY'),
                         string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'MATTERMOST_WEBHOOK'),
-                        string(credentialsId: 'OPENAI_API_URL', variable: 'OPENAI_API_URL')
+                        string(credentialsId: 'OPENAI_API_URL', variable: 'OPENAI_API_URL'),
+                        string(credentialsId: 'S3_ACCESS_KEY', variable: 'S3_ACCESS_KEY'),
+                        string(credentialsId: 'S3_SECRET_KEY', variable: 'S3_SECRET_KEY')
                     ]) {
                         sh '''
                             echo "🔄 Stopping existing containers..."
@@ -112,7 +114,9 @@ pipeline {  // 파이프라인 정의 시작
                                 --build-arg NAVER_CLIENT_SECRET=$NAVER_CLIENT_SECRET \
                                 --build-arg AES_SECRET_KEY=$AES_SECRET_KEY \
                                 --build-arg MATTERMOST_WEBHOOK=$MATTERMOST_WEBHOOK \
-                                --build-arg OPENAI_API_URL=$OPENAI_API_URL
+                                --build-arg OPENAI_API_URL=$OPENAI_API_URL \
+                                --build-arg S3_ACCESS_KEY=$S3_ACCESS_KEY \
+                                --build-arg S3_SECRET_KEY=$S3_SECRET_KEY
 
                             echo "🧹 Removing local Docker images..."
                             docker rmi workspace-backend || true
