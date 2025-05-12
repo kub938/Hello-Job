@@ -16,6 +16,7 @@ import { SyncLoader } from "react-spinners";
 import { SaveCoverLetterRequest } from "@/types/coverLetterApiType";
 import ReactMarkdown from "react-markdown";
 import chatbot from "../../../public/favicon/favicon-96x96.png";
+import { toast } from "sonner";
 
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
@@ -139,9 +140,17 @@ function CoverLetter() {
     saveMutation.mutate(saveData, {
       onSuccess: (data) => {
         console.log(data);
+        if (type === "save") {
+          toast.info("저장되었습니다.");
+        } else if (type === "draft") {
+          toast.info("임시 저장되었습니다.");
+        }
       },
       onError: (error) => {
         console.log(error);
+        if (type === "save" || "draft") {
+          toast.error("저장에 실패했습니다.");
+        }
       },
     });
   };
