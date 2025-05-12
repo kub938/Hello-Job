@@ -2,12 +2,13 @@ import { corporateReportApi } from "@/api/corporateReport";
 import { Button } from "@/components/Button";
 import { postCorporateReportRequest } from "@/types/coporateResearch";
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import ToggleInput from "./ToggleInput";
 import { useNavigate } from "react-router";
 import { FaSpinner } from "react-icons/fa";
+import { useGetToken } from "@/hooks/tokenHook";
 
 interface CreateCorporateProps {
   onClose: () => void;
@@ -27,6 +28,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const [isPlus, setIsPlus] = useState(false);
   const [isFinancial, setIsFinancial] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [token, setToken] = useState<number | undefined>();
 
   const navigate = useNavigate();
 
@@ -98,6 +100,14 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
     setIsSubmitting(true);
     handleSubmit(onValidSubmit, onInvalidSubmit)();
   };
+
+  const tokenData = useGetToken(true);
+
+  useEffect(() => {
+    if (tokenData.data?.token) {
+      setToken(tokenData.data.token);
+    }
+  }, [tokenData.data?.token]);
 
   return (
     <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
@@ -184,24 +194,38 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           requiredMessage="재무 분석 여부는 필수 입력 항목입니다."
         />
 
-        <div className="mt-12 flex justify-center gap-4">
-          <Button className="px-4 text-base" onClick={onClose} variant="white">
-            창 닫기
-          </Button>
-          <Button
-            className="px-4 text-base"
-            onClick={onSubmitClicked}
-            variant="default"
-            disabled={isSubmitting || mutation.isPending}
-          >
-            {isSubmitting || mutation.isPending ? (
-              <span className="flex items-center gap-2">
-                분석 중... <FaSpinner className="animate-spin" />
-              </span>
-            ) : (
-              "생성하기"
-            )}
-          </Button>
+        <div className="mt-12">
+          <div className="flex justify-center gap-4">
+            <h3>
+              분석 필요 토큰: <span className="text-[#6F52E0]">1</span>
+            </h3>
+            <h3>
+              금일 남은 토큰: <span className="text-[#6F52E0]">{token}</span>
+            </h3>
+          </div>
+          <div className="mt-4 flex justify-center gap-4">
+            <Button
+              className="px-4 text-base"
+              onClick={onClose}
+              variant="white"
+            >
+              창 닫기
+            </Button>
+            <Button
+              className="px-4 text-base"
+              onClick={onSubmitClicked}
+              variant="default"
+              disabled={isSubmitting || mutation.isPending}
+            >
+              {isSubmitting || mutation.isPending ? (
+                <span className="flex items-center gap-2">
+                  분석 중... <FaSpinner className="animate-spin" />
+                </span>
+              ) : (
+                "생성하기"
+              )}
+            </Button>
+          </div>
         </div>
       </form>
     </div>
