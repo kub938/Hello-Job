@@ -96,6 +96,37 @@ export interface GetMyProjectListResponse {
   empty: boolean;
 }
 
+export interface GetMyProjectDetailResponse {
+  projectId: number;
+  projectName: string;
+  projectIntro: string;
+  projectRole: string;
+  projectSkills: string;
+  projectStartDate: string;
+  projectEndDate: string;
+  projectDetail: string;
+  projectClient: string;
+  updatedAt: string;
+}
+
+export interface UpdateMyProjectRequest {
+  projectName: string;
+  projectIntro: string;
+  projectRole: string;
+  projectSkills: string; // ", "(쉼표 + 띄어쓰기)로 구분
+  projectStartDate: string;
+  projectEndDate: string;
+  projectDetail: string;
+  projectClient: string;
+}
+export interface UpdateMyProjectResponse {
+  message: string;
+}
+
+export interface DeleteMyProjectResponse {
+  message: string;
+}
+
 // 내 경험 불러오기
 export interface MyExperience {
   experienceId: number;
@@ -131,4 +162,34 @@ export interface GetMyExperienceListResponse {
     unsorted: boolean;
   };
   empty: boolean;
+}
+
+export interface GetMyExperienceDetailResponse {
+  experienceId: number;
+  experienceName: string;
+  experienceDetail: string;
+  experienceRole: string;
+  experienceStartDate: string;
+  experienceEndDate: string;
+  experienceClient: string;
+  updatedAt: string;
+}
+
+export interface UpdateMyExperienceRequest {
+  experienceName: string;
+  experienceDetail: string;
+  experienceRole: string;
+  experienceStartDate: string;
+  experienceEndDate: string;
+  experienceClient: string;
+}
+export interface UpdateMyExperienceResponse {
+  message: string;
+}
+export interface DeleteMyExperienceResponse {
+  message: string;
+}
+
+export interface GetTokenResponse {
+  token: number;
 }

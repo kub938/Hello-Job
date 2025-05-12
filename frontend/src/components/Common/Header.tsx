@@ -1,3 +1,4 @@
+import { useGetToken } from "@/hooks/tokenHook";
 import { useAuthStore } from "@/store/userStore";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
@@ -9,6 +10,7 @@ interface HeaderProps {
 function Header({ isMinimize = false }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const { isLoggedIn, userName } = useAuthStore();
+  const [token, setToken] = useState<number | undefined>();
   const location = useLocation();
   const nowPath = location.pathname;
   const pathName = ["/corporate-search", "/cover-letter", "/interview"];
@@ -30,6 +32,14 @@ function Header({ isMinimize = false }: HeaderProps) {
 
   console.log(location);
 
+  const tokenData = useGetToken(isLoggedIn && isMinimize);
+
+  useEffect(() => {
+    if (tokenData.data?.token) {
+      setToken(tokenData.data.token);
+    }
+  }, [tokenData.data?.token]);
+
   return (
     <>
       <header
@@ -45,12 +55,21 @@ function Header({ isMinimize = false }: HeaderProps) {
         </Link>
         {isMinimize ? (
           isLoggedIn ? (
-            <Link
-              className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
-              to="/mypage"
-            >
-              {userName}님 정보
-            </Link>
+            <div>
+              <Link
+                className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+                to="/mypage/account"
+              >
+                토큰:{" "}
+                <span className="text-[#6F52E0]">{token ? token : "0"}</span>
+              </Link>
+              <Link
+                className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+                to="/mypage"
+              >
+                {userName}님 정보
+              </Link>
+            </div>
           ) : (
             <Link
               className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"

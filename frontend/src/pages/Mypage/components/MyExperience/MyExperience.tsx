@@ -1,11 +1,12 @@
 import { useState } from "react";
-import MypageHeader from "./MypageHeader";
+import MypageHeader from "../MypageHeader";
 import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyExperienceList } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
 import { FaPlus } from "react-icons/fa";
 import DetailModal from "@/components/Common/DetailModal";
+import ReadMyExperience from "./ReadMyExperience";
 
 function MyExperience() {
   const [selectedCategory, setSelectedCategory] = useState("최신순");
@@ -168,7 +169,11 @@ function MyExperience() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <div>{experienceId}번 경험 상세 정보 출력 페이지 구현 해야함</div>
+          <ReadMyExperience
+            onClose={closeModal}
+            page={page}
+            id={experienceId}
+          />
         </DetailModal>
       )}
     </div>

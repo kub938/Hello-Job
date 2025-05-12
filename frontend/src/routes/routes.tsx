@@ -23,9 +23,9 @@ import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
+import MyExperience from "@/pages/Mypage/components/MyExperience/MyExperience";
+import MyProject from "@/pages/Mypage/components/MyProject/MyProject";
 import Interview from "@/pages/Interview/Interview";
-import MyExperience from "@/pages/Mypage/components/MyExperience";
-import MyProject from "@/pages/Mypage/components/MyProject";
 import StandardLayout from "@/components/layouts/StandardLayout";
 
 const CoverLetterAnalysis = lazy(
