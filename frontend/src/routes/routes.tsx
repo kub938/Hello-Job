@@ -24,9 +24,9 @@ import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
 import Interview from "@/pages/Interview/Interview";
-import StandardLayout from "@/components/layouts/standardLayout";
 import MyExperience from "@/pages/Mypage/components/MyExperience";
 import MyProject from "@/pages/Mypage/components/MyProject";
+import StandardLayout from "@/components/layouts/StandardLayout";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
