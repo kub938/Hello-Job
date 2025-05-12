@@ -1,3 +1,4 @@
+import { timeParser } from "@/hooks/timeParser";
 import { FaRegBookmark, FaBookmark } from "react-icons/fa";
 
 interface JobResearchCardProps {
@@ -94,13 +95,7 @@ function JobResearchCard({
             {jobRoleBookmarkCount}
           </span>
         </div>
-        <span className="text-xs text-gray-400">
-          {new Date(createdAt).toLocaleDateString("ko-KR", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </span>
+        <span className="text-xs text-gray-400">{timeParser(createdAt)}</span>
       </div>
     </div>
   );

@@ -5,13 +5,11 @@ import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
 interface CoverLetterAnalysisLayoutProps {
   nowStep: number;
   children: ReactNode;
-  handleStep: (nowStep: number) => void;
 }
 
 function CoverLetterAnalysisLayout({
   children,
   nowStep,
-  handleStep,
 }: CoverLetterAnalysisLayoutProps) {
   const { company } = useSelectCompanyStore();
   const title = [
@@ -61,7 +59,7 @@ function CoverLetterAnalysisLayout({
           </div>
           <div className="mt-10 mb-20">{children}</div>
         </div>
-        <LetterStep nowStep={nowStep} handleStep={handleStep} />
+        <LetterStep nowStep={nowStep} />
       </div>
     </>
   );

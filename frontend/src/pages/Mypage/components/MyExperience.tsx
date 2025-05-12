@@ -1,49 +1,42 @@
-import { Button } from "@/components/Button";
-import MypageHeader from "./MypageHeader";
 import { useState } from "react";
-import { FaPlus } from "react-icons/fa";
-import { Link } from "react-router";
-import DetailModal from "@/components/Common/DetailModal";
-import ReadCoverLetter from "./ReadCoverLetter";
+import MypageHeader from "./MypageHeader";
+import { Link, useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "react-router";
-import { getCoverLetterList } from "@/api/mypageApi";
+import { getMyExperienceList } from "@/api/mypageApi";
+import { Button } from "@/components/Button";
+import { FaPlus } from "react-icons/fa";
+import DetailModal from "@/components/Common/DetailModal";
 
-function CoverLetterList() {
-  // const [searchTerm, setSearchTerm] = useState("");
+function MyExperience() {
   const [selectedCategory, setSelectedCategory] = useState("최신순");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [researchId, setResearchId] = useState<number>(1);
+  const [experienceId, setExperienceId] = useState<number>(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "0");
 
-  const { data: coverLetterListData, isLoading } = useQuery({
-    queryKey: ["coverLetterList", page],
+  const { data: myExperienceListData, isLoading } = useQuery({
+    queryKey: ["myExperienceList", page],
     queryFn: async () => {
-      const response = await getCoverLetterList(Number(page));
+      const response = await getMyExperienceList(Number(page));
       return response.data;
     },
   });
 
-  // 페이지네이션 설정
-  // const itemsPerPage = coverLetterListData?.pageable?.pageSize || 10;
-  const totalPages = coverLetterListData?.totalPages || 1;
-  // const [itemsPerPage, setItemsPerPage] = useState(10);
-  // const [totalPages, setTotalPages] = useState(1);
-  //Math.ceil(coverLetters.length / itemsPerPage)
+  const totalPages = myExperienceListData?.totalPages || 1;
 
   const openReadModal = (id: number) => {
-    setResearchId(id);
+    setExperienceId(id);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
   };
+
   // 검색어에 따른 필터링
   // 현재 페이지에서만임. 수정 필요. 현재 사용하지 않는 로직
-  const filteredCoverLetters = coverLetterListData?.content?.filter(
-    (letter) => letter
+  const filteredMyExperienceList = myExperienceListData?.content?.filter(
+    (content) => content
   );
 
   // 페이지 변경 핸들러
@@ -56,16 +49,9 @@ function CoverLetterList() {
     setSelectedCategory(e.target.value);
   };
 
-  // 검색어 변경 핸들러
-  // const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   setSearchTerm(e.target.value);
-  //   setCurrentPage(1); // 검색 시 첫 페이지로 이동
-  // };
-
   return (
-    <div className="w-full p-4 md:p-6 md:ml-56 transition-all duration-300">
-      <MypageHeader title="자기소개서 목록" />
-
+    <div className="flex-1 p-4 md:p-6 md:ml-56 transition-all duration-300">
+      <MypageHeader title="내가 작성한 기타 경험" />
       <div className="flex justify-between items-center mb-6">
         {/* 검색 UI */}
         <div className="flex flex-col md:flex-row items-center gap-4">
@@ -95,8 +81,8 @@ function CoverLetterList() {
           </div> */}
         </div>
         <Button variant="default">
-          <Link to="/mypage/cover-letter/new" className="flex items-center">
-            <FaPlus className="mr-2" /> 자기소개서 작성
+          <Link to="/" className="flex items-center">
+            <FaPlus className="mr-2" /> 기타 경험 작성
           </Link>
         </Button>
       </div>
@@ -106,34 +92,24 @@ function CoverLetterList() {
           <div className="text-center py-10 text-gray-500">
             자기소개서 목록을 불러오고 있습니다...
           </div>
-        ) : filteredCoverLetters && filteredCoverLetters.length > 0 ? (
-          filteredCoverLetters.map((coverLetter) => (
+        ) : filteredMyExperienceList && filteredMyExperienceList.length > 0 ? (
+          filteredMyExperienceList.map((myExperience) => (
             <div
-              key={coverLetter.coverLetterId}
+              key={myExperience.experienceId}
               className="bg-white cursor-pointer p-6 rounded-lg shadow-sm border border-gray-100 hover:pl-[27px] pl-6 hover:shadow-md border-l-primary border-l-4 hover:rounded-l-sm rounded-l-none hover:bg-purple-50/30 hover:border-purple-200 hover:border-l-[1px] transition-shadow"
-              onClick={() => openReadModal(coverLetter.coverLetterId)}
+              onClick={() => openReadModal(myExperience.experienceId)}
             >
-              <div className="flex justify-between items-start mb-3">
+              <div className="flex justify-start items-start mb-3">
                 <h3 className="text-lg font-medium">
-                  {coverLetter.coverLetterTitle}
+                  {myExperience.experienceName}
                 </h3>
-                <div className="flex space-x-2">
-                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                    {coverLetter.companyName}
-                  </span>
-                  {coverLetter.jobRoleName ? (
-                    <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                      {coverLetter.jobRoleName}
-                    </span>
-                  ) : null}
-                </div>
               </div>
               <p className="text-gray-600 mb-3 text-sm line-clamp-2">
-                {coverLetter.firstContentDetail}
+                {myExperience.experienceRole}
               </p>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">
-                  작성일: {coverLetter.updatedAt}
+                  작성일: {myExperience.updatedAt}
                 </span>
               </div>
             </div>
@@ -146,7 +122,7 @@ function CoverLetterList() {
       </div>
 
       {/* 페이지네이션 (하단) */}
-      {filteredCoverLetters && (
+      {filteredMyExperienceList && (
         <div className="flex justify-center mt-6">
           <nav className="flex space-x-1">
             <button
@@ -192,11 +168,11 @@ function CoverLetterList() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadCoverLetter onClose={closeModal} id={researchId} />
+          <div>{experienceId}번 경험 상세 정보 출력 페이지 구현 해야함</div>
         </DetailModal>
       )}
     </div>
   );
 }
 
-export default CoverLetterList;
+export default MyExperience;
