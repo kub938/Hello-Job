@@ -131,7 +131,7 @@ function InputQuestion({
           .filter((_, index) => index !== contentId)
           .map((content, index) => ({
             ...content,
-            contentNumber: index,
+            contentNumber: index + 1,
           }));
 
         // 전체 업데이트

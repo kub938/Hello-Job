@@ -40,7 +40,7 @@ function CoverLetterEditor({
       <div className="text-sm text-muted-foreground pb-1">
         원하시는 부분을 수정하며 자소서를 완성해보세요!
       </div>
-      <div className="text-2xl font-bold pb-2 ">
+      <div className="text-lg font-semibold pb-2 ">
         {contentNumber + 1}. {contentQuestion}
       </div>
 
@@ -51,12 +51,15 @@ function CoverLetterEditor({
         className="break-all w-full p-3 h-[68vh] border resize-none"
         onChange={handleChange}
         placeholder="자기소개서를 작성 해 주세요"
-        maxLength={contentLength}
         value={localContent}
       />
       <div className="text-right text-muted-foreground">
-        {nowContentLength} / {contentLength}
+        <span className={nowContentLength > contentLength ? "text-error" : ""}>
+          {nowContentLength}
+        </span>
+        <span> / {contentLength}</span>
       </div>
+
       <div className="mt-4 flex justify-end gap-3">
         <Button
           onClick={() => onSaveContent("draft")}
