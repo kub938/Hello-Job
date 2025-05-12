@@ -5,6 +5,8 @@ import {
   getCoverLetterContentIdsResponse,
 } from "@/types/coverLetterTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
 export const useGetCoverLetter = (contentId: number) => {
   return useQuery({
@@ -37,6 +39,23 @@ export const useSendMessage = () => {
     }) => {
       const response = await coverLetterApi.sendMessage(message);
       return response.data;
+    },
+    onError: (error: AxiosError) => {
+      if (error.response?.status === 503) {
+        console.error(
+          "서버가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요.",
+          error
+        );
+        toast.error(
+          "서버가 일시적으로 사용 불가합니다. 잠시 후 다시 시도해주세요."
+        );
+      } else {
+        console.error(
+          "메시지 전송 중 오류가 발생했습니다. 다시 시도해 주세요",
+          error
+        );
+        toast.error("메시지 전송 중 오류가 발생했습니다. 다시 시도해 주세요");
+      }
     },
   });
 };
