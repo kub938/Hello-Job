@@ -97,3 +97,35 @@ class EditCoverLetterResponse(BaseModel):
     """자기소개서 수정 방향 응답"""
     user_message: str
     ai_message: str
+
+class ChatMessage(BaseModel):
+    """채팅 메시지"""
+    sender: str  # "user" 또는 "ai"
+    message: str  # 메시지 내용
+
+class CoverLetterContent(BaseModel):
+    """자기소개서 내용"""
+    content_number: int
+    content_question: str
+    content_length: int
+    cover_letter: str
+
+class ChatCoverLetterRequest(BaseModel):
+    """자기소개서 채팅 요청 정보"""
+    chat_history: List[ChatMessage]
+    user_message: str
+    company_analysis: CompanyAnalysis
+    job_role_analysis: JobRoleAnalysis
+    experiences: List[Experience]
+    projects: List[Project]
+    cover_letter: Optional[CoverLetterContent] = None
+
+class ChatCoverLetterResponse(BaseModel):
+    """자기소개서 채팅 응답"""
+    status: str
+    user_message: str
+    ai_message: str
+    
+class ChatTypeResponse(BaseModel):
+    """채팅 타입 응답"""
+    chat_type: str  # "chat" 또는 "coverletter"
