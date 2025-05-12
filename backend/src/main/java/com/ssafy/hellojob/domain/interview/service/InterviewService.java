@@ -34,6 +34,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -648,6 +649,22 @@ public class InterviewService {
         }
 
         interviewVideo.addInterviewVideoUrl(url);
+        interviewVideo.addEndTime(LocalDateTime.now());
+
+        LocalDateTime start = interviewVideo.getStart();
+        LocalDateTime end = interviewVideo.getEnd();
+
+        Duration duration = Duration.between(start, end);
+        if (duration.isNegative()) {
+            duration = Duration.ZERO; // 음수 방지
+        }
+
+        long hours = duration.toHours();
+        long minutes = duration.toMinutesPart();  // Java 9 이상
+        long seconds = duration.toSecondsPart();  // Java 9 이상
+
+        String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        interviewVideo.addVideoLength(formatted); // duration 필드는 String이라고 가정
 
         List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto = searchInterviewQuestionAndAnswer(interviewAnswers);
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
