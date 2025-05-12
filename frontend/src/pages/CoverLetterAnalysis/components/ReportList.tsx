@@ -59,8 +59,8 @@ function ReportList({ nowStep }: ReportListProps) {
     } else if (nowStep === 2) {
       return (data as JobBookMarkResponse[]).map((item) => ({
         id: item.jobRoleAnalysisId,
-        name: item.jobRoleName ?? "",
-        industry: item.jobRoleAnalysisTitle ?? "",
+        name: item.jobRoleAnalysisTitle ?? "",
+        industry: item.jobRoleName ?? "",
       }));
     }
   };
