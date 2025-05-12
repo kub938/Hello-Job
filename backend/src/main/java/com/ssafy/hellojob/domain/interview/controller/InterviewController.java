@@ -30,17 +30,32 @@ public class InterviewController {
         return responseDto;
     }
 
+    @GetMapping("/question/cs/{questionId}")
+    public QuestionDetailResponseDto csQuestionDetail(@PathVariable Integer questionId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findCsQuestionDetail(questionId, userPrincipal.getUserId());
+    }
+
     @GetMapping("/question/personality")
     public List<QuestionListResponseDto> personalityQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
         List<QuestionListResponseDto> responseDto = interviewService.getPersonalityQuestionList(userPrincipal.getUserId());
         return responseDto;
     }
 
-    @GetMapping("/question/cover-letter/{coverLetterId}")
+    @GetMapping("/question/personality/{questionId}")
+    public QuestionDetailResponseDto personalityQuestionDetail(@PathVariable Integer questionId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findPersonalityQuestionDetail(questionId, userPrincipal.getUserId());
+    }
+
+    @GetMapping("/question/cover-letter/{interviewId}/{questionId}")
     public List<QuestionListResponseDto> coverLetterQuestionList(@PathVariable("coverLetterId") Integer coverLetterId,
                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
         List<QuestionListResponseDto> responseDto = interviewService.getCoverLetterQuestionList(coverLetterId, userPrincipal.getUserId());
         return responseDto;
+    }
+
+    @GetMapping("/question/cover-letter/{coverLetterId}/{questionId}")
+    public QuestionDetailResponseDto coverLetterQuestionDetail(@PathVariable Integer questionId, @PathVariable Integer coverLetterId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findCoverLetterQuestionDetail(questionId, coverLetterId, userPrincipal.getUserId());
     }
 
     @PostMapping("/select/cs")
