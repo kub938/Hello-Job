@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.exprience.entity;
 
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -9,13 +10,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "experience")
-public class Experience {
+public class Experience extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,12 +44,6 @@ public class Experience {
     @Column(name = "experience_end_date", nullable = false)
     private LocalDate experienceEndDate;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @Builder
     public Experience(Integer experienceId, User user, String experienceName, String experienceDetail, String experienceRole, String experienceClient, LocalDate experienceStartDate, LocalDate experienceEndDate) {
         this.experienceId = experienceId;
@@ -69,17 +63,5 @@ public class Experience {
         this.experienceClient = experience.getExperienceClient();
         this.experienceStartDate = experience.getExperienceStartDate();
         this.experienceEndDate = experience.getExperienceEndDate();
-    }
-
-    @PrePersist
-    public void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    public void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }
