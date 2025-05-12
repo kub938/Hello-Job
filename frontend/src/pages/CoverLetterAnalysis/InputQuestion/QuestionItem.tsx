@@ -9,6 +9,7 @@ import SelectModal, { ModalType } from "../SelectModal/SelectModal";
 import ExperienceForm from "@/pages/Resume/ExperienceForm";
 import { GetExperienceResponse } from "@/api/experienceApi";
 import { useGetExperiences } from "@/hooks/experienceHooks";
+import { XIcon } from "lucide-react";
 
 export interface QuestionItemProps {
   contentIndex: number;
@@ -17,9 +18,11 @@ export interface QuestionItemProps {
     index: number,
     data: Partial<CoverLetterRequestContent>
   ) => void;
+  onRemoveContent: (contentId: number) => void;
 }
 
 function QuestionItem({
+  onRemoveContent,
   content,
   contentIndex,
   onUpdateQuestion,
@@ -95,6 +98,18 @@ function QuestionItem({
     }
   }, [inputTitle, inputLimitNum, inputPrompt]);
 
+  //content 입력값 초기화
+  useEffect(() => {
+    setInputTitle(content.contentQuestion || "");
+    setInputLimitNum(
+      content.contentLength ? String(content.contentLength) : ""
+    );
+    setInputPrompt(content.contentFirstPrompt || "");
+    setCharCount(
+      content.contentFirstPrompt ? content.contentFirstPrompt.length : 0
+    );
+  }, [content]);
+
   const toggleForm = () => {
     setIsOpen(!isOpen);
   };
@@ -153,6 +168,7 @@ function QuestionItem({
     setInputPrompt(e.target.value);
     setCharCount(e.target.value.length);
   };
+
   return (
     <>
       {selectModalOpen && (
@@ -168,10 +184,16 @@ function QuestionItem({
       {ExperienceFormOpen && <ExperienceForm onClose={onCloseExperienceForm} />}
       <form className="border w-full rounded-2xl mb-3">
         <div
-          className={`${headerStyle} flex justify-between items-center cursor-pointer`}
+          className={`${headerStyle} rounded-b-2xl flex justify-between items-center cursor-pointer`}
           onClick={toggleForm}
         >
-          <span>{content.contentNumber}번 문항</span>
+          <span className="flex justify-center items-center gap-2">
+            <XIcon
+              onClick={() => onRemoveContent(contentIndex)}
+              className="size-7 hover:bg-white duration-200 rounded-full p-1"
+            ></XIcon>
+            <span>{content.contentNumber}번 문항</span>
+          </span>
           {isOpen ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
         </div>
 
@@ -184,8 +206,7 @@ function QuestionItem({
                   name="contentQuestion"
                   className="border w-full"
                   placeholder="문항을 입력해 주세요"
-                  width={""}
-                  height={""}
+                  value={inputTitle}
                   onChange={(e) => onChangeInputTitle(e)}
                 />
               </div>
@@ -195,8 +216,7 @@ function QuestionItem({
                   name="contentLength"
                   placeholder="글자수"
                   className="w-30"
-                  width={""}
-                  height={""}
+                  value={inputLimitNum}
                   onChange={(e) => onChangeInputLimitNum(e)}
                 />
               </div>
@@ -252,6 +272,7 @@ function QuestionItem({
                 rows={8}
                 cols={50}
                 className="bg-white resize-none border rounded-b-xl w-full p-4 pb-10 "
+                value={inputPrompt}
                 onChange={(e) => onChangeInputPrompt(e)}
               />
               <span className="bg-white rounded-2xl px-2 absolute mt-10 right-4 bottom-3 text-sm text-text-muted-foreground">
