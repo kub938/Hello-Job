@@ -1,17 +1,20 @@
 package com.ssafy.hellojob.domain.project.entity;
 
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "project")
-public class Project {
+public class Project extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "project_id")
@@ -44,12 +47,6 @@ public class Project {
 
     @Column(name = "project_end_date")
     private LocalDate projectEndDate;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
 
     @Builder
     public Project(User user,
@@ -88,17 +85,5 @@ public class Project {
         this.projectClient = projectClient;
         this.projectStartDate = projectStartDate;
         this.projectEndDate = projectEndDate;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        LocalDateTime now = LocalDateTime.now();
-        this.createdAt = now;
-        this.updatedAt = now;
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
     }
 }
