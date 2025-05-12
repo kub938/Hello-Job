@@ -169,7 +169,11 @@ function MyExperience() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadMyExperience onClose={closeModal} id={experienceId} />
+          <ReadMyExperience
+            onClose={closeModal}
+            page={page}
+            id={experienceId}
+          />
         </DetailModal>
       )}
     </div>
