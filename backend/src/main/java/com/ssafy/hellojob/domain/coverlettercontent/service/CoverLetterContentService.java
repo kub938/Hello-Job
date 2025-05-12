@@ -8,7 +8,9 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterRespon
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
+import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AICoverLetterContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.EditContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
@@ -179,7 +181,16 @@ public class CoverLetterContentService {
         return list;
     }
 
-    public ChatResponseDto getAIChatRequestDto(Integer userId, Integer contentId, ChatRequestDto requestDto) {
+    public ChatResponseDto getAIChatForEdit(Integer userId, Integer contentId, ChatRequestDto requestDto) {
+
+        AIChatForEditRequestDto aiChatForEditRequestDto = getAIChatForEditRequestDto(userId, contentId, requestDto);
+        CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
+        ChatResponseDto response = chatLogService.sendChatForEdit(content, aiChatForEditRequestDto);
+
+        return response;
+    }
+
+    public AIChatForEditRequestDto getAIChatForEditRequestDto(Integer userId, Integer contentId, ChatRequestDto requestDto) {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
@@ -190,7 +201,7 @@ public class CoverLetterContentService {
 
         CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
 
-        AIChatRequestDto aiChatRequestDto = AIChatRequestDto.builder()
+        AIChatForEditRequestDto aiChatForEditRequestDto = AIChatForEditRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
                 .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
                 .experiences(content.getExperiences().stream()
@@ -208,8 +219,52 @@ public class CoverLetterContentService {
                 .edit_content(EditContentDto.from(content, requestDto))
                 .build();
 
+        return aiChatForEditRequestDto;
+    }
+
+    public ChatResponseDto sendChat(Integer userId, Integer contentId, ChatRequestDto requestDto) {
+        AIChatRequestDto aiChatRequestDto = getAIChatRequestDto(userId, contentId, requestDto);
+        CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
         ChatResponseDto response = chatLogService.sendChat(content, aiChatRequestDto);
 
         return response;
+    }
+
+    public AIChatRequestDto getAIChatRequestDto(Integer userId, Integer contentId, ChatRequestDto requestDto) {
+
+        userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
+        coverLetterContentReadService.checkCoverLetterContentValidation(userId, content);
+
+        Integer coverLetterId = coverLetterContentRepository.findCoverLetterIdByContentId(contentId)
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+
+        CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
+
+        List<ChatMessageDto> chatLog = chatLogService.getContentChatLog(contentId);
+        log.debug("🌞 chatLog size : {}", chatLog.size());
+        List<ChatMessageDto> chatRecentHistory = chatLog.subList(Math.max(chatLog.size()-10, 0), chatLog.size());
+
+        AIChatRequestDto aiChatRequestDto = AIChatRequestDto.builder()
+                .user_message(requestDto.getUserMessage())
+                .chat_history(chatRecentHistory)
+                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .experiences(content.getExperiences().stream()
+                        .map(cle -> cle.getExperience())
+                        .filter(Objects::nonNull)
+                        .map(ExperienceDto::from)
+                        .toList()
+                )
+                .projects(content.getExperiences().stream()
+                        .map(cle -> cle.getProject())
+                        .filter(Objects::nonNull)
+                        .map(ProjectDto::from)
+                        .toList()
+                )
+                .cover_letter(AICoverLetterContentDto.from(content))
+                .build();
+
+        return aiChatRequestDto;
     }
 }

@@ -19,6 +19,9 @@ public class InterviewReadService {
     private final PersonalityQuestionBankRepository personalityQuestionBankRepository;
     private final CoverLetterQuestionBankRepository coverLetterQuestionBankRepository;
     private final InterviewQuestionMemoRepository interviewQuestionMemoRepository;
+    private final InterviewAnswerRepository interviewAnswerRepository;
+    private final InterviewVideoRepository interviewVideoRepository;
+    private final InterviewRepository interviewRepository;
 
     public CoverLetterInterview findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(User user, CoverLetter coverLetter) {
         return coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
@@ -63,6 +66,26 @@ public class InterviewReadService {
     public CoverLetterInterview findCoverLetterInterviewByIWithUserdOrElseThrow(Integer coverLetterInterviewId) {
         return coverLetterInterviewRepository.findByIdWithUser(coverLetterInterviewId)
                 .orElseThrow(() -> new BaseException(COVER_LETTER_INTERVIEW_NOT_FOUND));
+    }
+
+    public InterviewVideo findInterviewVideoByIdOrElseThrow(Integer interveiwVideoId){
+        return interviewVideoRepository.findById(interveiwVideoId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_VIDEO_NOT_FOUND));
+    }
+
+    public InterviewAnswer findInterviewAnswerByIdOrElseThrow(Integer interviewAnswerId){
+        return interviewAnswerRepository.findById(interviewAnswerId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_ANSWER_NOT_FOUND));
+    }
+
+    public Interview findInterviewById(Integer interviewId){
+        return interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_NOT_FOUND));
+    }
+
+    public CoverLetterInterview findCoverLetterInterviewById(Integer interviewId){
+        return coverLetterInterviewRepository.findById(interviewId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_NOT_FOUND));
     }
 
 }
