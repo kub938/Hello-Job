@@ -122,6 +122,7 @@ class ChatCoverLetterRequest(BaseModel):
 
 class ChatCoverLetterResponse(BaseModel):
     """자기소개서 채팅 응답"""
+    status: str
     user_message: str
     ai_message: str
     

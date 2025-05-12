@@ -31,11 +31,13 @@ async def chat_with_cover_letter(request: ChatCoverLetterRequest):
     
     if response["status"] == "success":
         return ChatCoverLetterResponse(
+            status=response["status"],
             user_message=request.user_message,
             ai_message=response["content"]
         )
     else:
         return ChatCoverLetterResponse(
+            status=response["status"],
             user_message=request.user_message,
             ai_message=response["content"]
         )
