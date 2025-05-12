@@ -23,6 +23,7 @@ import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
+import Interview from "@/pages/Interview/Interview";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -94,6 +95,16 @@ const router = createBrowserRouter([
               <SuspenseWrapper>
                 <ErrorBoundary FallbackComponent={RenderErrorFallback}>
                   <CorporateResearch />
+                </ErrorBoundary>
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: "interview",
+            element: (
+              <SuspenseWrapper>
+                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                  <Interview />
                 </ErrorBoundary>
               </SuspenseWrapper>
             ),
