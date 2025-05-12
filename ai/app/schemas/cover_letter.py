@@ -122,5 +122,9 @@ class ChatCoverLetterRequest(BaseModel):
 
 class ChatCoverLetterResponse(BaseModel):
     """자기소개서 채팅 응답"""
-    chat_history: List[ChatMessage]
+    user_message: str
     ai_message: str
+    
+class ChatTypeResponse(BaseModel):
+    """채팅 타입 응답"""
+    chat_type: str  # "chat" 또는 "coverletter"
