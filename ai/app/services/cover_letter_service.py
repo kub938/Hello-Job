@@ -298,6 +298,7 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
     
     return ai_message_str
 
+
 async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest) -> str:
     
     # chat_history 파싱
@@ -326,10 +327,7 @@ async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest
 
     """
     
-    if chat_type == "general":
-        return base_prompt
-    
-    elif chat_type == "coverletter":
+    if chat_type.lower() == "coverletter":
         
         # 기업 분석 정보
         company_analysis = request.company_analysis
@@ -429,7 +427,9 @@ async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest
             
         return base_prompt + additional_info_prompt
 
-
+    else:
+        return base_prompt
+    
 async def get_chat_type(user_message: str) -> str:
     """
     사용자 메시지를 분석하여 대화 타입을 결정하는 함수
