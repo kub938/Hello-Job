@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisBookmarkListResponseDto {
 
+    private String companyAnalysisTitle;
     private Integer companyAnalysisBookmarkId;
     private Integer companyAnalysisId;
     private String companyName; // 기업명

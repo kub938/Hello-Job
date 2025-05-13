@@ -32,7 +32,9 @@ public final class ValidationMessage {
 
     // Company Analysis
     public static final String COMPANY_ANALYSIS_BOOKMARK_COMPANY_ANALYSIS_ID_NOT_EMPTY = "기업 분석 아이디는 필수값 입니다.";
-
+    public static final String COMPANY_ANALYSIS_TITLE_NOT_EMPTY = "기업 분석 제목은 필수값입니다.";
+    public static final String COMPANY_ID_NOT_EMPTY = "기업 아이디는 필수값입니다.";
+    
 
     // Schedule
     public static final String SCHEDULE_TITLE_NOT_EMPTY = "스케쥴 제목은 필수값입니다.";

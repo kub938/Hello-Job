@@ -13,6 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisDetailResponseDto {
 
+    private String companyAnalysisTitle;
     private Integer companyAnalysisId;
     private String companyName;
     private String userPrompt;
