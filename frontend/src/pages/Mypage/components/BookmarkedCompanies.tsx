@@ -9,6 +9,7 @@ import CorporateReportCard from "@/pages/CorporateResearch/components/CorporateR
 function BookmarkedCompanies() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchCompanyId, setResearchCompanyId] = useState<number>(1);
+  const [clickedCompanyId, setClickedCompanyId] = useState<number>(1);
 
   const { data: bookmarkedCompanyListData, isLoading } = useQuery({
     queryKey: ["bookmarkedCompanyList"],
@@ -42,9 +43,10 @@ function BookmarkedCompanies() {
             <CorporateReportCard
               key={corporateReport.companyAnalysisId}
               onClick={() => {
+                setClickedCompanyId(corporateReport.companyAnalysisId);
                 openReadModal(corporateReport.companyAnalysisId);
               }}
-              companyName={corporateReport.companyName}
+              companyAnalysisTitle={corporateReport.companyAnalysisTitle}
               createdAt={corporateReport.createdAt}
               companyViewCount={corporateReport.companyViewCount}
               companyLocation={corporateReport.companyLocation}
@@ -64,7 +66,11 @@ function BookmarkedCompanies() {
       </div>
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadCorporate onClose={closeModal} id={researchCompanyId} />
+          <ReadCorporate
+            onClose={closeModal}
+            id={researchCompanyId}
+            companyId={String(clickedCompanyId)}
+          />
         </DetailModal>
       )}
     </div>

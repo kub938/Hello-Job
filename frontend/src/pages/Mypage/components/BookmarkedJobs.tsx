@@ -9,6 +9,7 @@ import ReadJob from "@/pages/JobResearch/components/ReadJob";
 function BookmarkedJobs() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchJobId, setResearchJobId] = useState<number>(1);
+  const [clickedCompanyId, setClickedCompanyId] = useState<number>(1);
 
   const { data: bookmarkedJobListData, isLoading } = useQuery({
     queryKey: ["bookmarkedJobList"],
@@ -42,6 +43,7 @@ function BookmarkedJobs() {
             <JobResearchCard
               key={jobResearch.jobRoleAnalysisId}
               onClick={() => {
+                setClickedCompanyId(jobResearch.jobRoleAnalysisId);
                 openReadModal(jobResearch.jobRoleAnalysisId);
               }}
               jobRoleName={jobResearch.jobRoleName}
@@ -62,7 +64,11 @@ function BookmarkedJobs() {
       </div>
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadJob onClose={closeModal} id={researchJobId} />
+          <ReadJob
+            onClose={closeModal}
+            id={researchJobId}
+            companyId={String(clickedCompanyId)}
+          />
         </DetailModal>
       )}
     </div>
