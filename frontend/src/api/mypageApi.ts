@@ -1,4 +1,5 @@
 import {
+  DeleteCoverLetterResponse,
   GetCoverLetterDetailResponse,
   GetCoverLetterListResponse,
   GetMyExperienceDetailResponse,
@@ -26,6 +27,12 @@ export const getCoverLetterDetail = (coverLetterId: string) => {
 export const getCoverLetterList = (page: number) => {
   return authApi.get<GetCoverLetterListResponse>(
     `/api/v1/mypage/cover-letter?page=${page}`
+  );
+};
+
+export const deleteCoverLetter = (coverLetterId: number) => {
+  return authApi.delete<DeleteCoverLetterResponse>(
+    `/api/v1/cover-letter/${coverLetterId}`
   );
 };
 

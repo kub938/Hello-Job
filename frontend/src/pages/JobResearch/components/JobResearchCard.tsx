@@ -22,6 +22,12 @@ function JobResearchCard({
   bookmark,
   createdAt,
 }: JobResearchCardProps) {
+  const handleBookmarkClickOn = () => {
+    console.log("bookmarkClickOn");
+  };
+  const handleBookmarkClickOff = () => {
+    console.log("bookmarkOff");
+  };
   return (
     <div
       onClick={onClick}
@@ -45,9 +51,13 @@ function JobResearchCard({
         </div>
         <div className="flex items-center">
           {bookmark ? (
-            <FaBookmark className="text-[#6F52E0]" />
+            <div className="" onClick={handleBookmarkClickOff}>
+              <FaBookmark className="text-[#6F52E0]" />
+            </div>
           ) : (
-            <FaRegBookmark />
+            <div className="" onClick={handleBookmarkClickOn}>
+              <FaRegBookmark />
+            </div>
           )}
         </div>
       </div>

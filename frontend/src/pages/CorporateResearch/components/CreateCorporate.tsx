@@ -20,6 +20,7 @@ interface IForm {
   basic: boolean;
   plus: boolean;
   financial: boolean;
+  userPrompt: string;
 }
 
 function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
@@ -72,6 +73,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         basic: data.basic,
         plus: data.plus,
         financial: data.financial,
+        userPrompt: data.userPrompt,
       });
     } catch (error) {
       // 에러 처리
@@ -80,15 +82,8 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   };
 
   const onInvalidSubmit = (errors: FieldErrors<IForm>) => {
-    if (errors.isPublic?.type === "required") {
-      // "빈 채팅을 입력할 수 없습니다" 에러 발생 시, 원하는 custom function 실행
-      toast.error(errors.isPublic.message);
-    } else if (errors.basic?.type === "required") {
-      toast.error(errors.basic.message);
-    } else if (errors.plus?.type === "required") {
-      toast.error(errors.plus.message);
-    } else if (errors.financial?.type === "required") {
-      toast.error(errors.financial.message);
+    if (errors.userPrompt?.type === "maxLength") {
+      toast.error(errors.userPrompt.message);
     }
     setIsSubmitting(false);
   };
@@ -194,7 +189,29 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           requiredMessage="재무 분석 여부는 필수 입력 항목입니다."
         />
 
-        <div className="mt-12">
+        <div className="space-y-2 mt-4">
+          <label
+            htmlFor="userPrompt"
+            className="text-sm font-medium text-[#6E7180] flex justify-between"
+          >
+            <span>사용자 프롬프트</span>
+            <span className="text-xs text-[#9CA3AF]">최대 500자</span>
+          </label>
+          <textarea
+            id="userPrompt"
+            {...register("userPrompt", {
+              maxLength: {
+                value: 300,
+                message: "최대 300자리까지 입력할 수 있습니다",
+              },
+            })}
+            placeholder="AI에게 지시 사항이나 추가 정보를 입력해주세요.(선택사항)"
+            rows={3}
+            className="w-full p-3 border border-[#E4E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6F52E0]/50 focus:border-[#6F52E0] transition-all resize-none"
+          />
+        </div>
+
+        <div className="mt-4">
           <div className="flex justify-center gap-4">
             <h3>
               분석 필요 토큰: <span className="text-[#6F52E0]">1</span>
