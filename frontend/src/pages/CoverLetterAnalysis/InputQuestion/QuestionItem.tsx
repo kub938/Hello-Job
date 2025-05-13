@@ -50,7 +50,7 @@ function QuestionItem({
   const [selectedExperience, setSelectedExperience] = useState<
     GetExperienceResponse[]
   >([]);
-  const { inputData } = useCoverLetterInputStore();
+  const { inputData, updateContent } = useCoverLetterInputStore();
   const selectedProjectNum = inputData.contents[contentIndex].contentProjectIds;
   const selectedExperienceNum =
     inputData.contents[contentIndex].contentExperienceIds;
@@ -109,6 +109,15 @@ function QuestionItem({
     );
   }, [content]);
 
+  const syncToStore = () => {
+    updateContent(contentIndex, {
+      contentQuestion: inputTitle,
+      contentLength: inputLimitNum ? Number(inputLimitNum) : 0,
+      contentFirstPrompt: inputPrompt,
+      contentNumber: contentIndex + 1,
+    });
+  };
+
   const toggleForm = () => {
     setIsOpen(!isOpen);
   };
@@ -128,11 +137,13 @@ function QuestionItem({
   };
 
   const handleProjectModalOpen = () => {
+    syncToStore();
     setModalType("project");
     setSelectModalOpen(true);
   };
 
   const handleExperienceModalOpen = () => {
+    syncToStore();
     setModalType("experience");
     setSelectModalOpen(true);
   };
