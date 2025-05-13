@@ -92,7 +92,7 @@ function Header({ isMinimize = false }: HeaderProps) {
                 <Link to="/cover-letter">자기소개서</Link>
               </li>
               <li className={`${nowPath === pathName[2] && "text-accent "}`}>
-                <Link to="/interview">면접</Link>
+                <Link to="/interview/select">면접</Link>
               </li>
             </ul>
             <span>

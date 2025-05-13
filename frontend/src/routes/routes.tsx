@@ -25,8 +25,13 @@ import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
 import MyExperience from "@/pages/Mypage/components/MyExperience/MyExperience";
 import MyProject from "@/pages/Mypage/components/MyProject/MyProject";
-import Interview from "@/pages/Interview/Interview";
 import StandardLayout from "@/components/layouts/StandardLayout";
+import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
+import InterviewPage from "@/pages/Interview/pages/InterviewLayoutPage";
+import ResultPage from "@/pages/Interview/pages/ResultPage";
+import PreparePage from "@/pages/Interview/pages/PreparePage";
+import MockInterviewPage from "@/pages/Interview/pages/MockInterviewPage";
+import SingleQuestionPage from "@/pages/Interview/pages/SingleQuestionPage";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -111,10 +116,62 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <Interview />
+                  <InterviewPage />
                 </ErrorBoundary>
               </SuspenseWrapper>
             ),
+            children: [
+              {
+                path: "result",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <ResultPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: "prepare",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <PreparePage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: "select",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <TypeSelectPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: "mock-interview",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <MockInterviewPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: "single-question",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <SingleQuestionPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+            ],
           },
         ],
       },
