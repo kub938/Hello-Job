@@ -1,6 +1,6 @@
 import { useState } from "react";
 import MypageHeader from "../MypageHeader";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyExperienceList } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
