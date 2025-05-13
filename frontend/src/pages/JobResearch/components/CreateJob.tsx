@@ -8,7 +8,6 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
-import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 interface CreateJobProps {

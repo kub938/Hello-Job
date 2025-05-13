@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import ToggleInput from "./ToggleInput";
-import { useNavigate } from "react-router";
 import { FaSpinner } from "react-icons/fa";
 import { useGetToken } from "@/hooks/tokenHook";
 import { FaQuestionCircle } from "react-icons/fa";
