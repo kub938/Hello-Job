@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import GradientCard from "../../components/GradientCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SelectModal from "./components/SelectModal";
 import { corporateListApi } from "@/api/corporateReport";
 import { useQuery } from "@tanstack/react-query";
@@ -21,13 +21,27 @@ function CorporateSearch() {
   const [selectedCorporate, setSelectedCorporate] = useState("");
   const [selectedCorporateId, setSelectedCorporateId] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
 
-  // tanstack query를 사용한 데이터 불러오기
+  // 검색어 디바운스 처리
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedKeyword(searchKeyword);
+      //console.log(searchKeyword);
+    }, 300); // 0.3초 지연
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchKeyword]);
+
+  // tanstack query를 사용한 데이터 불러오기 (디바운스된 검색어 사용)
   const { data: corporateList, isLoading } = useQuery({
-    queryKey: ["corporateList", searchKeyword],
+    queryKey: ["corporateList", debouncedKeyword],
     queryFn: async () => {
-      const response = await corporateListApi.getCorporateList(searchKeyword);
-      debugger;
+      const response = await corporateListApi.getCorporateList(
+        debouncedKeyword
+      );
       return response.data;
     },
   });
