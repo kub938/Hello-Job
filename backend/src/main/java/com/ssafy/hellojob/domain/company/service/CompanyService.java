@@ -4,8 +4,6 @@ import com.ssafy.hellojob.domain.company.dto.CompanyDto;
 import com.ssafy.hellojob.domain.company.dto.CompanyListDto;
 import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
-import com.ssafy.hellojob.global.exception.BaseException;
-import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,6 +16,7 @@ import java.util.List;
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
+    private final CompanyReadService companyReadService;
 
     public List<CompanyListDto> getAllCompany(){
         return companyRepository.getAllCompany();
@@ -27,17 +26,9 @@ public class CompanyService {
         return companyRepository.getCompanyByCompanyName(companyName);
     }
 
-    public String getCompanyNameByCompanyId(Integer companyId){
-        String result =  companyRepository.getCompanyNameByCompanyId(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
-
-        return result;
-    }
-
     public CompanyDto getCompanyByCompanyId(Integer companyId){
 
-        Company company = companyRepository.findByCompanyId(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+        Company company = companyReadService.findCompanyByIdOrElseThrow(companyId);
 
         CompanyDto result = CompanyDto.builder()
                 .id(companyId)
