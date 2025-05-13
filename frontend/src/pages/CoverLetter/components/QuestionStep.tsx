@@ -34,7 +34,7 @@ function QuestionStep({
             status.contentNumber === selectQuestionNumber
           )}`}
         >
-          <div>{status.contentNumber + 1}</div>
+          <div>{status.contentNumber}</div>
           <div
             className={`size-2 rounded-full ${stepStatusStyle(
               status.contentStatus

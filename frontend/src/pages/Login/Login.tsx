@@ -29,7 +29,7 @@ function Login() {
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
             <p className="text-lg whitespace-normal font-gothic">
-              SSAFY 12기 B105 자율 Poject
+              SSAFY 12기 B105 자율 Project
             </p>
           </blockquote>
         </div>
@@ -49,7 +49,7 @@ function Login() {
 
           <div className="grid gap-6">
             <Button variant="default" size="default" type="submit">
-              <Link to="/">비회원으로 서비스 이용하기</Link>
+              <Link to="/">홈으로 돌아가기</Link>
             </Button>
 
             <div className="relative">
@@ -58,7 +58,7 @@ function Login() {
               </div>
               <div className="relative flex justify-center text-xs uppercase">
                 <span className="bg-background px-2 text-muted-foreground">
-                  또는 다음으로 계속하기
+                  다음으로 계속하기
                 </span>
               </div>
             </div>
@@ -77,7 +77,7 @@ function Login() {
                 />
                 Google 로그인
               </Button>
-              <Button
+              {/* <Button
                 variant="white"
                 size="default"
                 type="button"
@@ -89,21 +89,21 @@ function Login() {
                   className="h-4 w-4"
                 />
                 카카오 로그인
-              </Button>
+              </Button> */}
             </div>
           </div>
 
           <p className="px-8 text-center text-sm text-[#6E7180] whitespace-normal break-keep">
             계속하면{" "}
             <Link
-              to="/terms"
+              to="/"
               className="underline underline-offset-4 hover:text-[#2A2C35]"
             >
               서비스 약관
             </Link>
             과{" "}
             <Link
-              to="/privacy"
+              to="/"
               className="underline underline-offset-4 hover:text-[#2A2C35]"
             >
               개인정보 정책
