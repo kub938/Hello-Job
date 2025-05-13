@@ -94,7 +94,7 @@ async def create_cover_letter(
         response = await rate_limiter.chat_completion(
             model="gpt-4.1", 
             messages=[
-                {"role": "system", "content": "당신은 전문적인 자기소개서 작성 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서를 작성해주세요."},
+                {"role": "system", "content": "당신은 '제트'라는 이름의 AI로, 전문적인 자기소개서 작성 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서를 작성해주세요."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
@@ -264,7 +264,7 @@ async def edit_cover_letter_service(request: EditCoverLetterRequest) -> str:
         response = await rate_limiter.chat_completion(
             model="gpt-4.1",
             messages=[
-                {"role": "system", "content": "당신은 전문적인 자기소개서 수정 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서 수정 방향을 제시해주세요. 직접적인 수정은 절대 하지 말고 수정 방향만 제안해주세요. 수정 제안은 반드시 JSON 형식으로 작성해주세요."},
+                {"role": "system", "content": "당신은 '제트'라는 이름의 AI로, 전문적인 자기소개서 수정 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서 수정 방향을 제시해주세요. 직접적인 수정은 절대 하지 말고 수정 방향만 제안해주세요. 수정 제안은 반드시 JSON 형식으로 작성해주세요."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.7,
@@ -322,7 +322,7 @@ async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest
                 parsed_chat_history += f"{sender}: {message}\\n" # 혹시 다른 sender 타입이 있을 경우 대비
     
     base_prompt = f"""
-    당신은 취업 도움 사이트 Hello Job의 자기소개서 작성 도움 AI 어시스턴트입니다. 최근 대화 기록과 추가 정보를 바탕으로 사용자의 메시지에 대한 답변을 작성해주세요.
+    당신은 '제트'라는 이름의 AI로, 취업 도움 사이트 Hello Job의 자기소개서 작성 도움 AI 어시스턴트입니다. 최근 대화 기록과 추가 정보를 바탕으로 사용자의 메시지에 대한 답변을 작성해주세요.
     
     ## 주의 사항 
     - 추가 정보가 존재하는 경우 추가 정보를 활용하여 적절한 답변을 제공하세요.
@@ -448,7 +448,7 @@ async def get_chat_type(user_message: str) -> str:
     request_queue = get_request_queue()
     
     system_prompt = """
-당신은 사용자의 메시지를 분석하여 대화의 목적을 파악하는 전문가입니다. 다음 중 가장 적절한 대화 타입을 선택하고, 선택한 타입만을 반환하세요.
+당신은 '제트'라는 이름의 AI로, 사용자의 메시지를 분석하여 대화의 목적을 파악하는 전문가입니다. 다음 중 가장 적절한 대화 타입을 선택하고, 선택한 타입만을 반환하세요.
 
 대화 타입:
 - general: 일상적인 대화 

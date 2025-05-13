@@ -146,13 +146,13 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
         
         instructions = ""
         if user_prompt:
-            instructions = f"""당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 
+            instructions = f"""당신은 '제트'라는 이름의 AI로, 기업 정보를 분석하고 상세한 리포트를 작성하는 전문가입니다. 
             사용자의 요청사항에 적합한 기업분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다. 
             
             사용자 요청사항: {user_prompt}
             """
         else:
-            instructions = """당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 
+            instructions = """당신은 '제트'라는 이름의 AI로, 기업 정보를 분석하고 상세한 리포트를 작성하는 전문가입니다. 
             기업 분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다.
             """
             
@@ -273,10 +273,10 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
         
         instructions = ""
         if user_prompt:
-            instructions += f"""당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 사용자의 요청 사항을 반영하는 뉴스 기사 분석 데이터를 반환합니다.
+            instructions += f"""당신은 '제트'라는 이름의 AI로, 기업 뉴스를 분석하고 요약하는 전문가입니다. 다양한 MCP를 활용하여 사용자의 요청 사항을 반영하는 뉴스 기사 분석 데이터를 반환합니다.
             사용자 요청사항: {user_prompt}"""
         else:
-            instructions = f"당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 뉴스 기사 분석 데이터를 반환합니다."
+            instructions = f"당신은 '제트'라는 이름의 AI로, 기업 뉴스를 분석하고 요약하는 전문가입니다. 다양한 MCP를 활용하여 뉴스 기사 분석 데이터를 반환합니다."
         
         # Agent 생성 - 미리 설정된 MCP 서버 사용
         news_agent = Agent(
