@@ -9,6 +9,7 @@ sonarqube-check:
       - .sonar/cache
   script:
     - cd backend
+    - chmod +x ./gradlew    # 실행 권한 부여
     - ./gradlew sonar -Dsonar.projectKey=S12P31S105 -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.login="$SONAR_TOKEN"
   allow_failure: true
   only:
