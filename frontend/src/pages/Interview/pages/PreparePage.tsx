@@ -19,7 +19,7 @@ function PreparePage() {
   const [audioLevel, setAudioLevel] = useState<number>(0);
   const [isMicMuted, setIsMicMuted] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
-  const [isVideoReady, setIsVideoReady] = useState<boolean>(false);
+  const [_, setIsVideoReady] = useState<boolean>(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
