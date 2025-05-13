@@ -5,8 +5,6 @@ import {
 } from "@/api/experienceApi";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-const queryClient = useQueryClient();
-
 export const useGetExperiences = () => {
   return useQuery<GetExperienceResponse[]>({
     queryKey: ["experiences"],
@@ -18,6 +16,8 @@ export const useGetExperiences = () => {
 };
 
 export const usePostExperience = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["experienceFormData"],
     mutationFn: async (experienceFormData: PostExperienceRequest) => {
