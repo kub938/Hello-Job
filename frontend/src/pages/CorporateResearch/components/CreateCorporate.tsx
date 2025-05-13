@@ -22,6 +22,7 @@ interface IForm {
   plus: boolean;
   financial: boolean;
   userPrompt: string;
+  companyAnalysisTitle: string;
 }
 
 function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
@@ -75,6 +76,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         plus: data.plus,
         financial: data.financial,
         userPrompt: data.userPrompt,
+        companyAnalysisTitle: data.companyAnalysisTitle,
       });
     } catch (error) {
       // 에러 처리
@@ -85,6 +87,9 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const onInvalidSubmit = (errors: FieldErrors<IForm>) => {
     if (errors.userPrompt?.type === "maxLength") {
       toast.error(errors.userPrompt.message);
+    }
+    if (errors.companyAnalysisTitle?.type === "required") {
+      toast.error(errors.companyAnalysisTitle.message);
     }
     setIsSubmitting(false);
   };
@@ -133,6 +138,28 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
         action=""
       >
+        <div className="space-y-2">
+          <label
+            htmlFor="companyAnalysisTitle"
+            className="text-sm font-medium text-[#6E7180]"
+          >
+            기업 분석 제목 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="companyAnalysisTitle"
+            {...register("companyAnalysisTitle", {
+              required: "기업 분석 제목은 필수입니다.",
+              maxLength: {
+                value: 50,
+                message: "최대 50자리까지 입력할 수 있습니다",
+              },
+            })}
+            placeholder="기업 분석 제목 입력"
+            type="text"
+            autoComplete="off"
+            className="w-full p-3 border border-[#E4E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6F52E0]/50 focus:border-[#6F52E0] transition-all"
+          />
+        </div>
         <ToggleInput
           label={isPublic ? "공개" : "비공개"}
           description={
