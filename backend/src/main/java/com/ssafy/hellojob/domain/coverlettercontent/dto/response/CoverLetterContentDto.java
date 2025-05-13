@@ -22,7 +22,7 @@ public class CoverLetterContentDto {
     private LocalDateTime contentUpdatedAt;
 
     @Builder
-    public CoverLetterContentDto(Integer contentId, String contentQuestion, int contentNumber, int contentLength, String contentDetail, List<Integer> contentExperienceIds, List<Integer> contentProjectIds, String contentFirstPrompt, List<ChatMessageDto> contentChatLog, LocalDateTime contentUpdatedAt) {
+    public CoverLetterContentDto(Integer contentId, String contentQuestion, Integer contentNumber, Integer contentLength, String contentDetail, List<Integer> contentExperienceIds, List<Integer> contentProjectIds, String contentFirstPrompt, List<ChatMessageDto> contentChatLog, LocalDateTime contentUpdatedAt) {
         this.contentId = contentId;
         this.contentQuestion = contentQuestion;
         this.contentNumber = contentNumber;
