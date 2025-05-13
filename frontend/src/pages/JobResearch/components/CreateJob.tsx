@@ -5,7 +5,7 @@ import {
   JobRoleCategory,
   postJobRoleAnalysisRequest,
 } from "@/types/jobResearch";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { useNavigate } from "react-router";
@@ -30,9 +30,9 @@ interface IForm {
 
 function CreateJob({ onClose, corporateId }: CreateJobProps) {
   const [isPublic, setIsPublic] = useState(true);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit, resetField } = useForm<IForm>();
 
@@ -53,6 +53,10 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
       resetField("jobRolePreferences");
       resetField("jobRoleEtc");
       resetField("jobRoleCategory");
+
+      queryClient.invalidateQueries({
+        queryKey: ["jobResearchList", String(corporateId)],
+      });
       // 페이지 이동시키기
       navigate(`/job-research/${corporateId}`);
     },

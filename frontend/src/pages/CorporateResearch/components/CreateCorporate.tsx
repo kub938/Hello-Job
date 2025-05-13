@@ -1,7 +1,7 @@
 import { corporateReportApi } from "@/api/corporateReport";
 import { Button } from "@/components/Button";
 import { postCorporateReportRequest } from "@/types/coporateResearch";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
@@ -34,6 +34,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const [token, setToken] = useState<number | undefined>();
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit } = useForm<IForm>();
 
@@ -52,6 +53,10 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
       setIsBasic(true);
       setIsPlus(false);
       setIsFinancial(false);
+
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportList", String(corporateId)],
+      });
     },
     onError: (error: any) => {
       if (error.response && error.response.status === 402) {
@@ -246,7 +251,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
                 </div>
               </div>
             </div>
-            <span className="text-xs text-[#9CA3AF]">최대 500자</span>
+            <span className="text-xs text-[#9CA3AF]">최대 300자</span>
           </label>
           <textarea
             id="userPrompt"
@@ -293,6 +298,13 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
                 "생성하기"
               )}
             </Button>
+            {/* 분석중인 경우 */}
+            {(isSubmitting || mutation.isPending) && (
+              <p className="text-center mt-2 text-gray-600 text-sm">
+                1분 이상 소요됩니다. 추후 SSE를 도입할 예정이니 조금만
+                기다려주세요!
+              </p>
+            )}
           </div>
         </div>
       </form>
