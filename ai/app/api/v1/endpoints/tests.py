@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 from app.core.mcp_core import setup_mcp_servers, get_mcp_servers
 from app.mcp.dart_mcp import dart
+from app.services import interview_service
+from app.schemas import interview
+
 router = APIRouter(prefix="/tests", tags=["tests"])
 
 @router.get("")
@@ -21,3 +24,9 @@ async def test_mcp_servers():
 @router.get("/dart-mcp/get_corp_code_by_name")
 async def get_corp_code_by_name(company_name: str):
     return await dart.get_corp_code_by_name(company_name)
+
+
+@router.post("/interview/parse-user-info")
+async def test_parse_user_info(request: interview.CreateQuestionRequest):
+    result = await interview_service.parse_user_info(request)
+    return result
