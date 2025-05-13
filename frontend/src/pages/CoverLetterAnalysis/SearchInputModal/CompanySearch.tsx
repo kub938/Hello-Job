@@ -118,7 +118,7 @@ function CompanySearch({ modalClose }: CompanySearchProps) {
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-container w-100 h-auto max-h-70">
+      <div className="modal-container w-150 h-auto max-h-100">
         <div className="font-bold text-xl mb-2">{contents.title}</div>
         <div className="flex">
           <input
@@ -147,18 +147,16 @@ function CompanySearch({ modalClose }: CompanySearchProps) {
                 <div
                   key={`history-${item.companyId}`}
                   onClick={() => selectFromHistory(item)}
-                  className="cursor-pointer text-sm border-b-1 grid grid-cols-10 items-center h-11 px-3 hover:border-primary hover:border-1 hover:rounded transition-all duration-150 hover:bg-secondary-light"
+                  className="cursor-pointer text-sm border-b-1 grid grid-cols-10 items-center h-14 px-3 hover:border-primary hover:border-1 hover:rounded transition-all duration-150 hover:bg-secondary-light"
                 >
                   <span className="col-span-1 border bg-secondary-light rounded-full size-7 flex justify-center items-center font-semibold text-primary text-sm aspect-square">
                     {item.companyName[0]}
                   </span>
-                  <span className="col-span-3 font-medium text-left ml-3">
+                  <span className="col-span-2 font-medium text-left ml-3">
                     {item.companyName}
                   </span>
-                  <span className="col-span-3 text-right ">
-                    {item.companyLocation}
-                  </span>
-                  <span className="col-span-3 text-right ">
+                  <span className="col-span-5 ">{item.companyLocation}</span>
+                  <span className="col-span-2 text-right ">
                     {item.companySize}
                   </span>
                 </div>
@@ -182,18 +180,18 @@ function CompanySearch({ modalClose }: CompanySearchProps) {
                   })
                 }
                 key={el.id}
-                className="cursor-pointer text-sm border-b-1 grid grid-cols-10 items-center h-11 px-3 hover:border-primary hover:border-1 hover:rounded transition-all duration-150 hover:bg-secondary-light group:active:bg-primary"
+                className="cursor-pointer text-sm border-b-1 grid grid-cols-10 items-center h-14 px-3 hover:border-primary hover:border-1 hover:rounded transition-all duration-150 hover:bg-secondary-light group:active:bg-primary"
               >
                 <span className="col-span-1 group-active:bg-active group-active:border-active duration-100 border bg-secondary-light rounded-full size-7 flex justify-center items-center font-semibold text-primary text-sm aspect-square">
                   {el.companyName[0]}
                 </span>
-                <span className="col-span-3 font-medium text-left ml-3">
+                <span className="col-span-2 font-medium text-left ml-3">
                   {el.companyName}
                 </span>
-                <span className="col-span-3 text-right ">
+                <span className="col-span-5 text-right ">
                   {el.companyLocation}
                 </span>
-                <span className="col-span-3 text-right ">{el.companySize}</span>
+                <span className="col-span-2 text-right ">{el.companySize}</span>
               </div>
             ))}
           </div>
