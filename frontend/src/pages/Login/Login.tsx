@@ -49,7 +49,7 @@ function Login() {
 
           <div className="grid gap-6">
             <Button variant="default" size="default" type="submit">
-              <Link to="/">홈으로</Link>
+              <Link to="/">홈으로 돌아가기</Link>
             </Button>
 
             <div className="relative">
