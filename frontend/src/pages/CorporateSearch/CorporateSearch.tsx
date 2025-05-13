@@ -107,7 +107,10 @@ function CorporateSearch() {
               />
             ))
           ) : (
-            <div>검색 결과가 없습니다.</div>
+            <div>
+              현재는 Dart에서 지원하는 상장 기업만 등장합니다. 검색 결과가
+              없습니다.
+            </div>
           )}
         </div>
       </div>
