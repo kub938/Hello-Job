@@ -37,7 +37,7 @@ public class CoverLetterContent extends BaseTimeEntity {
     @Column(name = "cover_letter_content_detail", columnDefinition = "TEXT")
     private String contentDetail;
 
-    @Column(name = "cover_letter_content_length")
+    @Column(name = "cover_letter_content_length", nullable = false)
     private Integer contentLength;
 
     @Enumerated(EnumType.STRING)
