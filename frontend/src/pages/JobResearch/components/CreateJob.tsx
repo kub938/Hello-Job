@@ -31,7 +31,6 @@ interface IForm {
 function CreateJob({ onClose, corporateId }: CreateJobProps) {
   const [isPublic, setIsPublic] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { register, handleSubmit, resetField } = useForm<IForm>();
@@ -58,7 +57,8 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
         queryKey: ["jobResearchList", String(corporateId)],
       });
       // 페이지 이동시키기
-      navigate(`/job-research/${corporateId}`);
+      // navigate(`/job-research/${corporateId}`);
+      onClose();
     },
     onError: () => {
       toast.error("직무 분석 생성 실패");
