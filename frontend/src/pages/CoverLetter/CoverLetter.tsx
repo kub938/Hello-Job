@@ -53,6 +53,7 @@ function CoverLetter() {
 
   useEffect(() => {
     if (!coverLetter) return;
+    setSelectQuestionId(coverLetter.contentId);
     setContentDetail(coverLetter.contentDetail);
     setNowContentLength(coverLetter.contentDetail.length);
     setChatLog(coverLetter.contentChatLog);
