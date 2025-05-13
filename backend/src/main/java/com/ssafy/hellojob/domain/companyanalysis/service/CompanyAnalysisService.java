@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
+import com.ssafy.hellojob.domain.company.service.CompanyReadService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
@@ -45,6 +46,8 @@ public class CompanyAnalysisService {
     private final UserRepository userRepository;
     private final UserReadService userReadService;
     private final FastApiClientService fastApiClientService;
+    private final CompanyReadService companyReadService;
+    private final CompanyAnalysisReadService companyAnalysisReadService;
 
     // 토큰 확인
     public boolean TokenCheck(Integer userId){
@@ -73,8 +76,7 @@ public class CompanyAnalysisService {
         }
 
         // 회사 이름 가져오기
-        Company company = companyRepository.findById(requestDto.getCompanyId())
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+        Company company = companyReadService.findCompanyByIdOrElseThrow(requestDto.getCompanyId());
 
         String companyName = company.getCompanyName();
 
@@ -186,12 +188,10 @@ public class CompanyAnalysisService {
     public CompanyAnalysisDetailResponseDto detailCompanyAnalysis(Integer userId, Integer companyAnalysisId) {
 
         // 유저 조회
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 기업 분석 데이터 조회
-        CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
+        CompanyAnalysis companyAnalysis = companyAnalysisReadService.findCompanyAnalysisByIdOrElseThrow(companyAnalysisId);
 
         // 공개 여부 필터링
         if (!companyAnalysis.isPublic()) {
@@ -253,10 +253,8 @@ public class CompanyAnalysisService {
     public List<CompanyAnalysisListResponseDto> searchByCompanyIdCompanyAnalysis(Integer companyId, Integer userId) {
 
         // 유저, 회사 존재 여부 확인
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
-        companyRepository.findById(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
+        companyReadService.findCompanyByIdOrElseThrow(companyId);
 
         // 해당 기업의 기업 분석 전체 조회
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdAndIsPublicTrueOrderByCreatedAtDesc(companyId);
@@ -300,12 +298,10 @@ public class CompanyAnalysisService {
     public CompanyAnalysisBookmarkSaveResponseDto addCompanyAnalysisBookmark(Integer userId, CompanyAnalysisBookmarkSaveRequestDto requestDto) {
 
         // 기업 분석 데이터 조회
-        CompanyAnalysis companyAnalysis = companyAnalysisRepository.findById(requestDto.getCompanyAnalysisId())
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
+        CompanyAnalysis companyAnalysis = companyAnalysisReadService.findCompanyAnalysisByIdOrElseThrow(requestDto.getCompanyAnalysisId());
 
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 이미 북마크 되어 있는지 여부 확인
         boolean alreadyBookmarked = companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(userId, companyAnalysis.getCompanyAnalysisId());
@@ -344,15 +340,12 @@ public class CompanyAnalysisService {
     public void deleteCompanyAnalysisBookmark(Integer companyAnalysisId, Integer userId){
 
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        CompanyAnalysis bookmarkCompanyAnalysis = companyAnalysisRepository.findById(companyAnalysisId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_NOT_FOUND));
+        CompanyAnalysis bookmarkCompanyAnalysis = companyAnalysisReadService.findCompanyAnalysisByIdOrElseThrow(companyAnalysisId);
 
         // 북마크 정보 조회
-        CompanyAnalysisBookmark bookmark = companyAnalysisBookmarkRepository.findByUserAndCompanyAnalysis(user, bookmarkCompanyAnalysis)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND));
+        CompanyAnalysisBookmark bookmark = companyAnalysisReadService.findCompanyAnalysisBookmarkByUserAndCompanyAnalysis(user, bookmarkCompanyAnalysis);
 
         // 기업 분석 데이터 조회
         CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
@@ -373,8 +366,7 @@ public class CompanyAnalysisService {
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkList(Integer userId) {
         
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 유저가 북마크한 모든 북마크 리스트 조회
         List<CompanyAnalysisBookmark> bookmarkList = companyAnalysisBookmarkRepository.findAllByUser(user);
@@ -423,10 +415,8 @@ public class CompanyAnalysisService {
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Integer companyId) {
         
         // 유저, 회사 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
-        companyRepository.findById(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        companyReadService.findCompanyByIdOrElseThrow(companyId);
 
         // 유저 + 기업 정보 기반 북마크 리스트 조회
         List<CompanyAnalysisBookmark> bookmarkList = companyAnalysisBookmarkRepository.findAllByUserAndCompanyAnalysis_Company_CompanyId(user, companyId);

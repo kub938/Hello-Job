@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.entity;
 
+import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.request.JobRoleAnalysisUpdateRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
@@ -24,9 +25,9 @@ public class JobRoleAnalysis extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-
-    @Column(name = "company_id", nullable = false)
-    private Integer companyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id", nullable = false)
+    private Company company;
 
     @Column(name = "job_role_name", nullable = false, length = 100)
     private String jobRoleName;
@@ -65,7 +66,7 @@ public class JobRoleAnalysis extends BaseTimeEntity {
 
     @Builder
     public JobRoleAnalysis(User user,
-                           Integer companyId,
+                           Company company,
                            String jobRoleName,
                            String jobRoleTitle,
                            String jobRoleWork,
@@ -78,7 +79,7 @@ public class JobRoleAnalysis extends BaseTimeEntity {
                            JobRoleCategory jobRoleCategory,
                            Integer jobRoleBookmarkCount) {
         this.user = user;
-        this.companyId = companyId;
+        this.company = company;
         this.jobRoleName = jobRoleName;
         this.jobRoleTitle = jobRoleTitle;
         this.jobRoleWork = jobRoleWork;

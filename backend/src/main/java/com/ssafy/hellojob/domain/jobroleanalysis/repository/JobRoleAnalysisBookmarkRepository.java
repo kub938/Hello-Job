@@ -18,6 +18,6 @@ public interface JobRoleAnalysisBookmarkRepository extends JpaRepository<JobRole
 
     List<JobRoleAnalysisBookmark> findAllByUser(User user);
 
-    List<JobRoleAnalysisBookmark> findByUserAndJobRoleAnalysis_CompanyId(User user, Integer companyId);
+    List<JobRoleAnalysisBookmark> findByUserAndJobRoleAnalysis_Company_CompanyId(User user, Integer companyId);
 
 }
