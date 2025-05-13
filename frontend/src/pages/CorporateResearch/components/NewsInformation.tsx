@@ -7,7 +7,6 @@ import {
   FaChevronDown,
   FaChevronUp,
 } from "react-icons/fa";
-import { timeParser } from "@/hooks/timeParser";
 
 // 뉴스 정보 컴포넌트
 function NewsInformation({
