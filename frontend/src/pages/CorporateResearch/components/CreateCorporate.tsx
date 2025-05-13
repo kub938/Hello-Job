@@ -33,7 +33,6 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [token, setToken] = useState<number | undefined>();
 
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { register, handleSubmit } = useForm<IForm>();
@@ -47,7 +46,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
       toast.success("기업 분석이 완료되었습니다.");
       setIsSubmitting(false);
       // 페이지 이동시키기
-      navigate(`/corporate-research/${corporateId}`);
+      onClose();
       //초기화
       setIsPublic(true);
       setIsBasic(true);
