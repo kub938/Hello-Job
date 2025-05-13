@@ -7,9 +7,10 @@ import { Button } from "@/components/Button";
 interface ReadJobProps {
   onClose: () => void;
   id: number;
+  companyId: string;
 }
 
-function ReadJob({ onClose, id }: ReadJobProps) {
+function ReadJob({ onClose, id, companyId }: ReadJobProps) {
   const queryClient = useQueryClient();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isValidId, setIsValidId] = useState(false);
@@ -48,7 +49,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["jobRoleList"] });
+      queryClient.invalidateQueries({ queryKey: ["jobRoleList", companyId] });
     },
   });
 
@@ -61,7 +62,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["jobRoleList"] });
+      queryClient.invalidateQueries({ queryKey: ["jobRoleList", companyId] });
     },
   });
   // 북마크 토글 핸들러

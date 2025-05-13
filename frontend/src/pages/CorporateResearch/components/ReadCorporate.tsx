@@ -11,12 +11,13 @@ import NewsInformation from "./NewsInformation";
 interface ReadCorporateProps {
   id: number;
   onClose: () => void;
+  companyId: string;
 }
 
 // 탭 타입 정의
 type TabType = "분석 요약" | "공시 정보" | "뉴스 정보";
 
-function ReadCorporate({ onClose, id }: ReadCorporateProps) {
+function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
   const queryClient = useQueryClient();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isValidId, setIsValidId] = useState(false);
@@ -65,7 +66,9 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
       queryClient.invalidateQueries({
         queryKey: ["corporateReportDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["corporateReportList"] });
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportList", companyId],
+      });
     },
   });
 
@@ -78,7 +81,9 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
       queryClient.invalidateQueries({
         queryKey: ["corporateReportDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["corporateReportList"] });
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportList", companyId],
+      });
     },
   });
 
