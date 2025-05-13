@@ -181,8 +181,12 @@ public class CoverLetterService {
         return CoverLetterSummaryDto.builder()
                 .coverLetterTitle(coverLetter.getCoverLetterTitle())
                 .contentIds(contentIds)
-                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
-                .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
+                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId())
+                .jobRoleSnapshotId(
+                        coverLetter.getJobRoleSnapshot() != null
+                                ? coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId()
+                                : null
+                )
                 .build();
     }
 
