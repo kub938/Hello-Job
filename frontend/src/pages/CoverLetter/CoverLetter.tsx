@@ -5,8 +5,7 @@ import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
 import {
   useGetContentStatus,
-  useGetCoverLetter,
-  useGetCoverLetterContentIds,
+  useGetFirstCoverLetter,
   useSaveCoverLetter,
   useSendMessage,
 } from "@/hooks/coverLetterHooks";
@@ -15,8 +14,9 @@ import { useIsMutating } from "@tanstack/react-query";
 import { SyncLoader } from "react-spinners";
 import { SaveCoverLetterRequest } from "@/types/coverLetterApiType";
 import ReactMarkdown from "react-markdown";
-import chatbot from "../../../public/favicon/favicon-96x96.png";
+import chatbot from "../../assets/character/favicon-96x96.png";
 import { toast } from "sonner";
+import Loading from "@/components/Loading/Loading";
 
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
@@ -36,20 +36,19 @@ function CoverLetter() {
   const sendLoading = useIsMutating({ mutationKey: ["send-message"] });
 
   // API 호출 관련 훅
-  const { data: contents, isLoading: isContentsLoading } =
-    useGetCoverLetterContentIds(coverLetterId || 0);
-  const { data: coverLetter, isLoading } = useGetCoverLetter(
-    selectQuestionId || 0
+
+  const { data: coverLetter, isLoading } = useGetFirstCoverLetter(
+    coverLetterId || 0
   );
   const { data: statusData } = useGetContentStatus(coverLetterId || 0);
 
   // 데이터가 로드되면 상태 업데이트
-  useEffect(() => {
-    const firstContentId = contents?.contentIds?.[0];
-    if (firstContentId !== undefined) {
-      setSelectQuestionId(firstContentId);
-    }
-  }, [contents]);
+  // useEffect(() => {
+  //   const firstContentId = contents?.contentIds?.[0];
+  //   if (firstContentId !== undefined) {
+  //     setSelectQuestionId(firstContentId);
+  //   }
+  // }, [contents]);
 
   useEffect(() => {
     if (!coverLetter) return;
@@ -57,7 +56,6 @@ function CoverLetter() {
     setNowContentLength(coverLetter.contentDetail.length);
     setChatLog(coverLetter.contentChatLog);
   }, [coverLetter]);
-  // 이벤트 핸들러
 
   const onChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
@@ -159,16 +157,8 @@ function CoverLetter() {
     return <div>유효하지 않은 자기소개서 ID입니다.</div>;
   }
 
-  if (isContentsLoading) {
-    return <div>컨텐츠 로딩중 입니다.</div>;
-  }
-
-  if (!contents) {
-    return <div>유효하지 않은 문항 번호 입니다.</div>;
-  }
-
   if (isLoading) {
-    return <div>자기소개서를 가져오는 중 입니다.</div>;
+    return <Loading></Loading>;
   }
 
   if (!coverLetter) {
