@@ -12,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisListResponseDto {
 
+    private String companyAnalysisTitle;
     private Integer companyAnalysisId;
     private String companyName; // 기업명
     private LocalDateTime createdAt;

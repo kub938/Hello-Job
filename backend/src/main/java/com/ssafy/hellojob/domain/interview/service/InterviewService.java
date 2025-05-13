@@ -517,46 +517,50 @@ public class InterviewService {
         return Map.of("message", "메모가 삭제되었습니다.");
     }
 
-    public String transcribeAudio(MultipartFile audioFile) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+    public String transcribeAudio(MultipartFile audioFile) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        // 파일 리소스로 변환
-        Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
-            @Override
-            public String getFilename() {
-                return audioFile.getOriginalFilename();
+            // 파일 리소스로 변환
+            Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return audioFile.getOriginalFilename();
+                }
+            };
+
+            // Form 데이터 생성
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", audioResource);
+            body.add("model", "whisper-1");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            headers.setBearerAuth(openAiKey);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    openAiUrl,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String text = objectMapper.readTree(response.getBody()).get("text").asText();
+                return text;
+            } else {
+                return "stt 변환에 실패했습니다";
             }
-        };
-
-        // Form 데이터 생성
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", audioResource);
-        body.add("model", "whisper-1");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.setBearerAuth(openAiKey);
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                openAiUrl,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-
-        if (response.getStatusCode().is2xxSuccessful()) {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String text = objectMapper.readTree(response.getBody()).get("text").asText();
-
-            return text;
-        } else {
-            throw new RuntimeException("OpenAI API 요청 실패: " + response.getStatusCode());
+        } catch (Exception e) {
+            return "stt 변환에 실패했습니다";
         }
     }
 
+
+    // 면접 답변 저장
     @Transactional
     public void saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
         userReadService.findUserByIdOrElseThrow(userId);
@@ -630,12 +634,15 @@ public class InterviewService {
         return responseDto;
     }
 
+    // 면접 종료
     @Transactional
     public void endInterview(Integer userId, String url, VideoInfo videoInfo){
+        // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
+        // 인터뷰 유저와 요청한 유저 유효성 검사
         if(interviewVideo.getCoverLetterInterview() != null){
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
             if(!userId.equals(coverLetterInterview.getUser().getUserId())){
@@ -648,6 +655,7 @@ public class InterviewService {
             }
         }
 
+        // 시작 시간 및 종료 시간 기반으로 영상 시간 계산 후 저장
         interviewVideo.addInterviewVideoUrl(url);
         interviewVideo.addEndTime(LocalDateTime.now());
 
@@ -664,9 +672,21 @@ public class InterviewService {
         long seconds = duration.toSecondsPart();  // Java 9 이상
 
         String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        interviewVideo.addVideoLength(formatted); // duration 필드는 String이라고 가정
+        interviewVideo.addVideoLength(formatted); 
 
-        List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto = searchInterviewQuestionAndAnswer(interviewAnswers);
+        // 여기서부터 fast API 관련 로직
+        // 답변 객체 조회(stt 변환에 성공한 경우만)
+        List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto =
+                searchInterviewQuestionAndAnswer(interviewAnswers).stream()
+                        .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
+                        .toList();
+
+        // 모든 항목의 답변이 stt변환에 실패했을 때
+        if(interviewQuestionAndAnswerRequestDto.isEmpty()){
+            return;
+        }
+
+        // 자소서 조회
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
 
         if(interviewVideo.getCoverLetterInterview() != null){
@@ -675,6 +695,7 @@ public class InterviewService {
             coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
         }
 
+        // fast API 호출에 활용할 객체 생성
         InterviewFeedbackFastAPIRequestDto fastAPIRequestDto = InterviewFeedbackFastAPIRequestDto.builder()
                 .interview_question_answer_pairs(interviewQuestionAndAnswerRequestDto)
                 .cover_letter_contents(coverLetterContentFastAPIRequestDto)
@@ -682,6 +703,8 @@ public class InterviewService {
 
         // fast API 호출
         InterviewFeedbackFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto);
+
+        // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
 
         for(SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback:fastAPIResponseDto.getSingle_feedbacks()){
