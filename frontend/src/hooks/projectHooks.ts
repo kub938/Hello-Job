@@ -1,6 +1,8 @@
 import { projectApi } from "@/api/projectApi";
 import { PostProjectRequest } from "@/types/projectApiTypes";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+const queryClient = useQueryClient();
 
 export interface GetProjectsResponse {
   projectId: number;
@@ -25,6 +27,9 @@ export const usePostProject = () => {
     mutationFn: async (projectFormData: PostProjectRequest) => {
       const response = await projectApi.postProject(projectFormData);
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
     },
   });
 };
