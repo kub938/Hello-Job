@@ -4,11 +4,14 @@ import hashlib
 from pydantic import BaseModel, create_model
 from typing import List, Optional, Any, Dict, Tuple
 from agents import Agent
+import logging
 
 from app.schemas import company
 from app.core.agent_utils import RateLimitedRunner
 from app.core.request_queue import get_request_queue
 from app.core.mcp_core import get_mcp_servers
+
+logger = logging.getLogger(__name__)
 
 
 # OpenAI Agent 설정 -> 현재 사용 x 
@@ -275,7 +278,7 @@ async def format_company_analysis(result_obj: Any) -> str:
 
 
 # 기업 분석 및 뉴스 데이터 분석 결과 반환 -> 현재 사용
-async def company_analysis_all(company_name, base, plus, fin):
+async def company_analysis_all(company_name, base, plus, fin, user_prompt):
     """OpenAI Agent 와 MCP를 활용하여 기업 분석 및 뉴스 데이터를 한번에 분석하여 반환합니다.
 
     Args:
@@ -283,10 +286,12 @@ async def company_analysis_all(company_name, base, plus, fin):
         base (bool): 기본 정보 포함 여부
         plus (bool): 추가 정보 포함 여부
         fin (bool): 재무 정보 포함 여부
-    
+        user_prompt (str): 사용자 프롬프트
     Returns:
         dict: 기업 분석 및 뉴스 분석 결과를 포함한 딕셔너리
     """
+    logger.info(f"company_analysis_all 함수 호출: company_name={company_name}, base={base}, plus={plus}, fin={fin}, user_prompt={user_prompt}")
+    
     # 요청 큐 가져오기
     request_queue = get_request_queue()
     
@@ -327,35 +332,49 @@ async def company_analysis_all(company_name, base, plus, fin):
         # 동적으로 Pydantic 모델 생성
         CompanyAnalysisOutput = create_model('CompanyAnalysisOutput', **model_fields)
         
+        instructions = ""
+        if user_prompt:
+            instructions = f"""당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 
+            사용자의 요청사항에 적합한 기업분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다. 
+            
+            사용자 요청사항: {user_prompt}
+            """
+        else:
+            instructions = """당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 
+            기업 분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다.
+            """
+            
         # Agent 생성 - 미리 설정된 MCP 서버 사용
         dart_agent = Agent(
             name="Company Analysis Assistant",
-            instructions="당신은 기업 정보를 분석하고 상세한 리포트를 작성하는 도움을 주는 기업 분석 어시스턴트입니다. 다양한 MCP를 활용하여 기업 분석 결과 혹은 뉴스 기사 분석 데이터를 반환합니다.",
+            instructions=instructions,
             model="gpt-4.1",
             output_type=CompanyAnalysisOutput,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
         )
         
         # 분석 컨텍스트 구성
-        dart_context = f"DART API를 활용하여 {company_name} 기업의 기업 분석 내용을 제공하세요. "
-        dart_context += "**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'를 분석하여 포함해야 합니다.** "
-        dart_context += "분석에 사용한 문서는 문서명과 문서등록일을 포함하여 used_docs에 추가하세요. "
+        dart_context = f"DART API를 활용하여 {company_name}의 기업 분석 내용을 제공하세요.\n"
+        dart_context += f"기업명은 반드시 주어진 그대로 사용하세요. 기업명: {company_name}\n"
+        dart_context += f"사용자의 요청 사항에 특별한 연도가 있다면 해당 연도를 반영하여 분석하고, 그렇지 않은 경우에는 현재 날짜를 기준으로 최신 데이터를 분석하세요.\n"
+        dart_context += "**반드시 '주요 제품 및 브랜드(company_brand)'과 ''를 분석하여 포함해야 합니다.** \n"
+        dart_context += "분석에 사용한 문서는 문서명과 문서등록일을 포함하여 used_docs에 추가하세요. \n"
         dart_context += "포함할 내용은 다음과 같습니다: \n"
-        dart_context += "company_brand, company_vision, "
+        dart_context += "주요 제품 및 브랜드(company_brand), 기업 비전(company_vision), \n"
         
         if "base" in analysis_types:
-            dart_context += "사업의 개요(business_overview), 주요 제품 및 서비스(main_products_services), 주요계약 및 연구개발활동(major_contracts_rd_activities), 기타 참고사항(other_references), "
-            dart_context += "매출액(sales_revenue), 영업이익(operating_profit), 당기순이익(net_income), "
+            dart_context += "사업의 개요(business_overview), 주요 제품 및 서비스(main_products_services), 주요계약 및 연구개발활동(major_contracts_rd_activities), 기타 참고사항(other_references), \n"
+            dart_context += "매출액(sales_revenue), 영업이익(operating_profit), 당기순이익(net_income), \n"
             
         if "plus" in analysis_types:
-            dart_context += "원재료 및 생산설비(raw_materials_facilities), 매출 및 수주상황(sales_order_status), 위험관리 및 파생거래(risk_management_derivatives), "
+            dart_context += "원재료 및 생산설비(raw_materials_facilities), 매출 및 수주상황(sales_order_status), 위험관리 및 파생거래(risk_management_derivatives), \n"
             
         if "fin" in analysis_types:
-            dart_context += "자산 총계(total_assets), 부채 총계(total_liabilities), 자본 총계(total_equity), "
-            dart_context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow)"
+            dart_context += "자산 총계(total_assets), 부채 총계(total_liabilities), 자본 총계(total_equity), \n"
+            dart_context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow) \n\n" 
 
         # 정보 부재 시 처리 방법 추가
-        dart_context += "\n\n또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 Search MCP 를 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요."
+        dart_context += "또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 웹 검색(Search MCP)을 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요.\n\n"
         
         # DART 분석 실행
         dart_result = await RateLimitedRunner.run(
@@ -438,10 +457,19 @@ async def company_analysis_all(company_name, base, plus, fin):
     
     # 뉴스 분석을 위한 비동기 함수 정의
     async def perform_news_analysis():
+        
+        
+        instructions = ""
+        if user_prompt:
+            instructions += f"""당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 사용자의 요청 사항을 반영하는 뉴스 기사 분석 데이터를 반환합니다.
+            사용자 요청사항: {user_prompt}"""
+        else:
+            instructions = f"당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 뉴스 기사 분석 데이터를 반환합니다."
+        
         # Agent 생성 - 미리 설정된 MCP 서버 사용
         news_agent = Agent(
             name="Company News Analyzer",
-            instructions="당신은 기업 뉴스를 분석하고 요약하는 어시스턴트입니다. 다양한 MCP를 활용하여 뉴스 기사 분석 데이터를 반환합니다.",
+            instructions=instructions,
             model="gpt-4.1",
             output_type=company.CompanyNews,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용

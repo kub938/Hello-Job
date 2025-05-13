@@ -19,9 +19,10 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
     base = request.base
     plus = request.plus
     fin = request.fin
-
+    user_prompt = request.user_prompt
+    
     # company_analysis_all 함수를 호출하여 MCP 서버 설정을 한 번만 수행
-    result = await company_analysis_all(company_name, base, plus, fin)
+    result = await company_analysis_all(company_name, base, plus, fin, user_prompt)
     
     response = {
         "company_name": company_name,  # 기업 명

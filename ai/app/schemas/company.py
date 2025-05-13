@@ -7,6 +7,7 @@ class CompanyAnalysisRequest(BaseModel):
     base: bool # 사업 보고서 기본 분석 포함 여부
     plus: bool  # 사업 보고서 심화 분석 포함 여부
     fin: bool  # 재무 정보 포함 여부
+    user_prompt: Optional[str] = None  # 사용자 프롬프트
 
 
 # Default: 기본 제공 정보 
