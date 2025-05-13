@@ -91,8 +91,14 @@ function Header({ isMinimize = false }: HeaderProps) {
               <li className={`${nowPath === pathName[1] && "text-accent "}`}>
                 <Link to="/cover-letter">자기소개서</Link>
               </li>
-              <li className={`${nowPath === pathName[2] && "text-accent "}`}>
-                <Link to="/interview/select">면접</Link>
+              <li
+                onClick={() => {
+                  alert("ai 모의면접은 2차 배포때 오픈됩니다!");
+                }}
+                className={`${nowPath === pathName[2] && "text-accent "}`}
+              >
+                <button>면접</button>
+                {/* <Link to="/interview/select">면접</Link> */}
               </li>
             </ul>
             <span>

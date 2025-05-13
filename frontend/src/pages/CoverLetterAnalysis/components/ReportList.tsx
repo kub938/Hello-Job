@@ -53,7 +53,7 @@ function ReportList({ nowStep }: ReportListProps) {
     if (nowStep === 1) {
       return (data as CompanyBookMarkResponse[]).map((item) => ({
         id: item.companyAnalysisId,
-        name: item.companyName ?? "",
+        name: item.companyAnalysisTitle ?? "",
         industry: item.companyIndustry ?? "",
         categories: item.dartCategory ?? [""],
       }));
