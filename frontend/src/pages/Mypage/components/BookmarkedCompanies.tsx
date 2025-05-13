@@ -58,9 +58,9 @@ function BookmarkedCompanies() {
             />
           ))
         ) : (
-          <div className="text-center text-gray-500 text-lg h-[180px] w-[210px] flex flex-col items-center justify-center">
-            <h1>검색 결과가 없습니다.</h1>
-            <h1 className="text-base mt-2">기업 분석을 진행해주세요.</h1>
+          <div className="text-center text-gray-500 text-lg h-[110px] w-full flex flex-col items-center justify-center">
+            <h1>기업 분석이 없습니다.</h1>
+            <h1 className="text-base mt-2">기업 분석을 북마크 해보세요.</h1>
           </div>
         )}
       </div>
