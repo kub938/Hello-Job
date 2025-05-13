@@ -200,11 +200,11 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
               <div className="relative">
                 <FaQuestionCircle
                   className="text-[#9CA3AF] hover:text-[#6F52E0] cursor-pointer"
-                  onMouseEnter={(e) => {
+                  onMouseEnter={() => {
                     const tooltip = document.getElementById("prompt-tooltip");
                     if (tooltip) tooltip.classList.remove("hidden");
                   }}
-                  onMouseLeave={(e) => {
+                  onMouseLeave={() => {
                     const tooltip = document.getElementById("prompt-tooltip");
                     if (tooltip) tooltip.classList.add("hidden");
                   }}
