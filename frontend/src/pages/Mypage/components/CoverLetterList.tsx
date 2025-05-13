@@ -192,7 +192,7 @@ function CoverLetterList() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadCoverLetter onClose={closeModal} id={researchId} />
+          <ReadCoverLetter onClose={closeModal} id={researchId} page={page} />
         </DetailModal>
       )}
     </div>

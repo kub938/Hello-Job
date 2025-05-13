@@ -1,16 +1,18 @@
 import { useState } from "react";
 import MypageHeader from "../MypageHeader";
-import { Link, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
 import { getMyProjectList } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
 import { FaPlus } from "react-icons/fa";
 import DetailModal from "@/components/Common/DetailModal";
 import ReadMyProject from "./ReadMyProject";
+import ProjectForm from "@/pages/Resume/ProjectForm";
 
 function MyProject() {
   const [selectedCategory, setSelectedCategory] = useState("최신순");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
   const [projectId, setProjectId] = useState<number>(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "0");
@@ -82,10 +84,8 @@ function MyProject() {
             </button>
           </div> */}
         </div>
-        <Button variant="default">
-          <Link to="/" className="flex items-center">
-            <FaPlus className="mr-2" /> 나의 프로젝트 추가
-          </Link>
+        <Button onClick={() => setIsPostModalOpen(true)} variant="default">
+          <FaPlus className="mr-2" /> 나의 프로젝트 추가
         </Button>
       </div>
 
@@ -175,6 +175,9 @@ function MyProject() {
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           <ReadMyProject onClose={closeModal} id={projectId} page={page} />
         </DetailModal>
+      )}
+      {isPostModalOpen && (
+        <ProjectForm onClose={() => setIsPostModalOpen(false)} />
       )}
     </div>
   );

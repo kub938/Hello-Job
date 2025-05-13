@@ -61,6 +61,7 @@ export interface getCorporateReportDetailResponse {
   dartFinancialSummery: string;
   dartCategory: string[];
   public: boolean;
+  userPrompt: string;
 }
 
 //기업 분석 생성 API
@@ -70,6 +71,7 @@ export interface postCorporateReportRequest {
   basic: boolean;
   plus: boolean;
   financial: boolean;
+  userPrompt: string;
 }
 
 export interface postCorporateReportResponse {

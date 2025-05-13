@@ -85,9 +85,9 @@ function ReadMyExperience({ id, page, onClose }: ReadMyExperienceProps) {
               수정
             </Button>
             <Button
-              className="bg-red-600 hover:bg-red-700 active:bg-red-800"
+              className=" hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 active:text-white active:border-red-700"
               onClick={handleDeleteClick}
-              variant={"default"}
+              variant={"white"}
             >
               삭제
             </Button>

@@ -1,15 +1,21 @@
-import { getCoverLetterDetail } from "@/api/mypageApi";
+import { deleteCoverLetter, getCoverLetterDetail } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
-import { useQuery } from "@tanstack/react-query";
+import Modal from "@/components/Modal";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
 interface ReadCoverLetterProps {
   id: number;
+  page: number;
   onClose: () => void;
 }
 
-function ReadCoverLetter({ onClose, id }: ReadCoverLetterProps) {
+function ReadCoverLetter({ onClose, id, page }: ReadCoverLetterProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
   const { data: coverLetterDetailData, isLoading } = useQuery({
     queryKey: ["coverLetterDetailData", id],
     queryFn: async () => {
@@ -18,10 +24,46 @@ function ReadCoverLetter({ onClose, id }: ReadCoverLetterProps) {
     },
   });
 
+  const { mutate: deleteCoverLetterFn } = useMutation({
+    mutationFn: async () => {
+      const response = await deleteCoverLetter(id);
+      return response.data;
+    },
+    onSuccess: () => {
+      // 삭제 성공 시, 게시글 목록 갱신
+      queryClient.invalidateQueries({ queryKey: ["coverLetterList", page] });
+      onClose(); // 모달 닫기
+    },
+  });
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteCoverLetterFn();
+    setIsDeleteModalOpen(false);
+  };
+
   return (
     <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
       <header className="flex w-full justify-between items-end mb-4">
         <h1 className="text-2xl font-bold mb-4">자기소개서 열람</h1>
+        <div className="flex gap-4">
+          <Button
+            onClick={() => navigate(`/cover-letter/${id}`)}
+            variant={"white"}
+          >
+            수정
+          </Button>
+          <Button
+            className="hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 active:text-white active:border-red-700"
+            onClick={handleDeleteClick}
+            variant={"white"}
+          >
+            삭제
+          </Button>
+        </div>
       </header>
       {isLoading ? (
         <div className="flex justify-center items-center h-60">
@@ -56,17 +98,21 @@ function ReadCoverLetter({ onClose, id }: ReadCoverLetterProps) {
       )}
 
       <div className="mt-12 flex justify-center gap-4">
-        <Button
-          className="px-4 text-base"
-          onClick={() => navigate("/")}
-          variant="white"
-        >
-          수정하기
-        </Button>
         <Button className="px-4 text-base" onClick={onClose} variant="default">
           확인
         </Button>
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="프로젝트 삭제"
+        warning={true}
+      >
+        <p>정말 삭제하시겠습니까?</p>
+      </Modal>
     </div>
   );
 }

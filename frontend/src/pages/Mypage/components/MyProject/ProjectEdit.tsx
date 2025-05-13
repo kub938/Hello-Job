@@ -90,6 +90,19 @@ function ProjectEdit({
       onSubmit={handleSubmit}
       className="bg-gray-50 p-6 rounded-lg shadow-sm space-y-4"
     >
+      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+        <label className="text-sm font-medium text-gray-500 mb-2 block">
+          프로젝트명 (제목)
+        </label>
+        <input
+          type="text"
+          name="projectName"
+          value={formData.projectName}
+          onChange={handleChange}
+          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          required
+        />
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
           <label className="text-sm font-medium text-gray-500 mb-2 block">
@@ -128,20 +141,6 @@ function ProjectEdit({
             />
           </div>
         </div>
-      </div>
-
-      <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-        <label className="text-sm font-medium text-gray-500 mb-2 block">
-          프로젝트명
-        </label>
-        <input
-          type="text"
-          name="projectName"
-          value={formData.projectName}
-          onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          required
-        />
       </div>
 
       <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
