@@ -6,6 +6,7 @@ services:
     ports:
       - "8080:8080"      # 외부:내부 포트
     environment:         # 환경변수 설정
+      - TZ=Asia/Seoul
       - SPRING_PROFILES_ACTIVE=dev
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}

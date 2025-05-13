@@ -14,8 +14,13 @@ RUN ./gradlew build -x test
 # 실행 스테이지
 FROM openjdk:17-slim
 WORKDIR /app
+
+# 시간대 설정 추가
+ENV TZ=Asia/Seoul
+
 # 빌드된 jar 복사
 COPY --from=build /app/build/libs/*.jar app.jar
 # 포트 설정
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# JVM 시간대 설정과 함께 실행
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Seoul", "-jar", "app.jar"]
