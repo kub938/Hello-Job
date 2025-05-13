@@ -9,6 +9,7 @@ import ToggleInput from "./ToggleInput";
 import { useNavigate } from "react-router";
 import { FaSpinner } from "react-icons/fa";
 import { useGetToken } from "@/hooks/tokenHook";
+import { FaQuestionCircle } from "react-icons/fa";
 
 interface CreateCorporateProps {
   onClose: () => void;
@@ -194,7 +195,30 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
             htmlFor="userPrompt"
             className="text-sm font-medium text-[#6E7180] flex justify-between"
           >
-            <span>사용자 프롬프트</span>
+            <div className="flex items-center gap-1">
+              <span>사용자 프롬프트</span>
+              <div className="relative">
+                <FaQuestionCircle
+                  className="text-[#9CA3AF] hover:text-[#6F52E0] cursor-pointer"
+                  onMouseEnter={(e) => {
+                    const tooltip = document.getElementById("prompt-tooltip");
+                    if (tooltip) tooltip.classList.remove("hidden");
+                  }}
+                  onMouseLeave={(e) => {
+                    const tooltip = document.getElementById("prompt-tooltip");
+                    if (tooltip) tooltip.classList.add("hidden");
+                  }}
+                />
+                <div
+                  id="prompt-tooltip"
+                  className="hidden absolute z-10 p-2 bg-gray-800 text-white text-sm rounded-md shadow-lg w-80 left-6 -top-1"
+                >
+                  [안내] 현재 기업 분석은 DART 공시 및 뉴스 기사 정보만을
+                  기반으로 제공됩니다. 내부 문화, 상세 기술 스택 등은 분석
+                  범위에 포함되지 않습니다.
+                </div>
+              </div>
+            </div>
             <span className="text-xs text-[#9CA3AF]">최대 500자</span>
           </label>
           <textarea
