@@ -85,7 +85,7 @@ function CorporateSearch() {
           />
         </div>
         <h2 className="w-full text-2xl font-bold mb-[2vh]">기업 목록</h2>
-        <div className="flex justify-start gap-4 w-[968px] mx-auto flex-wrap pb-[196px]">
+        <div className="flex justify-start gap-4 w-[968px] mx-auto flex-wrap pb-[212px]">
           {isLoading ? (
             <div>로딩 중...</div>
           ) : corporates.length > 0 ? (
@@ -94,7 +94,7 @@ function CorporateSearch() {
                 key={corporate.id}
                 id={corporate.id}
                 width={230}
-                height={360}
+                height={376}
                 initialWidth={230}
                 initialHeight={180}
                 corName={corporate.corName}
