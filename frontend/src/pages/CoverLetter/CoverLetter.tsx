@@ -38,7 +38,8 @@ function CoverLetter() {
   // API 호출 관련 훅
 
   const { data: coverLetter, isLoading } = useGetFirstCoverLetter(
-    coverLetterId || 0
+    coverLetterId || 0,
+    selectQuestionNumber || 0
   );
   const { data: statusData } = useGetContentStatus(coverLetterId || 0);
 

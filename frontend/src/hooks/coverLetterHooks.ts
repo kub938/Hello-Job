@@ -38,15 +38,20 @@ export const useGetCoverLetter = (contentId: number | undefined) => {
 };
 
 // 두 쿼리를 연결하여 사용하는 복합 훅
-export const useGetFirstCoverLetter = (coverLetterId: number) => {
+export const useGetFirstCoverLetter = (
+  coverLetterId: number,
+  selectContentNumber: number
+) => {
   // 1. 먼저 contentIds 목록을 가져옴
   const contentIdsQuery = useGetCoverLetterContentIds(coverLetterId);
 
   // 2. contentIds 중 첫 번째 항목(0번 인덱스)을 사용하여 coverLetter 가져오기
-  const firstContentId = contentIdsQuery.data?.contentIds?.[0];
+  const firstContentId =
+    contentIdsQuery.data?.contentIds?.[selectContentNumber];
 
   const coverLetterQuery = useGetCoverLetter(firstContentId);
 
+  console.log(coverLetterQuery.data);
   return {
     contentIdsQuery,
     coverLetterQuery,
