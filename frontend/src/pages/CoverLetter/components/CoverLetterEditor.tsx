@@ -41,7 +41,7 @@ function CoverLetterEditor({
         원하시는 부분을 수정하며 자소서를 완성해보세요!
       </div>
       <div className="text-lg font-semibold pb-2 ">
-        {contentNumber + 1}. {contentQuestion}
+        {contentNumber}. {contentQuestion}
       </div>
 
       <label htmlFor="자기소개서 수정화면" />

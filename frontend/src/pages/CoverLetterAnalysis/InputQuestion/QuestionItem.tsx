@@ -56,7 +56,6 @@ function QuestionItem({
     inputData.contents[contentIndex].contentExperienceIds;
 
   /* 입력 값 상태 관리 */
-  // const [localContents, setLocalContents] = useState(inputData.contents[contentIndex]);
   const [inputTitle, setInputTitle] = useState("");
   const [inputLimitNum, setInputLimitNum] = useState("");
   const [inputPrompt, setInputPrompt] = useState("");
@@ -89,7 +88,7 @@ function QuestionItem({
         contentQuestion: inputTitle,
         contentLength: inputLimitNum ? Number(inputLimitNum) : 0,
         contentFirstPrompt: inputPrompt,
-        contentNumber: contentIndex,
+        contentNumber: contentIndex + 1,
         contentProjectIds: selectedProjectNum,
         contentExperienceIds: selectedExperienceNum,
       };
