@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
 import { toast } from "sonner";
 import ToggleInput from "./ToggleInput";
-import { useNavigate } from "react-router";
 import { FaSpinner } from "react-icons/fa";
 import { useGetToken } from "@/hooks/tokenHook";
 import { FaQuestionCircle } from "react-icons/fa";
@@ -33,7 +32,6 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [token, setToken] = useState<number | undefined>();
 
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { register, handleSubmit } = useForm<IForm>();
@@ -47,7 +45,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
       toast.success("기업 분석이 완료되었습니다.");
       setIsSubmitting(false);
       // 페이지 이동시키기
-      navigate(`/corporate-research/${corporateId}`);
+      onClose();
       //초기화
       setIsPublic(true);
       setIsBasic(true);

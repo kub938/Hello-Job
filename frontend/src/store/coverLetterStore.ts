@@ -141,5 +141,18 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
           contents,
         },
       })),
+    updateContent: (
+      contentIndex: number,
+      updatedData: Partial<CoverLetterRequestContent>
+    ) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          contents: state.inputData.contents.map((content, index) =>
+            index === contentIndex ? { ...content, ...updatedData } : content
+          ),
+        },
+      }));
+    },
   })
 );
