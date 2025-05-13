@@ -29,6 +29,7 @@ export interface postBookmarkResponse {
 //특정 기업 분석 레포트 목록 API
 export interface getCorporateReportListResponse {
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -44,6 +45,7 @@ export interface getCorporateReportListResponse {
 //특정 기업 분석 레포트 상세 API
 export interface getCorporateReportDetailResponse {
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -72,6 +74,7 @@ export interface postCorporateReportRequest {
   plus: boolean;
   financial: boolean;
   userPrompt: string;
+  companyAnalysisTitle: string;
 }
 
 export interface postCorporateReportResponse {

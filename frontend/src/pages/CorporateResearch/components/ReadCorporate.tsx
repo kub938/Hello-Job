@@ -11,12 +11,13 @@ import NewsInformation from "./NewsInformation";
 interface ReadCorporateProps {
   id: number;
   onClose: () => void;
+  companyId: string;
 }
 
 // 탭 타입 정의
 type TabType = "분석 요약" | "공시 정보" | "뉴스 정보";
 
-function ReadCorporate({ onClose, id }: ReadCorporateProps) {
+function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
   const queryClient = useQueryClient();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isValidId, setIsValidId] = useState(false);
@@ -65,7 +66,9 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
       queryClient.invalidateQueries({
         queryKey: ["corporateReportDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["corporateReportList"] });
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportList", companyId],
+      });
     },
   });
 
@@ -78,7 +81,9 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
       queryClient.invalidateQueries({
         queryKey: ["corporateReportDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["corporateReportList"] });
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportList", companyId],
+      });
     },
   });
 
@@ -95,11 +100,11 @@ function ReadCorporate({ onClose, id }: ReadCorporateProps) {
     <>
       <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
         <header className="flex w-full justify-between items-end mb-4">
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold truncate flex-1">
             {isLoading || !reportDetail
               ? "로딩 중..."
-              : reportDetail.companyName}{" "}
-            기업 분석 -{" "}
+              : reportDetail.companyAnalysisTitle}{" "}
+            ({reportDetail?.companyName} 기업 분석) -{" "}
             {isLoading || !reportDetail
               ? ""
               : new Date(reportDetail.createdAt).toLocaleDateString("ko-KR")}
