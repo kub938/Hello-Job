@@ -50,7 +50,10 @@ function ReadCoverLetter({ onClose, id, page }: ReadCoverLetterProps) {
       <header className="flex w-full justify-between items-end mb-4">
         <h1 className="text-2xl font-bold mb-4">자기소개서 열람</h1>
         <div className="flex gap-4">
-          <Button onClick={() => navigate("/")} variant={"white"}>
+          <Button
+            onClick={() => navigate(`/cover-letter/${id}`)}
+            variant={"white"}
+          >
             수정
           </Button>
           <Button
