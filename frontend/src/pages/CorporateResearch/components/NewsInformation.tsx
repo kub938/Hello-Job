@@ -42,9 +42,7 @@ function NewsInformation({
               </div>
               <div>
                 <p className="text-sm text-[#6E7180]">뉴스 분석 날짜</p>
-                <p className="font-semibold">
-                  {timeParser(reportDetail.newsAnalysisDate)}
-                </p>
+                <p className="font-semibold">{reportDetail.newsAnalysisDate}</p>
               </div>
             </div>
 

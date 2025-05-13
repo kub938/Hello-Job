@@ -3,7 +3,7 @@ import { timeParser } from "../../../hooks/timeParser";
 
 interface CorporateReportCardProps {
   onClick: () => void;
-  companyName: string;
+  companyAnalysisTitle: string;
   createdAt: string;
   companyViewCount: number;
   companyLocation: string;
@@ -14,7 +14,7 @@ interface CorporateReportCardProps {
 
 function CorporateReportCard({
   onClick,
-  companyName,
+  companyAnalysisTitle,
   createdAt,
   companyViewCount,
   companyLocation,
@@ -29,8 +29,8 @@ function CorporateReportCard({
     >
       <div>
         <div className="flex items-center w-full border-b border-[#AF9BFF]/80 pb-1 justify-between">
-          <h3 className="text-base font-bold text-gray-800 truncate">
-            {companyName}
+          <h3 className="text-base font-bold text-gray-800 w-full truncate">
+            {companyAnalysisTitle}
           </h3>
           {bookmark ? (
             <FaBookmark className="text-[#6F52E0]" />

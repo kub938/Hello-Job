@@ -9,6 +9,7 @@ import ToggleInput from "./ToggleInput";
 import { useNavigate } from "react-router";
 import { FaSpinner } from "react-icons/fa";
 import { useGetToken } from "@/hooks/tokenHook";
+import { FaQuestionCircle } from "react-icons/fa";
 
 interface CreateCorporateProps {
   onClose: () => void;
@@ -21,6 +22,7 @@ interface IForm {
   plus: boolean;
   financial: boolean;
   userPrompt: string;
+  companyAnalysisTitle: string;
 }
 
 function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
@@ -74,6 +76,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         plus: data.plus,
         financial: data.financial,
         userPrompt: data.userPrompt,
+        companyAnalysisTitle: data.companyAnalysisTitle,
       });
     } catch (error) {
       // 에러 처리
@@ -84,6 +87,9 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const onInvalidSubmit = (errors: FieldErrors<IForm>) => {
     if (errors.userPrompt?.type === "maxLength") {
       toast.error(errors.userPrompt.message);
+    }
+    if (errors.companyAnalysisTitle?.type === "required") {
+      toast.error(errors.companyAnalysisTitle.message);
     }
     setIsSubmitting(false);
   };
@@ -132,6 +138,28 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         onSubmit={handleSubmit(onValidSubmit, onInvalidSubmit)}
         action=""
       >
+        <div className="space-y-2">
+          <label
+            htmlFor="companyAnalysisTitle"
+            className="text-sm font-medium text-[#6E7180]"
+          >
+            기업 분석 제목 <span className="text-red-500">*</span>
+          </label>
+          <input
+            id="companyAnalysisTitle"
+            {...register("companyAnalysisTitle", {
+              required: "기업 분석 제목은 필수입니다.",
+              maxLength: {
+                value: 50,
+                message: "최대 50자리까지 입력할 수 있습니다",
+              },
+            })}
+            placeholder="기업 분석 제목 입력"
+            type="text"
+            autoComplete="off"
+            className="w-full p-3 border border-[#E4E8F0] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6F52E0]/50 focus:border-[#6F52E0] transition-all"
+          />
+        </div>
         <ToggleInput
           label={isPublic ? "공개" : "비공개"}
           description={
@@ -194,7 +222,30 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
             htmlFor="userPrompt"
             className="text-sm font-medium text-[#6E7180] flex justify-between"
           >
-            <span>사용자 프롬프트</span>
+            <div className="flex items-center gap-1">
+              <span>사용자 프롬프트</span>
+              <div className="relative">
+                <FaQuestionCircle
+                  className="text-[#9CA3AF] hover:text-[#6F52E0] cursor-pointer"
+                  onMouseEnter={() => {
+                    const tooltip = document.getElementById("prompt-tooltip");
+                    if (tooltip) tooltip.classList.remove("hidden");
+                  }}
+                  onMouseLeave={() => {
+                    const tooltip = document.getElementById("prompt-tooltip");
+                    if (tooltip) tooltip.classList.add("hidden");
+                  }}
+                />
+                <div
+                  id="prompt-tooltip"
+                  className="hidden absolute z-10 p-2 bg-gray-800 text-white text-sm rounded-md shadow-lg w-80 left-6 -top-1"
+                >
+                  [안내] 현재 기업 분석은 DART 공시 및 뉴스 기사 정보만을
+                  기반으로 제공됩니다. 내부 문화, 상세 기술 스택 등은 분석
+                  범위에 포함되지 않습니다.
+                </div>
+              </div>
+            </div>
             <span className="text-xs text-[#9CA3AF]">최대 500자</span>
           </label>
           <textarea

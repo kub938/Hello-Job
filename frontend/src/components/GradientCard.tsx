@@ -95,13 +95,13 @@ const GradientCard: React.FC<GradientCardProps> = ({
         updatedAt={updatedAt}
         onClick={onClick}
       >
-        <div className="w-full h-full bg-black/10 px-4 py-8 rounded-lg flex flex-col items-center">
+        <div className="w-full h-full bg-black/10 px-4 pt-6 rounded-lg flex flex-col items-center">
           <Avatar username={corName} size={50} className="bg-[#F1F3F9]" />
           <h2 className="text-white text-xl font-bold pt-4 pb-4">{corName}</h2>
           <div className="flex flex-col gap-2 w-full">
             <div>
               <p className="text-gray-100 text-xs">지역</p>
-              <p className="text-white font-semibold">{region}</p>
+              <p className="text-white font-semibold truncate">{region}</p>
             </div>
             <div>
               <p className="text-gray-100 text-xs">업종명</p>
