@@ -9,7 +9,8 @@ sonarqube-check:
       - .sonar/cache
   script:
     - cd backend
-    - ./gradlew clean build -x test  # 빌드 먼저 실행 (테스트 제외)
+    - chmod +x ./gradlew
+    - ./gradlew clean build -x test
     - ./gradlew sonar -Dsonar.projectKey=S12P31S105 -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.login="$SONAR_TOKEN"
   allow_failure: true
   only:
