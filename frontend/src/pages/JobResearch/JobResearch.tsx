@@ -172,7 +172,7 @@ function JobResearch({ type, companyId }: JobResearchProps) {
           {modalView === "create" ? (
             <CreateJob
               onClose={closeModal}
-              corporateId={parseInt(params.id ? params.id : "1")}
+              corporateId={parseInt(id ? id : "1")}
             />
           ) : (
             <ReadJob onClose={closeModal} id={researchJobId} companyId={id} />

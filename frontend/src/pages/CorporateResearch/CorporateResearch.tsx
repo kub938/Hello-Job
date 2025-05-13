@@ -87,7 +87,6 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
         public: corporateReport.public,
       })) || [];
     setCorporateReportList(temp);
-    debugger;
   }, [corporateReportListData]);
 
   const openCreateModal = () => {
