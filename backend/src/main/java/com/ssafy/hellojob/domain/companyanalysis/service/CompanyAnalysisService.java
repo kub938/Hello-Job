@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
-import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.company.service.CompanyReadService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
@@ -38,7 +37,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyAnalysisService {
 
-    private final CompanyRepository companyRepository;
     private final CompanyAnalysisRepository companyAnalysisRepository;
     private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
     private final DartAnalysisRepository dartAnalysisRepository;
@@ -135,7 +133,7 @@ public class CompanyAnalysisService {
         newsAnalysisRepository.save(news);
 
         // CompanyAnalysis 저장
-        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(user, company, dart, news, requestDto.isPublic(), requestDto.getUserPrompt());
+        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(requestDto.getCompanyAnalysisTitle(), user, company, dart, news, requestDto.isPublic(), requestDto.getUserPrompt());
         companyAnalysisRepository.save(companyAnalysis);
 
         // 기업 테이블 업데이트
@@ -163,6 +161,7 @@ public class CompanyAnalysisService {
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
+                            .companyAnalysisTitle(analysis.getCompanyAnalysisTitle())
                             .companyAnalysisId(analysis.getCompanyAnalysisId())
                             .companyName(analysis.getCompany().getCompanyName())
                             .createdAt(analysis.getCreatedAt())
@@ -227,6 +226,7 @@ public class CompanyAnalysisService {
         }
 
         return CompanyAnalysisDetailResponseDto.builder()
+                .companyAnalysisTitle(companyAnalysis.getCompanyAnalysisTitle())
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
                 .companyName(companyAnalysis.getCompany().getCompanyName())
                 .userPrompt(companyAnalysis.getUserPrompt())
@@ -275,6 +275,7 @@ public class CompanyAnalysisService {
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
+                            .companyAnalysisTitle(analysis.getCompanyAnalysisTitle())
                             .companyAnalysisId(analysis.getCompanyAnalysisId())
                             .companyName(analysis.getCompany().getCompanyName())
                             .createdAt(analysis.getCreatedAt())
@@ -392,6 +393,7 @@ public class CompanyAnalysisService {
             }
 
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()
+                    .companyAnalysisTitle(companyAnalysis.getCompanyAnalysisTitle())
                     .companyAnalysisBookmarkId(bookmark.getCompanyAnalysisBookmarkId())
                     .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
                     .companyName(companyAnalysis.getCompany().getCompanyName())
@@ -442,6 +444,7 @@ public class CompanyAnalysisService {
             }
 
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()
+                    .companyAnalysisTitle(companyAnalysis.getCompanyAnalysisTitle())
                     .companyAnalysisBookmarkId(bookmark.getCompanyAnalysisBookmarkId())
                     .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
                     .companyName(companyAnalysis.getCompany().getCompanyName())

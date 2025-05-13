@@ -30,6 +30,9 @@ public class CompanyAnalysis {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @Column(name = "company_analysis_title", nullable = false)
+    private String companyAnalysisTitle;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -63,8 +66,9 @@ public class CompanyAnalysis {
     }
 
 
-    public static CompanyAnalysis of(User user, Company company, DartAnalysis dart, NewsAnalysis news, boolean isPublic, String userPrompt) {
+    public static CompanyAnalysis of(String companyAnalysisTitle, User user, Company company, DartAnalysis dart, NewsAnalysis news, boolean isPublic, String userPrompt) {
         CompanyAnalysis ca = new CompanyAnalysis();
+        ca.companyAnalysisTitle = companyAnalysisTitle;
         ca.user = user;
         ca.company = company;
         ca.dartAnalysis = dart;
