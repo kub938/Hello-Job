@@ -184,7 +184,7 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
           {modalView === "create" ? (
             <CreateCorporate
               onClose={closeModal}
-              corporateId={parseInt(params.id ? params.id : "1")}
+              corporateId={parseInt(id ? id : "1")}
             />
           ) : (
             <ReadCorporate
