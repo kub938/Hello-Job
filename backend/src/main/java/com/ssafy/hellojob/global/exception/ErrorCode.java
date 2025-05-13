@@ -45,7 +45,7 @@ public enum ErrorCode {
     COMPANY_ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 기업 분석 레포트를  찾을 수 없습니다."),
     COMPANY_ANALYSIS_ALREADY_BOOKMARK(HttpStatus.NOT_FOUND, "이미 즐겨찾기에 추가된 항목입니다."),
     COMPANY_ANALYSIS_BOOKMARK_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 즐겨찾기 항목을 찾을 수 없습니다."),
-    COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED(HttpStatus.PAYMENT_REQUIRED, "일일 기업 분석 요청 횟수를 초과하였습니다."),
+    REQUEST_TOKEN_LIMIT_EXCEEDED(HttpStatus.PAYMENT_REQUIRED, "일일 토큰 사용량을 초과하였습니다."),
     FAST_API_RESPONSE_NULL(HttpStatus.BAD_REQUEST, "fast API 반환값이 없습니다"),
 
     // 자기소개서 관련
@@ -69,7 +69,7 @@ public enum ErrorCode {
     CS_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "CS 면접 질문을 찾을 수 없습니다."),
     PERSONALITY_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "인성 면접 질문을 찾을 수 없습니다."),
     COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
-    COVER_LETTER_QUESTION_MISMATCH(HttpStatus.FORBIDDEN, "자기속개서 기반 면접 질문의 소유자와 요청 유저가 일치하지 않습니다."),
+    COVER_LETTER_QUESTION_MISMATCH(HttpStatus.FORBIDDEN, "자기소개서 기반 면접 질문의 소유자와 요청 유저가 일치하지 않습니다."),
 
     // 메모
     QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
