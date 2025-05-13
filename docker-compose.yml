@@ -86,10 +86,12 @@ services:
       - MYSQL_DATABASE=hellojob
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - TZ=Asia/Seoul
     ports:
       - "23309:3306"
     volumes:            # 데이터 영속성
       - mysql_data:/var/lib/mysql
+    command: --default-time-zone='+09:00'
 
 volumes:
   mysql_data:          # MySQL 데이터 저장용 볼륨
