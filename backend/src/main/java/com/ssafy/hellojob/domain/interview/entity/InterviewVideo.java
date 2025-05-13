@@ -41,6 +41,9 @@ public class InterviewVideo {
     @Column(name = "end")
     private LocalDateTime end;
 
+    @Column(name = "video_length")
+    private String videoLength;
+
     public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start){
         InterviewVideo video = new InterviewVideo();
         video.coverLetterInterview = coverLetterInterview;
@@ -57,6 +60,14 @@ public class InterviewVideo {
 
     public void addInterviewVideoUrl(String interviewVideoUrl){
         this.interviewVideoUrl = interviewVideoUrl;
+    }
+
+    public void addEndTime(LocalDateTime end){
+        this.end = end;
+    }
+
+    public void addVideoLength(String videoLength){
+        this.videoLength = videoLength;
     }
 
 }
