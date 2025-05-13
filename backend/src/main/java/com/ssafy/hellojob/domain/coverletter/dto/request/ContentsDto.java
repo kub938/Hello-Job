@@ -19,6 +19,8 @@ public class ContentsDto {
 
     private List<Integer> contentExperienceIds;
     private List<Integer> contentProjectIds;
+
+    @NotNull(message = ValidationMessage.COVER_LETTER_CONTENT_LENGTH)
     private int contentLength;
     private String contentFirstPrompt;
 
