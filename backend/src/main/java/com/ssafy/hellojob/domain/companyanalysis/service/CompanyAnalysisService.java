@@ -53,7 +53,7 @@ public class CompanyAnalysisService {
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         if (user.getToken() <= 0) {
-            throw new BaseException(ErrorCode.COMPANY_ANALYSIS_REQUEST_LIMIT_EXCEEDED);
+            throw new BaseException(ErrorCode.REQUEST_TOKEN_LIMIT_EXCEEDED);
         }
 
         return true;
