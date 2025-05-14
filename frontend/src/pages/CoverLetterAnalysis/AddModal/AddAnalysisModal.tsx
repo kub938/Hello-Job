@@ -22,10 +22,15 @@ function AddAnalysisModal({ onClose, type }: CompanyAnalysisModalProps) {
         {type === "company" ? (
           <CorporateResearch
             type="modal"
+            modalClose={onClose}
             companyId={company.companyId}
           ></CorporateResearch>
         ) : (
-          <JobResearch type="modal" companyId={company.companyId} />
+          <JobResearch
+            type="modal"
+            modalClose={onClose}
+            companyId={company.companyId}
+          />
         )}
       </div>
     </div>

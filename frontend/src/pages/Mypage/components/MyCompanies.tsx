@@ -1,20 +1,20 @@
 import { useState } from "react";
 import MypageHeader from "./MypageHeader";
-import { useQuery } from "@tanstack/react-query";
-import { getCompanyBookMarksAll } from "@/api/mypageApi";
+import { getMyCompanies } from "@/api/mypageApi";
 import DetailModal from "@/components/Common/DetailModal";
 import ReadCorporate from "@/pages/CorporateResearch/components/ReadCorporate";
+import { useQuery } from "@tanstack/react-query";
 import CorporateReportCard from "@/pages/CorporateResearch/components/CorporateReportCard";
 
-function BookmarkedCompanies() {
+function MyCompanies() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchCompanyId, setResearchCompanyId] = useState<number>(1);
   const [clickedCompanyId, setClickedCompanyId] = useState<number>(1);
 
-  const { data: bookmarkedCompanyListData, isLoading } = useQuery({
-    queryKey: ["bookmarkedCompanyList"],
+  const { data: myCompanyListData, isLoading } = useQuery({
+    queryKey: ["myCompanyList"],
     queryFn: async () => {
-      const response = await getCompanyBookMarksAll();
+      const response = await getMyCompanies();
       return response.data;
     },
   });
@@ -30,16 +30,15 @@ function BookmarkedCompanies() {
 
   return (
     <div className="flex-1 p-4 md:p-6 md:ml-56 transition-all duration-300">
-      <MypageHeader title="기업 분석 북마크" />
+      <MypageHeader title="내 기업 분석" />
       <h2 className="text-xl font-semibold mb-4">
-        내가 북마크한 기업 분석을 모아 볼 수 있습니다.
+        내가 작성한 기업 분석을 모아 볼 수 있습니다.
       </h2>
       <div className="flex justify-start gap-4 w-[1164px] mx-auto flex-wrap">
         {isLoading ? (
           <div>로딩 중...</div>
-        ) : bookmarkedCompanyListData &&
-          bookmarkedCompanyListData.length > 0 ? (
-          bookmarkedCompanyListData.map((corporateReport) => (
+        ) : myCompanyListData && myCompanyListData.length > 0 ? (
+          myCompanyListData.map((corporateReport) => (
             <CorporateReportCard
               key={corporateReport.companyAnalysisId}
               onClick={() => {
@@ -62,8 +61,8 @@ function BookmarkedCompanies() {
           ))
         ) : (
           <div className="text-center text-gray-500 text-lg h-[110px] w-full flex flex-col items-center justify-center">
-            <h1>기업 분석이 없습니다.</h1>
-            <h1 className="text-base mt-2">기업 분석을 북마크 해보세요.</h1>
+            <h1>작성한 기업 분석이 없습니다.</h1>
+            <h1 className="text-base mt-2">기업 분석을 작성해보세요.</h1>
           </div>
         )}
       </div>
@@ -80,4 +79,4 @@ function BookmarkedCompanies() {
   );
 }
 
-export default BookmarkedCompanies;
+export default MyCompanies;

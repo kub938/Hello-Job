@@ -28,9 +28,14 @@ interface CorporateReport {
 export interface CorporateResearchProps {
   type?: "modal";
   companyId?: number;
+  modalClose?: () => void;
 }
 
-function CorporateResearch({ type, companyId }: CorporateResearchProps) {
+function CorporateResearch({
+  modalClose,
+  type,
+  companyId,
+}: CorporateResearchProps) {
   const params = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -140,6 +145,9 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
               onClick={() => {
                 openReadModal(corporateReport.companyAnalysisId);
               }}
+              modalClose={modalClose}
+              reportId={corporateReport.companyAnalysisId}
+              companyId={id}
               companyAnalysisTitle={corporateReport.companyAnalysisTitle}
               createdAt={corporateReport.createdAt}
               companyViewCount={corporateReport.companyViewCount}
@@ -150,6 +158,7 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
               isPublic={corporateReport.public}
+              isFinding={type === "modal" ? true : false} //companyId가 있으면 자소서 작성 중임임
             />
           ))
         ) : (
