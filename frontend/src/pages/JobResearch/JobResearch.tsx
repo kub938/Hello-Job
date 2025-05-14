@@ -16,9 +16,10 @@ import { useSelectJobStore } from "@/store/coverLetterAnalysisStore";
 export interface JobResearchProps {
   type?: "modal";
   companyId?: number;
+  modalClose?: () => void;
 }
 
-function JobResearch({ type, companyId }: JobResearchProps) {
+function JobResearch({ modalClose, type, companyId }: JobResearchProps) {
   const params = useParams();
   const navigate = useNavigate();
 
@@ -132,6 +133,9 @@ function JobResearch({ type, companyId }: JobResearchProps) {
               onClick={() => {
                 openReadModal(jobResearch.jobRoleAnalysisId);
               }}
+              modalClose={modalClose}
+              jobId={jobResearch.jobRoleAnalysisId}
+              companyId={id}
               jobRoleName={jobResearch.jobRoleName}
               jobRoleAnalysisTitle={jobResearch.jobRoleAnalysisTitle}
               jobRoleCategory={jobResearch.jobRoleCategory}
@@ -139,6 +143,8 @@ function JobResearch({ type, companyId }: JobResearchProps) {
               jobRoleBookmarkCount={jobResearch.jobRoleBookmarkCount}
               bookmark={jobResearch.bookmark}
               createdAt={jobResearch.createdAt}
+              isPublic={jobResearch.public}
+              isFinding={companyId ? true : false} //companyId가 있으면 자소서 작성 중임임
             />
           ))
         ) : (

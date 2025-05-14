@@ -96,6 +96,16 @@ export const getJobBookMarksAll = () => {
   );
 };
 
+export const getMyCompanies = () => {
+  return authApi.get<CompanyBookMarkResponse[]>(
+    `/api/v1/mypage/company-analysis`
+  );
+};
+
+export const getMyJobs = () => {
+  return authApi.get<JobBookMarkResponse[]>(`/api/v1/mypage/job-role-analysis`);
+};
+
 export const getToken = () => {
   return authApi.get<GetTokenResponse>(`/api/v1/user/token`);
 };
