@@ -1,7 +1,7 @@
 import { corporateReportApi } from "@/api/corporateReport";
 import { useState, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
 import { Button } from "@/components/Button";
 import { parseData, Section } from "@/hooks/researchParseHook";
 import AnalysisSummary from "./AnalysisSummary";
@@ -101,9 +101,19 @@ function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
       <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
         <header className="flex w-full justify-between items-end mb-4">
           <h1 className="text-2xl font-bold truncate flex-1">
-            {isLoading || !reportDetail
-              ? "로딩 중..."
-              : reportDetail.companyAnalysisTitle}{" "}
+            {isLoading || !reportDetail ? (
+              "로딩 중..."
+            ) : (
+              <>
+                {reportDetail.public === false && (
+                  <FaLock
+                    className="inline-block mr-2 text-gray-500"
+                    size={16}
+                  />
+                )}
+                {reportDetail.companyAnalysisTitle}
+              </>
+            )}{" "}
             ({reportDetail?.companyName} 기업 분석) -{" "}
             {isLoading || !reportDetail
               ? ""

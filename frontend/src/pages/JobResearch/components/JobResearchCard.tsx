@@ -1,5 +1,5 @@
 import { timeParser } from "@/hooks/timeParser";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
 
 interface JobResearchCardProps {
   onClick: () => void;
@@ -10,6 +10,7 @@ interface JobResearchCardProps {
   jobRoleBookmarkCount: number;
   bookmark: boolean;
   createdAt: string;
+  isPublic: boolean;
 }
 
 function JobResearchCard({
@@ -21,6 +22,7 @@ function JobResearchCard({
   jobRoleBookmarkCount,
   bookmark,
   createdAt,
+  isPublic,
 }: JobResearchCardProps) {
   const handleBookmarkClickOn = () => {
     console.log("bookmarkClickOn");
@@ -37,6 +39,13 @@ function JobResearchCard({
         <div className="flex flex-col">
           <div className="flex items-center gap-4">
             <h3 className="text-lg font-bold text-[#333] mb-1">
+              {isPublic ? (
+                <></>
+              ) : (
+                <span className="text-gray-500 mr-1">
+                  <FaLock size={12} />
+                </span>
+              )}
               {jobRoleAnalysisTitle}
             </h3>
             <span className="text-sm font-medium text-[#6F4BFF]">

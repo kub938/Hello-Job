@@ -55,6 +55,7 @@ function BookmarkedCompanies() {
               }
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
+              isPublic={corporateReport.public}
             />
           ))
         ) : (

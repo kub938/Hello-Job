@@ -149,6 +149,7 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
               }
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
+              isPublic={corporateReport.public}
             />
           ))
         ) : (

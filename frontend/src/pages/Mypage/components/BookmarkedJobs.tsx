@@ -53,6 +53,7 @@ function BookmarkedJobs() {
               jobRoleBookmarkCount={jobResearch.jobRoleBookmarkCount}
               bookmark={jobResearch.bookmark}
               createdAt={jobResearch.updatedAt}
+              isPublic={jobResearch.public}
             />
           ))
         ) : (
