@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from app.schemas.cover_letter import Experience, Project
+from typing import List
 
 class CoverLetterContent(BaseModel):
     cover_letter_content_number: int  # 자기소개서 문항 번호 
@@ -17,7 +18,7 @@ class CreateQuestionRequest(BaseModel):
     
 class CreateQuestionResponse(BaseModel):
     cover_letter_id: int
-    expected_questions: List[QuestionAnswerPair]
+    expected_questions: List[str]
     
 class QuestionAnswerPair(BaseModel): 
     """면접 질문과 답변 쌍"""
@@ -37,4 +38,4 @@ class SingleFeedback(BaseModel):
     
 class FeedbackInterviewResponse(BaseModel):
     single_feedbacks: List[SingleFeedback]  # 피드백 리스트
-    overall_feedback: str  # 총평 (전반적인 피드백)
+    overall_feedback: str  # 전반적인 피드백
