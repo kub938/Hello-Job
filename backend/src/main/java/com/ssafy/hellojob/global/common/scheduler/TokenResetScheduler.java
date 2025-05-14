@@ -36,7 +36,8 @@ public class TokenResetScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void testScheduler() {
-        log.info("🔔 테스트 스케줄러 동작 확인");
+        System.out.println("🔥 [스케줄러 실행] testScheduler 동작 중");
+        log.info("🔔 [스케줄러] 테스트 스케줄러 동작 확인");
     }
 
 
