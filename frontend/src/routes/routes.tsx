@@ -30,8 +30,8 @@ import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
 import InterviewPage from "@/pages/Interview/pages/InterviewLayoutPage";
 import ResultPage from "@/pages/Interview/pages/ResultPage";
 import PreparePage from "@/pages/Interview/pages/PreparePage";
-import MockInterviewPage from "@/pages/Interview/pages/MockInterviewPage";
 import SingleQuestionPage from "@/pages/Interview/pages/SingleQuestionPage";
+import PracticeInterviewPage from "@/pages/Interview/pages/PracticeInterviewPage";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -152,11 +152,11 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "mock-interview",
+                path: "practice-interview",
                 element: (
                   <SuspenseWrapper>
                     <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <MockInterviewPage />
+                      <PracticeInterviewPage />
                     </ErrorBoundary>
                   </SuspenseWrapper>
                 ),
