@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.coverletter.service;
 
 import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
+import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisService;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.*;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
@@ -51,6 +52,7 @@ public class CoverLetterService {
     private final UserReadService userReadService;
     private final FastApiClientService fastApiClientService;
     private final CoverLetterReadService coverLetterReadService;
+    private final CompanyAnalysisService companyAnalysisService;
 
     public CoverLetterCreateResponseDto createCoverLetter(Integer userId, CoverLetterRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
@@ -108,7 +110,10 @@ public class CoverLetterService {
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .job_role_analysis(
+                        coverLetter.getJobRoleSnapshot() != null
+                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                        : null)
                 .contents(coverLetter.getContents().stream()
                         .map(content -> ContentDto.builder()
                                 .content_number(content.getContentNumber())
