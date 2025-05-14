@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 async def create_cover_letter(
     content: ContentItem, 
     company_analysis: CompanyAnalysis, 
-    job_role_analysis: JobRoleAnalysis) -> CoverLetterItem:
+    job_role_analysis: Optional[JobRoleAnalysis] = None) -> CoverLetterItem:
     
     # 요청 큐 가져오기
     request_queue = get_request_queue()
@@ -45,8 +45,9 @@ async def create_cover_letter(
         """
     
     # 프롬프트 구성
-    prompt = f"""
-    다음 정보를 바탕으로 자기소개서 항목에 대한 초안을 작성해주세요:
+    prompt = ""
+    if job_role_analysis:
+        prompt = f"""다음 정보를 바탕으로 자기소개서 항목에 대한 초안을 작성해주세요:
     
     ## 자기소개서 항목
     - 항목 번호: {content.content_number}
@@ -71,6 +72,38 @@ async def create_cover_letter(
     - 우대 사항: {job_role_analysis.job_role_preferences or '정보 없음'}
     - 기타 정보: {job_role_analysis.job_role_etc or '정보 없음'}
     - 직무 카테고리: {job_role_analysis.job_role_category}
+    
+    ## 지원자 경험 정보
+    {experiences_text}
+    
+    ## 지원자 프로젝트 정보
+    {projects_text}
+    
+    ## 작성 가이드라인
+    1. 기업의 비전과 분석 내용에 부합하는 내용으로 작성해주세요.
+    2. 직무에 필요한 역량과 스킬을 지원자의 경험/프로젝트와 연결하여 작성해주세요.
+    3. 지원자의 경험과 프로젝트 중 해당 직무와 가장 관련성이 높은 내용을 중심으로 작성해주세요.
+    4. **지원자가 요청한 사항({content.content_prompt})을 반드시 반영해주세요.**
+    5. {content.content_length}자 내외로 작성해주세요.
+    6. **자기소개서 내용만을 작성해주세요. 자기소개서 내용 외의 내용은 작성하지 마세요.**
+    7. 한국어로 작성해주세요.
+    """
+    else: 
+        prompt = f"""다음 정보를 바탕으로 자기소개서 항목에 대한 초안을 작성해주세요:
+    
+    ## 자기소개서 항목
+    - 항목 번호: {content.content_number}
+    - 항목 질문: {content.content_question}
+    - 글자수 제한: {content.content_length}
+    - 요청 사항: {content.content_prompt}
+    
+    ## 기업 분석
+    - 기업명: {company_analysis.company_name}
+    - 기업 브랜드: {company_analysis.company_brand}
+    - 기업 분석: {company_analysis.company_analysis}
+    - 비전: {company_analysis.company_vision}
+    - 재무 상태: {company_analysis.company_finance}
+    - 뉴스 분석: {company_analysis.news_analysis_data}
     
     ## 지원자 경험 정보
     {experiences_text}

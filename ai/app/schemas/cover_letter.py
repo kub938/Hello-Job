@@ -55,7 +55,7 @@ class ContentItem(BaseModel):
 class CreateCoverLetterRequest(BaseModel):
     """자기소개서 초안 생성 요청 정보"""
     company_analysis: CompanyAnalysis
-    job_role_analysis: JobRoleAnalysis
+    job_role_analysis: Optional[JobRoleAnalysis] = None
     contents: List[ContentItem]
 
 class CoverLetterItem(BaseModel):
