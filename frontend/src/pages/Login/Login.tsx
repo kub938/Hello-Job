@@ -48,9 +48,9 @@ function Login() {
           </div>
 
           <div className="grid gap-6">
-            <Button variant="default" size="default" type="submit">
+            {/* <Button variant="default" size="default" type="submit">
               <Link to="/">홈으로 돌아가기</Link>
-            </Button>
+            </Button> */}
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
