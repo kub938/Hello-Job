@@ -30,7 +30,7 @@ public class CompanyAnalysis {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
-    @Column(name = "company_analysis_title", nullable = true)
+    @Column(name = "company_analysis_title", nullable = false)
     private String companyAnalysisTitle;
 
     @CreationTimestamp
