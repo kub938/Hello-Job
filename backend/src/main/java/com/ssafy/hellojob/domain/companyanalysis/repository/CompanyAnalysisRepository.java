@@ -12,7 +12,7 @@ public interface CompanyAnalysisRepository extends JpaRepository<CompanyAnalysis
     List<CompanyAnalysis> findAllByCompany_CompanyId(Integer companyId);
 
     // 최근 14개 반환
-    List<CompanyAnalysis> findTop14ByCompany_CompanyIdAndIsPublicTrueOrderByCreatedAtDesc(Integer companyId);
+    List<CompanyAnalysis> findTop14ByCompany_CompanyIdOrderByCreatedAtDesc(Integer companyId);
 
 
 }
