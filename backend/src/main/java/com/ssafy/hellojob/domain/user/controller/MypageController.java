@@ -1,5 +1,7 @@
 package com.ssafy.hellojob.domain.user.controller;
 
+import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisListResponseDto;
+import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisService;
 import com.ssafy.hellojob.domain.coverletter.dto.response.MyPageCoverLetterDto;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.WholeCoverLetterContentDto;
@@ -17,7 +19,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -26,6 +31,7 @@ import java.util.List;
 @RequestMapping("/api/v1/mypage")
 public class MypageController {
 
+    private final CompanyAnalysisService companyAnalysisService;
     private final JobRoleAnalysisService jobRoleAnalysisService;
     private final CoverLetterService coverLetterService;
     private final ExperienceService experienceService;
@@ -38,6 +44,13 @@ public class MypageController {
         List<JobRoleAnalysisSearchListResponseDto> result = jobRoleAnalysisService.searchJobRoleAnalysisByUserId(userId);
 
         return result;
+    }
+
+    @GetMapping("/company-analysis")
+    public List<CompanyAnalysisListResponseDto> CompanyAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Integer userId = userPrincipal.getUserId();
+        return companyAnalysisService.searchCompanyAnalysisByUserId(userId);
     }
 
     @GetMapping("/cover-letter")

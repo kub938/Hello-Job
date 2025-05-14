@@ -76,7 +76,7 @@ public class JobRoleAnalysisService {
                 .build();
     }
 
-    // 직무 분석 정보 조회
+    // 직무 분석 상세 조회
     @Transactional
     public JobRoleAnalysisDetailResponseDto searchJobRoleAnalysis(Integer userId, Integer jobRoleAnalysisId) {
 
@@ -94,6 +94,8 @@ public class JobRoleAnalysisService {
 
         // 현재 로그인한 유저가 이거 북마크했는지 여부 조회
         boolean isBookmarked = jobRoleAnalysisBookmarkRepository.existsByUserAndJobRoleAnalysis(user, jobRoleAnalysis);
+
+        boolean isWrittenByMe = userId.equals(jobRoleAnalysis.getUser().getUserId());
 
         // 조회수 +1
         jobRoleAnalysis.setJobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount() + 1);
@@ -117,6 +119,7 @@ public class JobRoleAnalysisService {
                 .updatedAt(jobRoleAnalysis.getUpdatedAt())
                 .jobRoleAnalysisBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                 .bookmark(isBookmarked)
+                .writtenByMe(isWrittenByMe)
                 .build();
     }
 
