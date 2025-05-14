@@ -258,7 +258,7 @@ public class CompanyAnalysisService {
         companyReadService.findCompanyByIdOrElseThrow(companyId);
 
         // 해당 기업의 기업 분석 전체 조회
-        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdAndIsPublicTrueOrderByCreatedAtDesc(companyId);
+        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdOrderByCreatedAtDesc(companyId);
 
         log.debug("기업 분석 목록 조회");
         log.debug("검색된 기업 분석 갯수: {}", analysisList.size());
