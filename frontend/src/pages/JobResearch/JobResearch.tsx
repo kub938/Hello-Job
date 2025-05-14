@@ -139,6 +139,7 @@ function JobResearch({ type, companyId }: JobResearchProps) {
               jobRoleBookmarkCount={jobResearch.jobRoleBookmarkCount}
               bookmark={jobResearch.bookmark}
               createdAt={jobResearch.createdAt}
+              isPublic={jobResearch.public}
             />
           ))
         ) : (

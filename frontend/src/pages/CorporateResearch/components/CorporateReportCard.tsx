@@ -1,4 +1,4 @@
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
 import { timeParser } from "../../../hooks/timeParser";
 
 interface CorporateReportCardProps {
@@ -10,6 +10,7 @@ interface CorporateReportCardProps {
   companyAnalysisBookmarkCount: number;
   bookmark: boolean;
   dartCategory?: string[];
+  isPublic: boolean;
 }
 
 function CorporateReportCard({
@@ -21,6 +22,7 @@ function CorporateReportCard({
   companyAnalysisBookmarkCount,
   bookmark,
   dartCategory,
+  isPublic,
 }: CorporateReportCardProps) {
   return (
     <div
@@ -29,6 +31,13 @@ function CorporateReportCard({
     >
       <div>
         <div className="flex items-center w-full border-b border-[#AF9BFF]/80 pb-1 justify-between">
+          {isPublic ? (
+            <></>
+          ) : (
+            <span className="text-gray-500 mr-1">
+              <FaLock size={12} />
+            </span>
+          )}
           <h3 className="text-base font-bold text-gray-800 w-full truncate">
             {companyAnalysisTitle}
           </h3>
