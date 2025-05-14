@@ -30,6 +30,7 @@ export interface getJobRoleDetail {
   updatedAt: string;
   jobRoleAnalysisBookmarkCount: number;
   bookmark: boolean;
+  writtenByMe: boolean;
 }
 
 //북마크
@@ -81,4 +82,22 @@ export interface postJobRoleAnalysisRequest {
 
 export interface postJobRoleAnalysisResponse {
   jobRoleId: number;
+}
+
+export interface putJobRoleAnalysisRequest {
+  jobRoleAnalysisId: number; // not null
+  companyId: number; // not null
+  jobRoleName: string; // not null // 글자수 제한 33자
+  jobRoleTitle: string; // not null // 글자수 제한 50자
+  jobRoleSkills: string; // 글자수 제한 500자
+  jobRoleWork: string; // 글자수 제한 500자
+  jobRoleRequirements: string; // 글자수 제한 500자
+  jobRolePreferences: string; // 글자수 제한 500자
+  jobRoleEtc: string; // 글자수 제한 500자
+  jobRoleCategory: JobRoleCategory; // not null
+  isPublic: boolean; // not null
+}
+
+export interface putJobRoleAnalysisResponse {
+  jobRoleAnalysisId: number;
 }

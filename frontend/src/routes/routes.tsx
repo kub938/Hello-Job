@@ -32,6 +32,9 @@ import ResultPage from "@/pages/Interview/pages/ResultPage";
 import PreparePage from "@/pages/Interview/pages/PreparePage";
 import MockInterviewPage from "@/pages/Interview/pages/MockInterviewPage";
 import SingleQuestionPage from "@/pages/Interview/pages/SingleQuestionPage";
+import InterviewTest from "@/pages/Interview/pages/InterviewTest";
+import MyCompanies from "@/pages/Mypage/components/MyCompanies";
+import MyJobs from "@/pages/Mypage/components/MyJobs";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -142,6 +145,16 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: "test",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <InterviewTest />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
                 path: "select",
                 element: (
                   <SuspenseWrapper>
@@ -218,6 +231,14 @@ const router = createBrowserRouter([
               {
                 path: "account",
                 element: <Account />,
+              },
+              {
+                path: "my-companies",
+                element: <MyCompanies />,
+              },
+              {
+                path: "my-jobs",
+                element: <MyJobs />,
               },
               {
                 path: "my-experience",
