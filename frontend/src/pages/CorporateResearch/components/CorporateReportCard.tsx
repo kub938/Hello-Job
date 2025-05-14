@@ -50,6 +50,9 @@ function CorporateReportCard({
         queryClient.invalidateQueries({
           queryKey: ["corporateReportList", companyId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ["companyAnalyses", parseInt(companyId)],
+        });
       } else {
         queryClient.invalidateQueries({
           queryKey: ["bookmarkedCompanyList"],

@@ -50,6 +50,9 @@ function JobResearchCard({
         queryClient.invalidateQueries({
           queryKey: ["jobResearchList", companyId],
         });
+        queryClient.invalidateQueries({
+          queryKey: ["job-book-mark", parseInt(companyId)],
+        });
       } else {
         queryClient.invalidateQueries({
           queryKey: ["bookmarkedCompanyList"],
