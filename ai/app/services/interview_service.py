@@ -3,7 +3,7 @@ from typing import List, Dict
 from pydantic import BaseModel, Field
 
 from app.schemas import interview
-from app.prompts.interview_prompts import CREATE_INTERVIEW_QUESTION_PROMPT
+from app.prompts.interview_prompts import CREATE_INTERVIEW_QUESTION_PROMPT, INTERVIEW_FEEDBACK_PROMPT
 from app.core.request_queue import get_request_queue
 from app.core.openai_utils import get_rate_limiter
 
@@ -117,6 +117,79 @@ async def create_interview_questions_from_cover_letter(request: interview.Create
     
     return interview_questions
 
-async def feedback_interview(request: interview.FeedbackInterviewRequest)->interview.FeedbackInterviewResponse:
-    #TODO: 면접 피드백 서비스 함수 구현
-    return None
+
+async def parse_interview_info(request: interview.FeedbackInterviewRequest):
+    """면접 피드백 요청 데이터를 파싱하는 함수입니다."""
+    # 면접 질문-답변 쌍 정보 추출
+    question_answer_pairs = request.interview_question_answer_pairs
+    cover_letter_contents = request.cover_letter_contents
+    
+    interview_info = """
+# 면접 질문-답변 쌍
+
+"""
+    for i, pair in enumerate(question_answer_pairs, 1):
+        interview_info += f"## 질문-답변 쌍 {i}\n"
+        interview_info += f"### 질문 ID: {pair.interview_answer_id}\n"
+        interview_info += f"### 질문: {pair.interview_question}\n"
+        interview_info += f"### 답변: {pair.interview_answer}\n"
+        interview_info += f"### 카테고리: {pair.interview_question_category}\n\n"
+    
+    # 자기소개서 정보 추출
+    user_info_coverletter = """
+# 자기소개서
+
+"""
+    for i, cover_letter_content in enumerate(cover_letter_contents, 1):
+        user_info_coverletter += f"## 자기소개서 {cover_letter_content.cover_letter_content_number}\n"
+        user_info_coverletter += f"### 질문: \n{cover_letter_content.cover_letter_content_question}\n"
+        user_info_coverletter += f"### 내용: \n{cover_letter_content.cover_letter_content_detail}\n\n"
+    
+    interview_info += user_info_coverletter
+    
+    return interview_info
+
+
+async def feedback_interview(request: interview.FeedbackInterviewRequest)-> interview.FeedbackInterviewResponse:
+    """면접 피드백 서비스 함수입니다."""
+    
+    logger.info(f"면접 피드백 요청")
+    logger.info(f"면접 문항 개수: {len(request.interview_question_answer_pairs)}")
+    
+    request_queue = get_request_queue()
+    
+    system_prompt = INTERVIEW_FEEDBACK_PROMPT
+    
+    # 면접 정보 파싱
+    interview_info = await parse_interview_info(request)
+    
+    user_prompt = f"""다음 정보를 바탕으로 면접 피드백을 생성해주세요:
+    
+{interview_info}"""
+    
+    async def perform_api_call():
+        rate_limiter = get_rate_limiter()
+        
+        response = await rate_limiter.chat_completion(
+            model="gpt-4.1", 
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            temperature=0.7,
+            max_tokens=3000,
+            response_format=interview.FeedbackInterviewResponse
+        )
+        
+        # API 응답에서 구조화된 데이터로 피드백 추출
+        return response.choices[0].message.parsed
+    
+    feedback_response = await request_queue.enqueue(
+        perform_api_call,
+        priority=5,  # 우선순위 (낮을수록 우선)
+        estimated_tokens=3000
+    )
+    
+    logger.info(f"면접 피드백 생성 완료")
+    
+    return feedback_response

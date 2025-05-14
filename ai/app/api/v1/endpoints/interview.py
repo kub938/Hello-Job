@@ -21,7 +21,4 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)->inter
     
     result = await interview_service.feedback_interview(request)
     
-    return interview.FeedbackInterviewResponse(
-        single_feedbacks=result.single_feedbacks,
-        overall_feedback=result.overall_feedback
-    )
+    return result
