@@ -132,7 +132,12 @@ function JobResearchCard({
         </div>
         <div className="flex items-center">
           {isFinding ? (
-            <div onClick={onClick}>읽기</div>
+            <div
+              onClick={onClick}
+              className="w-[48px] text-center bg-[#6F4BFF] px-2 py-0.5 text-white text-sm rounded-md"
+            >
+              읽기
+            </div>
           ) : bookmark ? (
             <div className="" onClick={handleBookmarkClickOff}>
               <FaBookmark className="text-[#6F52E0]" />

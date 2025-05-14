@@ -126,7 +126,7 @@ function CorporateReportCard({
           </h3>
           {isFinding ? (
             <div
-              className="w-[48px] bg-[#6F4BFF] px-2 py-0.5 text-white text-sm rounded-md"
+              className="w-[48px] text-center bg-[#6F4BFF] px-2 py-0.5 text-white text-sm rounded-md"
               onClick={handleRead}
             >
               읽기
