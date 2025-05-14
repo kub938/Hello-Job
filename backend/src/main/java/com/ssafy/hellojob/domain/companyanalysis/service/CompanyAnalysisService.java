@@ -182,6 +182,42 @@ public class CompanyAnalysisService {
         return result;
     }
 
+    // 해당 유저가 작성한 기업 분석 목록 조회
+    public List<CompanyAnalysisListResponseDto> searchCompanyAnalysisByUserId(Integer userId) {
+        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
+
+        List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+                .filter(analysis -> analysis.getUser().getUserId().equals(userId))
+                .map(analysis -> {
+                    DartAnalysis dart = analysis.getDartAnalysis();
+                    List<String> dartCategory = new ArrayList<>();
+                    if (dart != null) {
+                        if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+                        if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+                        if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+                    }
+
+                    return CompanyAnalysisListResponseDto.builder()
+                            .companyAnalysisTitle(analysis.getCompanyAnalysisTitle())
+                            .companyAnalysisId(analysis.getCompanyAnalysisId())
+                            .companyName(analysis.getCompany().getCompanyName())
+                            .createdAt(analysis.getCreatedAt())
+                            .companyViewCount(analysis.getCompanyAnalysisViewCount())
+                            .companyLocation(analysis.getCompany().getCompanyLocation())
+                            .companySize(analysis.getCompany().getCompanySize().name())
+                            .companyIndustry(analysis.getCompany().getCompanyIndustry())
+                            .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
+                            .bookmark(companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(
+                                    userId, analysis.getCompanyAnalysisId()))
+                            .isPublic(analysis.isPublic())
+                            .dartCategory(dartCategory)
+                            .build();
+                })
+                .toList();
+
+        return result;
+    }
+
 
     // 기업 분석 상세 조회
     @Transactional
