@@ -65,7 +65,6 @@ function JobResearchCard({
   const removeJobBookmarkMutation = useMutation({
     mutationFn: () => jobRoleAnalysis.deleteBookmark(jobId),
     onSuccess: () => {
-      console.log("북마크 삭제 성공");
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", jobId],
       });
@@ -102,6 +101,11 @@ function JobResearchCard({
       onClick();
     }
   };
+  const handleRead = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick();
+  };
+
   return (
     <div
       onClick={handleClick}
@@ -133,7 +137,7 @@ function JobResearchCard({
         <div className="flex items-center">
           {isFinding ? (
             <div
-              onClick={onClick}
+              onClick={handleRead}
               className="w-[48px] text-center bg-[#6F4BFF] px-2 py-0.5 text-white text-sm rounded-md"
             >
               읽기
