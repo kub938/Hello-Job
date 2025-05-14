@@ -30,8 +30,9 @@ import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
 import InterviewPage from "@/pages/Interview/pages/InterviewLayoutPage";
 import ResultPage from "@/pages/Interview/pages/ResultPage";
 import PreparePage from "@/pages/Interview/pages/PreparePage";
-import SingleQuestionPage from "@/pages/Interview/pages/SingleQuestionPage";
+import SingleQuestionPage from "@/pages/Interview/pages/SelectQuestionPage";
 import PracticeInterviewPage from "@/pages/Interview/pages/PracticeInterviewPage";
+import { categoryValidator } from "@/pages/Interview/util/validRouteCategory";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -152,6 +153,17 @@ const router = createBrowserRouter([
                 ),
               },
               {
+                path: ":category",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <SingleQuestionPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+                loader: categoryValidator,
+              },
+              {
                 path: "practice-interview",
                 element: (
                   <SuspenseWrapper>
@@ -161,16 +173,7 @@ const router = createBrowserRouter([
                   </SuspenseWrapper>
                 ),
               },
-              {
-                path: "single-question",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <SingleQuestionPage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
-              },
+              {},
             ],
           },
         ],
