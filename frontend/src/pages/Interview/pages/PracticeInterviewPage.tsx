@@ -1,7 +1,7 @@
 import { Pause, Plus, X, HelpCircle } from "lucide-react";
 import { Link } from "react-router";
 import Interviewer from "../../../assets/interview/Interviewer.webp";
-function MockInterviewPage() {
+function PracticeInterviewPage() {
   return (
     <div className="relative h-[86vh] w-full">
       {/* 현재 질문 표시 (좌측 상단) */}
@@ -71,4 +71,4 @@ function MockInterviewPage() {
   );
 }
 
-export default MockInterviewPage;
+export default PracticeInterviewPage;

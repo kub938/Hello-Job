@@ -223,30 +223,6 @@ function ReportList({ nowStep }: ReportListProps) {
                     </div>
                   </div>
                 </div>
-                {/* <div className="group-active:bg-active group-active:border-active duration-100 border mr-3 bg-secondary-light rounded-full size-15 flex justify-center items-center font-bold text-primary text-xl aspect-square">
-                  {report.name[0]}
-                </div>
-                <div>
-                  <div className="whitespace-normal line-clamp-2 font-semibold text-xl">
-                    {report.name}
-                  </div>
-                  <div className="text-sm line-clamp-2 text-muted-foreground">
-                    {report.industry}
-                  </div>
-                  <div className="flex flex-wrap ">
-                    {report.categories.map(
-                      (category, index) =>
-                        category !== "" && (
-                          <div
-                            key={index}
-                            className="mr-1 my-0.5 border rounded-3xl bg-secondary-light text-primary px-3 text-xs"
-                          >
-                            {category}
-                          </div>
-                        )
-                    )}
-                  </div>
-                </div> */}
               </div>
             );
           })}
