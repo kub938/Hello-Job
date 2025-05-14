@@ -150,7 +150,8 @@ public class CompanyAnalysisService {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
 
         List<CompanyAnalysisListResponseDto> result = analysisList.stream()
-                .filter(CompanyAnalysis::isPublic) // 공개된 기업 분석만 조회
+                .filter(analysis ->
+                        analysis.isPublic() || analysis.getUser().getUserId().equals(userId)) // 공개된 기업 분석만 조회
                 .map(analysis -> {
                     DartAnalysis dart = analysis.getDartAnalysis();
                     List<String> dartCategory = new ArrayList<>();
@@ -193,7 +194,7 @@ public class CompanyAnalysisService {
         CompanyAnalysis companyAnalysis = companyAnalysisReadService.findCompanyAnalysisByIdOrElseThrow(companyAnalysisId);
 
         // 공개 여부 필터링
-        if (!companyAnalysis.isPublic()) {
+        if (!companyAnalysis.isPublic() && !userId.equals(companyAnalysis.getUser().getUserId())) {
             throw new BaseException(ErrorCode.INVALID_USER);
         }
 
@@ -264,7 +265,8 @@ public class CompanyAnalysisService {
 
         // 공개된 분석만 필터링하여 DTO 매핑
         return analysisList.stream()
-                .filter(CompanyAnalysis::isPublic)
+                .filter(analysis ->
+                        analysis.isPublic() || analysis.getUser().getUserId().equals(userId))
                 .map(analysis -> {
                     DartAnalysis dart = analysis.getDartAnalysis();
                     List<String> dartCategory = new ArrayList<>();
@@ -380,7 +382,7 @@ public class CompanyAnalysisService {
             CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
             // 공개 여부 처리(비공개일경우 pass)
-            if (!companyAnalysis.isPublic()) {
+            if (!companyAnalysis.isPublic() && !userId.equals(companyAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -431,7 +433,7 @@ public class CompanyAnalysisService {
             CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
             // 공개 여부 처리(비공개 시 pass)
-            if (!companyAnalysis.isPublic()) {
+            if (!companyAnalysis.isPublic() && !userId.equals(companyAnalysis.getUser().getUserId())) {
                 continue;
             }
 

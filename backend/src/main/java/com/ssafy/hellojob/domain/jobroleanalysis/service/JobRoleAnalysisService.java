@@ -202,7 +202,7 @@ public class JobRoleAnalysisService {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
             // 직무 분석이 '비공개'인 경우는 제외
-            if (!jobRoleAnalysis.getIsPublic()) {
+            if (!jobRoleAnalysis.getIsPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -245,7 +245,7 @@ public class JobRoleAnalysisService {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
             // 직무 분석이 '비공개'인 경우는 제외
-            if (!jobRoleAnalysis.getIsPublic()) {
+            if (!jobRoleAnalysis.getIsPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -289,7 +289,8 @@ public class JobRoleAnalysisService {
         // companyId로 소속된 모든 직무 분석 조회
         List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
                 .filter(analysis -> analysis.getCompany().getCompanyId().equals(companyId)) // companyId 일치
-                .filter(JobRoleAnalysis::getIsPublic)
+                .filter(analysis ->
+                        analysis.getIsPublic() || analysis.getUser().getUserId().equals(userId))
                 .filter(analysis -> {
                     if (condition.getJobRoleName() != null && !condition.getJobRoleName().isEmpty()) {
                         return analysis.getJobRoleName().startsWith(condition.getJobRoleName()); // jobRoleName이 시작하는 경우
