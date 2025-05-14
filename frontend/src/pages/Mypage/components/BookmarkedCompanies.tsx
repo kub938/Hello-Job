@@ -56,6 +56,8 @@ function BookmarkedCompanies() {
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
               isPublic={corporateReport.public}
+              reportId={corporateReport.companyAnalysisId}
+              isFinding={false}
             />
           ))
         ) : (
