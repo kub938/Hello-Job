@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { Button } from "@/components/Button";
@@ -83,8 +83,20 @@ function ReadJob({ onClose, id, companyId }: ReadJobProps) {
       <header className="flex w-full justify-between items-end mb-6">
         <div>
           <h1 className="text-2xl font-bold mb-1">
-            {isLoading || !jobDetail ? "로딩 중..." : jobDetail.companyName} -{" "}
-            {isLoading || !jobDetail ? "" : jobDetail.jobRoleAnalysisTitle}
+            {isLoading || !jobDetail ? (
+              "로딩 중..."
+            ) : (
+              <>
+                {jobDetail.isPublic === false && (
+                  <FaLock
+                    className="inline-block mr-2 text-gray-500"
+                    size={16}
+                  />
+                )}
+                {jobDetail.companyName}
+              </>
+            )}{" "}
+            - {isLoading || !jobDetail ? "" : jobDetail.jobRoleAnalysisTitle}
           </h1>
           <p className="text-gray-500 text-sm">
             {isLoading || !jobDetail ? "" : jobDetail.jobRoleCategory} | 작성일:{" "}
