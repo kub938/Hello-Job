@@ -54,6 +54,8 @@ function BookmarkedJobs() {
               bookmark={jobResearch.bookmark}
               createdAt={jobResearch.updatedAt}
               isPublic={jobResearch.public}
+              jobId={jobResearch.jobRoleAnalysisId}
+              isFinding={false}
             />
           ))
         ) : (
