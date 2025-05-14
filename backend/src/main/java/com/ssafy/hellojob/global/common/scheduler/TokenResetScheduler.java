@@ -16,10 +16,22 @@ public class TokenResetScheduler {
     private final UserRepository userRepository;
 
     // 매일 자정에 실행
-    @Scheduled(cron = "0 35 9 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void resetTokens() {
         log.debug("{}시 토큰 리셋 시작", LocalTime.now());
-        userRepository.resetAllTokens(3); // 모든 사용자의 토큰을 3으로 리셋
+        try {
+            userRepository.resetAllTokens(3); // 모든 사용자의 토큰을 3으로 리셋
+        } catch (Exception e) {
+            log.error("❌ 토큰 리셋 중 예외 발생", e);
+        }
+
         log.debug("토큰 리셋 완료");
     }
+
+    @Scheduled(fixedRate = 60000)
+    public void testScheduler() {
+        log.info("🔔 테스트 스케줄러 동작 확인");
+    }
+
+
 }
