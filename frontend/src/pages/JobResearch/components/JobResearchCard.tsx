@@ -38,11 +38,11 @@ function JobResearchCard({
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
           <div className="flex items-center gap-4">
-            <h3 className="text-lg font-bold text-[#333] mb-1">
+            <h3 className="text-lg font-bold text-[#333] mb-1 flex items-center">
               {isPublic ? (
                 <></>
               ) : (
-                <span className="text-gray-500 mr-1">
+                <span className="text-gray-500 mr-2">
                   <FaLock size={12} />
                 </span>
               )}
