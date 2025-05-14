@@ -115,7 +115,7 @@ class ChatCoverLetterRequest(BaseModel):
     chat_history: List[ChatMessage]
     user_message: str
     company_analysis: CompanyAnalysis
-    job_role_analysis: JobRoleAnalysis
+    job_role_analysis: Optional[JobRoleAnalysis] = None
     experiences: List[Experience]
     projects: List[Project]
     cover_letter: Optional[CoverLetterContent] = None
