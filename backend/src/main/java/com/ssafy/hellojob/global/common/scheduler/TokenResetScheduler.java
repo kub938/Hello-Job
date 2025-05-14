@@ -1,7 +1,6 @@
 package com.ssafy.hellojob.global.common.scheduler;
 
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -16,13 +15,8 @@ public class TokenResetScheduler {
 
     private final UserRepository userRepository;
 
-    @PostConstruct
-    public void init() {
-        log.warn("✅ TokenResetScheduler 빈 등록 완료됨");
-    }
-
     // 매일 자정에 실행
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 50 10 * * ?")
     public void resetTokens() {
         log.debug("{}시 토큰 리셋 시작", LocalTime.now());
         try {
@@ -33,12 +27,5 @@ public class TokenResetScheduler {
 
         log.debug("토큰 리셋 완료");
     }
-
-    @Scheduled(fixedRate = 60000)
-    public void testScheduler() {
-        System.out.println("🔥 [스케줄러 실행] testScheduler 동작 중");
-        log.info("🔔 [스케줄러] 테스트 스케줄러 동작 확인");
-    }
-
 
 }
