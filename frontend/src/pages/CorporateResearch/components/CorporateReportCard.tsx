@@ -51,7 +51,7 @@ function CorporateReportCard({
           queryKey: ["corporateReportList", companyId],
         });
         queryClient.invalidateQueries({
-          queryKey: ["companyAnalyses", parseInt(companyId)],
+          queryKey: ["companyBookMark", parseInt(companyId)],
         });
       } else {
         queryClient.invalidateQueries({
@@ -77,7 +77,7 @@ function CorporateReportCard({
           queryKey: ["corporateReportList", companyId],
         });
         queryClient.invalidateQueries({
-          queryKey: ["companyAnalyses", parseInt(companyId)],
+          queryKey: ["companyBookMark", parseInt(companyId)],
         });
       } else {
         queryClient.invalidateQueries({
