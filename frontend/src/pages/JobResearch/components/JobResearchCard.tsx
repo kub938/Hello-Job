@@ -48,7 +48,7 @@ function JobResearchCard({
       });
       if (companyId) {
         queryClient.invalidateQueries({
-          queryKey: ["jobRoleList", companyId],
+          queryKey: ["jobResearchList", companyId],
         });
       } else {
         queryClient.invalidateQueries({
@@ -71,7 +71,7 @@ function JobResearchCard({
       });
       if (companyId) {
         queryClient.invalidateQueries({
-          queryKey: ["jobRoleList", companyId],
+          queryKey: ["jobResearchList", companyId],
         });
       } else {
         queryClient.invalidateQueries({
