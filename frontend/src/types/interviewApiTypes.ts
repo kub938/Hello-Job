@@ -1,4 +1,4 @@
-export type InterviewCategory = "cover-letter" | "cs" | "personality";
+export type InterviewCategory = null | "cover-letter" | "cs" | "personality";
 
 export interface QuestionResponse {
   questionBankId: number;
