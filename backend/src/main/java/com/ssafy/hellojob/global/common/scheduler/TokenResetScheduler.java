@@ -16,7 +16,7 @@ public class TokenResetScheduler {
     private final UserRepository userRepository;
 
     // 매일 자정에 실행
-    @Scheduled(cron = "0 50 10 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?")
     public void resetTokens() {
         log.debug("{}시 토큰 리셋 시작", LocalTime.now());
         try {
