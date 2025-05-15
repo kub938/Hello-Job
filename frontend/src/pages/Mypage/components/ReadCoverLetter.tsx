@@ -2,7 +2,7 @@ import { deleteCoverLetter } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
 import Modal from "@/components/Modal";
 import { useGetCoverLetterDetail } from "@/hooks/mypageHooks";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 

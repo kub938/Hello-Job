@@ -1,7 +1,6 @@
-import { authApi } from "@/api/instance";
 import { interviewApi } from "@/api/interviewApi";
 import { InterviewCategory } from "@/types/interviewApiTypes";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useGetQuestions = (category: InterviewCategory) => {
   return useQuery({
@@ -14,7 +13,7 @@ export const useGetQuestions = (category: InterviewCategory) => {
 };
 
 export const useCreateCoverLetterQuestion = () => {
-  const queryClient = useQueryClient();
+  // const queryClient = useQueryClient();
 
   return useMutation({
     mutationKey: ["create-cover-letter-question"],
