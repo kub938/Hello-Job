@@ -119,6 +119,11 @@ public class InterviewController {
         return interviewService.createCsMemo(requestDto, userPrincipal.getUserId());
     }
 
+    @PostMapping("/question/personality/memo")
+    public WriteMemoResponseDto writePersonalityMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createPersonalityMemo(requestDto, userPrincipal.getUserId());
+    }
+
     @PatchMapping("/question/{memoId}")
     public Map<String, String> modifyMemo(@RequestBody ModifyMemoRequestDto requestDto, @PathVariable Integer memoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return interviewService.updateMemo(requestDto.getMemo(), memoId, userPrincipal.getUserId());

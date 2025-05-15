@@ -472,6 +472,28 @@ public class InterviewService {
 
     }
 
+    public WriteMemoResponseDto createPersonalityMemo(WriteMemoRequestDto requestDto, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        PersonalityQuestionBank personalityQuestionBank  = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
+
+        if(memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(null)
+                    .personalityQuestionBank(personalityQuestionBank)
+                    .coverLetterQuestionBank(null)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+    }
+
     public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
