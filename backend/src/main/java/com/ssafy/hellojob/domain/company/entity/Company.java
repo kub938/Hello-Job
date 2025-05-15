@@ -2,10 +2,9 @@
 package com.ssafy.hellojob.domain.company.entity;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
-
-import com.ssafy.hellojob.domain.company.entity.CompanySize;
 import lombok.Getter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -35,6 +34,9 @@ public class Company {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "search_keyword")
+    private String searchKeyword;
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;

@@ -8,6 +8,6 @@ import java.util.List;
 public class SelectQuestionRequestDto {
 
     private Integer interviewVideoId;
-    private List<QuestionBankIdDto> questionIdList;
+    private List<Integer> questionIdList;
 
 }

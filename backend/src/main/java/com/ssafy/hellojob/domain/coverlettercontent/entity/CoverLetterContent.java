@@ -48,7 +48,7 @@ public class CoverLetterContent extends BaseTimeEntity {
     @Column(name = "cover_letter_content_first_prompt", length = 4500)
     private String contentFirstPrompt;
 
-    @OneToOne(mappedBy = "coverLetterContent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "coverLetterContent", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private ChatLog chatLog;
 
     @OneToMany(mappedBy = "coverLetterContent", cascade = CascadeType.ALL, orphanRemoval = true)

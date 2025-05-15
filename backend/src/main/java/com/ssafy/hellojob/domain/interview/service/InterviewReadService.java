@@ -25,7 +25,12 @@ public class InterviewReadService {
 
     public CoverLetterInterview findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(User user, CoverLetter coverLetter) {
         return coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
-                .orElseThrow(() -> new BaseException(COVER_LETTER_INTERVIEW_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_MISMATCH));
+    }
+
+    public Interview findInterviewByIdAndUserOrElseThrow(Integer interviewId, User user) {
+        return interviewRepository.findByUserAndInterviewId(user, interviewId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_MISMATCH));
     }
 
     public CsQuestionBank findCsQuestionByIdOrElseThrow(Integer csQuestionBankId) {

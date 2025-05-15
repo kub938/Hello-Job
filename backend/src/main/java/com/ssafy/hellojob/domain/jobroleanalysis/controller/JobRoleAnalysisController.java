@@ -101,7 +101,7 @@ public class JobRoleAnalysisController {
     }
 
     // 직무 분석 삭제
-    @DeleteMapping("/analysis/{jobRoleAnalysisId}")
+    @DeleteMapping("/{jobRoleAnalysisId}")
     public void JobRoleAnalysisDelete(@PathVariable Integer jobRoleAnalysisId,
                                       @AuthenticationPrincipal UserPrincipal userPrincipal){
         Integer userId = userPrincipal.getUserId();

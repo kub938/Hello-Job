@@ -26,18 +26,18 @@ public class CoverLetter extends BaseTimeEntity {
     @Column(name = "cover_letter_id")
     private Integer coverLetterId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @Column(name = "cover_letter_title", length = 90, nullable = false)
     private String coverLetterTitle;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_analysis_id", nullable = false)
     private CompanyAnalysis companyAnalysis;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "job_role_analysis_snapshot")
     private JobRoleSnapshot jobRoleSnapshot;
 
