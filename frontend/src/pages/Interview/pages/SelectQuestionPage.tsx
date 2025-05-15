@@ -1,8 +1,9 @@
+import { Button } from "@/components/Button";
 import { useInterviewStore } from "@/store/interviewStore";
 import { dummyQuestions } from "@/utils/mockData";
 import { StickyNote, CheckCircle, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
 function SelectQuestionPage() {
@@ -10,7 +11,7 @@ function SelectQuestionPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const { category } = useParams();
   const { selectCategory, setSelectCategory } = useInterviewStore();
-
+  const navigate = useNavigate();
   useEffect(() => {
     if (
       category === "cs" ||
@@ -151,12 +152,13 @@ function SelectQuestionPage() {
         )}
 
         <div className="mt-8 flex justify-between">
-          <Link
-            to="/"
-            className="flex items-center justify-center rounded-lg border border-border px-6 py-2.5 text-secondary-foreground font-medium hover:bg-muted transition-colors"
+          <Button
+            onClick={() => navigate(-1)}
+            variant={"white"}
+            className="border border-border px-10 py- "
           >
             이전
-          </Link>
+          </Button>
           <Link
             to="/interview/prepare"
             className={`flex items-center justify-center rounded-lg px-6 py-2.5 font-medium transition-colors ${
