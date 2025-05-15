@@ -91,21 +91,21 @@ public class InterviewController {
     }
 
     @PostMapping("/practice/question/cs")
-    public void selectCsQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+    public InterviewStartResponseDto selectCsQuestion(@RequestBody SelectQuestionRequestDto requestDto,
                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        interviewService.saveCsQuestions(userPrincipal.getUserId(), requestDto);
+        return interviewService.saveCsQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     @PostMapping("/practice/question/personality")
-    public void selectPersonalityQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+    public InterviewStartResponseDto selectPersonalityQuestion(@RequestBody SelectQuestionRequestDto requestDto,
                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        interviewService.savePersonalityQuestions(userPrincipal.getUserId(), requestDto);
+        return interviewService.savePersonalityQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     @PostMapping("/practice/question/cover-letter")
-    public void selectCoverLetterQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+    public InterviewStartResponseDto selectCoverLetterQuestion(@RequestBody SelectQuestionRequestDto requestDto,
                                           @AuthenticationPrincipal UserPrincipal userPrincipal){
-        interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
+        return interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     @PostMapping("/question/cover-letter/save")
