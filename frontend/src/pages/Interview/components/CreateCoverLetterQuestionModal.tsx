@@ -12,7 +12,7 @@ import {
 interface CoverLetterQuestionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  coverLetterInterviewId: number | null;
+  coverLetterId: number | null;
   generatedQuestions: CreateQuestionResponse | null;
   isLoading: boolean;
   onSaveQuestions: (data: SaveQuestionRequest) => void;
@@ -22,7 +22,7 @@ interface CoverLetterQuestionModalProps {
 function CreateCoverLetterQuestionModal({
   isOpen,
   onClose,
-  coverLetterInterviewId,
+  coverLetterId,
   generatedQuestions,
   isLoading,
   onSaveQuestions,
@@ -86,7 +86,7 @@ function CreateCoverLetterQuestionModal({
 
   // 선택한 질문 저장 핸들러
   const handleSaveQuestions = () => {
-    if (!coverLetterInterviewId) {
+    if (!coverLetterId) {
       toast.error("자기소개서 ID가 유효하지 않습니다.");
       return;
     }
@@ -97,8 +97,8 @@ function CreateCoverLetterQuestionModal({
     }
 
     const saveData: SaveQuestionRequest = {
-      coverLetterInterviewId,
-      coverLetterQuestionList: selectedQuestions,
+      coverLetterId,
+      coverLetterQuestion: selectedQuestions,
     };
 
     onSaveQuestions(saveData);
@@ -134,8 +134,8 @@ function CreateCoverLetterQuestionModal({
                 AI가 자기소개서 기반 질문을 생성 중입니다...
               </p>
             </div>
-          ) : generatedQuestions?.coverLetterQuestionList &&
-            generatedQuestions.coverLetterQuestionList.length > 0 ? (
+          ) : generatedQuestions?.coverLetterQuestion &&
+            generatedQuestions.coverLetterQuestion.length > 0 ? (
             <div className="space-y-4">
               <p className="text-secondary-foreground mb-4">
                 AI가 자기소개서 내용을 분석하여 면접 질문을 생성했습니다.
@@ -143,7 +143,7 @@ function CreateCoverLetterQuestionModal({
               </p>
 
               <div className="space-y-3 mt-4">
-                {generatedQuestions.coverLetterQuestionList.map(
+                {generatedQuestions.coverLetterQuestion.map(
                   (question, index) => {
                     const isSelected = selectedQuestions.includes(question);
 
