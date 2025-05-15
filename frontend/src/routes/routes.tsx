@@ -16,7 +16,7 @@ import BlankLayout from "@/components/layouts/BlankLayout";
 import CoverLetter from "@/pages/CoverLetter/CoverLetter";
 
 // 마이페이지 서브 컴포넌트들
-import Schedule from "@/pages/Mypage/components/Schedule";
+import Schedule from "@/pages/Mypage/components/ScheduleManager";
 import BookmarkedCompanies from "@/pages/Mypage/components/BookmarkedCompanies";
 import BookmarkedJobs from "@/pages/Mypage/components/BookmarkedJobs";
 import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
