@@ -1,6 +1,7 @@
 import { interviewApi } from "@/api/interviewApi";
 import {
   InterviewCategory,
+  InterviewVideoQuestionRequest,
   SaveQuestionRequest,
 } from "@/types/interviewApiTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -66,15 +67,37 @@ export const useGetCoverLetterQuestions = (
 export const useSelectCategory = () => {
   return useMutation({
     mutationKey: ["select-category"],
-    mutationFn: async (
-      selectCategory: InterviewCategory,
-      coverLetterId?: number
-    ) => {
+    mutationFn: async ({
+      selectCategory,
+      coverLetterId,
+    }: {
+      selectCategory: InterviewCategory;
+      coverLetterId?: number;
+    }) => {
       const response = await interviewApi.selectCategory(
         selectCategory,
         coverLetterId
       );
       console.log(response.data);
+      return response.data;
+    },
+  });
+};
+
+export const useSelectQuestionComplete = () => {
+  return useMutation({
+    mutationKey: ["select-question-complete"],
+    mutationFn: async ({
+      category,
+      selectData,
+    }: {
+      category: InterviewCategory;
+      selectData: InterviewVideoQuestionRequest;
+    }) => {
+      const response = await interviewApi.selectQuestionComplete(
+        category,
+        selectData
+      );
       return response.data;
     },
   });
