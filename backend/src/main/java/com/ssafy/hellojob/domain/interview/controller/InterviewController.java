@@ -156,12 +156,11 @@ public class InterviewController {
 
     @PostMapping("/practice/video")
     public void endInterview(
-//            @RequestPart("videoFile") MultipartFile videoFile,
+            @RequestPart("videoFile") MultipartFile videoFile,
                              @RequestPart("videoInfo") VideoInfo videoInfo,
                              @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException, InterruptedException {
 
-//        String url = s3UploadService.uploadVideo(videoFile);
-        String url = "";
+        String url = s3UploadService.uploadVideo(videoFile);
         interviewService.endInterview(userPrincipal.getUserId(), url, videoInfo);
     }
 
