@@ -411,9 +411,7 @@ function CoverLetterQuestionPage() {
       <CreateCoverLetterQuestionModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        coverLetterInterviewId={
-          generatedQuestions?.coverLetterInterviewId || null
-        }
+        coverLetterId={generatedQuestions?.coverLetterId || null}
         generatedQuestions={generatedQuestions}
         isLoading={createQuestionMutation.isPending}
         onSaveQuestions={handleSaveQuestions}
