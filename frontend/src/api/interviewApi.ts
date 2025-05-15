@@ -62,14 +62,14 @@ export const interviewApi = {
     );
   },
 
-  // 연습 면접 API - 통합 방식
-  practiceInterview: (
+  selectQuestionComplete: (
     category: InterviewCategory,
-    inputData: InterviewVideoQuestionRequest
+    selectData: InterviewVideoQuestionRequest
   ) => {
-    return authApi.post(`/api/v1/interview/practice/question/${category}`, {
-      inputData,
-    });
+    return authApi.post(
+      `/api/v1/interview/practice/question/${category}`,
+      selectData
+    );
   },
 
   // 미디어 저장 API - 통합 방식
