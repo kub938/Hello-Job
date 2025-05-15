@@ -2,43 +2,16 @@ import { useDrag } from "react-dnd";
 import { useRef } from "react";
 import { statusColorMap, statusBorderColorMap } from "@/types/scheduleTypes";
 import { format, parseISO } from "date-fns";
+import { getSchedulesResponse } from "@/types/scheduleApiTypes";
 
 interface ScheduleCardProps {
-  scheduleList: {
-    scheduleId: number;
-    scheduleTitle: string;
-    scheduleStartDate: string;
-    scheduleEndDate: string;
-    scheduleStatusName: string;
-    scheduleStatusStep: string;
-    scheduleMemo: string;
-    coverLetterId?: number;
-    coverLetterTitle?: string;
-    updatedAt: string;
-  }[];
-  backgroundColor: string;
-  borderColor: string;
-  textColor: string;
+  scheduleList: getSchedulesResponse[];
   onMoveSchedule: (id: number, newStatusStep: string) => void;
   onEdit: (schedule: any) => void;
 }
 
 interface ScheduleItemProps {
-  schedule: {
-    scheduleId: number;
-    scheduleTitle: string;
-    scheduleStartDate: string;
-    scheduleEndDate: string;
-    scheduleStatusName: string;
-    scheduleStatusStep: string;
-    scheduleMemo: string;
-    coverLetterId?: number;
-    coverLetterTitle?: string;
-    updatedAt: string;
-  };
-  backgroundColor: string;
-  borderColor: string;
-  textColor: string;
+  schedule: getSchedulesResponse;
   onMoveSchedule: (id: number, newStatusStep: string) => void;
   onEdit: (schedule: any) => void;
 }
@@ -82,8 +55,11 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
         </div>
         <div className="flex flex-row gap-x-1">
           <div className="text-xs text-gray-500">
-            {formatDatetoDot(schedule.scheduleStartDate)} -{" "}
-            {formatDatetoDot(schedule.scheduleEndDate)}
+            {schedule.scheduleStartDate && schedule.scheduleEndDate
+              ? `${formatDatetoDot(
+                  schedule.scheduleStartDate
+                )} - ${formatDatetoDot(schedule.scheduleEndDate)}`
+              : "기간 미정"}
           </div>
         </div>
       </div>
@@ -99,9 +75,6 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
 
 function ScheduleCard({
   scheduleList,
-  backgroundColor,
-  borderColor,
-  textColor,
   onMoveSchedule,
   onEdit,
 }: ScheduleCardProps) {
@@ -112,9 +85,6 @@ function ScheduleCard({
           <ScheduleItem
             key={schedule.scheduleId}
             schedule={schedule}
-            backgroundColor={backgroundColor}
-            borderColor={borderColor}
-            textColor={textColor}
             onMoveSchedule={onMoveSchedule}
             onEdit={onEdit}
           />

@@ -6,33 +6,14 @@ import {
   ScheduleStatus,
   ScheduleStatusStep,
   scheduleStatusList,
+  Schedule,
 } from "@/types/scheduleTypes";
 
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (scheduleData: {
-    scheduleId?: number;
-    title: string;
-    startDate: string;
-    endDate: string;
-    status: string;
-    statusStep: ScheduleStatusStep;
-    memo: string;
-    coverLetterId?: number;
-    coverLetterTitle?: string;
-  }) => void;
-  initialData?: {
-    scheduleId: number;
-    scheduleTitle: string;
-    scheduleStartDate?: string;
-    scheduleEndDate?: string;
-    scheduleStatusName: string;
-    scheduleStatusStep: string;
-    scheduleMemo: string;
-    coverLetterId?: number;
-    coverLetterTitle?: string;
-  };
+  onSubmit: (scheduleData: Schedule) => void;
+  data?: Schedule;
   mode?: "create" | "edit";
 }
 
@@ -40,7 +21,7 @@ function ScheduleModal({
   isOpen,
   onClose,
   onSubmit,
-  initialData,
+  data,
   mode = "create",
 }: ScheduleModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -77,26 +58,26 @@ function ScheduleModal({
   ];
 
   useEffect(() => {
-    if (initialData) {
-      setTitle(initialData.scheduleTitle);
-      setStartDate(initialData.scheduleStartDate || "");
-      setEndDate(initialData.scheduleEndDate || "");
-      setMemo(initialData.scheduleMemo);
-      setSelectedStep(initialData.scheduleStatusStep as ScheduleStatusStep);
+    if (data) {
+      setTitle(data.scheduleTitle);
+      setStartDate(data.scheduleStartDate || "");
+      setEndDate(data.scheduleEndDate || "");
+      setMemo(data.scheduleMemo ?? "");
+      setSelectedStep(data.scheduleStatusStep as ScheduleStatusStep);
       const status = scheduleStatusList[
-        initialData.scheduleStatusStep as ScheduleStatusStep
-      ].find((s) => s.name === initialData.scheduleStatusName);
+        data.scheduleStatusStep as ScheduleStatusStep
+      ].find((s) => s.name === data.scheduleStatusName);
       if (status) {
         setSelectedStatus(status);
       }
-      if (initialData.coverLetterId) {
-        setSelectedCoverLetterId(initialData.coverLetterId);
+      if (data.coverLetterId) {
+        setSelectedCoverLetterId(data.coverLetterId);
       }
-      if (initialData.coverLetterTitle) {
-        setSelectedCoverLetterTitle(initialData.coverLetterTitle);
+      if (data.coverLetterTitle) {
+        setSelectedCoverLetterTitle(data.coverLetterTitle);
       }
     }
-  }, [initialData]);
+  }, [data]);
 
   useEffect(() => {
     if (isOpen && mode === "create") {
@@ -125,17 +106,18 @@ function ScheduleModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({
-      ...(initialData?.scheduleId && { scheduleId: initialData.scheduleId }),
-      title: title,
-      startDate: startDate,
-      endDate: endDate,
-      status: selectedStatus.name,
-      statusStep: selectedStatus.step,
-      memo: memo,
+    const scheduleData = {
+      scheduleTitle: title,
+      scheduleStartDate: startDate,
+      scheduleEndDate: endDate,
+      scheduleStatusName: selectedStatus.name,
+      scheduleStatusStep: selectedStatus.step,
+      scheduleMemo: memo,
       coverLetterId: selectedCoverLetterId,
       coverLetterTitle: selectedCoverLetterTitle,
-    });
+      scheduleId: data?.scheduleId ?? 0,
+    };
+    onSubmit(scheduleData);
     resetForm();
     onClose();
   };
@@ -154,7 +136,11 @@ function ScheduleModal({
         className="bg-white rounded-lg shadow-lg w-[36rem] max-w-[90vw] max-h-[80vh] overflow-auto"
       >
         <form onSubmit={handleSubmit} className="flex flex-col p-6">
-          <h2 className="text-2xl font-bold mb-5">일정 등록</h2>
+          {mode === "create" ? (
+            <h2 className="text-2xl font-bold mb-5">일정 등록</h2>
+          ) : (
+            <h2 className="text-2xl font-bold mb-5">일정 수정</h2>
+          )}
           <div className="space-y-3">
             {/* 일정 정보 */}
             <FormInput

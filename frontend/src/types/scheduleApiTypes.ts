@@ -2,11 +2,11 @@ import { ScheduleStatusStep } from "./scheduleTypes";
 
 export interface postScheduleRequest {
   scheduleTitle: string;
-  scheduleMemo: string;
-  scheduleStartDate: string;
-  scheduleEndDate: string;
+  scheduleMemo: string | null;
+  scheduleStartDate: string | null;
+  scheduleEndDate: string | null;
   scheduleStatusName: string;
-  coverLetterId: number;
+  coverLetterId: number | null;
 }
 
 export interface postScheduleResponse {
@@ -16,22 +16,24 @@ export interface postScheduleResponse {
 export interface getScheduleResponse {
   scheduleId: number;
   scheduleTitle: string;
-  scheduleMemo: string;
-  scheduleStartDate: string;
-  scheduleEndDate: string;
+  scheduleMemo: string | null;
+  scheduleStartDate: string | null;
+  scheduleEndDate: string | null;
   scheduleStatusName: string;
   scheduleStatusStep: ScheduleStatusStep;
-  coverLetterId: number;
-  coverLetterTitle: string;
+  coverLetterId: number | null;
+  coverLetterTitle: string | null;
   updatedAt: string;
 }
 
 export interface getSchedulesResponse {
   scheduleId: number;
   scheduleTitle: string;
-  scheduleMemo: string;
-  scheduleStartDate: string;
-  scheduleEndDate: string;
+  scheduleMemo: string | null;
+  scheduleStartDate: string | null;
+  scheduleEndDate: string | null;
   scheduleStatusName: string;
-  coverLetterId: number;
+  scheduleStatusStep: ScheduleStatusStep;
+  coverLetterId: number | null;
 }
+
