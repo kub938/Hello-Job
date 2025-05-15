@@ -74,3 +74,19 @@ async def test_gms(user_input: str):
     }
     
     return serializable_result
+
+@router.post("/gms/mcp-server-config")
+async def test_mcp_server_config(server_list: str|list[str] = 'all'):
+    from app.services.gms.utils import gms_utils
+    
+    logger.info(f"server_list: {server_list}")
+    
+    try:
+        config = await gms_utils._get_mcp_server_config(server_list)
+        if server_list == 'all':
+            # 딕셔너리 items()를 리스트로 변환하여 반환
+            return {key: value for key, value in config}
+        else:
+            return {"server_list": config}
+    except Exception as e:
+        return {"error": str(e)}
