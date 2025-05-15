@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -956,6 +957,53 @@ public class InterviewService {
         }
 
         return null;
+    }
+
+    public InterviewFeedbackResponseDto findInterviewFeedbackDetail(Integer interviewVideoId, Integer userId){
+
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewVideoId);
+
+        List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+
+        List<InterviewFeedbackDetailDto> interviewFeedbackDetailList = new ArrayList<>();
+
+        for(InterviewAnswer answer:interviewAnswers){
+
+            List<String> followUpQuestions = new ArrayList<>();
+            String rawJson = answer.getInterviewFollowUpQuestion();
+
+            if (rawJson != null && !rawJson.isBlank()) {
+                try {
+                    followUpQuestions = new ObjectMapper().readValue(rawJson, new TypeReference<List<String>>() {});
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("꼬리 질문 역직렬화 실패", e);
+                }
+            }
+
+            interviewFeedbackDetailList.add(
+                    InterviewFeedbackDetailDto.builder()
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .interviewQuestion(answer.getInterviewQuestion())
+                            .interviewAnswer(answer.getInterviewAnswer())
+                            .interviewAnswerFeedback(answer.getInterviewAnswerFeedback())
+                            .interviewAnswerFollowUpQuestion(followUpQuestions)
+                            .interviewAnswerVideoUrl(answer.getInterviewVideoUrl())
+                            .interviewAnswerLength(answer.getVideoLength())
+                            .build()
+            );
+        }
+
+        return InterviewFeedbackResponseDto.builder()
+                .interviewVideoId(interviewVideoId)
+                .interviewTitle(interviewVideo.getInterviewTitle())
+                .interviewFeedback(interviewVideo.getInterviewFeedback())
+                .interviewCategory(interviewVideo.isSelectQuestion() ? "단일문항" : "모의면접")
+                .interviewQuestionCategory(interviewVideo.getInterviewCategory().name())
+                .date(interviewVideo.getStart().toLocalDate())
+                .interviewFeedbackList(interviewFeedbackDetailList)
+                .build();
+
     }
 
 
