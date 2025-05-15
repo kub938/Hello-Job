@@ -108,7 +108,10 @@ public class CoverLetterService {
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .job_role_analysis(
+                        coverLetter.getJobRoleSnapshot() != null
+                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                        : null)
                 .contents(coverLetter.getContents().stream()
                         .map(content -> ContentDto.builder()
                                 .content_number(content.getContentNumber())
@@ -181,8 +184,12 @@ public class CoverLetterService {
         return CoverLetterSummaryDto.builder()
                 .coverLetterTitle(coverLetter.getCoverLetterTitle())
                 .contentIds(contentIds)
-                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
-                .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
+                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId())
+                .jobRoleSnapshotId(
+                        coverLetter.getJobRoleSnapshot() != null
+                                ? coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId()
+                                : null
+                )
                 .build();
     }
 

@@ -13,8 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisDetailResponseDto {
 
+    private String companyAnalysisTitle;
     private Integer companyAnalysisId;
     private String companyName;
+    private String userPrompt;
     private LocalDateTime createdAt;
     private Integer companyViewCount;
     private String companyLocation;

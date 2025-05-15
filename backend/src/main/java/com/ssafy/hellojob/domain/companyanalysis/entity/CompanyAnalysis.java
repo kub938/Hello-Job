@@ -30,6 +30,9 @@ public class CompanyAnalysis {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @Column(name = "company_analysis_title", nullable = false)
+    private String companyAnalysisTitle;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -51,6 +54,9 @@ public class CompanyAnalysis {
     @Column(name = "public", nullable = false)
     private boolean isPublic;
 
+    @Column(name = "company_analysis_user_prompt")
+    private String userPrompt;
+
     public void setCompanyAnalysisBookmarkCount(Integer companyAnalysisBookmarkCount) {
         this.companyAnalysisBookmarkCount = companyAnalysisBookmarkCount;
     }
@@ -60,8 +66,9 @@ public class CompanyAnalysis {
     }
 
 
-    public static CompanyAnalysis of(User user, Company company, DartAnalysis dart, NewsAnalysis news, boolean isPublic) {
+    public static CompanyAnalysis of(String companyAnalysisTitle, User user, Company company, DartAnalysis dart, NewsAnalysis news, boolean isPublic, String userPrompt) {
         CompanyAnalysis ca = new CompanyAnalysis();
+        ca.companyAnalysisTitle = companyAnalysisTitle;
         ca.user = user;
         ca.company = company;
         ca.dartAnalysis = dart;
@@ -69,6 +76,7 @@ public class CompanyAnalysis {
         ca.companyAnalysisViewCount = 0;
         ca.companyAnalysisBookmarkCount = 0;
         ca.isPublic = isPublic;
+        ca.userPrompt = userPrompt;
         return ca;
     }
 

@@ -198,6 +198,8 @@ public class GlobalExceptionHandler {
     public boolean checkExceptionForMattermost(String requestUrl) {
         if(requestUrl.endsWith("/bookmark")) {
             return false;
+        } else if(requestUrl.endsWith("/refresh")) {
+            return false;
         }
         return true;
     }

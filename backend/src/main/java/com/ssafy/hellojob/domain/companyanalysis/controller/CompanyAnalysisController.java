@@ -50,6 +50,7 @@ public class CompanyAnalysisController {
         return result;
     }
 
+    // 기업 분석 요청(fast API)
     @PostMapping
     public CompanyAnalysisBookmarkSaveRequestDto requestCompanyAnalysis(
             @RequestBody CompanyAnalysisRequestDto requestDto,
