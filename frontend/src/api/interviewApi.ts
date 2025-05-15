@@ -26,18 +26,16 @@ export const interviewApi = {
 
   // 자기소개서 질문 생성 API
   createQuestion: (coverLetterId: number) => {
-    return authApi.post(
-      `/api/v1/interview/question/cover-letter`,
-      coverLetterId
-    );
+    return authApi.post(`/api/v1/interview/question/cover-letter`, {
+      coverLetterId,
+    });
   },
 
   // 자기소개서 질문 저장 API
   saveQuestion: (coverLetterId: number) => {
-    return authApi.post(
-      `/api/v1/interview/question/cover-letter/save`,
-      coverLetterId
-    );
+    return authApi.post(`/api/v1/interview/question/cover-letter/save`, {
+      coverLetterId,
+    });
   },
 
   // 문항 면접 시작 API - 카테고리를 인자로 받는 통합 방식
@@ -52,10 +50,9 @@ export const interviewApi = {
     category: InterviewCategory,
     inputData: InterviewVideoQuestionRequest
   ) => {
-    return authApi.post(
-      `/api/v1/interview/practice/question/${category}`,
-      inputData
-    );
+    return authApi.post(`/api/v1/interview/practice/question/${category}`, {
+      inputData,
+    });
   },
 
   // 미디어 저장 API - 통합 방식
@@ -88,7 +85,7 @@ export const interviewApi = {
   startInterview: (interviewId: number, category: InterviewCategory) => {
     return authApi.post<StartInterviewResponse>(
       `/api/v1/interview/${category}`,
-      interviewId
+      { interviewId }
     );
   },
 
@@ -138,7 +135,7 @@ export const interviewApi = {
   ) => {
     return authApi.post(
       `/api/v1/interview/question/cover-letter/${coverLetterId}/memo`,
-      memoData
+      { memoData }
     );
   },
 };
