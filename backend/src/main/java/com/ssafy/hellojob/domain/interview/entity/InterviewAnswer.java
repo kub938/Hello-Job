@@ -37,6 +37,12 @@ public class InterviewAnswer extends BaseTimeEntity {
     @Column(name = "interview_follow_up_question", columnDefinition = "TEXT")
     private String interviewFollowUpQuestion;
 
+    @Column(name = "video_length")
+    private String videoLength;
+
+    @Column(name = "interview_video_url")
+    private String interviewVideoUrl;
+
     public static InterviewAnswer of(InterviewVideo interviewVideo, String interviewQuestion, InterviewQuestionCategory interviewQuestionCategory){
         InterviewAnswer answer = new InterviewAnswer();
         answer.interviewVideo = interviewVideo;
@@ -53,6 +59,14 @@ public class InterviewAnswer extends BaseTimeEntity {
     }
     public void addInterviewFollowUpQuestion(String interviewFollowUpQuestion){
         this.interviewFollowUpQuestion = interviewFollowUpQuestion;
+    }
+
+    public void addInterviewVideoUrl(String interviewVideoUrl){
+        this.interviewVideoUrl = interviewVideoUrl;
+    }
+
+    public void addVideoLength(String videoLength){
+        this.videoLength = videoLength;
     }
 
 

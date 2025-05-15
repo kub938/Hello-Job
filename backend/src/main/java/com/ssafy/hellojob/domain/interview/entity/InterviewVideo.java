@@ -26,9 +26,6 @@ public class InterviewVideo {
     @JoinColumn(name = "interview_id")
     private Interview interview;
 
-    @Column(name = "interview_video_url")
-    private String interviewVideoUrl;
-
     @Column(name = "select_question", nullable = false)
     private boolean selectQuestion;
 
@@ -41,12 +38,12 @@ public class InterviewVideo {
     @Column(name = "end")
     private LocalDateTime end;
 
-    @Column(name = "video_length")
-    private String videoLength;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "interview_category", nullable = false)
     private InterviewCategory interviewCategory;
+
+    @Column(name = "interview_title")
+    private String interviewTitle;
 
     public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start, InterviewCategory interviewCategory){
         InterviewVideo video = new InterviewVideo();
@@ -62,16 +59,11 @@ public class InterviewVideo {
         this.interviewFeedback = interviewFeedback;
     }
 
-    public void addInterviewVideoUrl(String interviewVideoUrl){
-        this.interviewVideoUrl = interviewVideoUrl;
-    }
 
     public void addEndTime(LocalDateTime end){
         this.end = end;
     }
 
-    public void addVideoLength(String videoLength){
-        this.videoLength = videoLength;
-    }
+    public void addTitle(String interviewTitle){ this.interviewTitle = interviewTitle; }
 
 }

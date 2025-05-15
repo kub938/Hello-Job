@@ -24,4 +24,6 @@ public interface CoverLetterInterviewRepository extends JpaRepository<CoverLette
     @Query("SELECT i FROM CoverLetterInterview i WHERE i.user = :user AND i.coverLetter.coverLetterId = :coverLetterId")
     Optional<CoverLetterInterview> findByUserAndCoverLetterIdWithGraph(@Param("user") User user, @Param("coverLetterId") Integer coverLetterId);
 
+    Optional<CoverLetterInterview> findByCoverLetter(CoverLetter coverLetter);
+
 }
