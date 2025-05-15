@@ -153,4 +153,10 @@ public class InterviewController {
         interviewService.endInterview(userPrincipal.getUserId(), url, videoInfo);
     }
 
+    @GetMapping("/{interviewId}")
+    public AllInterviewResponseDto findAllInterview(@PathVariable Integer interviewId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findAllInterview(interviewId, userPrincipal.getUserId());
+    }
+
+
 }

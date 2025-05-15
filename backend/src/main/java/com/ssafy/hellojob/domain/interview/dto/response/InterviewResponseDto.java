@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 @Builder
 public class InterviewResponseDto {
 
+    private String type;
     private String interviewVideoUrl;
     private LocalDateTime start;
     private String videoLength;
