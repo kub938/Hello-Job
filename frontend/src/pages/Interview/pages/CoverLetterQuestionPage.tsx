@@ -9,10 +9,24 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useNavigate } from "react-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
 import { getCoverLetterList } from "@/api/mypageApi";
-import { useCreateCoverLetterQuestion } from "@/hooks/interviewHooks";
+import {
+  useCreateCoverLetterQuestion,
+  useSaveCoverLetterQuestions,
+} from "@/hooks/interviewHooks";
 import { toast } from "sonner";
+import CreateCoverLetterQuestionModal from "../components/CreateCoverLetterQuestionModal";
+import {
+  CreateQuestionResponse,
+  SaveQuestionRequest,
+} from "@/types/interviewApiTypes";
+
+// // 생성된 질문 응답 인터페이스
+// interface GeneratedQuestionsResponse {
+//   coverLetterInterviewId: number;
+//   coverLetterQuestionList: string[];
+// }
 
 function CoverLetterQuestionPage() {
   // 선택된 자기소개서 ID
@@ -20,35 +34,39 @@ function CoverLetterQuestionPage() {
     number | null
   >(null);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
-  // 생성 중 상태
   // 검색어
   const [searchTerm, setSearchTerm] = useState("");
+
+  // 모달 관련 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [generatedQuestions, setGeneratedQuestions] =
+    useState<CreateQuestionResponse | null>(null);
 
   const navigate = useNavigate();
 
   // Intersection Observer를 위한 ref
   const observerTarget = useRef<HTMLDivElement | null>(null);
 
-  //react query hooks
   // useInfiniteQuery를 사용하여 무한 스크롤 구현
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: ["coverLetterList"],
-      // 직접 API 함수를 호출하여 데이터를 가져옴
       queryFn: async ({ pageParam = 0 }) => {
         const response = await getCoverLetterList(Number(pageParam));
         return response.data;
       },
       getNextPageParam: (lastPage) => {
-        // 마지막 페이지인 경우 undefined 반환 (더 이상 페이지가 없음)
         if (lastPage.last) return undefined;
-        // 다음 페이지 번호 반환
         return lastPage.pageable.pageNumber + 1;
       },
       initialPageParam: 0,
     });
 
-  const mutation = useCreateCoverLetterQuestion();
+  // 기존 질문 생성 훅 사용
+  const createQuestionMutation = useCreateCoverLetterQuestion();
+
+  // 선택한 질문 저장 뮤테이션
+  const saveQuestionsMutation = useSaveCoverLetterQuestions();
 
   // Intersection Observer를 사용하여 스크롤 감지
   useEffect(() => {
@@ -111,16 +129,36 @@ function CoverLetterQuestionPage() {
     },
   ];
 
-  // 현재 선택된 자기소개서에 해당하는 질문들
-
   // 추가 질문 생성 핸들러
   const handleGenerateQuestions = () => {
+    setIsModalOpen(true);
+
     if (!selectedCoverLetterId) {
-      toast.error("자기소개서를 다시 선택해 주세요s");
+      toast.error("자기소개서를 선택해 주세요");
       return;
     }
 
-    mutation.mutate(selectedCoverLetterId);
+    // 기존 mutation 호출
+    createQuestionMutation.mutate(selectedCoverLetterId, {
+      onSuccess: (data) => {
+        // 성공 시 생성된 질문 데이터 저장 및 모달 열기
+        setGeneratedQuestions(data);
+        setIsModalOpen(true);
+      },
+      onError: () => {
+        toast.error("질문 생성에 실패했습니다. 다시 시도해 주세요.");
+      },
+    });
+  };
+
+  // 모달 닫기 핸들러
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // 선택한 질문 저장 핸들러
+  const handleSaveQuestions = (data: SaveQuestionRequest) => {
+    saveQuestionsMutation.mutate(data);
   };
 
   return (
@@ -267,7 +305,7 @@ function CoverLetterQuestionPage() {
                               ]);
                             } else {
                               // 최대 5개 선택 제한 - 실제로는 toast 메시지 등으로 알림
-                              alert("최대 5개까지 선택할 수 있습니다.");
+                              toast.error("최대 5개까지 선택할 수 있습니다.");
                             }
                           }
                         }}
@@ -313,10 +351,10 @@ function CoverLetterQuestionPage() {
               <div className="border-t border-border pt-5">
                 <button
                   onClick={handleGenerateQuestions}
-                  disabled={mutation.isPending}
+                  disabled={createQuestionMutation.isPending}
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-primary/50 bg-primary/5 text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"
                 >
-                  {mutation.isPending ? (
+                  {createQuestionMutation.isPending ? (
                     <>
                       <RefreshCw className="w-5 h-5 animate-spin" />
                       질문 생성 중...
@@ -369,6 +407,18 @@ function CoverLetterQuestionPage() {
           선택 완료 ({selectedQuestions.length})
         </button>
       </div>
+
+      <CreateCoverLetterQuestionModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        coverLetterInterviewId={
+          generatedQuestions?.coverLetterInterviewId || null
+        }
+        generatedQuestions={generatedQuestions}
+        isLoading={createQuestionMutation.isPending}
+        onSaveQuestions={handleSaveQuestions}
+        isSaving={saveQuestionsMutation.isPending}
+      />
     </div>
   );
 }

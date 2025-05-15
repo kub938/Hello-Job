@@ -1,10 +1,12 @@
 import { authApi } from "./instance";
 import {
+  CreateQuestionResponse,
   InterviewAnswerInfo,
   InterviewCategory,
   InterviewVideoQuestionRequest,
   QuestionMemoRequest,
   QuestionResponse,
+  SaveQuestionRequest,
   StartInterviewResponse,
   StartQuestionInterviewResponse,
 } from "@/types/interviewApiTypes";
@@ -26,15 +28,18 @@ export const interviewApi = {
 
   // 자기소개서 질문 생성 API
   createQuestion: (coverLetterId: number) => {
-    return authApi.post(`/api/v1/interview/question/cover-letter`, {
-      coverLetterId,
-    });
+    return authApi.post<CreateQuestionResponse>(
+      `/api/v1/interview/question/cover-letter`,
+      {
+        coverLetterId,
+      }
+    );
   },
 
   // 자기소개서 질문 저장 API
-  saveQuestion: (coverLetterId: number) => {
+  saveQuestion: (questionData: SaveQuestionRequest) => {
     return authApi.post(`/api/v1/interview/question/cover-letter/save`, {
-      coverLetterId,
+      questionData,
     });
   },
 
