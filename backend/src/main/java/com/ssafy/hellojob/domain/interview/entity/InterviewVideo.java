@@ -48,13 +48,13 @@ public class InterviewVideo {
     @Column(name = "interview_category", nullable = false)
     private InterviewCategory interviewCategory;
 
-    public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start){
+    public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start, InterviewCategory interviewCategory){
         InterviewVideo video = new InterviewVideo();
         video.coverLetterInterview = coverLetterInterview;
         video.interview = interview;
         video.selectQuestion = selectQuestion;
         video.start = start;
-
+        video.interviewCategory = interviewCategory;
         return video;
     }
 

@@ -184,7 +184,7 @@ public class InterviewService {
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("CS"));
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
@@ -203,7 +203,7 @@ public class InterviewService {
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("PERSONALITY"));
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
@@ -226,7 +226,7 @@ public class InterviewService {
                 });
 
 
-        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
@@ -245,7 +245,7 @@ public class InterviewService {
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("CS"));
         interviewVideoRepository.save(video);
 
         List<CsQuestionBank> all = csQuestionBankRepository.findAll();
@@ -284,7 +284,7 @@ public class InterviewService {
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("PERSONALITY"));
         interviewVideoRepository.save(video);
 
         List<PersonalityQuestionBank> all = personalityQuestionBankRepository.findAll();
@@ -326,7 +326,7 @@ public class InterviewService {
                     return coverLetterInterviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
         List<CoverLetterQuestionBank> all = coverLetterQuestionBankRepository.findByCoverLetterInterview(interview);
