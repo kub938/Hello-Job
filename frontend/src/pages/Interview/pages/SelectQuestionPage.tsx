@@ -1,9 +1,12 @@
 import { Button } from "@/components/Button";
-import { useGetQuestions } from "@/hooks/interviewHooks";
+import {
+  useGetQuestions,
+  useSelectQuestionComplete,
+} from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
 import { StickyNote, CheckCircle, Search } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { Link, useLocation, useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 
 function SelectQuestionPage() {
@@ -12,7 +15,17 @@ function SelectQuestionPage() {
   const { category } = useParams();
   const { selectCategory, setSelectCategory } = useInterviewStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  //이거 가지고
+  const { interviewId, interviewVideoId } = location.state || {};
+  console.log(interviewId, interviewVideoId);
+
+  //react query hooks
+  const questionList = useGetQuestions(selectCategory);
+  const selectCompleteMutation = useSelectQuestionComplete();
+
+  //useEffects
   useEffect(() => {
     if (
       category === "cs" ||
@@ -22,9 +35,6 @@ function SelectQuestionPage() {
       setSelectCategory(category);
     }
   }, [category]);
-  //react query hooks
-  // const questionList = dummyQuestions;
-  const questionList = useGetQuestions(selectCategory);
 
   // 문항 선택
   const handleSelectQuestions = (selectQuestionsId: number) => {
@@ -41,6 +51,25 @@ function SelectQuestionPage() {
     }
   };
 
+  const handleSelectComplete = (e: React.MouseEvent) => {
+    if (selectQuestions.length === 0) {
+      e.preventDefault();
+      toast.error("문항을 1개 이상 선택해 주세요");
+      return;
+    }
+    console.log(1234);
+
+    selectCompleteMutation.mutate(
+      {
+        category: selectCategory,
+        selectData: {
+          interviewVideoId: interviewVideoId,
+          questionIdList: selectQuestions,
+        },
+      },
+      { onSuccess: (data) => console.log("문항선택 성공", data) }
+    );
+  };
   // 검색 필터링
 
   if (!questionList || !questionList.data) {
@@ -170,9 +199,7 @@ function SelectQuestionPage() {
                 : "bg-muted-foreground/30 text-muted cursor-not-allowed"
             }`}
             onClick={(e) => {
-              if (selectQuestions.length === 0) {
-                e.preventDefault();
-              }
+              handleSelectComplete(e);
             }}
           >
             선택 완료 ({selectQuestions.length})
