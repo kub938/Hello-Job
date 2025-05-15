@@ -65,7 +65,11 @@ export const interviewApi = {
     formData.append("interviewInfo", JSON.stringify(interviewInfo));
     formData.append("audioFile", audioFile);
 
-    return authApi.post("/api/v1/interview/practice/voice", formData);
+    return authApi.post("/api/v1/interview/practice/voice", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
   completeInterview: (interviewInfo: InterviewAnswerInfo, videoFile: File) => {
     const formData = new FormData();
@@ -73,7 +77,11 @@ export const interviewApi = {
     formData.append("interviewInfo", JSON.stringify(interviewInfo));
     formData.append("videoFile", videoFile);
 
-    return authApi.post("/api/v1/interview/practice/video", formData);
+    return authApi.post("/api/v1/interview/practice/video", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
   // 모의 면접 시작 API - 카테고리를 인자로 받는 통합 방식
