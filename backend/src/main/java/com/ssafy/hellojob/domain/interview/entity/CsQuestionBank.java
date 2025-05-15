@@ -14,7 +14,7 @@ public class CsQuestionBank extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "cs_question_memo_id", nullable = false)
+    @Column(name = "cs_question_bank_id", nullable = false)
     private Integer csQuestionBankId;
 
     @Column(name = "cs_question", nullable = false)
