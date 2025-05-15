@@ -494,6 +494,35 @@ public class InterviewService {
         return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
     }
 
+    public WriteMemoResponseDto createCoverLetterMemo(WriteMemoRequestDto requestDto, Integer coverLetterId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetterQuestionBank coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getQuestionBankId());
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
+        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
+
+        if(!coverLetterInterview.equals(coverLetterQuestionBank.getCoverLetterInterview())) {
+            throw new BaseException(COVER_LETTER_QUESTION_MISMATCH);
+        }
+
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
+
+        if(memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(null)
+                    .personalityQuestionBank(null)
+                    .coverLetterQuestionBank(coverLetterQuestionBank)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+    }
+
     public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);

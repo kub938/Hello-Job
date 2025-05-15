@@ -124,6 +124,11 @@ public class InterviewController {
         return interviewService.createPersonalityMemo(requestDto, userPrincipal.getUserId());
     }
 
+    @PostMapping("/question/cover-letter/{coverLetterId}/memo")
+    public WriteMemoResponseDto writeCoverLetterMemo(@RequestBody WriteMemoRequestDto requestDto, @PathVariable Integer coverLetterId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createCoverLetterMemo(requestDto, coverLetterId, userPrincipal.getUserId());
+    }
+
     @PatchMapping("/question/{memoId}")
     public Map<String, String> modifyMemo(@RequestBody ModifyMemoRequestDto requestDto, @PathVariable Integer memoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
         return interviewService.updateMemo(requestDto.getMemo(), memoId, userPrincipal.getUserId());
