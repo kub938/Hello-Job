@@ -468,7 +468,7 @@ public class InterviewService {
 
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(requestDto.getCoverLetterId());
+        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
 
         List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
 
@@ -694,8 +694,8 @@ public class InterviewService {
         CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
 
         CreateCoverLetterQuestionResponseDto responseDto = CreateCoverLetterQuestionResponseDto.builder()
-                .coverLetterInterviewId(coverLetter.getCoverLetterId())
-                .coverLetterQuestionList(fastAPIResponseDto.getExpected_questions())
+                .coverLetterId(coverLetter.getCoverLetterId())
+                .coverLetterQuestion(fastAPIResponseDto.getExpected_questions())
                 .build();
 
         return responseDto;
