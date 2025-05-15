@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useNavigate } from "react-router";
-import { useInfiniteQuery, useMutation } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { getCoverLetterList } from "@/api/mypageApi";
 import {
   useCreateCoverLetterQuestion,
