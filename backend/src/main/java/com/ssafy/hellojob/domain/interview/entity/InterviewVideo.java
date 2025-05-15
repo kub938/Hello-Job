@@ -18,11 +18,11 @@ public class InterviewVideo {
     @Column(name = "interview_video", nullable = false)
     private Integer interviewVideoId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_interview")
     private CoverLetterInterview coverLetterInterview;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview")
     private Interview interview;
 
@@ -43,6 +43,10 @@ public class InterviewVideo {
 
     @Column(name = "video_length")
     private String videoLength;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "interview_category")
+    private InterviewCategory interviewCategory;
 
     public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start){
         InterviewVideo video = new InterviewVideo();
