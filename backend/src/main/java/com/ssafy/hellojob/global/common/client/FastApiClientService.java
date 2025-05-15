@@ -12,6 +12,7 @@ import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatForEdi
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.request.CreateCoverLetterFastAPIRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.InterviewFeedbackFastAPIRequestDto;
+import com.ssafy.hellojob.domain.interview.dto.request.InterviewQuestionAndAnswerRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.response.CreateCoverLetterFastAPIResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.response.InterviewFeedbackFastAPIResponseDto;
 import com.ssafy.hellojob.global.exception.BaseException;
@@ -106,7 +107,7 @@ public class FastApiClientService {
     public CreateCoverLetterFastAPIResponseDto sendCoverLetterToFastApi(CreateCoverLetterFastAPIRequestDto requestDto) {
 
         CreateCoverLetterFastAPIResponseDto response = fastApiWebClient.post()
-                .uri("/api/v1/interview/question/cover-letter")
+                .uri("/api/v1/ai/interview/question/cover-letter")
                 .bodyValue(requestDto)
                 .retrieve()
                 .bodyToMono(CreateCoverLetterFastAPIResponseDto.class)
@@ -124,8 +125,14 @@ public class FastApiClientService {
 
     public InterviewFeedbackFastAPIResponseDto sendInterviewAnswerToFastApi(InterviewFeedbackFastAPIRequestDto requestDto) {
 
+        log.debug("fast API 전송 요청");
+
+        for(InterviewQuestionAndAnswerRequestDto i:requestDto.getInterview_question_answer_pairs()){
+            log.debug("전송되는 아이디: {}", i.getInterview_answer_id());
+        }
+
         InterviewFeedbackFastAPIResponseDto response = fastApiWebClient.post()
-                .uri("/api/v1/interview/question/cover-letter")
+                .uri("/api/v1/ai/interview/feedback")
                 .bodyValue(requestDto)
                 .retrieve()
                 .bodyToMono(InterviewFeedbackFastAPIResponseDto.class)
