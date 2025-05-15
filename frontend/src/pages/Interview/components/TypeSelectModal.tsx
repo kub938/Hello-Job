@@ -1,7 +1,10 @@
 import { Button } from "@/components/Button";
 import { useSelectCategory } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
-import { InterviewCategory } from "@/types/interviewApiTypes";
+import {
+  InterviewCategory,
+  StartQuestionInterviewResponse,
+} from "@/types/interviewApiTypes";
 import { FileText, Code, Users } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -23,20 +26,49 @@ function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
     }
   };
 
-  const handleClickCoverLetter = (selectCategory: InterviewCategory) => {
+  const handleClickCoverLetter = (
+    selectCategory: InterviewCategory,
+    coverLetterId?: number
+  ) => {
     setSelectCategory(selectCategory);
+
+    // 카테고리에 따라 적절한 인수 전달
     if (selectCategory === "cover-letter") {
-      selectCategoryMutation.mutate(selectCategory);
+      selectCategoryMutation.mutate(
+        { selectCategory, coverLetterId },
+        {
+          onSuccess: (res) => handleNavigationAfterSuccess(res),
+        }
+      );
+    } else {
+      selectCategoryMutation.mutate(
+        { selectCategory },
+        {
+          onSuccess: (res) => handleNavigationAfterSuccess(res),
+        }
+      );
     }
-    if (type === "question") {
-      navigate(`/interview/${selectCategory}`);
-    }
+
+    const handleNavigationAfterSuccess = (
+      response: StartQuestionInterviewResponse
+    ) => {
+      console.log(response);
+      if (type === "question") {
+        navigate(`/interview/${selectCategory}`, {
+          state: response,
+        });
+      } else {
+        navigate("interview/prepare", {
+          state: response,
+        });
+      }
+    };
   };
 
   return (
     <div onClick={(e) => clickOverlay(e)} className="modal-overlay">
       <div
-        className="modal-container bg-white h-90 "
+        className="modal-container bg-white h-92 overflow-hidden "
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold text-center mb-8 text-[#2a2c35]">
