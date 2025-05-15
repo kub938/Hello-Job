@@ -130,7 +130,7 @@ async def parse_interview_info(request: interview.FeedbackInterviewRequest):
 """
     for i, pair in enumerate(question_answer_pairs, 1):
         interview_info += f"## 질문-답변 쌍 {i}\n"
-        interview_info += f"### 질문 ID: {pair.interview_answer_id}\n"
+        interview_info += f"### Interview Answer ID: {pair.interview_answer_id}\n"
         interview_info += f"### 질문: {pair.interview_question}\n"
         interview_info += f"### 답변: {pair.interview_answer}\n"
         interview_info += f"### 카테고리: {pair.interview_question_category}\n\n"
@@ -155,6 +155,12 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)-> inte
     
     logger.info(f"면접 피드백 요청")
     logger.info(f"면접 문항 개수: {len(request.interview_question_answer_pairs)}")
+    logger.info(f"면접 피드백 요청 정보: {request}")
+    logger.info(f"자기소개서 정보: {request.cover_letter_contents}")
+    
+    # 요청에서 interview_answer_id 추출
+    request_ids = [qa_pair.interview_answer_id for qa_pair in request.interview_question_answer_pairs]
+    logger.info(f"면접 답변 ID: {request_ids}")
     
     request_queue = get_request_queue()
     
@@ -191,5 +197,33 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)-> inte
     )
     
     logger.info(f"면접 피드백 생성 완료")
+    logger.info(f"면접 피드백 응답: {feedback_response}")
+    
+    # 요청의 interview_answer_id와 응답의 interview_answer_id를 비교하여 다를 경우에만 수정
+    updated_feedbacks = []
+    
+    for i, single_feedback in enumerate(feedback_response.single_feedbacks):
+        response_id = single_feedback.interview_answer_id
+        
+        # 응답 ID가 요청 ID 목록에 없거나 순서가 맞지 않을 경우에만 수정
+        if response_id not in request_ids or (i < len(request_ids) and response_id != request_ids[i]):
+            if i < len(request_ids):
+                logger.info(f"면접 답변 ID 불일치 수정: {response_id} -> {request_ids[i]}")
+                updated_feedbacks.append(interview.SingleFeedback(
+                    interview_answer_id=request_ids[i],
+                    feedback=single_feedback.feedback,
+                    follow_up_questions=single_feedback.follow_up_questions
+                ))
+            else:
+                # 인덱스 범위를 벗어난 경우 원래 값 유지
+                updated_feedbacks.append(single_feedback)
+                logger.warning(f"인덱스 범위 초과: 피드백 인덱스 {i}, 요청 ID 길이 {len(request_ids)}")
+        else:
+            # 이미 올바른 ID가 설정되어 있으면 그대로 유지
+            updated_feedbacks.append(single_feedback)
+            logger.info(f"면접 답변 ID 일치 (변경 없음): {response_id}")
+    
+    # 수정된 피드백으로 업데이트
+    feedback_response.single_feedbacks = updated_feedbacks
     
     return feedback_response
