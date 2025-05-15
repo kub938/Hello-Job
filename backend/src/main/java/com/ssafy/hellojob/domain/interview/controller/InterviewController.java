@@ -46,7 +46,7 @@ public class InterviewController {
         return interviewService.findPersonalityQuestionDetail(questionId, userPrincipal.getUserId());
     }
 
-    @GetMapping("/question/cover-letter/{interviewId}/{questionId}")
+    @GetMapping("/question/cover-letter/{coverLetterId}")
     public List<QuestionListResponseDto> coverLetterQuestionList(@PathVariable("coverLetterId") Integer coverLetterId,
                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
         List<QuestionListResponseDto> responseDto = interviewService.getCoverLetterQuestionList(coverLetterId, userPrincipal.getUserId());
