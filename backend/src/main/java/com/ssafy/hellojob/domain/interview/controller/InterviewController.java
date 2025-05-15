@@ -91,21 +91,21 @@ public class InterviewController {
     }
 
     @PostMapping("/practice/question/cs")
-    public void selectCsQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+    public InterviewStartResponseDto selectCsQuestion(@RequestBody SelectQuestionRequestDto requestDto,
                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        interviewService.saveCsQuestions(userPrincipal.getUserId(), requestDto);
+        return interviewService.saveCsQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     @PostMapping("/practice/question/personality")
-    public void selectPersonalityQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+    public InterviewStartResponseDto selectPersonalityQuestion(@RequestBody SelectQuestionRequestDto requestDto,
                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        interviewService.savePersonalityQuestions(userPrincipal.getUserId(), requestDto);
+        return interviewService.savePersonalityQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     @PostMapping("/practice/question/cover-letter")
-    public void selectCoverLetterQuestion(@RequestBody SelectQuestionRequestDto requestDto,
+    public InterviewStartResponseDto selectCoverLetterQuestion(@RequestBody SelectQuestionRequestDto requestDto,
                                           @AuthenticationPrincipal UserPrincipal userPrincipal){
-        interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
+        return interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     @PostMapping("/question/cover-letter/save")
@@ -114,9 +114,19 @@ public class InterviewController {
         return interviewService.saveNewCoverLetterQuestion(userPrincipal.getUserId(), requestDto);
     }
 
-    @PostMapping("/question/memo")
-    public WriteMemoResponseDto writeMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return interviewService.createMemo(requestDto, userPrincipal.getUserId());
+    @PostMapping("/question/cs/memo")
+    public WriteMemoResponseDto writeCsMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createCsMemo(requestDto, userPrincipal.getUserId());
+    }
+
+    @PostMapping("/question/personality/memo")
+    public WriteMemoResponseDto writePersonalityMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createPersonalityMemo(requestDto, userPrincipal.getUserId());
+    }
+
+    @PostMapping("/question/cover-letter/{coverLetterId}/memo")
+    public WriteMemoResponseDto writeCoverLetterMemo(@RequestBody WriteMemoRequestDto requestDto, @PathVariable Integer coverLetterId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createCoverLetterMemo(requestDto, coverLetterId, userPrincipal.getUserId());
     }
 
     @PatchMapping("/question/{memoId}")
@@ -145,9 +155,10 @@ public class InterviewController {
     }
 
     @PostMapping("/practice/video")
-    public void endInterview(@RequestPart("videoFile") MultipartFile videoFile,
+    public void endInterview(
+            @RequestPart("videoFile") MultipartFile videoFile,
                              @RequestPart("videoInfo") VideoInfo videoInfo,
-                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException {
+                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException, InterruptedException {
 
         String url = s3UploadService.uploadVideo(videoFile);
         interviewService.endInterview(userPrincipal.getUserId(), url, videoInfo);

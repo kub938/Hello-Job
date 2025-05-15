@@ -32,7 +32,7 @@ public class InterviewVideo {
     @Column(name = "select_question", nullable = false)
     private boolean selectQuestion;
 
-    @Column(name = "interview_feedback")
+    @Column(name = "interview_feedback", columnDefinition = "TEXT")
     private String interviewFeedback;
 
     @Column(name = "start")
