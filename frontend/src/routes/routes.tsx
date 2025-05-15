@@ -36,6 +36,7 @@ import { categoryValidator } from "@/pages/Interview/util/validRouteCategory";
 import InterviewTest from "@/pages/Interview/pages/InterviewTest";
 import MyCompanies from "@/pages/Mypage/components/MyCompanies";
 import MyJobs from "@/pages/Mypage/components/MyJobs";
+import CoverLetterQuestionPage from "@/pages/Interview/pages/CoverLetterQuestionPage";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -161,6 +162,16 @@ const router = createBrowserRouter([
                   <SuspenseWrapper>
                     <ErrorBoundary FallbackComponent={RenderErrorFallback}>
                       <TypeSelectPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+              },
+              {
+                path: "cover-letter",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <CoverLetterQuestionPage />
                     </ErrorBoundary>
                   </SuspenseWrapper>
                 ),
