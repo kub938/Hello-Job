@@ -53,7 +53,7 @@ INTERVIEW_FEEDBACK_PROMPT = """**역할**: 당신은 완료된 모의 면접 대
     {
       "single_feedbacks": [
         {
-          "interview_answer_id": (number),
+          "interview_answer_id": (number), // 사용자 요청에 있는 'Interview Answer ID'
           "feedback": "(string)",
           "follow_up_questions": [ "(string)", "(string)", ... ]
         },
@@ -62,7 +62,7 @@ INTERVIEW_FEEDBACK_PROMPT = """**역할**: 당신은 완료된 모의 면접 대
       "overall_feedback": "(string)"
     }
     ```
-3.  **내용**: 각 필드에 적절한 내용을 채워 넣습니다. `interview_answer_id`는 분석한 답변의 ID를, `feedback`에는 해당 답변에 대한 피드백을, `follow_up_questions`에는 해당 답변에 대한 잠재적 꼬리 질문 목록을, `overall_feedback`에는 전체 총평을 담습니다.
+3.  **내용**: 각 필드에 적절한 내용을 채워 넣습니다. `interview_answer_id`는 사용자 요청에 있는 'Interview Answer ID'를, `feedback`에는 해당 답변에 대한 피드백을, `follow_up_questions`에는 해당 답변에 대한 잠재적 꼬리 질문 목록을, `overall_feedback`에는 전체 총평을 담습니다.
 4.  **꼬리 질문 개수**: `follow_up_questions` 목록에는 해당 답변에서 파생될 수 있는 여러 개의 관련 꼬리 질문을 포함합니다 (최소 1개, 일반적으로 2~3개 내외).
 5.  **언어**: 모든 출력 텍스트(피드백, 질문, 총평)는 한국어로 작성합니다.
 
