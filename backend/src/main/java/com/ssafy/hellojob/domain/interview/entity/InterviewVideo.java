@@ -45,7 +45,7 @@ public class InterviewVideo {
     private String videoLength;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "interview_category")
+    @Column(name = "interview_category", nullable = false)
     private InterviewCategory interviewCategory;
 
     public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start){
