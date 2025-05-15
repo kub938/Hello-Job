@@ -76,7 +76,7 @@ public class JobRoleAnalysisService {
                 .build();
     }
 
-    // 직무 분석 정보 조회
+    // 직무 분석 상세 조회
     @Transactional
     public JobRoleAnalysisDetailResponseDto searchJobRoleAnalysis(Integer userId, Integer jobRoleAnalysisId) {
 
@@ -94,6 +94,8 @@ public class JobRoleAnalysisService {
 
         // 현재 로그인한 유저가 이거 북마크했는지 여부 조회
         boolean isBookmarked = jobRoleAnalysisBookmarkRepository.existsByUserAndJobRoleAnalysis(user, jobRoleAnalysis);
+
+        boolean isWrittenByMe = userId.equals(jobRoleAnalysis.getUser().getUserId());
 
         // 조회수 +1
         jobRoleAnalysis.setJobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount() + 1);
@@ -117,6 +119,7 @@ public class JobRoleAnalysisService {
                 .updatedAt(jobRoleAnalysis.getUpdatedAt())
                 .jobRoleAnalysisBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                 .bookmark(isBookmarked)
+                .writtenByMe(isWrittenByMe)
                 .build();
     }
 
@@ -202,7 +205,7 @@ public class JobRoleAnalysisService {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
             // 직무 분석이 '비공개'인 경우는 제외
-            if (!jobRoleAnalysis.getIsPublic()) {
+            if (!jobRoleAnalysis.getIsPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -245,7 +248,7 @@ public class JobRoleAnalysisService {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
             // 직무 분석이 '비공개'인 경우는 제외
-            if (!jobRoleAnalysis.getIsPublic()) {
+            if (!jobRoleAnalysis.getIsPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -289,7 +292,8 @@ public class JobRoleAnalysisService {
         // companyId로 소속된 모든 직무 분석 조회
         List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
                 .filter(analysis -> analysis.getCompany().getCompanyId().equals(companyId)) // companyId 일치
-                .filter(JobRoleAnalysis::getIsPublic)
+                .filter(analysis ->
+                        analysis.getIsPublic() || analysis.getUser().getUserId().equals(userId))
                 .filter(analysis -> {
                     if (condition.getJobRoleName() != null && !condition.getJobRoleName().isEmpty()) {
                         return analysis.getJobRoleName().startsWith(condition.getJobRoleName()); // jobRoleName이 시작하는 경우

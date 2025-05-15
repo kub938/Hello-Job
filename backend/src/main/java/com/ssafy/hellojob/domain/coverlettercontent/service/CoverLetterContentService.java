@@ -203,7 +203,9 @@ public class CoverLetterContentService {
 
         AIChatForEditRequestDto aiChatForEditRequestDto = AIChatForEditRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .job_role_analysis(coverLetter.getJobRoleSnapshot() != null
+                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                        : null)
                 .experiences(content.getExperiences().stream()
                         .map(cle -> cle.getExperience())
                         .filter(Objects::nonNull)
@@ -249,7 +251,10 @@ public class CoverLetterContentService {
                 .user_message(requestDto.getUserMessage())
                 .chat_history(chatRecentHistory)
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .job_role_analysis(
+                        coverLetter.getJobRoleSnapshot() != null
+                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                        : null)
                 .experiences(content.getExperiences().stream()
                         .map(cle -> cle.getExperience())
                         .filter(Objects::nonNull)

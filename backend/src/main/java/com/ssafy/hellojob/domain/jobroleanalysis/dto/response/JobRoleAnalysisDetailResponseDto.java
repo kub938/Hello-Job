@@ -28,6 +28,7 @@ public class JobRoleAnalysisDetailResponseDto {
     private LocalDateTime updatedAt;         // 최종 수정날짜
     private Integer jobRoleAnalysisBookmarkCount; // 총 즐겨찾기 수
     private Boolean bookmark;                // 현재 유저가 즐겨찾기 했는지 여부
+    private boolean writtenByMe; // 이 유저가 작성자인지 여부
 
 }
 

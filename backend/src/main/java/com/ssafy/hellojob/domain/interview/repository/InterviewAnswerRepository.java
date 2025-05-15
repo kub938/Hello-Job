@@ -11,5 +11,6 @@ import java.util.List;
 public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer, Integer> {
 
     List<InterviewAnswer> findInterviewAnswerByInterviewVideo(InterviewVideo interviewVideo);
+    List<InterviewAnswer> findByInterviewVideoOrderByCreatedAtAsc(InterviewVideo interviewVideo);
 
 }

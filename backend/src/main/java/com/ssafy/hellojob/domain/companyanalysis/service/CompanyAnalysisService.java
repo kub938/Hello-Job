@@ -150,7 +150,44 @@ public class CompanyAnalysisService {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
 
         List<CompanyAnalysisListResponseDto> result = analysisList.stream()
-                .filter(CompanyAnalysis::isPublic) // 공개된 기업 분석만 조회
+                .filter(analysis ->
+                        analysis.isPublic() || analysis.getUser().getUserId().equals(userId)) // 공개된 기업 분석만 조회
+                .map(analysis -> {
+                    DartAnalysis dart = analysis.getDartAnalysis();
+                    List<String> dartCategory = new ArrayList<>();
+                    if (dart != null) {
+                        if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
+                        if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
+                        if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
+                    }
+
+                    return CompanyAnalysisListResponseDto.builder()
+                            .companyAnalysisTitle(analysis.getCompanyAnalysisTitle())
+                            .companyAnalysisId(analysis.getCompanyAnalysisId())
+                            .companyName(analysis.getCompany().getCompanyName())
+                            .createdAt(analysis.getCreatedAt())
+                            .companyViewCount(analysis.getCompanyAnalysisViewCount())
+                            .companyLocation(analysis.getCompany().getCompanyLocation())
+                            .companySize(analysis.getCompany().getCompanySize().name())
+                            .companyIndustry(analysis.getCompany().getCompanyIndustry())
+                            .companyAnalysisBookmarkCount(analysis.getCompanyAnalysisBookmarkCount())
+                            .bookmark(companyAnalysisBookmarkRepository.existsByUser_UserIdAndCompanyAnalysis_CompanyAnalysisId(
+                                    userId, analysis.getCompanyAnalysisId()))
+                            .isPublic(analysis.isPublic())
+                            .dartCategory(dartCategory)
+                            .build();
+                })
+                .toList();
+
+        return result;
+    }
+
+    // 해당 유저가 작성한 기업 분석 목록 조회
+    public List<CompanyAnalysisListResponseDto> searchCompanyAnalysisByUserId(Integer userId) {
+        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
+
+        List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+                .filter(analysis -> analysis.getUser().getUserId().equals(userId))
                 .map(analysis -> {
                     DartAnalysis dart = analysis.getDartAnalysis();
                     List<String> dartCategory = new ArrayList<>();
@@ -193,7 +230,7 @@ public class CompanyAnalysisService {
         CompanyAnalysis companyAnalysis = companyAnalysisReadService.findCompanyAnalysisByIdOrElseThrow(companyAnalysisId);
 
         // 공개 여부 필터링
-        if (!companyAnalysis.isPublic()) {
+        if (!companyAnalysis.isPublic() && !userId.equals(companyAnalysis.getUser().getUserId())) {
             throw new BaseException(ErrorCode.INVALID_USER);
         }
 
@@ -257,14 +294,15 @@ public class CompanyAnalysisService {
         companyReadService.findCompanyByIdOrElseThrow(companyId);
 
         // 해당 기업의 기업 분석 전체 조회
-        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdAndIsPublicTrueOrderByCreatedAtDesc(companyId);
+        List<CompanyAnalysis> analysisList = companyAnalysisRepository.findTop14ByCompany_CompanyIdOrderByCreatedAtDesc(companyId);
 
         log.debug("기업 분석 목록 조회");
         log.debug("검색된 기업 분석 갯수: {}", analysisList.size());
 
         // 공개된 분석만 필터링하여 DTO 매핑
         return analysisList.stream()
-                .filter(CompanyAnalysis::isPublic)
+                .filter(analysis ->
+                        analysis.isPublic() || analysis.getUser().getUserId().equals(userId))
                 .map(analysis -> {
                     DartAnalysis dart = analysis.getDartAnalysis();
                     List<String> dartCategory = new ArrayList<>();
@@ -380,7 +418,7 @@ public class CompanyAnalysisService {
             CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
             // 공개 여부 처리(비공개일경우 pass)
-            if (!companyAnalysis.isPublic()) {
+            if (!companyAnalysis.isPublic() && !userId.equals(companyAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -431,7 +469,7 @@ public class CompanyAnalysisService {
             CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
             // 공개 여부 처리(비공개 시 pass)
-            if (!companyAnalysis.isPublic()) {
+            if (!companyAnalysis.isPublic() && !userId.equals(companyAnalysis.getUser().getUserId())) {
                 continue;
             }
 

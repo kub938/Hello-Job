@@ -6,10 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class WriteMemoRequestDto {
-    private Integer csQuestionBankId;
-    private Integer personalityQuestionBankId;
-    private Integer coverLetterQuestionBankId;
-    private Integer interviewId;
+    private Integer questionBankId;
 
     @NotBlank(message = ValidationMessage.MEMO_NOT_EMPTY)
     private String memo;
