@@ -34,7 +34,10 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.Duration;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -70,7 +73,10 @@ public class InterviewService {
     private static final int MAX_WAIT_SECONDS = 60;
     private static final int POLL_INTERVAL_MS = 500;
 
-    private final Integer QUESTION_SIZE = 3;
+    private final Integer QUESTION_SIZE = 5;
+
+//    @Value("${FFPROBE_PATH}")
+//    private String ffprobe_path;
 
 
     @Value("${OPENAI_API_URL}")
@@ -468,7 +474,11 @@ public class InterviewService {
 
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); // 팩토리 메서드
+                    return newInterview;
+                });
 
         List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
 
@@ -628,7 +638,7 @@ public class InterviewService {
 
     // 면접 답변 저장
     @Transactional
-    public Map<String, String> saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
+    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, InterviewInfo interviewInfo, MultipartFile videoFile) throws InterruptedException, IOException {
         userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
@@ -647,8 +657,48 @@ public class InterviewService {
         }
 
         interviewAnswer.addInterviewAnswer(answer);
+        interviewAnswer.addInterviewVideoUrl(url);
+        interviewAnswer.addVideoLength(getVideoDurationWithFFprobe(videoFile));
+
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
+
+    public String getVideoDurationWithFFprobe(MultipartFile videoFile) throws IOException, InterruptedException {
+        File tempFile = File.createTempFile("upload", ".mp4");
+        videoFile.transferTo(tempFile);
+
+        String ffprobe_path = "ffprobe.exe";
+
+        ProcessBuilder pb = new ProcessBuilder(
+                ffprobe_path,
+                "-v", "error",
+                "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                tempFile.getAbsolutePath()
+        );
+
+        Process process = pb.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String durationStr = reader.readLine();
+        process.waitFor();
+        tempFile.delete();
+
+        if (durationStr == null) {
+            log.error("⚠️ ffprobe 결과가 null입니다. 영상 길이를 분석하지 못했습니다.");
+//            throw new BaseException("영상 길이를 분석할 수 없습니다.");
+        }
+
+        double durationInSeconds = Double.parseDouble(durationStr.trim());
+
+        // 초 단위를 hh:mm:ss 형식으로 변환
+        int hours = (int) durationInSeconds / 3600;
+        int minutes = ((int) durationInSeconds % 3600) / 60;
+        int seconds = (int) durationInSeconds % 60;
+
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+    }
+
+
 
     @Transactional
     public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto){
@@ -703,7 +753,7 @@ public class InterviewService {
 
     // 면접 종료
     @Transactional
-    public Map<String, String> endInterview(Integer userId, String url, VideoInfo videoInfo) throws InterruptedException {
+    public EndInterviewResponseDto endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
@@ -737,24 +787,8 @@ public class InterviewService {
             }
         }
 
-        // 시작 시간 및 종료 시간 기반으로 영상 시간 계산 후 저장
-        interviewVideo.addInterviewVideoUrl(url);
+        interviewVideo.addTitle(videoInfo.getInterviewTitle());
         interviewVideo.addEndTime(LocalDateTime.now());
-
-        LocalDateTime start = interviewVideo.getStart();
-        LocalDateTime end = interviewVideo.getEnd();
-
-        Duration duration = Duration.between(start, end);
-        if (duration.isNegative()) {
-            duration = Duration.ZERO; // 음수 방지
-        }
-
-        long hours = duration.toHours();
-        long minutes = duration.toMinutesPart();
-        long seconds = duration.toSecondsPart();
-
-        String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-        interviewVideo.addVideoLength(formatted); 
 
         // 여기서부터 fast API 관련 로직
         // 답변 객체 조회(stt 변환에 성공한 경우만)
@@ -765,7 +799,9 @@ public class InterviewService {
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if(interviewQuestionAndAnswerRequestDto.isEmpty()){
-            return Map.of("message", "오류가 발생했습니다.");
+            return EndInterviewResponseDto.builder()
+                    .interviewVideoId(interviewVideo.getInterviewVideoId())
+                    .build();
         }
 
         // 자소서 조회
@@ -808,7 +844,9 @@ public class InterviewService {
 
         }
 
-        return Map.of("message", "정상적으로 저장되었습니다.");
+        return EndInterviewResponseDto.builder()
+                .interviewVideoId(interviewVideo.getInterviewVideoId())
+                .build();
     }
 
     public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers){
@@ -892,9 +930,7 @@ public class InterviewService {
         for (InterviewVideo video : videos) {
             InterviewResponseDto dto = InterviewResponseDto.builder()
                     .type(video.getInterviewCategory().name())
-                    .interviewVideoUrl(video.getInterviewVideoUrl())
                     .start(video.getStart())
-                    .videoLength(video.getVideoLength())
                     .firstQuestion(getFirstQuestion(video))
                     .build();
 
