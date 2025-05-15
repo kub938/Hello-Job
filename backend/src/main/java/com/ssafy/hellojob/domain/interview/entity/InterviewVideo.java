@@ -15,15 +15,15 @@ public class InterviewVideo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "interview_video", nullable = false)
+    @Column(name = "interview_video_id", nullable = false)
     private Integer interviewVideoId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cover_letter_interview")
+    @JoinColumn(name = "cover_letter_interview_id")
     private CoverLetterInterview coverLetterInterview;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview")
+    @JoinColumn(name = "interview_id")
     private Interview interview;
 
     @Column(name = "interview_video_url")
