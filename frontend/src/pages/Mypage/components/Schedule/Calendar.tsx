@@ -18,21 +18,15 @@ import {
 } from "date-fns";
 import { useState } from "react";
 import { statusColorMap } from "@/types/scheduleTypes";
-import { getScheduleResponse } from "@/types/scheduleApiTypes";
+import { getSchedulesResponse } from "@/types/scheduleApiTypes";
 
 interface CalendarProps {
-  scheduleList: getScheduleResponse[];
+  scheduleList: getSchedulesResponse[];
 }
 
 // 주 단위로 이벤트를 처리하기 위한 인터페이스
 interface WeekEvent {
-  schedule: getScheduleResponse;
-  startIdx: number;
-  endIdx: number;
-}
-
-interface WeekEvent {
-  schedule: getScheduleResponse;
+  schedule: getSchedulesResponse;
   startIdx: number;
   endIdx: number;
   row?: number;
@@ -64,7 +58,7 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
   // 주별로 일정을 계산하는 함수
   const getWeekEvents = (
     week: string[],
-    schedules: getScheduleResponse[]
+    schedules: getSchedulesResponse[]
   ): WeekEvent[] => {
     const weekEvents: WeekEvent[] = [];
 
@@ -72,8 +66,10 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
     const weekDates = week.map((dateStr) => parseISO(dateStr));
 
     schedules.forEach((schedule) => {
-      const scheduleStart = startOfDay(parseISO(schedule.scheduleStartDate));
-      const scheduleEnd = endOfDay(parseISO(schedule.scheduleEndDate));
+      const scheduleStart = startOfDay(
+        parseISO(schedule.scheduleStartDate ?? "")
+      );
+      const scheduleEnd = endOfDay(parseISO(schedule.scheduleEndDate ?? ""));
 
       // 이 주의 시작일과 종료일
       const weekStartDate = weekDates[0];
@@ -134,8 +130,8 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
           });
           // 일정 종료일이 빠른 순으로 정렬
           weekEvents.sort((a, b) => {
-            const aEnd = parseISO(a.schedule.scheduleEndDate).getTime();
-            const bEnd = parseISO(b.schedule.scheduleEndDate).getTime();
+            const aEnd = parseISO(a.schedule.scheduleEndDate ?? "").getTime();
+            const bEnd = parseISO(b.schedule.scheduleEndDate ?? "").getTime();
             return aEnd - bEnd;
           });
         }
@@ -266,7 +262,7 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
                     key={`${event.schedule.scheduleId}-week-${weekIndex}-event-${idx}`}
                     className={`absolute rounded-lg ${colorClass} text-[11px] text-left px-3 py-1 rounded whitespace-nowrap overflow-hidden text-ellipsis opacity-70 hover:opacity-100 transition-opacity cursor-pointer`}
                     style={{ left, width, top }}
-                    title={event.schedule.scheduleMemo}
+                    title={event.schedule.scheduleMemo ?? ""}
                   >
                     {event.schedule.scheduleTitle}
                   </button>
