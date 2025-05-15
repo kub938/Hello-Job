@@ -51,7 +51,7 @@ export const useGetCoverLetterQuestions = (
     queryKey: ["cover-letter-questions"],
     queryFn: async () => {
       if (coverLetterId === null) {
-        return "";
+        return;
       }
       const response = await interviewApi.getCoverLetterQuestions(
         coverLetterId
