@@ -38,9 +38,10 @@ export const interviewApi = {
 
   // 자기소개서 질문 저장 API
   saveQuestion: (questionData: SaveQuestionRequest) => {
-    return authApi.post(`/api/v1/interview/question/cover-letter/save`, {
-      questionData,
-    });
+    return authApi.post(
+      `/api/v1/interview/question/cover-letter/save`,
+      questionData
+    );
   },
 
   // 문항 면접 시작 API - 카테고리를 인자로 받는 통합 방식
