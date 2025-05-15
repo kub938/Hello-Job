@@ -30,11 +30,13 @@ import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
 import InterviewPage from "@/pages/Interview/pages/InterviewLayoutPage";
 import ResultPage from "@/pages/Interview/pages/ResultPage";
 import PreparePage from "@/pages/Interview/pages/PreparePage";
-import MockInterviewPage from "@/pages/Interview/pages/MockInterviewPage";
-import SingleQuestionPage from "@/pages/Interview/pages/SingleQuestionPage";
+import SelectQuestionPage from "@/pages/Interview/pages/SelectQuestionPage";
+import PracticeInterviewPage from "@/pages/Interview/pages/PracticeInterviewPage";
+import { categoryValidator } from "@/pages/Interview/util/validRouteCategory";
 import InterviewTest from "@/pages/Interview/pages/InterviewTest";
 import MyCompanies from "@/pages/Mypage/components/MyCompanies";
 import MyJobs from "@/pages/Mypage/components/MyJobs";
+import CoverLetterQuestionPage from "@/pages/Interview/pages/CoverLetterQuestionPage";
 
 const CoverLetterAnalysis = lazy(
   () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
@@ -165,25 +167,37 @@ const router = createBrowserRouter([
                 ),
               },
               {
-                path: "mock-interview",
+                path: "cover-letter",
                 element: (
                   <SuspenseWrapper>
                     <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <MockInterviewPage />
+                      <CoverLetterQuestionPage />
                     </ErrorBoundary>
                   </SuspenseWrapper>
                 ),
               },
               {
-                path: "single-question",
+                path: ":category",
                 element: (
                   <SuspenseWrapper>
                     <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <SingleQuestionPage />
+                      <SelectQuestionPage />
+                    </ErrorBoundary>
+                  </SuspenseWrapper>
+                ),
+                loader: categoryValidator,
+              },
+              {
+                path: "practice-interview",
+                element: (
+                  <SuspenseWrapper>
+                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+                      <PracticeInterviewPage />
                     </ErrorBoundary>
                   </SuspenseWrapper>
                 ),
               },
+              {},
             ],
           },
         ],

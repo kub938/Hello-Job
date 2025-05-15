@@ -186,8 +186,7 @@ function ReadJob({ onClose, id, companyId }: ReadJobProps) {
         <>
           <JobInfo jobDetail={jobDetail} />
           <div className="mt-8 flex gap-4 justify-end">
-            {/* {jobDetail?.writtenByMe && ( */}
-            {true && (
+            {jobDetail?.writtenByMe && (
               <>
                 <Button
                   className="px-6"
@@ -197,7 +196,7 @@ function ReadJob({ onClose, id, companyId }: ReadJobProps) {
                   수정
                 </Button>
                 <Button
-                  className="px-6  hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 active:text-white active:border-red-700"
+                  className="px-6 hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 active:text-white active:border-red-700"
                   variant="white"
                   onClick={handleDeleteClick}
                 >

@@ -176,7 +176,7 @@ function ReportList({ nowStep }: ReportListProps) {
                 <div className="absolute right-1.5 top-1.5 text-text-disabled hover:text-primary duration-150  ">
                   <Info onClick={() => handleOpenDetail(report.id)} size={24} />
                 </div>
-                <div className="flex items-start ">
+                <div className="flex w-full items-start ">
                   {/* 회사 첫 글자 아바타 */}
                   <div className="flex-shrink-0 mr-4">
                     <div className="w-12 h-12 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-xl">
@@ -186,7 +186,7 @@ function ReportList({ nowStep }: ReportListProps) {
 
                   {/* 컨텐츠 영역 */}
                   <div className="flex-1 min-w-0">
-                    <h3 className="text-lg w-50 font-semibold text-gray-900 mb-1 truncate">
+                    <h3 className="text-lg font-semibold w-full text-gray-900 mb-1 truncate">
                       {report.title}
                     </h3>
 
@@ -195,7 +195,7 @@ function ReportList({ nowStep }: ReportListProps) {
                     </p>
 
                     {/* 메타 정보 영역 */}
-                    <div className="flex flex-wrap items-center text-xs text-gray-500 gap-3">
+                    <div className="flex flex-wrap  w-full items-center text-xs text-gray-500 gap-3">
                       <div className="flex items-center">
                         {report.location && nowStep === 1 ? (
                           <MapPin size={14} className="mr-1" />
@@ -203,7 +203,9 @@ function ReportList({ nowStep }: ReportListProps) {
                           <BriefcaseBusiness size={14} className="mr-1" />
                         )}
 
-                        <span>{report.location}</span>
+                        <span className="w-full line-clamp-2">
+                          {report.location}
+                        </span>
                       </div>
                       <div className="flex w-full justify-end gap-2">
                         <div className="flex items-center">
@@ -217,36 +219,14 @@ function ReportList({ nowStep }: ReportListProps) {
                         </div>
                         <div className="flex items-center">
                           <Calendar size={14} className="mr-1" />
-                          <span>{formatDate(report.date)}</span>
+                          <span className="w-full">
+                            {formatDate(report.date)}
+                          </span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                {/* <div className="group-active:bg-active group-active:border-active duration-100 border mr-3 bg-secondary-light rounded-full size-15 flex justify-center items-center font-bold text-primary text-xl aspect-square">
-                  {report.name[0]}
-                </div>
-                <div>
-                  <div className="whitespace-normal line-clamp-2 font-semibold text-xl">
-                    {report.name}
-                  </div>
-                  <div className="text-sm line-clamp-2 text-muted-foreground">
-                    {report.industry}
-                  </div>
-                  <div className="flex flex-wrap ">
-                    {report.categories.map(
-                      (category, index) =>
-                        category !== "" && (
-                          <div
-                            key={index}
-                            className="mr-1 my-0.5 border rounded-3xl bg-secondary-light text-primary px-3 text-xs"
-                          >
-                            {category}
-                          </div>
-                        )
-                    )}
-                  </div>
-                </div> */}
               </div>
             );
           })}

@@ -283,20 +283,20 @@ function PreparePage() {
         )}
 
         {/* 비디오 미리보기 영역 */}
-        <div className="mb-8 overflow-hidden rounded-lg bg-gray-900 relative">
+        <div className="mb-8 overflow-hidden h-120 rounded-lg bg-gray-900 relative">
+          <video
+            ref={videoRef} // DOM 요소 참조 연결
+            autoPlay // 자동 재생
+            playsInline // 모바일에서 인라인 재생(전체 화면 방지)
+            muted // 오디오 음소거(피드백 방지)
+            className="h-full w-full object-cover"
+            onLoadedData={handleVideoLoadedData} //  비디오 데이터 로드 완료 이벤트 핸들러
+          />
           {cameraStream ? (
-            // 카메라 스트림이 있으면 비디오 표시
-            <video
-              ref={videoRef} // DOM 요소 참조 연결
-              autoPlay // 자동 재생
-              playsInline // 모바일에서 인라인 재생(전체 화면 방지)
-              muted // 오디오 음소거(피드백 방지)
-              className="h-64 w-full object-cover"
-              onLoadedData={handleVideoLoadedData} // 비디오 데이터 로드 완료 이벤트 핸들러
-            />
+            <></>
           ) : (
             // 카메라 스트림이 없으면 로딩 표시
-            <div className="flex h-64 items-center justify-center">
+            <div className="flex h-120 items-center justify-center absolute top-0 left-0 w-full">
               <div className="text-center text-white">
                 <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-gray-700 mx-auto">
                   <Camera className="h-6 w-6 text-gray-400" />
