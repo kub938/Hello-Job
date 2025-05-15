@@ -258,7 +258,7 @@ function CoverLetterQuestionPage() {
 
               {/* 질문 목록 */}
               <div className="space-y-3 mb-6 max-h-[320px] overflow-y-auto pr-2">
-                {questions !== undefined && questions.length > 0 ? (
+                {questions && questions.length > 0 ? (
                   questions.map((question) => {
                     const isSelected = selectedQuestions.includes(
                       question.questionBankId

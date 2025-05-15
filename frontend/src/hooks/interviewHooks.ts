@@ -51,11 +51,13 @@ export const useGetCoverLetterQuestions = (
     queryKey: ["cover-letter-questions"],
     queryFn: async () => {
       if (coverLetterId === null) {
-        return;
+        return null;
       }
       const response = await interviewApi.getCoverLetterQuestions(
         coverLetterId
       );
+      console.log(response);
+
       return response.data;
     },
   });
