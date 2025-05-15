@@ -1,6 +1,7 @@
+import { authApi } from "@/api/instance";
 import { interviewApi } from "@/api/interviewApi";
 import { InterviewCategory } from "@/types/interviewApiTypes";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useGetQuestions = (category: InterviewCategory) => {
   return useQuery({
@@ -8,6 +9,22 @@ export const useGetQuestions = (category: InterviewCategory) => {
     queryFn: async () => {
       const response = await interviewApi.getQuestions(category);
       return response.data;
+    },
+  });
+};
+
+export const useCreateCoverLetterQuestion = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["create-cover-letter-question"],
+    mutationFn: async (coverLetterId: number) => {
+      const response = await interviewApi.createQuestion(coverLetterId);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log(data, "question 데이터 생성에 성공했습니다.");
+      // queryClient.invalidateQueries([]);
     },
   });
 };
