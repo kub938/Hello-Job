@@ -463,7 +463,7 @@ public class InterviewService {
 
     }
 
-    public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
+    public Map<String, String> saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
@@ -472,8 +472,8 @@ public class InterviewService {
 
         List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
 
-        for(CoverLetterQuestionDto dto: requestDto.getCoverLetterQuestion()){
-            String newQuestion = dto.getCoverLetterQuestion();
+        for(String newQuestion: requestDto.getCoverLetterQuestion()){
+
             CoverLetterQuestionBank newQuestions = CoverLetterQuestionBank.of(coverLetterInterview, newQuestion);
             coverLetterQuestionBankRepository.save(newQuestions);
             questionIdList.add(CoverLetterQuestionIdDto.builder()
@@ -481,11 +481,7 @@ public class InterviewService {
                     .build());
         }
 
-        return CoverLetterQuestionSaveResponseDto.builder()
-                .coverLetterId(coverLetter.getCoverLetterId())
-                .coverLetterInterviewId(coverLetterInterview.getCoverLetterInterviewId())
-                .coverLetterQuestionSaveId(questionIdList)
-                .build();
+        return Map.of("message", "성공적으로 저장되었습니다.");
     }
 
     public WriteMemoResponseDto createCsMemo(WriteMemoRequestDto requestDto, Integer userId) {
@@ -632,7 +628,7 @@ public class InterviewService {
 
     // 면접 답변 저장
     @Transactional
-    public void saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
+    public Map<String, String> saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
         userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
@@ -651,6 +647,7 @@ public class InterviewService {
         }
 
         interviewAnswer.addInterviewAnswer(answer);
+        return Map.of("message", "정상적으로 저장되었습니다.");
     }
 
     @Transactional
@@ -706,7 +703,7 @@ public class InterviewService {
 
     // 면접 종료
     @Transactional
-    public void endInterview(Integer userId, String url, VideoInfo videoInfo) throws InterruptedException {
+    public Map<String, String> endInterview(Integer userId, String url, VideoInfo videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
@@ -768,7 +765,7 @@ public class InterviewService {
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if(interviewQuestionAndAnswerRequestDto.isEmpty()){
-            return;
+            return Map.of("message", "오류가 발생했습니다.");
         }
 
         // 자소서 조회
@@ -811,6 +808,7 @@ public class InterviewService {
 
         }
 
+        return Map.of("message", "정상적으로 저장되었습니다.");
     }
 
     public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers){
