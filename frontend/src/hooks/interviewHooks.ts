@@ -1,5 +1,8 @@
 import { interviewApi } from "@/api/interviewApi";
-import { InterviewCategory } from "@/types/interviewApiTypes";
+import {
+  InterviewCategory,
+  SaveQuestionRequest,
+} from "@/types/interviewApiTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 export const useGetQuestions = (category: InterviewCategory) => {
@@ -24,6 +27,19 @@ export const useCreateCoverLetterQuestion = () => {
     onSuccess: (data) => {
       console.log(data, "question 데이터 생성에 성공했습니다.");
       // queryClient.invalidateQueries([]);
+    },
+  });
+};
+
+export const useSaveCoverLetterQuestions = () => {
+  return useMutation({
+    mutationKey: ["save-cover-letter-question"],
+    mutationFn: async (selectQuestion: SaveQuestionRequest) => {
+      const response = await interviewApi.saveQuestion(selectQuestion);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      console.log(data, "question 데이터 저장에 성공했습니다.");
     },
   });
 };
