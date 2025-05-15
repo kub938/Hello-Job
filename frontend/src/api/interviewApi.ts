@@ -50,7 +50,13 @@ export const interviewApi = {
   },
 
   // 문항 면접 시작 API - 카테고리를 인자로 받는 통합 방식
-  startQuestionInterview: (category: InterviewCategory) => {
+  selectCategory: (category: InterviewCategory, coverLetterId?: number) => {
+    if (category === "cover-letter") {
+      return authApi.post<StartQuestionInterviewResponse>(
+        `/api/v1/interview/select/${category}`,
+        { coverLetterId }
+      );
+    }
     return authApi.post<StartQuestionInterviewResponse>(
       `/api/v1/interview/select/${category}`
     );
