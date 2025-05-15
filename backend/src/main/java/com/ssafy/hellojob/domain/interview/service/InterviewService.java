@@ -66,7 +66,12 @@ public class InterviewService {
     private final CoverLetterContentService coverLetterContentService;
     private final FastApiClientService fastApiClientService;
 
+    // polling 전 정의
+    private static final int MAX_WAIT_SECONDS = 60;
+    private static final int POLL_INTERVAL_MS = 500;
+
     private final Integer QUESTION_SIZE = 3;
+
 
     @Value("${OPENAI_API_URL}")
     private String openAiUrl;
@@ -133,11 +138,9 @@ public class InterviewService {
     public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
 
-        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_INTERVIEW_NOT_FOUND));
+        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(coverLetterId);
 
         List<CoverLetterQuestionBank> questionList = coverLetterQuestionBankRepository.findByCoverLetterInterview(coverLetterInterview);
 
@@ -353,11 +356,12 @@ public class InterviewService {
 
     }
 
-    public void saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+    public InterviewStartResponseDto saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
+
+        List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
         for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
             Integer questionId = dto.getQuestionBankId();
@@ -371,16 +375,29 @@ public class InterviewService {
                     InterviewQuestionCategory.valueOf(question.getCsCategory().name())
             );
             interviewAnswerRepository.save(answer);
+
+            questionList.add(
+                QuestionAndAnswerListResponseDto.builder()
+                        .questionBankId(questionId)
+                        .question(question.getCsQuestion())
+                        .interviewAnswerId(answer.getInterviewAnswerId())
+                        .build()
+            );
         }
 
-
+        return InterviewStartResponseDto.builder()
+                .interviewId(video.getInterviewVideoId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
     }
 
-    public void savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+    public InterviewStartResponseDto savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
+
+        List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
         for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
             Integer questionId = dto.getQuestionBankId();
@@ -394,16 +411,30 @@ public class InterviewService {
                     InterviewQuestionCategory.valueOf("인성면접")
             );
             interviewAnswerRepository.save(answer);
+
+            questionList.add(
+                    QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(questionId)
+                            .question(question.getPersonalityQuestion())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .build()
+            );
         }
 
+        return InterviewStartResponseDto.builder()
+                .interviewId(video.getInterviewVideoId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
 
     }
 
-    public void saveCoverLetterQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+    public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectQuestionRequestDto requestDto){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
+
+        List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
         for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
             Integer questionId = dto.getQuestionBankId();
@@ -417,19 +448,30 @@ public class InterviewService {
                     InterviewQuestionCategory.valueOf("자기소개서면접")
             );
             interviewAnswerRepository.save(answer);
+
+            questionList.add(
+                    QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(questionId)
+                            .question(question.getCoverLetterQuestion())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .build()
+            );
         }
 
+        return InterviewStartResponseDto.builder()
+                .interviewId(video.getInterviewVideoId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
 
     }
 
     public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
-        CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(requestDto.getCoverLetterId());
 
         List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
 
@@ -667,11 +709,26 @@ public class InterviewService {
 
     // 면접 종료
     @Transactional
-    public void endInterview(Integer userId, String url, VideoInfo videoInfo){
+    public void endInterview(Integer userId, String url, VideoInfo videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+
+        // Polling: 최대 MAX_WAIT_SECONDS까지 대기
+        int waited = 0;
+        while (waited < MAX_WAIT_SECONDS * 1000) {
+            boolean hasPendingStt = interviewAnswers.stream()
+                    .anyMatch(ans -> ans.getInterviewAnswer() == null);
+
+            if (!hasPendingStt) break;  // 모두 STT 완료됨
+
+            Thread.sleep(POLL_INTERVAL_MS);  // 0.5초 대기
+            waited += POLL_INTERVAL_MS;
+
+            // 최신 상태로 다시 로드
+            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+        }
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
         if(interviewVideo.getCoverLetterInterview() != null){
@@ -699,8 +756,8 @@ public class InterviewService {
         }
 
         long hours = duration.toHours();
-        long minutes = duration.toMinutesPart();  // Java 9 이상
-        long seconds = duration.toSecondsPart();  // Java 9 이상
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
 
         String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         interviewVideo.addVideoLength(formatted); 
