@@ -5,6 +5,7 @@ import JobSearch from "../SearchInputModal/JobSearch";
 import CompanySearch from "../SearchInputModal/CompanySearch";
 import { BsClockHistory } from "react-icons/bs"; // 검색 기록 아이콘
 import { CompanyState } from "@/types/coverLetterStoreTypes";
+import { formatDate } from "@/utils/formatDate";
 
 export type SearchType = "job" | "company" | "";
 
@@ -71,17 +72,6 @@ function JobCompanyForm() {
   // 최근 검색 기록 표시 (최대 3개)
   const recentSearches = searchHistory.slice(0, 3);
 
-  // 날짜 포맷 함수
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    return `${
-      date.getMonth() + 1
-    }/${date.getDate()} ${date.getHours()}:${String(date.getMinutes()).padStart(
-      2,
-      "0"
-    )}`;
-  };
-
   return (
     <>
       {isModalOpen && <CompanySearch modalClose={modalClose}></CompanySearch>}
@@ -98,13 +88,13 @@ function JobCompanyForm() {
               <span className="col-span-1 group-active:bg-active group-active:border-active duration-100 border bg-secondary-light rounded-full size-7 flex justify-center items-center font-semibold text-primary text-sm aspect-square">
                 {company.companyName[0]}
               </span>
-              <span className="col-span-3 font-medium text-left ml-3">
+              <span className="col-span-3 font-medium text-left ml-3 truncate">
                 {company.companyName}
               </span>
-              <span className="col-span-3 text-right">
+              <span className="col-span-4 text-right truncate">
                 {company.companyLocation}
               </span>
-              <span className="col-span-3 text-right">
+              <span className="col-span-2 text-right">
                 {company.companySize}
               </span>
             </div>

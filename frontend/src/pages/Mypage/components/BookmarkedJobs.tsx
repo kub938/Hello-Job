@@ -9,6 +9,7 @@ import ReadJob from "@/pages/JobResearch/components/ReadJob";
 function BookmarkedJobs() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchJobId, setResearchJobId] = useState<number>(1);
+  const [clickedCompanyId, setClickedCompanyId] = useState<number>(1);
 
   const { data: bookmarkedJobListData, isLoading } = useQuery({
     queryKey: ["bookmarkedJobList"],
@@ -42,6 +43,7 @@ function BookmarkedJobs() {
             <JobResearchCard
               key={jobResearch.jobRoleAnalysisId}
               onClick={() => {
+                setClickedCompanyId(jobResearch.jobRoleAnalysisId);
                 openReadModal(jobResearch.jobRoleAnalysisId);
               }}
               jobRoleName={jobResearch.jobRoleName}
@@ -51,10 +53,13 @@ function BookmarkedJobs() {
               jobRoleBookmarkCount={jobResearch.jobRoleBookmarkCount}
               bookmark={jobResearch.bookmark}
               createdAt={jobResearch.updatedAt}
+              isPublic={jobResearch.public}
+              jobId={jobResearch.jobRoleAnalysisId}
+              isFinding={false}
             />
           ))
         ) : (
-          <div className="text-center text-gray-500 text-lg h-[110px] w-[800px] flex flex-col items-center justify-center">
+          <div className="text-center text-gray-500 text-lg h-[110px] w-full flex flex-col items-center justify-center">
             <h1>북마크한 직무 분석이 없습니다.</h1>
             <h1 className="text-base mt-2">직무 분석을 북마크 해보세요.</h1>
           </div>
@@ -62,7 +67,11 @@ function BookmarkedJobs() {
       </div>
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadJob onClose={closeModal} id={researchJobId} />
+          <ReadJob
+            onClose={closeModal}
+            id={researchJobId}
+            companyId={String(clickedCompanyId)}
+          />
         </DetailModal>
       )}
     </div>

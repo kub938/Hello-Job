@@ -1,8 +1,12 @@
+import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { timeParser } from "@/hooks/timeParser";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
+import { toast } from "sonner";
 
 interface JobResearchCardProps {
   onClick: () => void;
+  modalClose?: () => void;
   jobRoleName: string;
   jobRoleAnalysisTitle: string;
   jobRoleCategory: string;
@@ -10,10 +14,15 @@ interface JobResearchCardProps {
   jobRoleBookmarkCount: number;
   bookmark: boolean;
   createdAt: string;
+  isPublic: boolean;
+  jobId: number;
+  companyId?: string;
+  isFinding: boolean;
 }
 
 function JobResearchCard({
   onClick,
+  modalClose,
   jobRoleName,
   jobRoleAnalysisTitle,
   jobRoleCategory,
@@ -21,16 +30,104 @@ function JobResearchCard({
   jobRoleBookmarkCount,
   bookmark,
   createdAt,
+  isPublic,
+  jobId,
+  companyId,
+  isFinding,
 }: JobResearchCardProps) {
+  const queryClient = useQueryClient();
+
+  // 북마크 추가 mutation
+  const addJobBookmarkMutation = useMutation({
+    mutationFn: () =>
+      jobRoleAnalysis.postBookmark({ jobRoleAnalysisId: jobId }),
+    onSuccess: () => {
+      console.log("북마크 추가 성공");
+      queryClient.invalidateQueries({
+        queryKey: ["jobRoleDetail", jobId],
+      });
+      if (companyId) {
+        queryClient.invalidateQueries({
+          queryKey: ["jobResearchList", companyId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["job-book-mark", parseInt(companyId)],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["bookmarkedCompanyList"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["myCompanyList"],
+        });
+      }
+    },
+  });
+
+  // 북마크 삭제 mutation
+  const removeJobBookmarkMutation = useMutation({
+    mutationFn: () => jobRoleAnalysis.deleteBookmark(jobId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["jobRoleDetail", jobId],
+      });
+      if (companyId) {
+        queryClient.invalidateQueries({
+          queryKey: ["jobResearchList", companyId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["job-book-mark", parseInt(companyId)],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["bookmarkedJobList"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["myJobList"],
+        });
+      }
+    },
+  });
+
+  const handleBookmarkClickOn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addJobBookmarkMutation.mutate();
+  };
+  const handleBookmarkClickOff = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeJobBookmarkMutation.mutate();
+  };
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFinding && modalClose) {
+      addJobBookmarkMutation.mutate();
+      toast.info("북마크에 추가되었습니다.");
+      modalClose();
+    } else {
+      onClick();
+    }
+  };
+  const handleRead = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick();
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       className="w-[800px] h-[110px] border-l-4 border-[#6F4BFF] bg-white rounded-lg rounded-l-xs cursor-pointer shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between p-4"
     >
       <div className="flex justify-between items-start">
         <div className="flex flex-col">
           <div className="flex items-center gap-4">
-            <h3 className="text-lg font-bold text-[#333] mb-1">
+            <h3 className="text-lg font-bold text-[#333] mb-1 flex items-center">
+              {isPublic ? (
+                <></>
+              ) : (
+                <span className="text-gray-500 mr-2">
+                  <FaLock size={12} />
+                </span>
+              )}
               {jobRoleAnalysisTitle}
             </h3>
             <span className="text-sm font-medium text-[#6F4BFF]">
@@ -44,10 +141,21 @@ function JobResearchCard({
           </div>
         </div>
         <div className="flex items-center">
-          {bookmark ? (
-            <FaBookmark className="text-[#6F52E0]" />
+          {isFinding ? (
+            <div
+              onClick={handleRead}
+              className="w-[48px] text-center bg-[#6F4BFF] px-2 py-0.5 text-white text-sm rounded-md"
+            >
+              읽기
+            </div>
+          ) : bookmark ? (
+            <div className="" onClick={handleBookmarkClickOff}>
+              <FaBookmark className="text-[#6F52E0]" />
+            </div>
           ) : (
-            <FaRegBookmark />
+            <div className="" onClick={handleBookmarkClickOn}>
+              <FaRegBookmark />
+            </div>
           )}
         </div>
       </div>

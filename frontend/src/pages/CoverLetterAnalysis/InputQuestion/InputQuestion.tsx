@@ -1,6 +1,6 @@
 import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import QuestionItem from "./QuestionItem";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { CoverLetterRequestContent } from "@/types/coverLetterTypes";
 import { toast } from "sonner";
 import { Button } from "@/components/Button";
@@ -119,6 +119,28 @@ function InputQuestion({
       setCreateModalOpen(false);
     }
   };
+
+  const onRemoveContent = useCallback(
+    (contentId: number) => {
+      if (confirm("정말 삭제하시겠습니까?")) {
+        if (localContents.length <= 1) {
+          toast.warning("문항은 최소 1개 이상 필요합니다.");
+          return;
+        }
+        const updatedContents = [...localContents]
+          .filter((_, index) => index !== contentId)
+          .map((content, index) => ({
+            ...content,
+            contentNumber: index + 1,
+          }));
+
+        // 전체 업데이트
+        setAllQuestions(updatedContents);
+        setLocalContents(updatedContents);
+      }
+    },
+    [localContents, setAllQuestions]
+  );
   const contentList = inputData.contents;
   return (
     <>
@@ -167,6 +189,7 @@ function InputQuestion({
 
       {contentList.map((content, contentIndex) => (
         <QuestionItem
+          onRemoveContent={onRemoveContent}
           key={contentIndex}
           onUpdateQuestion={updateQuestionData}
           content={content}

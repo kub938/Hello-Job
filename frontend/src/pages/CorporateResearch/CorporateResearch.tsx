@@ -14,6 +14,7 @@ import { getCompanyDetail } from "@/api/companyApi";
 
 interface CorporateReport {
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -27,29 +28,29 @@ interface CorporateReport {
 export interface CorporateResearchProps {
   type?: "modal";
   companyId?: number;
+  modalClose?: () => void;
 }
 
-function CorporateResearch({ type, companyId }: CorporateResearchProps) {
+function CorporateResearch({
+  modalClose,
+  type,
+  companyId,
+}: CorporateResearchProps) {
   const params = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalView, setModalView] = useState<"create" | "read">("create");
   const [researchId, setResearchId] = useState<number>(1);
+  const id = params.id ? params.id : String(companyId);
 
   console.log(params.id ? "true" : "false");
   // tanstack query를 사용한 특정 기업의 모든 리포트 불러오기
   const { data: corporateReportListData, isLoading } = useQuery({
-    queryKey: ["corporateReportList", params.id, companyId],
+    queryKey: ["corporateReportList", id],
     queryFn: async () => {
-      let id;
-      if (params.id) {
-        id = parseInt(params.id);
-      } else if (companyId) {
-        id = companyId;
-      } else {
-        id = 1;
-      }
-      const response = await corporateReportApi.getCorporateReportList(id);
+      const response = await corporateReportApi.getCorporateReportList(
+        parseInt(id)
+      );
       return response.data;
     },
   });
@@ -79,6 +80,7 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
     const temp =
       corporateReportListData?.map((corporateReport) => ({
         companyAnalysisId: corporateReport.companyAnalysisId,
+        companyAnalysisTitle: corporateReport.companyAnalysisTitle,
         companyName: corporateReport.companyName,
         createdAt: corporateReport.createdAt,
         companyViewCount: corporateReport.companyViewCount,
@@ -90,7 +92,6 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
         public: corporateReport.public,
       })) || [];
     setCorporateReportList(temp);
-    debugger;
   }, [corporateReportListData]);
 
   const openCreateModal = () => {
@@ -144,7 +145,10 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
               onClick={() => {
                 openReadModal(corporateReport.companyAnalysisId);
               }}
-              companyName={corporateReport.companyName}
+              modalClose={modalClose}
+              reportId={corporateReport.companyAnalysisId}
+              companyId={id}
+              companyAnalysisTitle={corporateReport.companyAnalysisTitle}
               createdAt={corporateReport.createdAt}
               companyViewCount={corporateReport.companyViewCount}
               companyLocation={corporateReport.companyLocation}
@@ -153,6 +157,8 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
               }
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
+              isPublic={corporateReport.public}
+              isFinding={type === "modal" ? true : false} //companyId가 있으면 자소서 작성 중임임
             />
           ))
         ) : (
@@ -187,10 +193,14 @@ function CorporateResearch({ type, companyId }: CorporateResearchProps) {
           {modalView === "create" ? (
             <CreateCorporate
               onClose={closeModal}
-              corporateId={parseInt(params.id ? params.id : "1")}
+              corporateId={parseInt(id ? id : "1")}
             />
           ) : (
-            <ReadCorporate onClose={closeModal} id={researchId} />
+            <ReadCorporate
+              onClose={closeModal}
+              id={researchId}
+              companyId={id}
+            />
           )}
         </DetailModal>
       )}

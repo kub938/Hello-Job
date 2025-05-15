@@ -5,10 +5,9 @@ import {
   JobRoleCategory,
   postJobRoleAnalysisRequest,
 } from "@/types/jobResearch";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm, FieldErrors } from "react-hook-form";
-import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
 interface CreateJobProps {
@@ -30,9 +29,8 @@ interface IForm {
 
 function CreateJob({ onClose, corporateId }: CreateJobProps) {
   const [isPublic, setIsPublic] = useState(true);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { register, handleSubmit, resetField } = useForm<IForm>();
 
@@ -53,8 +51,13 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
       resetField("jobRolePreferences");
       resetField("jobRoleEtc");
       resetField("jobRoleCategory");
+
+      queryClient.invalidateQueries({
+        queryKey: ["jobResearchList", String(corporateId)],
+      });
       // 페이지 이동시키기
-      navigate(`/job-research/${corporateId}`);
+      // navigate(`/job-research/${corporateId}`);
+      onClose();
     },
     onError: () => {
       toast.error("직무 분석 생성 실패");
@@ -184,17 +187,32 @@ function CreateJob({ onClose, corporateId }: CreateJobProps) {
                   className="w-full p-3 border border-[#E4E8F0] rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-[#6F52E0]/50 focus:border-[#6F52E0] transition-all appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%236E7180%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%222%22%20d%3D%22M19%209l-7%207-7-7%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.25rem] bg-[right_0.75rem_center] bg-no-repeat pr-10"
                 >
                   <option value="">직무 카테고리 선택</option>
+                  <option value="서버백엔드개발자">서버백엔드개발자</option>
                   <option value="프론트엔드개발자">프론트엔드개발자</option>
-                  <option value="백엔드개발자">백엔드개발자</option>
-                  <option value="풀스택개발자">풀스택개발자</option>
-                  <option value="모바일개발자">모바일개발자</option>
-                  <option value="데이터엔지니어">데이터엔지니어</option>
-                  <option value="데이터분석가">데이터분석가</option>
-                  <option value="데브옵스">데브옵스</option>
-                  <option value="기획자">기획자</option>
-                  <option value="디자이너">디자이너</option>
-                  <option value="마케터">마케터</option>
-                  <option value="영업">영업</option>
+                  <option value="안드로이드개발자">안드로이드개발자</option>
+                  <option value="iOS개발자">iOS개발자</option>
+                  <option value="크로스플랫폼앱개발자">
+                    크로스플랫폼앱개발자
+                  </option>
+                  <option value="게임클라이언트개발자">
+                    게임클라이언트개발자
+                  </option>
+                  <option value="게임서버개발자">게임서버개발자</option>
+                  <option value="DBA">DBA</option>
+                  <option value="빅데이터엔지니어">빅데이터엔지니어</option>
+                  <option value="인공지능머신러닝">인공지능머신러닝</option>
+                  <option value="devops시스템엔지니어">
+                    devops시스템엔지니어
+                  </option>
+                  <option value="정보보안침해대응">정보보안침해대응</option>
+                  <option value="QA엔지니어">QA엔지니어</option>
+                  <option value="개발PM">개발PM</option>
+                  <option value="HW펌웨어개발">HW펌웨어개발</option>
+                  <option value="SW솔루션">SW솔루션</option>
+                  <option value="헬스테크">헬스테크</option>
+                  <option value="VRAR3D">VRAR3D</option>
+                  <option value="블록체인">블록체인</option>
+                  <option value="기술지원">기술지원</option>
                   <option value="기타">기타</option>
                 </select>
               </div>

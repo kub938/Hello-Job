@@ -5,9 +5,8 @@ import { FaPlus } from "react-icons/fa";
 import { Link } from "react-router";
 import DetailModal from "@/components/Common/DetailModal";
 import ReadCoverLetter from "./ReadCoverLetter";
-import { useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router";
-import { getCoverLetterList } from "@/api/mypageApi";
+import { useGetCoverLetterList } from "@/hooks/mypageHooks";
 
 function CoverLetterList() {
   // const [searchTerm, setSearchTerm] = useState("");
@@ -16,14 +15,9 @@ function CoverLetterList() {
   const [researchId, setResearchId] = useState<number>(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "0");
-
-  const { data: coverLetterListData, isLoading } = useQuery({
-    queryKey: ["coverLetterList", page],
-    queryFn: async () => {
-      const response = await getCoverLetterList(Number(page));
-      return response.data;
-    },
-  });
+  const { data: coverLetterListData, isLoading } = useGetCoverLetterList(
+    Number(page)
+  );
 
   // 페이지네이션 설정
   // const itemsPerPage = coverLetterListData?.pageable?.pageSize || 10;
@@ -192,7 +186,7 @@ function CoverLetterList() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadCoverLetter onClose={closeModal} id={researchId} />
+          <ReadCoverLetter onClose={closeModal} id={researchId} page={page} />
         </DetailModal>
       )}
     </div>

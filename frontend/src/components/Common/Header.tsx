@@ -1,6 +1,7 @@
+import { useGetToken } from "@/hooks/tokenHook";
 import { useAuthStore } from "@/store/userStore";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 
 interface HeaderProps {
   isMinimize?: boolean;
@@ -9,10 +10,14 @@ interface HeaderProps {
 function Header({ isMinimize = false }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const { isLoggedIn, userName } = useAuthStore();
+  const [token, setToken] = useState<number | undefined>();
+  const location = useLocation();
+  const nowPath = location.pathname;
+  const pathName = ["/corporate-search", "/cover-letter", "/interview"];
 
   useEffect(() => {
     const handleScroll = () => {
-      const isScrolled = window.scrollY >= 52;
+      const isScrolled = window.scrollY >= 10;
       if (isScrolled !== scrolled) {
         setScrolled(isScrolled);
       }
@@ -25,12 +30,22 @@ function Header({ isMinimize = false }: HeaderProps) {
     };
   }, [scrolled]);
 
+  console.log(location);
+
+  const tokenData = useGetToken(isLoggedIn && isMinimize);
+
+  useEffect(() => {
+    if (tokenData.data?.token) {
+      setToken(tokenData.data.token);
+    }
+  }, [tokenData.data?.token]);
+
   return (
     <>
       <header
         className={`${
           scrolled && "bg-white"
-        }  z-10 sticky top-0 transition-all duration-150 h-13 flex items-center justify-between`}
+        }  z-10 sticky top-0 transition-all duration-100 h-13 flex items-center justify-between text-sm`}
       >
         <Link to="/">
           <div className="font-bold text-2xl ml-5">
@@ -40,12 +55,21 @@ function Header({ isMinimize = false }: HeaderProps) {
         </Link>
         {isMinimize ? (
           isLoggedIn ? (
-            <Link
-              className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
-              to="/mypage"
-            >
-              {userName}님 정보
-            </Link>
+            <div>
+              <Link
+                className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+                to="/mypage/account"
+              >
+                토큰:{" "}
+                <span className="text-[#6F52E0]">{token ? token : "0"}</span>
+              </Link>
+              <Link
+                className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+                to="/mypage"
+              >
+                {userName}님 정보
+              </Link>
+            </div>
           ) : (
             <Link
               className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
@@ -55,26 +79,46 @@ function Header({ isMinimize = false }: HeaderProps) {
             </Link>
           )
         ) : (
-          <ul className="flex gap-3 mr-5">
-            <li>
-              <Link to="/resume">인적사항</Link>
-            </li>
-            <li>
-              <Link to="/corporate-search">기업분석</Link>
-            </li>
-            <li>
-              <Link to="/job-analysis">직무분석</Link>
-            </li>
-            <li>
-              <Link to="/cover-letter">자기소개서</Link>
-            </li>
-            <li>
-              <Link to="/interview">면접</Link>
-            </li>
-            <li>
-              <Link to="/mypage">마이페이지</Link>
-            </li>
-          </ul>
+          <div className="flex">
+            <ul className="flex font-semibold text-text-disabled gap-3 mr-5">
+              {/* <li>
+                <Link to="/resume">인적사항</Link>
+              </li> */}
+              <li className={`${nowPath === pathName[0] && "text-accent "}`}>
+                <Link to="/corporate-search">기업/직무분석</Link>
+              </li>
+
+              <li className={`${nowPath === pathName[1] && "text-accent "}`}>
+                <Link to="/cover-letter">자기소개서</Link>
+              </li>
+              <li
+                onClick={() => {
+                  alert("ai 모의면접은 2차 배포때 오픈됩니다!");
+                }}
+                className={`${nowPath === pathName[2] && "text-accent "}`}
+              >
+                <button>면접</button>
+                {/* <Link to="/interview/select">면접</Link> */}
+              </li>
+            </ul>
+            <span>
+              {isLoggedIn ? (
+                <Link
+                  className="shadow-xs border  rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+                  to="/mypage"
+                >
+                  {userName}님
+                </Link>
+              ) : (
+                <Link
+                  className="shadow-xs border rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
+                  to="/login"
+                >
+                  로그인
+                </Link>
+              )}
+            </span>
+          </div>
         )}
       </header>
     </>

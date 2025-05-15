@@ -9,6 +9,7 @@ import CorporateReportCard from "@/pages/CorporateResearch/components/CorporateR
 function BookmarkedCompanies() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchCompanyId, setResearchCompanyId] = useState<number>(1);
+  const [clickedCompanyId, setClickedCompanyId] = useState<number>(1);
 
   const { data: bookmarkedCompanyListData, isLoading } = useQuery({
     queryKey: ["bookmarkedCompanyList"],
@@ -42,9 +43,10 @@ function BookmarkedCompanies() {
             <CorporateReportCard
               key={corporateReport.companyAnalysisId}
               onClick={() => {
+                setClickedCompanyId(corporateReport.companyAnalysisId);
                 openReadModal(corporateReport.companyAnalysisId);
               }}
-              companyName={corporateReport.companyName}
+              companyAnalysisTitle={corporateReport.companyAnalysisTitle}
               createdAt={corporateReport.createdAt}
               companyViewCount={corporateReport.companyViewCount}
               companyLocation={corporateReport.companyLocation}
@@ -53,18 +55,25 @@ function BookmarkedCompanies() {
               }
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
+              isPublic={corporateReport.public}
+              reportId={corporateReport.companyAnalysisId}
+              isFinding={false}
             />
           ))
         ) : (
-          <div className="text-center text-gray-500 text-lg h-[180px] w-[210px] flex flex-col items-center justify-center">
-            <h1>검색 결과가 없습니다.</h1>
-            <h1 className="text-base mt-2">기업 분석을 진행해주세요.</h1>
+          <div className="text-center text-gray-500 text-lg h-[110px] w-full flex flex-col items-center justify-center">
+            <h1>기업 분석이 없습니다.</h1>
+            <h1 className="text-base mt-2">기업 분석을 북마크 해보세요.</h1>
           </div>
         )}
       </div>
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <ReadCorporate onClose={closeModal} id={researchCompanyId} />
+          <ReadCorporate
+            onClose={closeModal}
+            id={researchCompanyId}
+            companyId={String(clickedCompanyId)}
+          />
         </DetailModal>
       )}
     </div>

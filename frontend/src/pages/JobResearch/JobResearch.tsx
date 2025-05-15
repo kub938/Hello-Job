@@ -16,9 +16,10 @@ import { useSelectJobStore } from "@/store/coverLetterAnalysisStore";
 export interface JobResearchProps {
   type?: "modal";
   companyId?: number;
+  modalClose?: () => void;
 }
 
-function JobResearch({ type, companyId }: JobResearchProps) {
+function JobResearch({ modalClose, type, companyId }: JobResearchProps) {
   const params = useParams();
   const navigate = useNavigate();
 
@@ -26,28 +27,21 @@ function JobResearch({ type, companyId }: JobResearchProps) {
   const [modalView, setModalView] = useState<"create" | "read">("create");
   const [researchJobId, setResearchJobId] = useState<number>(1);
   const { jobRoleCategory } = useSelectJobStore();
+  const id = params.id ? params.id : String(companyId);
 
   // tanstack query를 사용한 데이터 불러오기
   const { data: jobResearchListData, isLoading } = useQuery({
-    queryKey: ["jobResearchList", params.id],
+    queryKey: ["jobResearchList", id],
     queryFn: async () => {
-      let id;
-      if (params.id) {
-        id = parseInt(params.id);
-      } else if (companyId) {
-        id = companyId;
-      } else {
-        id = 1;
-      }
       if (type === "modal" && jobRoleCategory.trim() !== "") {
         console.log(jobRoleCategory);
         const response = await jobRoleAnalysis.getAllJobList(
-          id,
+          parseInt(id),
           jobRoleCategory.replace(/\s+/g, "")
         );
         return response.data;
       } else {
-        const response = await jobRoleAnalysis.getAllJobList(id);
+        const response = await jobRoleAnalysis.getAllJobList(parseInt(id));
         return response.data;
       }
     },
@@ -139,6 +133,9 @@ function JobResearch({ type, companyId }: JobResearchProps) {
               onClick={() => {
                 openReadModal(jobResearch.jobRoleAnalysisId);
               }}
+              modalClose={modalClose}
+              jobId={jobResearch.jobRoleAnalysisId}
+              companyId={id}
               jobRoleName={jobResearch.jobRoleName}
               jobRoleAnalysisTitle={jobResearch.jobRoleAnalysisTitle}
               jobRoleCategory={jobResearch.jobRoleCategory}
@@ -146,6 +143,8 @@ function JobResearch({ type, companyId }: JobResearchProps) {
               jobRoleBookmarkCount={jobResearch.jobRoleBookmarkCount}
               bookmark={jobResearch.bookmark}
               createdAt={jobResearch.createdAt}
+              isPublic={jobResearch.public}
+              isFinding={companyId ? true : false} //companyId가 있으면 자소서 작성 중임임
             />
           ))
         ) : (
@@ -179,10 +178,10 @@ function JobResearch({ type, companyId }: JobResearchProps) {
           {modalView === "create" ? (
             <CreateJob
               onClose={closeModal}
-              corporateId={parseInt(params.id ? params.id : "1")}
+              corporateId={parseInt(id ? id : "1")}
             />
           ) : (
-            <ReadJob onClose={closeModal} id={researchJobId} />
+            <ReadJob onClose={closeModal} id={researchJobId} companyId={id} />
           )}
         </DetailModal>
       )}

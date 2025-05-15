@@ -1,31 +1,35 @@
 import { useState } from "react";
-import MypageHeader from "./MypageHeader";
-import { Link, useSearchParams } from "react-router";
+import MypageHeader from "../MypageHeader";
+import { useSearchParams } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { getMyExperienceList } from "@/api/mypageApi";
+import { getMyProjectList } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
 import { FaPlus } from "react-icons/fa";
 import DetailModal from "@/components/Common/DetailModal";
+import ReadMyProject from "./ReadMyProject";
+import ProjectForm from "@/pages/Resume/ProjectForm";
 
-function MyExperience() {
+function MyProject() {
   const [selectedCategory, setSelectedCategory] = useState("최신순");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [experienceId, setExperienceId] = useState<number>(1);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [projectId, setProjectId] = useState<number>(1);
   const [searchParams, setSearchParams] = useSearchParams();
   const page = parseInt(searchParams.get("page") || "0");
 
-  const { data: myExperienceListData, isLoading } = useQuery({
-    queryKey: ["myExperienceList", page],
+  const { data: myProjectListData, isLoading } = useQuery({
+    queryKey: ["myProjectList", page],
     queryFn: async () => {
-      const response = await getMyExperienceList(Number(page));
+      const response = await getMyProjectList(Number(page));
       return response.data;
     },
   });
 
-  const totalPages = myExperienceListData?.totalPages || 1;
+  //추적 및 리랜더링 되는 값 (그런 객체가 변수에 담겨 있음)
+  const totalPages = myProjectListData?.totalPages || 1;
 
   const openReadModal = (id: number) => {
-    setExperienceId(id);
+    setProjectId(id);
     setIsModalOpen(true);
   };
 
@@ -35,7 +39,7 @@ function MyExperience() {
 
   // 검색어에 따른 필터링
   // 현재 페이지에서만임. 수정 필요. 현재 사용하지 않는 로직
-  const filteredMyExperienceList = myExperienceListData?.content?.filter(
+  const filteredMyProjectList = myProjectListData?.content?.filter(
     (content) => content
   );
 
@@ -51,7 +55,7 @@ function MyExperience() {
 
   return (
     <div className="flex-1 p-4 md:p-6 md:ml-56 transition-all duration-300">
-      <MypageHeader title="내가 작성한 기타 경험" />
+      <MypageHeader title="내가 작성한 프로젝트" />
       <div className="flex justify-between items-center mb-6">
         {/* 검색 UI */}
         <div className="flex flex-col md:flex-row items-center gap-4">
@@ -80,36 +84,37 @@ function MyExperience() {
             </button>
           </div> */}
         </div>
-        <Button variant="default">
-          <Link to="/" className="flex items-center">
-            <FaPlus className="mr-2" /> 기타 경험 작성
-          </Link>
+        <Button onClick={() => setIsPostModalOpen(true)} variant="default">
+          <FaPlus className="mr-2" /> 나의 프로젝트 추가
         </Button>
       </div>
 
       <div className="space-y-4">
         {isLoading ? (
           <div className="text-center py-10 text-gray-500">
-            자기소개서 목록을 불러오고 있습니다...
+            나의 프로젝트 목록을 불러오고 있습니다...
           </div>
-        ) : filteredMyExperienceList && filteredMyExperienceList.length > 0 ? (
-          filteredMyExperienceList.map((myExperience) => (
+        ) : filteredMyProjectList && filteredMyProjectList.length > 0 ? (
+          filteredMyProjectList.map((myProject) => (
             <div
-              key={myExperience.experienceId}
+              key={myProject.projectId}
               className="bg-white cursor-pointer p-6 rounded-lg shadow-sm border border-gray-100 hover:pl-[27px] pl-6 hover:shadow-md border-l-primary border-l-4 hover:rounded-l-sm rounded-l-none hover:bg-purple-50/30 hover:border-purple-200 hover:border-l-[1px] transition-shadow"
-              onClick={() => openReadModal(myExperience.experienceId)}
+              onClick={() => openReadModal(myProject.projectId)}
             >
-              <div className="flex justify-start items-start mb-3">
-                <h3 className="text-lg font-medium">
-                  {myExperience.experienceName}
-                </h3>
+              <div className="flex justify-between items-start mb-3">
+                <h3 className="text-lg font-medium">{myProject.projectName}</h3>
+                <div className="flex space-x-2">
+                  <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                    {myProject.projectSkills}
+                  </span>
+                </div>
               </div>
               <p className="text-gray-600 mb-3 text-sm line-clamp-2">
-                {myExperience.experienceRole}
+                {myProject.projectIntro}
               </p>
               <div className="flex justify-between items-center">
                 <span className="text-xs text-gray-500">
-                  작성일: {myExperience.updatedAt}
+                  작성일: {myProject.updatedAt}
                 </span>
               </div>
             </div>
@@ -122,7 +127,7 @@ function MyExperience() {
       </div>
 
       {/* 페이지네이션 (하단) */}
-      {filteredMyExperienceList && (
+      {filteredMyProjectList && (
         <div className="flex justify-center mt-6">
           <nav className="flex space-x-1">
             <button
@@ -168,11 +173,14 @@ function MyExperience() {
       )}
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
-          <div>{experienceId}번 경험 상세 정보 출력 페이지 구현 해야함</div>
+          <ReadMyProject onClose={closeModal} id={projectId} page={page} />
         </DetailModal>
+      )}
+      {isPostModalOpen && (
+        <ProjectForm onClose={() => setIsPostModalOpen(false)} />
       )}
     </div>
   );
 }
 
-export default MyExperience;
+export default MyProject;

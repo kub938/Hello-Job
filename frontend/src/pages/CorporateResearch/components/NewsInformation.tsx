@@ -7,7 +7,6 @@ import {
   FaChevronDown,
   FaChevronUp,
 } from "react-icons/fa";
-import { timeParser } from "@/hooks/timeParser";
 
 // 뉴스 정보 컴포넌트
 function NewsInformation({
@@ -42,9 +41,7 @@ function NewsInformation({
               </div>
               <div>
                 <p className="text-sm text-[#6E7180]">뉴스 분석 날짜</p>
-                <p className="font-semibold">
-                  {timeParser(reportDetail.newsAnalysisDate)}
-                </p>
+                <p className="font-semibold">{reportDetail.newsAnalysisDate}</p>
               </div>
             </div>
 
@@ -62,8 +59,8 @@ function NewsInformation({
           </div>
 
           <div className="border-t border-[#E4E8F0] pt-4">
-            <div className="flex items-start space-x-3">
-              <div className="text-[#886BFB] mt-0.5 flex-shrink-0">
+            <div className="flex items-start">
+              <div className="text-[#886BFB] mr-3 mt-0.5 flex-shrink-0">
                 <FaLink />
               </div>
               <div className="w-full">
@@ -71,15 +68,25 @@ function NewsInformation({
                   <p className="text-sm text-[#6E7180]">참고 뉴스 URL</p>
                   <button
                     onClick={() => setShowAllUrls(!showAllUrls)}
-                    className="text-[#886BFB] text-sm flex items-center hover:underline"
-                  >
-                    {showAllUrls ? "접기" : "모두 보기"}
-                    {showAllUrls ? (
+                    className="text-[#886BFB] cursor-pointer text-sm flex items-center hover:underline"
+                  ></button>
+                  {showAllUrls ? (
+                    <button
+                      onClick={() => setShowAllUrls(!showAllUrls)}
+                      className="text-[#886BFB] cursor-pointer text-sm flex items-center hover:underline mr-5"
+                    >
+                      접기
                       <FaChevronUp className="ml-1" size={12} />
-                    ) : (
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowAllUrls(!showAllUrls)}
+                      className="text-[#886BFB] cursor-pointer text-sm flex items-center hover:underline"
+                    >
+                      모두 보기
                       <FaChevronDown className="ml-1" size={12} />
-                    )}
-                  </button>
+                    </button>
+                  )}
                 </div>
                 <div className="space-y-2">
                   {displayUrls.map((url: string, index: number) => (

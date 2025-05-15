@@ -9,6 +9,7 @@ import {
   FaTags,
   FaLightbulb,
   FaTrademark,
+  FaPencilAlt,
 } from "react-icons/fa";
 import { BsGraphUp } from "react-icons/bs";
 import { timeParser } from "@/hooks/timeParser";
@@ -23,25 +24,6 @@ function AnalysisSummary({
 
   return (
     <div className="space-y-10 pb-12">
-      <section>
-        <h3 className="font-bold text-2xl mb-4 text-[#2A2C35] flex items-center">
-          <span className="bg-[#AF9BFF]/20 p-2 rounded-md mr-3 text-[#886BFB]">
-            <FaTags className="w-5 h-5" />
-          </span>
-          분석에 사용한 정보
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {reportDetail.dartCategory.map((category, index) => (
-            <span
-              key={index}
-              className="px-4 py-1.5 bg-[#F0EBFF]/50 text-[#6F52E0] rounded-full text-sm font-medium transition-all"
-            >
-              {category}
-            </span>
-          ))}
-        </div>
-      </section>
-
       <section>
         <h3 className="font-bold text-2xl mb-4 text-[#2A2C35] flex items-center">
           <span className="bg-[#AF9BFF]/20 p-2 rounded-md mr-3 text-[#886BFB]">
@@ -125,6 +107,41 @@ function AnalysisSummary({
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section>
+        <h3 className="font-bold text-2xl mb-4 text-[#2A2C35] flex items-center">
+          <span className="bg-[#AF9BFF]/20 p-2 rounded-md mr-3 text-[#886BFB]">
+            <FaTags className="w-5 h-5" />
+          </span>
+          분석에 사용한 정보
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {reportDetail.dartCategory.map((category, index) => (
+            <span
+              key={index}
+              className="px-4 py-1.5 bg-[#F0EBFF]/50 text-[#6F52E0] rounded-full text-sm font-medium transition-all"
+            >
+              {category}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h3 className="font-bold text-2xl mb-4 text-[#2A2C35] flex items-center">
+          <span className="bg-[#AF9BFF]/20 p-2 rounded-md mr-3 text-[#886BFB]">
+            <FaPencilAlt className="w-5 h-5" />
+          </span>
+          사용자 지시 사항
+        </h3>
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-[#E4E8F0] transition-all">
+          <p className="leading-relaxed">
+            {reportDetail.userPrompt
+              ? reportDetail.userPrompt
+              : "입력한 프롬프트가 없습니다."}
+          </p>
         </div>
       </section>
 

@@ -1,41 +1,150 @@
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
 import { timeParser } from "../../../hooks/timeParser";
+import { toast } from "sonner";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { corporateReportApi } from "@/api/corporateReport";
 
 interface CorporateReportCardProps {
   onClick: () => void;
-  companyName: string;
+  modalClose?: () => void;
+  companyAnalysisTitle: string;
   createdAt: string;
   companyViewCount: number;
   companyLocation: string;
   companyAnalysisBookmarkCount: number;
   bookmark: boolean;
   dartCategory?: string[];
+  isPublic: boolean;
+  reportId: number;
+  companyId?: string;
+  isFinding: boolean;
 }
 
 function CorporateReportCard({
   onClick,
-  companyName,
+  modalClose,
+  companyAnalysisTitle,
   createdAt,
   companyViewCount,
   companyLocation,
   companyAnalysisBookmarkCount,
   bookmark,
   dartCategory,
+  isPublic,
+  reportId,
+  companyId,
+  isFinding,
 }: CorporateReportCardProps) {
+  const queryClient = useQueryClient();
+
+  // 북마크 추가 mutation
+  const addBookmarkMutation = useMutation({
+    mutationFn: () =>
+      corporateReportApi.postBookmark({ companyAnalysisId: reportId }),
+    onSuccess: () => {
+      console.log("북마크 추가 성공");
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportDetail", reportId],
+      });
+      if (companyId) {
+        queryClient.invalidateQueries({
+          queryKey: ["corporateReportList", companyId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["companyBookMark", parseInt(companyId)],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["bookmarkedCompanyList"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["myCompanyList"],
+        });
+      }
+    },
+  });
+
+  // 북마크 삭제 mutation
+  const removeBookmarkMutation = useMutation({
+    mutationFn: () => corporateReportApi.deleteBookmark(reportId),
+    onSuccess: () => {
+      console.log("북마크 삭제 성공");
+      queryClient.invalidateQueries({
+        queryKey: ["corporateReportDetail", reportId],
+      });
+      if (companyId) {
+        queryClient.invalidateQueries({
+          queryKey: ["corporateReportList", companyId],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["companyBookMark", parseInt(companyId)],
+        });
+      } else {
+        queryClient.invalidateQueries({
+          queryKey: ["bookmarkedCompanyList"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["myCompanyList"],
+        });
+      }
+    },
+  });
+
+  const handleBookmarkClickOn = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    addBookmarkMutation.mutate();
+  };
+  const handleBookmarkClickOff = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    removeBookmarkMutation.mutate();
+  };
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isFinding && modalClose) {
+      addBookmarkMutation.mutate();
+      toast.info("북마크에 추가되었습니다.");
+      modalClose();
+    } else {
+      onClick();
+    }
+  };
+  const handleRead = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onClick();
+  };
+
   return (
     <div
-      onClick={onClick}
+      onClick={handleClick}
       className="w-[220px] h-[180px] bg-white rounded-lg cursor-pointer border border-gray-200 p-3 hover:shadow-sm transition-shadow flex flex-col justify-between"
     >
       <div>
         <div className="flex items-center w-full border-b border-[#AF9BFF]/80 pb-1 justify-between">
-          <h3 className="text-base font-bold text-gray-800 truncate">
-            {companyName}
-          </h3>
-          {bookmark ? (
-            <FaBookmark className="text-[#6F52E0]" />
+          {isPublic ? (
+            <></>
           ) : (
-            <FaRegBookmark />
+            <span className="text-gray-500 mr-1">
+              <FaLock size={12} />
+            </span>
+          )}
+          <h3 className="text-base font-bold text-gray-800 w-full truncate">
+            {companyAnalysisTitle}
+          </h3>
+          {isFinding ? (
+            <div
+              className="w-[48px] text-center bg-[#6F4BFF] px-2 py-0.5 text-white text-sm rounded-md"
+              onClick={handleRead}
+            >
+              읽기
+            </div>
+          ) : bookmark ? (
+            <div className="" onClick={handleBookmarkClickOff}>
+              <FaBookmark className="text-[#6F52E0]" />
+            </div>
+          ) : (
+            <div className="" onClick={handleBookmarkClickOn}>
+              <FaRegBookmark />
+            </div>
           )}
         </div>
         <p className="text-sm text-gray-600 mt-1 truncate">{companyLocation}</p>

@@ -270,7 +270,9 @@ const CompanyCard: React.FC<CompanyCardProps> = ({
             <CardHeader>
               <Avatar username={corName} size={42} className="bg-[#F1F3F9]" />
               <CardTitle className="pt-2">{corName}</CardTitle>
-              <span className="text-[#6E7180] text-sm">{industryName}</span>
+              <span className="text-[#6E7180] text-sm w-full text-center truncate">
+                {industryName}
+              </span>
             </CardHeader>
             <CardFooter>
               <div className="flex gap-1 items-center">

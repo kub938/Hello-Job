@@ -5,8 +5,7 @@ import CoverLetterEditor from "./components/CoverLetterEditor";
 import { useParams } from "react-router";
 import {
   useGetContentStatus,
-  useGetCoverLetter,
-  useGetCoverLetterContentIds,
+  useGetFirstCoverLetter,
   useSaveCoverLetter,
   useSendMessage,
 } from "@/hooks/coverLetterHooks";
@@ -14,6 +13,10 @@ import QuestionStep from "./components/QuestionStep";
 import { useIsMutating } from "@tanstack/react-query";
 import { SyncLoader } from "react-spinners";
 import { SaveCoverLetterRequest } from "@/types/coverLetterApiType";
+import ReactMarkdown from "react-markdown";
+import chatbot from "../../assets/character/favicon-96x96.png";
+import { toast } from "sonner";
+import Loading from "@/components/Loading/Loading";
 
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
@@ -33,28 +36,28 @@ function CoverLetter() {
   const sendLoading = useIsMutating({ mutationKey: ["send-message"] });
 
   // API 호출 관련 훅
-  const { data: contents, isLoading: isContentsLoading } =
-    useGetCoverLetterContentIds(coverLetterId || 0);
-  const { data: coverLetter, isLoading } = useGetCoverLetter(
-    selectQuestionId || 0
+
+  const { data: coverLetter, isLoading } = useGetFirstCoverLetter(
+    coverLetterId || 0,
+    selectQuestionNumber || 0
   );
   const { data: statusData } = useGetContentStatus(coverLetterId || 0);
 
   // 데이터가 로드되면 상태 업데이트
-  useEffect(() => {
-    const firstContentId = contents?.contentIds?.[0];
-    if (firstContentId !== undefined) {
-      setSelectQuestionId(firstContentId);
-    }
-  }, [contents]);
+  // useEffect(() => {
+  //   const firstContentId = contents?.contentIds?.[0];
+  //   if (firstContentId !== undefined) {
+  //     setSelectQuestionId(firstContentId);
+  //   }
+  // }, [contents]);
 
   useEffect(() => {
     if (!coverLetter) return;
+    setSelectQuestionId(coverLetter.contentId);
     setContentDetail(coverLetter.contentDetail);
     setNowContentLength(coverLetter.contentDetail.length);
     setChatLog(coverLetter.contentChatLog);
   }, [coverLetter]);
-  // 이벤트 핸들러
 
   const onChangeInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
@@ -108,7 +111,7 @@ function CoverLetter() {
       },
       ai: {
         container: "flex",
-        chatBubble: "break-all border max-w-92 px-3 py-3 rounded-xl bg-muted",
+        chatBubble: "px-2  prose",
       },
     }),
     []
@@ -137,28 +140,27 @@ function CoverLetter() {
     saveMutation.mutate(saveData, {
       onSuccess: (data) => {
         console.log(data);
+        if (type === "save") {
+          toast.info("저장되었습니다.");
+        } else if (type === "draft") {
+          toast.info("임시 저장되었습니다.");
+        }
       },
       onError: (error) => {
         console.log(error);
+        if (type === "save" || "draft") {
+          toast.error("저장에 실패했습니다.");
+        }
       },
     });
   };
 
-  // 조건부 렌더링 - 모든 훅 선언 이후에 배치
   if (!coverLetterId) {
     return <div>유효하지 않은 자기소개서 ID입니다.</div>;
   }
 
-  if (isContentsLoading) {
-    return <div>컨텐츠 로딩중 입니다.</div>;
-  }
-
-  if (!contents) {
-    return <div>유효하지 않은 문항 번호 입니다.</div>;
-  }
-
   if (isLoading) {
-    return <div>자기소개서를 가져오는 중 입니다.</div>;
+    return <Loading></Loading>;
   }
 
   if (!coverLetter) {
@@ -173,24 +175,41 @@ function CoverLetter() {
 
   return (
     <>
-      <div className="flex mt-5 gap-3 items-start">
-        <div className="bg-white border w-[50rem] border-t-4 border-t-primary rounded-xl px-4 py-4 ">
-          <div className="text-2xl font-bold pb-1 ">첨삭 도우미</div>
-          <div className="text-sm text-muted-foreground border-b-1 pb-1">
-            원하시는 부분을 수정하며 자소서를 완성해보세요!
-          </div>
-
+      <div className="flex gap-3 mx-4 items-start ">
+        <div className="bg-white w-[50rem] border-t-4 border-t-primary rounded-xl px-4 py-4 ">
           <div className="relative">
             <div
               ref={chatContainerRef}
-              className="flex flex-col h-[76vh] grow overflow-y-auto gap-2 mt-2 pb-15"
+              className="flex flex-col  h-[86vh] grow overflow-y-auto gap-2 mt-2 pb-15"
             >
               {chatLog.map((chat, index) => (
-                <div key={index} className={chatStyles[chat.sender].container}>
-                  <div className={chatStyles[chat.sender].chatBubble}>
-                    {chat.message}
+                <>
+                  <div
+                    key={index}
+                    className={chatStyles[chat.sender].container}
+                  >
+                    {index === 0 ? (
+                      <div className="flex text-md gap-1">
+                        <span className="w-30">
+                          <img src={chatbot} alt="" />
+                        </span>
+                        <span className="border-2  border-secondary  px-4 py-2 rounded-2xl ">
+                          {chat.message}
+                        </span>
+                      </div>
+                    ) : (
+                      <div
+                        className={`${chatStyles[chat.sender].chatBubble} mb-2`}
+                      >
+                        {chat.sender === "ai" ? (
+                          <ReactMarkdown>{chat.message}</ReactMarkdown>
+                        ) : (
+                          chat.message
+                        )}
+                      </div>
+                    )}
                   </div>
-                </div>
+                </>
               ))}
 
               {sendLoading > 0 && (
