@@ -43,3 +43,20 @@ export const useSaveCoverLetterQuestions = () => {
     },
   });
 };
+
+export const useGetCoverLetterQuestions = (
+  coverLetterId?: number | null | undefined
+) => {
+  return useQuery({
+    queryKey: ["cover-letter-questions"],
+    queryFn: async () => {
+      if (coverLetterId === null) {
+        return "";
+      }
+      const response = await interviewApi.getCoverLetterQuestions(
+        coverLetterId
+      );
+      return response.data;
+    },
+  });
+};
