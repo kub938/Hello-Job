@@ -882,4 +882,47 @@ public class InterviewService {
         return projects;
     }
 
+    public AllInterviewResponseDto findAllInterview(Integer interviewId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        Interview interview = interviewReadService.findInterviewByIdAndUserOrElseThrow(interviewId, user);
+
+        List<InterviewVideo> videos = interviewVideoRepository.findAllByInterviewOrderByStartDesc(interview);
+
+        List<InterviewResponseDto> selectQuestionInterview = new ArrayList<>();
+        List<InterviewResponseDto> simulateInterview = new ArrayList<>();
+
+        for (InterviewVideo video : videos) {
+            InterviewResponseDto dto = InterviewResponseDto.builder()
+                    .type(video.getInterviewCategory().name())
+                    .interviewVideoUrl(video.getInterviewVideoUrl())
+                    .start(video.getStart())
+                    .videoLength(video.getVideoLength())
+                    .firstQuestion(getFirstQuestion(video))
+                    .build();
+
+            if (video.isSelectQuestion()) {
+                selectQuestionInterview.add(dto);
+            } else {
+                simulateInterview.add(dto);
+            }
+        }
+
+        return AllInterviewResponseDto.builder()
+                .selectQuestionInterview(selectQuestionInterview)
+                .simulateInterview(simulateInterview)
+                .build();
+    }
+
+    private String getFirstQuestion(InterviewVideo video) {
+        List<InterviewAnswer> answers = interviewAnswerRepository
+                .findByInterviewVideoOrderByCreatedAtAsc(video);
+
+        if (!answers.isEmpty()) {
+            return answers.get(0).getInterviewQuestion();
+        }
+
+        return null;
+    }
+
+
 }
