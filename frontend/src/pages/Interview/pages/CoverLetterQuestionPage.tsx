@@ -13,6 +13,7 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getCoverLetterList } from "@/api/mypageApi";
 import {
   useCreateCoverLetterQuestion,
+  useGetCoverLetterQuestions,
   useSaveCoverLetterQuestions,
 } from "@/hooks/interviewHooks";
 import { toast } from "sonner";
@@ -61,7 +62,6 @@ function CoverLetterQuestionPage() {
       },
       initialPageParam: 0,
     });
-
   // 기존 질문 생성 훅 사용
   const createQuestionMutation = useCreateCoverLetterQuestion();
 
@@ -101,33 +101,7 @@ function CoverLetterQuestionPage() {
   };
 
   // 예시 질문 데이터
-  const questions = [
-    {
-      id: 1,
-      coverLetterId: 1,
-      question: "지원자님이 백엔드 개발에 관심을 갖게 된 계기가 무엇인가요?",
-    },
-    {
-      id: 2,
-      coverLetterId: 1,
-      question: "가장 어려웠던 프로젝트와 그 해결 방법에 대해 설명해주세요.",
-    },
-    {
-      id: 3,
-      coverLetterId: 1,
-      question: "협업 과정에서 갈등이 있었을 때 어떻게 해결하셨나요?",
-    },
-    {
-      id: 4,
-      coverLetterId: 2,
-      question: "프론트엔드 개발자로서 사용자 경험을 개선한 경험이 있나요?",
-    },
-    {
-      id: 5,
-      coverLetterId: 2,
-      question: "최근에 학습한 기술과 그 적용 사례에 대해 설명해주세요.",
-    },
-  ];
+  const { data: questions } = useGetCoverLetterQuestions(selectedCoverLetterId);
 
   // 추가 질문 생성 핸들러
   const handleGenerateQuestions = () => {
@@ -284,24 +258,26 @@ function CoverLetterQuestionPage() {
 
               {/* 질문 목록 */}
               <div className="space-y-3 mb-6 max-h-[320px] overflow-y-auto pr-2">
-                {questions.length > 0 ? (
+                {questions && questions.length > 0 ? (
                   questions.map((question) => {
-                    const isSelected = selectedQuestions.includes(question.id);
+                    const isSelected = selectedQuestions.includes(
+                      question.questionBankId
+                    );
                     return (
                       <div
-                        key={question.id}
+                        key={question.questionBankId}
                         onClick={() => {
                           if (isSelected) {
                             setSelectedQuestions(
                               selectedQuestions.filter(
-                                (id) => id !== question.id
+                                (id) => id !== question.questionBankId
                               )
                             );
                           } else {
                             if (selectedQuestions.length < 5) {
                               setSelectedQuestions([
                                 ...selectedQuestions,
-                                question.id,
+                                question.questionBankId,
                               ]);
                             } else {
                               // 최대 5개 선택 제한 - 실제로는 toast 메시지 등으로 알림
@@ -411,9 +387,7 @@ function CoverLetterQuestionPage() {
       <CreateCoverLetterQuestionModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        coverLetterInterviewId={
-          generatedQuestions?.coverLetterInterviewId || null
-        }
+        coverLetterId={generatedQuestions?.coverLetterId || null}
         generatedQuestions={generatedQuestions}
         isLoading={createQuestionMutation.isPending}
         onSaveQuestions={handleSaveQuestions}

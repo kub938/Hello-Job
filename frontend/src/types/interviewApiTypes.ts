@@ -41,11 +41,11 @@ export interface QuestionMemoRequest {
 }
 
 export interface SaveQuestionRequest {
-  coverLetterInterviewId: number;
-  coverLetterQuestionList: string[];
+  coverLetterId: number;
+  coverLetterQuestion: string[];
 }
 
 export interface CreateQuestionResponse {
-  coverLetterInterviewId: number;
-  coverLetterQuestionList: string[];
+  coverLetterId: number;
+  coverLetterQuestion: string[];
 }
