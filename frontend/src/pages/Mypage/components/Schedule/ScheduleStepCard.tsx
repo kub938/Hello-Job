@@ -18,7 +18,10 @@ function ScheduleStepCard({
 
   const [{ isOver }, drop] = useDrop(() => ({
     accept: "SCHEDULE",
-    drop: (item: { scheduleId: number; scheduleStatusStep: string }) => {
+    drop: (item: {
+      scheduleId: number;
+      scheduleStatusStep: ScheduleStatusStep;
+    }) => {
       if (item.scheduleStatusStep !== stepKey) {
         onMoveSchedule(item.scheduleId, stepKey as ScheduleStatusStep);
       }
