@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
@@ -21,6 +22,11 @@ public class InterviewReadService {
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final InterviewVideoRepository interviewVideoRepository;
     private final InterviewRepository interviewRepository;
+
+    public CoverLetterInterview findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(User user, CoverLetter coverLetter) {
+        return coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
+                .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_MISMATCH));
+    }
 
     public Interview findInterviewByIdAndUserOrElseThrow(Integer interviewId, User user) {
         return interviewRepository.findByUserAndInterviewId(user, interviewId)
