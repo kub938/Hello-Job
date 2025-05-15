@@ -114,9 +114,9 @@ public class InterviewController {
         return interviewService.saveNewCoverLetterQuestion(userPrincipal.getUserId(), requestDto);
     }
 
-    @PostMapping("/question/memo")
-    public WriteMemoResponseDto writeMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return interviewService.createMemo(requestDto, userPrincipal.getUserId());
+    @PostMapping("/question/cs/memo")
+    public WriteMemoResponseDto writeCsMemo(@RequestBody WriteMemoRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.createCsMemo(requestDto, userPrincipal.getUserId());
     }
 
     @PatchMapping("/question/{memoId}")

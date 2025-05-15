@@ -449,31 +449,10 @@ public class InterviewService {
                 .build();
     }
 
-    public WriteMemoResponseDto createMemo(WriteMemoRequestDto requestDto, Integer userId) {
-
+    public WriteMemoResponseDto createCsMemo(WriteMemoRequestDto requestDto, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
-        CsQuestionBank csQuestionBank = null;
-        PersonalityQuestionBank personalityQuestionBank = null;
-        CoverLetterQuestionBank coverLetterQuestionBank = null;
-        CoverLetterInterview coverLetterInterview = null;
-        InterviewQuestionMemo memo = null;
-
-        if(requestDto.getCsQuestionBankId() != null) {
-            csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
-            memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
-        } else if(requestDto.getPersonalityQuestionBankId() != null) {
-            personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
-            memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
-        } else if(requestDto.getCoverLetterQuestionBankId() != null) {
-            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getCoverLetterQuestionBankId());
-            coverLetterInterview = interviewReadService.findCoverLetterInterviewByIWithUserdOrElseThrow(requestDto.getInterviewId());
-            if(!coverLetterQuestionBank.getCoverLetterInterview().equals(coverLetterInterview) || !coverLetterInterview.getUser().equals(user)) {
-                throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
-            }
-            memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
-        } else {
-            throw new BaseException(QUESTION_TYPE_REQUIRED);
-        }
+        CsQuestionBank csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
 
         if(memo != null) {
             memo.updateMemo(requestDto.getMemo());
@@ -481,8 +460,8 @@ public class InterviewService {
             memo = InterviewQuestionMemo.builder()
                     .user(user)
                     .csQuestionBank(csQuestionBank)
-                    .personalityQuestionBank(personalityQuestionBank)
-                    .coverLetterQuestionBank(coverLetterQuestionBank)
+                    .personalityQuestionBank(null)
+                    .coverLetterQuestionBank(null)
                     .memo(requestDto.getMemo())
                     .build();
         }
@@ -490,6 +469,7 @@ public class InterviewService {
         interviewQuestionMemoRepository.save(memo);
 
         return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+
     }
 
     public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
