@@ -39,3 +39,13 @@ export interface QuestionMemoRequest {
   interviewId: number;
   memo: string;
 }
+
+export interface SaveQuestionRequest {
+  coverLetterInterviewId: number;
+  coverLetterQuestionList: string[];
+}
+
+export interface CreateQuestionResponse {
+  coverLetterInterviewId: number;
+  coverLetterQuestionList: string[];
+}
