@@ -1,4 +1,5 @@
 import { Button } from "@/components/Button";
+import { useSelectCategory } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
 import { InterviewCategory } from "@/types/interviewApiTypes";
 import { FileText, Code, Users } from "lucide-react";
@@ -13,6 +14,9 @@ export interface TypeSelectModalProps {
 function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
   const { setSelectCategory } = useInterviewStore();
   const navigate = useNavigate();
+
+  //hooks
+  const selectCategoryMutation = useSelectCategory();
   const clickOverlay = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
@@ -21,6 +25,9 @@ function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
 
   const handleClickCoverLetter = (selectCategory: InterviewCategory) => {
     setSelectCategory(selectCategory);
+    if (selectCategory === "cover-letter") {
+      selectCategoryMutation.mutate(selectCategory);
+    }
     if (type === "question") {
       navigate(`/interview/${selectCategory}`);
     }
