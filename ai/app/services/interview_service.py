@@ -9,13 +9,6 @@ from app.core.openai_utils import get_rate_limiter
 
 logger = logging.getLogger(__name__)
 
-# 아래 클래스 추가: 정확히 n개의 질문을 생성하도록 유도하는 스키마
-class ParsingInterviewQuestions(BaseModel):
-    """면접 질문 파싱 스키마"""
-    questions: List[str] = Field(
-        description="자기소개서, 경험, 프로젝트 기반의 면접 예상 질문 목록"
-    )
-
 async def parse_user_info(request: interview.CreateQuestionRequest):
     # 요청에서 데이터 추출
     cover_letter_contents = request.cover_letter.cover_letter_contents
@@ -87,6 +80,12 @@ async def create_interview_questions_from_cover_letter(request: interview.Create
         
         # Structured outputs을 위한 Pydantic 스키마 사용
         # questions 필드에 정확히 num_questions 개수의 항목을 생성하도록 설정
+        # 아래 클래스 추가: 정확히 n개의 질문을 생성하도록 유도하는 스키마
+        class ParsingInterviewQuestions(BaseModel):
+            """면접 질문 파싱 스키마"""
+            questions: List[str] = Field(
+                description="자기소개서, 경험, 프로젝트 기반의 면접 예상 질문 목록"
+            )
         class CustomParsingInterviewQuestions(ParsingInterviewQuestions):
             questions: List[str] = Field(
                 description=f"정확히 {num_questions}개의 면접 예상 질문 목록"
