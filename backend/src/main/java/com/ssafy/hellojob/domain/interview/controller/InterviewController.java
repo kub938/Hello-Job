@@ -155,7 +155,8 @@ public class InterviewController {
     }
 
     @PostMapping("/practice/video")
-    public void endInterview(@RequestPart("videoFile") MultipartFile videoFile,
+    public void endInterview(
+            @RequestPart("videoFile") MultipartFile videoFile,
                              @RequestPart("videoInfo") VideoInfo videoInfo,
                              @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException, InterruptedException {
 

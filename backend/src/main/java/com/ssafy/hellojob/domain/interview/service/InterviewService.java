@@ -363,8 +363,7 @@ public class InterviewService {
 
         List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
-        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
-            Integer questionId = dto.getQuestionBankId();
+        for (Integer questionId : requestDto.getQuestionIdList()) {
 
             CsQuestionBank question = csQuestionBankRepository.findById(questionId)
                     .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
@@ -399,8 +398,7 @@ public class InterviewService {
 
         List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
-        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
-            Integer questionId = dto.getQuestionBankId();
+        for (Integer questionId : requestDto.getQuestionIdList()) {
 
             PersonalityQuestionBank question = personalityQuestionBankRepository.findById(questionId)
                     .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
@@ -436,8 +434,7 @@ public class InterviewService {
 
         List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
-        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
-            Integer questionId = dto.getQuestionBankId();
+        for (Integer questionId : requestDto.getQuestionIdList()) {
 
             CoverLetterQuestionBank question = coverLetterQuestionBankRepository.findById(questionId)
                     .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
@@ -797,6 +794,11 @@ public class InterviewService {
 
         for(SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback:fastAPIResponseDto.getSingle_feedbacks()){
 
+            InterviewAnswer targetAnswer = interviewAnswers.stream()
+                    .filter(ans -> ans.getInterviewAnswerId().equals(singleInterviewFeedback.getInterview_answer_id()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("해당 interview_answer_id를 찾을 수 없습니다: " + singleInterviewFeedback.getInterview_answer_id()));
+
             String jsonFeedbacks;
             try {
                 jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
@@ -804,8 +806,9 @@ public class InterviewService {
                 throw new RuntimeException("꼬리 질문 직렬화 실패", e);
             }
 
-            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
-            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewFollowUpQuestion(jsonFeedbacks);
+            targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
+            targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
+
         }
 
     }
