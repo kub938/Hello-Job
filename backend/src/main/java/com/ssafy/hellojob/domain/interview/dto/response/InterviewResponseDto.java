@@ -10,9 +10,7 @@ import java.time.LocalDateTime;
 public class InterviewResponseDto {
 
     private String type;
-    private String interviewVideoUrl;
     private LocalDateTime start;
-    private String videoLength;
     private String firstQuestion;
 
 }

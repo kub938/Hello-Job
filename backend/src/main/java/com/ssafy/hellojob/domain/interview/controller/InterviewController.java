@@ -11,7 +11,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -139,13 +138,14 @@ public class InterviewController {
         return interviewService.deleteMemo(memoId, userPrincipal.getUserId());
     }
 
-    @PostMapping("/practice/voice")
+    @PostMapping("/practice/question")
     public void stopVoiceRecoding(@RequestPart("interviewInfo") InterviewInfo interviewInfo,
+                                  @RequestPart("videoFile") MultipartFile videoFile,
                                   @RequestPart("audioFile") MultipartFile audioFile,
                                   @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
-
+        String url = s3UploadService.uploadVideo(videoFile);
         String result = interviewService.transcribeAudio(audioFile);
-        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), result, interviewInfo);
+        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, interviewInfo, videoFile);
     }
 
     @PostMapping("/question/cover-letter")
@@ -154,14 +154,11 @@ public class InterviewController {
         return interviewService.createCoverLetterQuestion(userPrincipal.getUserId(), coverLetterIdRequestDto);
     }
 
-    @PostMapping("/practice/video")
-    public Map<String, String> endInterview(
-            @RequestPart("videoFile") MultipartFile videoFile,
-                             @RequestPart("videoInfo") VideoInfo videoInfo,
-                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException, InterruptedException {
+    @PostMapping("/practice/end")
+    public EndInterviewResponseDto endInterview(@RequestBody EndInterviewRequestDto videoInfo,
+                                            @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
 
-        String url = s3UploadService.uploadVideo(videoFile);
-        return interviewService.endInterview(userPrincipal.getUserId(), url, videoInfo);
+        return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
 
     @GetMapping("/{interviewId}")
