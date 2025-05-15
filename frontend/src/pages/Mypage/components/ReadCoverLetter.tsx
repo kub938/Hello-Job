@@ -1,6 +1,7 @@
-import { deleteCoverLetter, getCoverLetterDetail } from "@/api/mypageApi";
+import { deleteCoverLetter } from "@/api/mypageApi";
 import { Button } from "@/components/Button";
 import Modal from "@/components/Modal";
+import { useGetCoverLetterDetail } from "@/hooks/mypageHooks";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -16,13 +17,8 @@ function ReadCoverLetter({ onClose, id, page }: ReadCoverLetterProps) {
   const queryClient = useQueryClient();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-  const { data: coverLetterDetailData, isLoading } = useQuery({
-    queryKey: ["coverLetterDetailData", id],
-    queryFn: async () => {
-      const response = await getCoverLetterDetail(id.toString());
-      return response.data;
-    },
-  });
+  const { data: coverLetterDetailData, isLoading } =
+    useGetCoverLetterDetail(id);
 
   const { mutate: deleteCoverLetterFn } = useMutation({
     mutationFn: async () => {
