@@ -62,3 +62,20 @@ export const useGetCoverLetterQuestions = (
     },
   });
 };
+
+export const useSelectCategory = () => {
+  return useMutation({
+    mutationKey: ["select-category"],
+    mutationFn: async (
+      selectCategory: InterviewCategory,
+      coverLetterId?: number
+    ) => {
+      const response = await interviewApi.selectCategory(
+        selectCategory,
+        coverLetterId
+      );
+      console.log(response.data);
+      return response.data;
+    },
+  });
+};
