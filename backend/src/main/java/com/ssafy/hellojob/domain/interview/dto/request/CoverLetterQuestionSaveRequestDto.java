@@ -8,7 +8,7 @@ import java.util.List;
 public class CoverLetterQuestionSaveRequestDto {
 
     private Integer coverLetterId;
-    private List<CoverLetterQuestionDto> coverLetterQuestion;
+    private List<String> coverLetterQuestion;
 
 
 }

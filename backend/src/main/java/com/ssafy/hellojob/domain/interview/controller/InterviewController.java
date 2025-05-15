@@ -109,7 +109,7 @@ public class InterviewController {
     }
 
     @PostMapping("/question/cover-letter/save")
-    public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(@RequestBody CoverLetterQuestionSaveRequestDto requestDto,
+    public Map<String, String> saveNewCoverLetterQuestion(@RequestBody CoverLetterQuestionSaveRequestDto requestDto,
                                                                          @AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.saveNewCoverLetterQuestion(userPrincipal.getUserId(), requestDto);
     }
@@ -155,13 +155,13 @@ public class InterviewController {
     }
 
     @PostMapping("/practice/video")
-    public void endInterview(
+    public Map<String, String> endInterview(
             @RequestPart("videoFile") MultipartFile videoFile,
                              @RequestPart("videoInfo") VideoInfo videoInfo,
                              @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException, InterruptedException {
 
         String url = s3UploadService.uploadVideo(videoFile);
-        interviewService.endInterview(userPrincipal.getUserId(), url, videoInfo);
+        return interviewService.endInterview(userPrincipal.getUserId(), url, videoInfo);
     }
 
     @GetMapping("/{interviewId}")
