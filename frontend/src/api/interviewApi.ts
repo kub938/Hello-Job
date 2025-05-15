@@ -13,6 +13,12 @@ import {
 
 export const interviewApi = {
   // 질문 조회 API - 카테고리를 인자로 받아 해당 카테고리의 질문 목록 반환
+  getCoverLetterQuestions: (coverLetterId: number | null | undefined) => {
+    return authApi.get<QuestionResponse[]>(
+      `/api/v1/interview/question/cover-letter/${coverLetterId}`
+    );
+  },
+
   getQuestions: (category: InterviewCategory) => {
     return authApi.get<QuestionResponse[]>(
       `/api/v1/interview/question/${category}`
@@ -25,7 +31,6 @@ export const interviewApi = {
       `/api/v1/interview/question/${category}/${questionId}`
     );
   },
-
   // 자기소개서 질문 생성 API
   createQuestion: (coverLetterId: number) => {
     return authApi.post<CreateQuestionResponse>(
