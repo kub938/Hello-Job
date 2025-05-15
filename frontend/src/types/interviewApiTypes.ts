@@ -10,13 +10,9 @@ export interface StartQuestionInterviewResponse {
   interviewVideoId: number;
 }
 
-export interface QuestionBankIdItem {
-  questionBankId: number;
-}
-
 export interface InterviewVideoQuestionRequest {
   interviewVideoId: number;
-  questionIdList: QuestionBankIdItem[];
+  questionIdList: number[];
 }
 
 export interface InterviewAnswerInfo {
