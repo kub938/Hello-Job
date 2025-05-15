@@ -66,7 +66,12 @@ public class InterviewService {
     private final CoverLetterContentService coverLetterContentService;
     private final FastApiClientService fastApiClientService;
 
+    // polling 전 정의
+    private static final int MAX_WAIT_SECONDS = 60;
+    private static final int POLL_INTERVAL_MS = 500;
+
     private final Integer QUESTION_SIZE = 3;
+
 
     @Value("${OPENAI_API_URL}")
     private String openAiUrl;
@@ -636,11 +641,26 @@ public class InterviewService {
 
     // 면접 종료
     @Transactional
-    public void endInterview(Integer userId, String url, VideoInfo videoInfo){
+    public void endInterview(Integer userId, String url, VideoInfo videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+
+        // Polling: 최대 MAX_WAIT_SECONDS까지 대기
+        int waited = 0;
+        while (waited < MAX_WAIT_SECONDS * 1000) {
+            boolean hasPendingStt = interviewAnswers.stream()
+                    .anyMatch(ans -> ans.getInterviewAnswer() == null);
+
+            if (!hasPendingStt) break;  // 모두 STT 완료됨
+
+            Thread.sleep(POLL_INTERVAL_MS);  // 0.5초 대기
+            waited += POLL_INTERVAL_MS;
+
+            // 최신 상태로 다시 로드
+            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+        }
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
         if(interviewVideo.getCoverLetterInterview() != null){
@@ -668,8 +688,8 @@ public class InterviewService {
         }
 
         long hours = duration.toHours();
-        long minutes = duration.toMinutesPart();  // Java 9 이상
-        long seconds = duration.toSecondsPart();  // Java 9 이상
+        long minutes = duration.toMinutesPart();
+        long seconds = duration.toSecondsPart();
 
         String formatted = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         interviewVideo.addVideoLength(formatted); 
