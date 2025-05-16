@@ -1,28 +1,29 @@
 import { Button } from "@/components/Button";
+import {
+  useGetQuestions,
+  useSelectQuestionComplete,
+} from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
-import { dummyQuestions } from "@/utils/mockData";
 import { StickyNote, CheckCircle, Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 function SelectQuestionPage() {
   const [selectQuestions, setSelectQuestions] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const { category } = useParams();
-  const { selectCategory, setSelectCategory } = useInterviewStore();
+  // const { category } = useParams();
+  const { selectCategory } = useInterviewStore();
   const navigate = useNavigate();
-  useEffect(() => {
-    if (
-      category === "cs" ||
-      category === "cover-letter" ||
-      category === "personality"
-    ) {
-      setSelectCategory(category);
-    }
-  }, [category]);
+  const location = useLocation();
+
+  //이거 가지고
+  const { interviewId, interviewVideoId } = location.state || {};
+  console.log(interviewId, interviewVideoId);
+
   //react query hooks
-  const questionList = dummyQuestions;
+  const questionList = useGetQuestions(selectCategory);
+  const selectCompleteMutation = useSelectQuestionComplete();
 
   // 문항 선택
   const handleSelectQuestions = (selectQuestionsId: number) => {
@@ -39,18 +40,42 @@ function SelectQuestionPage() {
     }
   };
 
-  // 검색 필터링
-  const filteredQuestions = questionList.filter((question) =>
-    question.question.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSelectComplete = (e: React.MouseEvent) => {
+    if (selectQuestions.length === 0) {
+      e.preventDefault();
+      toast.error("문항을 1개 이상 선택해 주세요");
+      return;
+    }
 
-  if (!questionList) {
+    selectCompleteMutation.mutate(
+      {
+        category: selectCategory,
+        selectData: {
+          interviewVideoId: interviewVideoId,
+          questionIdList: selectQuestions,
+        },
+      },
+      {
+        onSuccess: (response) => {
+          console.log("문항선택 성공", response);
+          navigate("/interview/prepare", { state: response });
+        },
+      }
+    );
+  };
+  // 검색 필터링
+
+  if (!questionList || !questionList.data) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
       </div>
     );
   }
+
+  const filteredQuestions = questionList.data.filter((question) =>
+    question.question.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
@@ -159,21 +184,18 @@ function SelectQuestionPage() {
           >
             이전
           </Button>
-          <Link
-            to="/interview/prepare"
-            className={`flex items-center justify-center rounded-lg px-6 py-2.5 font-medium transition-colors ${
+          <Button
+            className={`w-30 ${
               selectQuestions.length > 0
                 ? "bg-primary text-primary-foreground hover:bg-accent"
                 : "bg-muted-foreground/30 text-muted cursor-not-allowed"
             }`}
             onClick={(e) => {
-              if (selectQuestions.length === 0) {
-                e.preventDefault();
-              }
+              handleSelectComplete(e);
             }}
           >
             선택 완료 ({selectQuestions.length})
-          </Link>
+          </Button>
         </div>
       </div>
 

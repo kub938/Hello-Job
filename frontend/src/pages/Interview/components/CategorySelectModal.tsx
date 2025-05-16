@@ -1,35 +1,68 @@
 import { Button } from "@/components/Button";
+import { useSelectCategory } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
-import { InterviewCategory } from "@/types/interviewApiTypes";
+import {
+  InterviewCategory,
+  StartQuestionInterviewResponse,
+} from "@/types/interviewApiTypes";
 import { FileText, Code, Users } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export type interviewType = "question" | "practice";
 export interface TypeSelectModalProps {
-  type: "question" | "practice";
   onClose: () => void;
 }
 
-function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
-  const { setSelectCategory } = useInterviewStore();
+function CategorySelectModal({ onClose }: TypeSelectModalProps) {
+  const { setSelectCategory, selectInterviewType: type } = useInterviewStore();
   const navigate = useNavigate();
+  //hooks
+  const selectCategoryMutation = useSelectCategory();
   const clickOverlay = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
   };
 
-  const handleClickCoverLetter = (selectCategory: InterviewCategory) => {
-    setSelectCategory(selectCategory);
+  const handleNavigationAfterSuccess = (
+    response: StartQuestionInterviewResponse,
+    selectCategory: InterviewCategory
+  ) => {
+    console.log(response);
     if (type === "question") {
-      navigate(`/interview/${selectCategory}`);
+      navigate(`/interview/${selectCategory}`, {
+        state: response,
+      });
+    } else {
+      navigate("interview/prepare", {
+        state: response,
+      });
+    }
+  };
+
+  const handleSelectCategory = (selectCategory: InterviewCategory) => {
+    setSelectCategory(selectCategory);
+
+    if (type === "question") {
+      if (selectCategory === "cover-letter") {
+        navigate("/interview/cover-letter");
+      } else if (selectCategory === "cs" || selectCategory === "personality") {
+        selectCategoryMutation.mutate(selectCategory, {
+          onSuccess: (res) => handleNavigationAfterSuccess(res, selectCategory),
+        });
+      }
+    } else if (type === "practice") {
+      if (selectCategory === "cover-letter") {
+      } else if (selectCategory === "cs" || selectCategory === "personality") {
+        navigate(`/interview/prepare`);
+      }
     }
   };
 
   return (
     <div onClick={(e) => clickOverlay(e)} className="modal-overlay">
       <div
-        className="modal-container bg-white h-90 "
+        className="modal-container bg-white h-92 overflow-hidden "
         onClick={(e) => e.stopPropagation()}
       >
         <h2 className="text-2xl font-bold text-center mb-8 text-[#2a2c35]">
@@ -40,7 +73,7 @@ function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
           {/* 자기소개서 카테고리 */}
           <button
             className=" min-w-[240px] bg-[#f7f5ff] hover:bg-[#f5f7fd] active:bg-[#cec6f5] transition-all p-5 rounded-lg border border-[#e4e8f0] hover:border-[#886bfb] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#886bfb] group relative overflow-hidden"
-            onClick={() => handleClickCoverLetter("cover-letter")}
+            onClick={() => handleSelectCategory("cover-letter")}
           >
             <div className="absolute inset-0 bg-[#886bfb] opacity-0 group-hover:opacity-5 group-active:opacity-10 transition-opacity"></div>
             <div className="flex flex-col items-center text-center">
@@ -60,7 +93,7 @@ function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
           {/* CS 카테고리 */}
           <button
             className="min-w-[240px] bg-[#f7f5ff] hover:bg-[#f5f7fd] active:bg-[#cec6f5] transition-all p-5 rounded-lg border border-[#e4e8f0] hover:border-[#af9bff] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#af9bff] group relative overflow-hidden"
-            onClick={() => handleClickCoverLetter("cs")}
+            onClick={() => handleSelectCategory("cs")}
           >
             <div className="absolute inset-0 bg-[#af9bff] opacity-0 group-hover:opacity-5 group-active:opacity-10 transition-opacity"></div>
             <div className="flex flex-col items-center text-center">
@@ -78,7 +111,7 @@ function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
           {/* 인성 카테고리 */}
           <button
             className="min-w-[240px] bg-[#f7f5ff] hover:bg-[#f5f7fd] active:bg-[#cec6f5] transition-all p-5 rounded-lg border border-[#e4e8f0] hover:border-[#6f52e0] hover:shadow-md focus:outline-none focus:ring-2 focus:ring-[#6f52e0] group relative overflow-hidden"
-            onClick={() => handleClickCoverLetter("personality")}
+            onClick={() => handleSelectCategory("personality")}
           >
             <div className="absolute inset-0 bg-[#6f52e0] opacity-0 group-hover:opacity-5 group-active:opacity-10 transition-opacity"></div>
             <div className="flex flex-col items-center text-center">
@@ -108,4 +141,4 @@ function TypeSelectModal({ onClose, type }: TypeSelectModalProps) {
   );
 }
 
-export default TypeSelectModal;
+export default CategorySelectModal;

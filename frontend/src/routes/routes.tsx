@@ -188,7 +188,7 @@ const router = createBrowserRouter([
                 loader: categoryValidator,
               },
               {
-                path: "practice-interview",
+                path: "practice",
                 element: (
                   <SuspenseWrapper>
                     <ErrorBoundary FallbackComponent={RenderErrorFallback}>
