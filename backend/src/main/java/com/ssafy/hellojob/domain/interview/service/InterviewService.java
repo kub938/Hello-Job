@@ -76,8 +76,8 @@ public class InterviewService {
 
     private final Integer QUESTION_SIZE = 5;
 
-//    @Value("${FFPROBE_PATH}")
-//    private String ffprobe_path;
+    @Value("${FFPROBE_PATH}")
+    private String ffprobe_path;
 
     @Value("${OPENAI_API_URL}")
     private String openAiUrl;
@@ -721,8 +721,6 @@ public class InterviewService {
     public String getVideoDurationWithFFprobe(MultipartFile videoFile) throws IOException, InterruptedException {
         File tempFile = File.createTempFile("upload", ".mp4");
         videoFile.transferTo(tempFile);
-
-        String ffprobe_path = "ffprobe.exe";
 
         ProcessBuilder pb = new ProcessBuilder(
                 ffprobe_path,
