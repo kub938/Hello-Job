@@ -6,8 +6,11 @@ from app.schemas import interview
 from app.prompts.interview_prompts import CREATE_INTERVIEW_QUESTION_PROMPT, INTERVIEW_FEEDBACK_PROMPT
 from app.core.request_queue import get_request_queue
 from app.core.openai_utils import get_rate_limiter
+from app.services.gms.utils import gms_utils
+from agents import Runner
 
 logger = logging.getLogger(__name__)
+
 
 async def parse_user_info(request: interview.CreateQuestionRequest):
     # 요청에서 데이터 추출
@@ -60,14 +63,12 @@ async def create_interview_questions_from_cover_letter(request: interview.Create
     """자기소개서 기반 면접 예상 질문 생성 서비스 함수입니다."""
     logger.info(f"면접 예상 질문 생성 요청 - 자기소개서 ID: {request.cover_letter.cover_letter_id}")
     
-    request_queue = get_request_queue()
-    
     system_prompt = CREATE_INTERVIEW_QUESTION_PROMPT
     
     # 사용자 정보 파싱 
     user_info = await parse_user_info(request)
     
-    # 생성할 질문 개수 (기본값 10개)
+    # 생성할 질문 개수 (기본값 5개)
     num_questions = 5
     
     # 사용자 프롬프트에 질문 개수 정보 추가
@@ -75,46 +76,32 @@ async def create_interview_questions_from_cover_letter(request: interview.Create
     
 {user_info}"""
 
-    async def perform_api_call():
-        rate_limiter = get_rate_limiter()
-        
-        # Structured outputs을 위한 Pydantic 스키마 사용
-        # questions 필드에 정확히 num_questions 개수의 항목을 생성하도록 설정
-        # 아래 클래스 추가: 정확히 n개의 질문을 생성하도록 유도하는 스키마
-        class ParsingInterviewQuestions(BaseModel):
-            """면접 질문 파싱 스키마"""
-            questions: List[str] = Field(
-                description="자기소개서, 경험, 프로젝트 기반의 면접 예상 질문 목록"
-            )
-        class CustomParsingInterviewQuestions(ParsingInterviewQuestions):
-            questions: List[str] = Field(
-                description=f"정확히 {num_questions}개의 면접 예상 질문 목록"
-            )
-        
-        response = await rate_limiter.chat_completion(
-            model="gpt-4.1", 
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.7,
-            max_tokens=1500,
-            response_format=CustomParsingInterviewQuestions
+    class ParsingInterviewQuestions(BaseModel):
+        """면접 질문 파싱 스키마"""
+        questions: List[str] = Field(
+            description="자기소개서, 경험, 프로젝트 기반의 면접 예상 질문 목록"
         )
-        
-        # API 응답에서 구조화된 데이터로 질문 추출
-        interview_questions = response.choices[0].message.parsed.questions
-        return interview_questions
+    class CustomParsingInterviewQuestions(ParsingInterviewQuestions):
+        questions: List[str] = Field(
+            description=f"정확히 {num_questions}개의 면접 예상 질문 목록"
+        )
     
-    interview_questions = await request_queue.enqueue(
-        perform_api_call,
-        priority=5,  # 우선순위 (낮을수록 우선)
-        estimated_tokens=3000
+    gms_agent = await gms_utils.get_gms_agent(
+        name="GMS Interview Question Generator",
+        model="gpt-4.1",
+        instructions=system_prompt,
+        # mcp_servers=["sequential-thinking"],
+        tools=[],
+        output_type=CustomParsingInterviewQuestions
     )
     
-    logger.info(f"면접 예상 질문 생성 완료: {interview_questions}")
+    interview_questions = await Runner.run(gms_agent, user_prompt)
+
+    logger.info(f"면접 예상 질문 생성 결과: {interview_questions}")
     
-    return interview_questions
+    # 리스트 형태로 반환하도록 수정
+    return interview_questions.final_output.questions
+        
 
 
 async def parse_interview_info(request: interview.FeedbackInterviewRequest):
@@ -152,7 +139,7 @@ async def parse_interview_info(request: interview.FeedbackInterviewRequest):
 async def feedback_interview(request: interview.FeedbackInterviewRequest)-> interview.FeedbackInterviewResponse:
     """면접 피드백 서비스 함수입니다."""
     
-    logger.info(f"면접 피드백 요청")
+    logger.info(f"면접 피드백 요청 (GMS)")
     logger.info(f"면접 문항 개수: {len(request.interview_question_answer_pairs)}")
     logger.info(f"면접 피드백 요청 정보: {request}")
     logger.info(f"자기소개서 정보: {request.cover_letter_contents}")
@@ -161,9 +148,10 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)-> inte
     request_ids = [qa_pair.interview_answer_id for qa_pair in request.interview_question_answer_pairs]
     logger.info(f"면접 답변 ID: {request_ids}")
     
-    request_queue = get_request_queue()
     
     system_prompt = INTERVIEW_FEEDBACK_PROMPT
+#     system_prompt = """당신은 사용자의 면접 답변에 대해 구체적이고 건설적인 피드백을 제공하는 AI입니다. 
+# **sequential-thinking**을 사용하여 피드백 생성 **전략을 수립**하여 답변의 강점, 개선할 점, 그리고 다음 면접을 위한 실질적인 조언을 명확하게 제시해주세요."""
     
     # 면접 정보 파싱
     interview_info = await parse_interview_info(request)
@@ -172,36 +160,29 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)-> inte
     
 {interview_info}"""
     
-    async def perform_api_call():
-        rate_limiter = get_rate_limiter()
-        
-        response = await rate_limiter.chat_completion(
-            model="gpt-4.1", 
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
-            temperature=0.7,
-            max_tokens=3000,
-            response_format=interview.FeedbackInterviewResponse
-        )
-        
-        # API 응답에서 구조화된 데이터로 피드백 추출
-        return response.choices[0].message.parsed
-    
-    feedback_response = await request_queue.enqueue(
-        perform_api_call,
-        priority=5,  # 우선순위 (낮을수록 우선)
-        estimated_tokens=3000
+
+    gms_agent = await gms_utils.get_gms_agent(
+        name="GMS Interview Feedback Generator",
+        model="gpt-4.1",
+        instructions=system_prompt,
+        # mcp_servers=["sequential-thinking"],
+        tools=[],  # 빈 도구 목록 사용
+        output_type=interview.FeedbackInterviewResponse
     )
+    
+    feedback_response = await Runner.run(gms_agent, user_prompt)
+    
     
     logger.info(f"면접 피드백 생성 완료")
     logger.info(f"면접 피드백 응답: {feedback_response}")
     
+    # RunResult 객체에서 final_output을 추출
+    feedback_result = feedback_response.final_output
+    
     # 요청의 interview_answer_id와 응답의 interview_answer_id를 비교하여 다를 경우에만 수정
     updated_feedbacks = []
     
-    for i, single_feedback in enumerate(feedback_response.single_feedbacks):
+    for i, single_feedback in enumerate(feedback_result.single_feedbacks):
         response_id = single_feedback.interview_answer_id
         
         # 응답 ID가 요청 ID 목록에 없거나 순서가 맞지 않을 경우에만 수정
@@ -223,6 +204,6 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)-> inte
             logger.info(f"면접 답변 ID 일치 (변경 없음): {response_id}")
     
     # 수정된 피드백으로 업데이트
-    feedback_response.single_feedbacks = updated_feedbacks
+    feedback_result.single_feedbacks = updated_feedbacks
     
-    return feedback_response
+    return feedback_result
