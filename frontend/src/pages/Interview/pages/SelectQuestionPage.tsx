@@ -5,8 +5,8 @@ import {
 } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
 import { StickyNote, CheckCircle, Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate, useParams } from "react-router";
+import { useState } from "react";
+import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 function SelectQuestionPage() {
