@@ -121,7 +121,7 @@ public class CompanyAnalysisService {
         try {
             jsonUrls = new ObjectMapper().writeValueAsString(responseDto.getNews_urls());
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("뉴스 URL 직렬화 실패", e);
+            throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
         }
 
         NewsAnalysis news = NewsAnalysis.of(
@@ -258,7 +258,7 @@ public class CompanyAnalysisService {
                 ObjectMapper objectMapper = new ObjectMapper();
                 newsUrls = objectMapper.readValue(news.getNewsAnalysisUrl(), new TypeReference<List<String>>() {});
             } catch (Exception e) {
-                throw new RuntimeException("뉴스 URL 파싱 실패", e);
+                throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
             }
         }
 

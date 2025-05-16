@@ -692,7 +692,7 @@ public class InterviewService {
 
     // 한 문항 종료(면접 답변 저장)
     @Transactional
-    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, InterviewInfo interviewInfo, MultipartFile videoFile) throws InterruptedException, IOException {
+    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, InterviewInfo interviewInfo, MultipartFile videoFile) {
         userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
@@ -710,9 +710,16 @@ public class InterviewService {
             }
         }
 
+        String videoLength = null;
+        try {
+            videoLength = getVideoDurationWithFFprobe(videoFile);
+        } catch(Exception e){
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        }
+
         interviewAnswer.addInterviewAnswer(answer);
         interviewAnswer.addInterviewVideoUrl(url);
-        interviewAnswer.addVideoLength(getVideoDurationWithFFprobe(videoFile));
+        interviewAnswer.addVideoLength(videoLength);
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
