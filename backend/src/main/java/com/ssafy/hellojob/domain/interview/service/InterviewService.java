@@ -76,7 +76,7 @@ public class InterviewService {
     private static final Integer QUESTION_SIZE = 5;
 
     @Value("${FFPROBE_PATH}")
-    private static String ffprobe_path;
+    private static String ffprobePath;
 
     @Value("${OPENAI_API_URL}")
     private static String openAiUrl;
@@ -717,7 +717,7 @@ public class InterviewService {
         String videoLength = null;
         try {
             videoLength = getVideoDurationWithFFprobe(videoFile);
-        } catch (Exception e) {
+        } catch (InterruptedException | IOException e) {
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
 
@@ -734,7 +734,7 @@ public class InterviewService {
         videoFile.transferTo(tempFile);
 
         ProcessBuilder pb = new ProcessBuilder(
-                ffprobe_path,
+                ffprobePath,
                 "-v", "error",
                 "-show_entries", "format=duration",
                 "-of", "default=noprint_wrappers=1:nokey=1",
@@ -1073,7 +1073,7 @@ public class InterviewService {
         // 모든 InterviewVideo ID를 수집
         List<Integer> videoIds = interviewVideos.stream()
                 .map(InterviewVideo::getInterviewVideoId)
-                .collect(Collectors.toList());
+                .toList();
 
         // 한 번의 쿼리로 각 InterviewVideo의 첫 번째 답변 조회
         List<Map<String, Object>> firstQuestionsResults = interviewAnswerRepository
@@ -1096,7 +1096,7 @@ public class InterviewService {
                         .start(video.getStart())
                         .firstQuestion(firstQuestionsByVideoId.get(video.getInterviewVideoId()))
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public InterviewDetailResponseDto findInterviewDetail(Integer interviewVideoId, Integer userId) {
@@ -1150,7 +1150,7 @@ public class InterviewService {
             List<String> s3Urls = answers.stream()
                     .map(InterviewAnswer::getInterviewVideoUrl)
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 
             try {
                 // 배치 삭제 시도

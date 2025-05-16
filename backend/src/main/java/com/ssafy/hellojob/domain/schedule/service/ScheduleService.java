@@ -78,7 +78,7 @@ public class ScheduleService {
 
         scheduleRepository.save(newSchedule);
 
-        return new ScheduleIdResponseDto().builder()
+        return ScheduleIdResponseDto.builder()
                 .scheduleId(newSchedule.getScheduleId())
                 .build();
 
@@ -88,14 +88,14 @@ public class ScheduleService {
     public void deleteSchedule(Integer scheduleId, Integer userId) {
 
         // 유저 정보 조회
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
 
         // 작성자와 userId가 같을 때만 삭제
-        if (userId == schedule.getUser().getUserId()) {
+        if (userId.equals(schedule.getUser().getUserId())) {
             scheduleRepository.delete(schedule);
         } else {
             throw new BaseException(ErrorCode.INVALID_USER);
@@ -106,7 +106,7 @@ public class ScheduleService {
     // 일정 상태 수정
     public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -136,7 +136,7 @@ public class ScheduleService {
     // 일정 자기소개서 수정
     public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -148,10 +148,8 @@ public class ScheduleService {
         }
 
         // 자기소개서 조회
-        CoverLetter coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
-        if (coverLetter == null) {
-            throw new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND);
-        }
+        CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
         // 상태 변경
         schedule.setScheduleCoverLetter(coverLetter);
@@ -166,7 +164,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 조회
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 기존 스케줄 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -241,7 +239,7 @@ public class ScheduleService {
     // 일정 상세 조회
     public ScheduleDetailResponseDto detailSchedule(Integer scheduleId, Integer userId) {
 
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
@@ -293,7 +291,7 @@ public class ScheduleService {
                     newsUrls = objectMapper.readValue(newsAnalysis.getNewsAnalysisUrl(), new TypeReference<List<String>>() {
                     });
                 } catch (Exception e) {
-                    throw new RuntimeException("뉴스 URL 파싱 실패", e);
+                    throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
                 }
             }
 
