@@ -23,6 +23,7 @@ public class S3UploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+    // S3에 영상 업로드
     public String uploadVideo(MultipartFile file) throws IOException {
         String originalFileName = file.getOriginalFilename();
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
