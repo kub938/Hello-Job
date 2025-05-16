@@ -1,6 +1,5 @@
 package com.ssafy.hellojob.domain.schedule.dto.response;
 
-import jakarta.persistence.Column;
 import lombok.*;
 
 @Getter

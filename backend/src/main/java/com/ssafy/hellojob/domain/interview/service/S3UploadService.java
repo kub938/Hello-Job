@@ -10,6 +10,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
+import java.io.IOException;
 import java.util.*;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
@@ -47,7 +48,7 @@ public class S3UploadService {
                         .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
                         .toString();
 
-            } catch (Exception e) {
+            } catch (IOException e) {
                 attempt++;
                 if (attempt >= maxRetries) {
                     // 로그를 남기거나 알림을 추가할 수도 있음
@@ -80,7 +81,7 @@ public class S3UploadService {
                     bucketToKeys.computeIfAbsent(bucketName, k -> new ArrayList<>())
                             .add(ObjectIdentifier.builder().key(key).build());
                 }
-            } catch (Exception e) {
+            } catch(Exception e) {
                 log.warn("⚠️ URL 파싱 실패, 개별 삭제로 대체: {}", s3Url);
                 deleteVideo(s3Url); // 개별 삭제로 대체
             }

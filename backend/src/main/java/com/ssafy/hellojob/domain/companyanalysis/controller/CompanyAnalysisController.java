@@ -26,7 +26,7 @@ public class CompanyAnalysisController {
 
     // 기업 분석 전체 목록 조회
     @GetMapping("/all-analysis")
-    public List<CompanyAnalysisListResponseDto> CompanyAnalysisAll(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public List<CompanyAnalysisListResponseDto> companyAnalysisAll(@AuthenticationPrincipal UserPrincipal userPrincipal){
 
         Integer userId = userPrincipal.getUserId();
         return companyAnalysisService.searchAllCompanyAnalysis(userId);
@@ -34,7 +34,7 @@ public class CompanyAnalysisController {
 
     // 기업 분석 상세 조회
     @GetMapping("/{companyAnalysisId}")
-    public CompanyAnalysisDetailResponseDto CompanyAnalysisDetail(@PathVariable("companyAnalysisId") Integer companyAnalysisId,
+    public CompanyAnalysisDetailResponseDto companyAnalysisDetail(@PathVariable("companyAnalysisId") Integer companyAnalysisId,
                                                                   @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         return companyAnalysisService.detailCompanyAnalysis(userPrincipal.getUserId(), companyAnalysisId);
@@ -52,14 +52,14 @@ public class CompanyAnalysisController {
 
     // 기업 분석 검색
     @GetMapping("/search/{companyId}")
-    public List<CompanyAnalysisListResponseDto> CompanyAnalysisSearch(@PathVariable("companyId") Integer companyId,
+    public List<CompanyAnalysisListResponseDto> companyAnalysisSearch(@PathVariable("companyId") Integer companyId,
                                                    @AuthenticationPrincipal UserPrincipal userPrincipal){
         return companyAnalysisService.searchByCompanyIdCompanyAnalysis(companyId, userPrincipal.getUserId());
     }
 
     // 기업 분석 북마크 추가
     @PostMapping("/bookmark")
-    public CompanyAnalysisBookmarkSaveResponseDto CompanyAnalysisBookmarkSave(@Valid @RequestBody CompanyAnalysisBookmarkSaveRequestDto requestDto,
+    public CompanyAnalysisBookmarkSaveResponseDto companyAnalysisBookmarkSave(@Valid @RequestBody CompanyAnalysisBookmarkSaveRequestDto requestDto,
                                                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
 
         return companyAnalysisService.addCompanyAnalysisBookmark(userPrincipal.getUserId(), requestDto);
@@ -67,14 +67,14 @@ public class CompanyAnalysisController {
 
     // 기업 분석 북마크 해제
     @DeleteMapping("/bookmark/{companyAnalysisId}")
-    public void CompanyAnalysisBookmarkDelete(@PathVariable("companyAnalysisId") Integer companyAnalysisId,
+    public void companyAnalysisBookmarkDelete(@PathVariable("companyAnalysisId") Integer companyAnalysisId,
                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
         companyAnalysisService.deleteCompanyAnalysisBookmark(companyAnalysisId, userPrincipal.getUserId());
     }
 
     // 기업 분석 북마크 목록 조회
     @GetMapping("/bookmark")
-    public List<CompanyAnalysisBookmarkListResponseDto> CompanyAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Integer companyId,
+    public List<CompanyAnalysisBookmarkListResponseDto> companyAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Integer companyId,
                                                                                     @AuthenticationPrincipal UserPrincipal userPrincipal){
         List<CompanyAnalysisBookmarkListResponseDto> result;
 

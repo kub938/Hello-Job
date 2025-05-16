@@ -42,6 +42,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
@@ -76,7 +77,10 @@ public class InterviewService {
     private static final Integer QUESTION_SIZE = 5;
 
     @Value("${FFPROBE_PATH}")
-    private static String ffprobe_path;
+    private String ffprobePath;
+
+    @Value("${FFMPEG_PATH}")
+    private String ffmpegPath;
 
     @Value("${OPENAI_API_URL}")
     private static String openAiUrl;
@@ -717,7 +721,8 @@ public class InterviewService {
         String videoLength = null;
         try {
             videoLength = getVideoDurationWithFFprobe(videoFile);
-        } catch (Exception e) {
+//            videoLength = getAudioDurationWithFFprobe(videoFile);
+        } catch (InterruptedException | IOException e) {
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
 
@@ -729,42 +734,101 @@ public class InterviewService {
     }
 
     // 동영상에서 시간 뽑아내기
+    // 영상 길이 추출 + .webm -> .mp4 자동 변환
     public String getVideoDurationWithFFprobe(MultipartFile videoFile) throws IOException, InterruptedException {
-        File tempFile = File.createTempFile("upload", ".mp4");
-        videoFile.transferTo(tempFile);
+        long start = System.nanoTime();
+        log.debug("▶ getVideoDurationWithFFprobe 시작");
 
-        ProcessBuilder pb = new ProcessBuilder(
-                ffprobe_path,
+        String originalFilename = videoFile.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : ".webm";
+        log.debug("⏺️ 원본 파일명: {}, 추출된 확장자: {}", originalFilename, extension);
+
+        File webmTempFile = File.createTempFile("upload", extension);
+        videoFile.transferTo(webmTempFile);
+        log.debug("📁 임시 webm 파일 생성 및 저장 완료: {}", webmTempFile.getAbsolutePath());
+
+        File mp4TempFile = File.createTempFile("converted", ".mp4");
+        log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
+
+        // ffmpeg 실행
+        ProcessBuilder ffmpegPb = new ProcessBuilder(
+                ffmpegPath, "-y",
+                "-i", webmTempFile.getAbsolutePath(),
+                "-c:v", "libx264",
+                "-preset", "ultrafast",
+                "-c:a", "aac",
+                "-strict", "experimental",
+                mp4TempFile.getAbsolutePath()
+        );
+        ffmpegPb.redirectErrorStream(true);
+        Process ffmpegProcess = ffmpegPb.start();
+        log.debug("⚙️ ffmpeg 프로세스 시작");
+
+        // 출력 스트림 소비 (중단 방지)
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(ffmpegProcess.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.debug("ffmpeg ▶ {}", line);
+                }
+            } catch (IOException e) {
+                log.warn("⚠️ ffmpeg 로그 읽기 실패", e);
+            }
+        }).start();
+
+        boolean ffmpegFinished = ffmpegProcess.waitFor(30, TimeUnit.SECONDS);
+        if (!ffmpegFinished) {
+            ffmpegProcess.destroyForcibly();
+            log.error("❌ ffmpeg 시간 초과로 강제 종료됨");
+            throw new IOException("ffmpeg 변환 시간 초과");
+        }
+        log.debug("✅ ffmpeg 변환 완료 (파일 경로: {})", mp4TempFile.getAbsolutePath());
+
+        // ffprobe 실행
+        ProcessBuilder ffprobePb = new ProcessBuilder(
+                ffprobePath,
                 "-v", "error",
                 "-show_entries", "format=duration",
                 "-of", "default=noprint_wrappers=1:nokey=1",
-                tempFile.getAbsolutePath()
+                mp4TempFile.getAbsolutePath()
         );
-
-        Process process = pb.start();
-        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        Process ffprobeProcess = ffprobePb.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(ffprobeProcess.getInputStream()));
         String durationStr = reader.readLine();
-        process.waitFor();
+        ffprobeProcess.waitFor();
+        log.debug("🧪 ffprobe 결과: {}", durationStr);
 
         try {
-            Files.delete(tempFile.toPath());
+            Files.deleteIfExists(webmTempFile.toPath());
+            Files.deleteIfExists(mp4TempFile.toPath());
+            log.debug("🧹 임시 파일 삭제 완료");
         } catch (IOException e) {
-            log.error("⚠️ 임시 파일 삭제 실패: {}", tempFile.getAbsolutePath(), e);
+            log.warn("⚠️ 임시 파일 삭제 실패", e);
         }
 
-        if (durationStr == null) {
-            log.error("⚠️ ffprobe 결과가 null입니다. 영상 길이를 분석하지 못했습니다.");
+        if (durationStr == null || durationStr.trim().isEmpty() || durationStr.trim().equalsIgnoreCase("N/A")) {
+            log.warn("⚠️ ffprobe 결과로부터 duration 추출 실패: '{}'", durationStr);
             return "";
         }
 
-        double durationInSeconds = Double.parseDouble(durationStr.trim());
+        double durationInSeconds;
+        try {
+            durationInSeconds = Double.parseDouble(durationStr.trim());
+        } catch (NumberFormatException e) {
+            log.error("❌ duration 값이 유효하지 않음: '{}'", durationStr);
+            return "";
+        }
 
-        // 초 단위를 hh:mm:ss 형식으로 변환
         int hours = (int) durationInSeconds / 3600;
         int minutes = ((int) durationInSeconds % 3600) / 60;
         int seconds = (int) durationInSeconds % 60;
 
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        String result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        long end = System.nanoTime();
+        log.debug("✅ 변환된 영상 길이: {}, 총 소요 시간: {} ms", result, (end - start) / 1_000_000);
+        return result;
     }
 
     // Fast API 자소서 기반 질문 생성
@@ -991,17 +1055,6 @@ public class InterviewService {
         return projects;
     }
 
-    private String getFirstQuestion(InterviewVideo video) {
-        List<InterviewAnswer> answers = interviewAnswerRepository
-                .findByInterviewVideoOrderByCreatedAtAsc(video);
-
-        if (!answers.isEmpty()) {
-            return answers.get(0).getInterviewQuestion();
-        }
-
-        return null;
-    }
-
     // 면접 피드백 상세 조회
     public InterviewFeedbackResponseDto findInterviewFeedbackDetail(Integer interviewVideoId, Integer userId) {
 
@@ -1073,7 +1126,7 @@ public class InterviewService {
         // 모든 InterviewVideo ID를 수집
         List<Integer> videoIds = interviewVideos.stream()
                 .map(InterviewVideo::getInterviewVideoId)
-                .collect(Collectors.toList());
+                .toList();
 
         // 한 번의 쿼리로 각 InterviewVideo의 첫 번째 답변 조회
         List<Map<String, Object>> firstQuestionsResults = interviewAnswerRepository
@@ -1096,7 +1149,7 @@ public class InterviewService {
                         .start(video.getStart())
                         .firstQuestion(firstQuestionsByVideoId.get(video.getInterviewVideoId()))
                         .build())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public InterviewDetailResponseDto findInterviewDetail(Integer interviewVideoId, Integer userId) {
@@ -1150,7 +1203,7 @@ public class InterviewService {
             List<String> s3Urls = answers.stream()
                     .map(InterviewAnswer::getInterviewVideoUrl)
                     .filter(Objects::nonNull)
-                    .collect(Collectors.toList());
+                    .toList();
 
             try {
                 // 배치 삭제 시도

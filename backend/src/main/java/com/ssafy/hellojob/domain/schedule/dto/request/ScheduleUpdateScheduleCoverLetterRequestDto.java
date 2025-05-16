@@ -1,7 +1,6 @@
 package com.ssafy.hellojob.domain.schedule.dto.request;
 
 import com.ssafy.hellojob.global.exception.ValidationMessage;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;

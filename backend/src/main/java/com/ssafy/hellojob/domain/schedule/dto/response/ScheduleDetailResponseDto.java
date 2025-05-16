@@ -3,7 +3,6 @@ package com.ssafy.hellojob.domain.schedule.dto.response;
 import lombok.*;
 
 import java.sql.Date;
-import java.util.List;
 
 @Getter
 @Builder
