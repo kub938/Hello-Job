@@ -50,20 +50,20 @@ export const interviewApi = {
   },
 
   // 문항 면접 시작 API - 카테고리를 인자로 받는 통합 방식
-  startQuestionInterview: (category: InterviewCategory) => {
+  selectCategory: (category: InterviewCategory) => {
     return authApi.post<StartQuestionInterviewResponse>(
       `/api/v1/interview/select/${category}`
     );
   },
 
-  // 연습 면접 API - 통합 방식
-  practiceInterview: (
+  selectQuestionComplete: (
     category: InterviewCategory,
-    inputData: InterviewVideoQuestionRequest
+    selectData: InterviewVideoQuestionRequest
   ) => {
-    return authApi.post(`/api/v1/interview/practice/question/${category}`, {
-      inputData,
-    });
+    return authApi.post(
+      `/api/v1/interview/practice/question/${category}`,
+      selectData
+    );
   },
 
   // 미디어 저장 API - 통합 방식
@@ -93,10 +93,15 @@ export const interviewApi = {
   },
 
   // 모의 면접 시작 API - 카테고리를 인자로 받는 통합 방식
-  startInterview: (interviewId: number, category: InterviewCategory) => {
+  startInterview: (category: InterviewCategory, coverLetterId?: number) => {
+    if (category === "cover-letter") {
+      return authApi.post<StartInterviewResponse>(
+        `/api/v1/interview/${category}`,
+        { coverLetterId }
+      );
+    }
     return authApi.post<StartInterviewResponse>(
-      `/api/v1/interview/${category}`,
-      { interviewId }
+      `/api/v1/interview/${category}`
     );
   },
 
