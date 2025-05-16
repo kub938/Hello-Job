@@ -63,14 +63,12 @@ async def create_interview_questions_from_cover_letter(request: interview.Create
     """자기소개서 기반 면접 예상 질문 생성 서비스 함수입니다."""
     logger.info(f"면접 예상 질문 생성 요청 - 자기소개서 ID: {request.cover_letter.cover_letter_id}")
     
-    # request_queue = get_request_queue()
-    
     system_prompt = CREATE_INTERVIEW_QUESTION_PROMPT
     
     # 사용자 정보 파싱 
     user_info = await parse_user_info(request)
     
-    # 생성할 질문 개수 (기본값 10개)
+    # 생성할 질문 개수 (기본값 5개)
     num_questions = 5
     
     # 사용자 프롬프트에 질문 개수 정보 추가
@@ -92,6 +90,8 @@ async def create_interview_questions_from_cover_letter(request: interview.Create
         name="GMS Interview Question Generator",
         model="gpt-4.1",
         instructions=system_prompt,
+        # mcp_servers=["sequential-thinking"],
+        tools=[],
         output_type=CustomParsingInterviewQuestions
     )
     
@@ -151,7 +151,7 @@ async def feedback_interview(request: interview.FeedbackInterviewRequest)-> inte
     
     system_prompt = INTERVIEW_FEEDBACK_PROMPT
 #     system_prompt = """당신은 사용자의 면접 답변에 대해 구체적이고 건설적인 피드백을 제공하는 AI입니다. 
-# **sequential-thinking**을 사용하여 피드백 생성 **전략을 수립**하고 **가이드라인 문서**를 참고하여 답변의 강점, 개선할 점, 그리고 다음 면접을 위한 실질적인 조언을 명확하게 제시해주세요."""
+# **sequential-thinking**을 사용하여 피드백 생성 **전략을 수립**하여 답변의 강점, 개선할 점, 그리고 다음 면접을 위한 실질적인 조언을 명확하게 제시해주세요."""
     
     # 면접 정보 파싱
     interview_info = await parse_interview_info(request)
