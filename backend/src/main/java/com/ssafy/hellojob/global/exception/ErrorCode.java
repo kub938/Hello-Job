@@ -82,7 +82,12 @@ public enum ErrorCode {
     // FastAPI
     FAST_API_RESPONSE_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "AI 응답 중 에러가 발생하였습니다. 잠시 후 다시 시도해주세요."),
     SERIALIZATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "직렬화 실패"),
-    DESERIALIZATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "역직렬화 실패")
+    DESERIALIZATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "역직렬화 실패"),
+
+    // S3
+    S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 삭제에 실패했습니다."),
+    S3_URL_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 S3 URL입니다."),
+    S3_KEY_EXTRACTION_FAILED(HttpStatus.BAD_REQUEST, "S3 URL에서 키를 추출할 수 없습니다.")
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.

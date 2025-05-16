@@ -191,4 +191,9 @@ public class InterviewController {
         return interviewService.findInterviewDetail(interviewVideoId, userPrincipal.getUserId());
     }
 
+    @DeleteMapping("/{interviewVideoId}")
+    public Map<String, String> deleteInterviewVideo(@PathVariable Integer interviewVideoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.deleteInterviewVideo(interviewVideoId, userPrincipal.getUserId());
+    }
+
 }
