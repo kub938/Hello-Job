@@ -29,7 +29,7 @@ public class InterviewDeleteScheduler {
         log.debug("{}시 면접 삭제 시작", LocalTime.now());
 
         try {
-            LocalDateTime cutoff = LocalDateTime.now().minusDays(1);
+            LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
             List<InterviewVideo> videos = interviewVideoRepository.findAllByEndBeforeAndInterviewTitleIsNull(cutoff);
 
             interviewVideoRepository.deleteAll(videos); // Cascade로 InterviewAnswer도 함께 삭제됨
