@@ -161,10 +161,4 @@ public class InterviewController {
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
 
-    @GetMapping
-    public List<InterviewThumbNailResponseDto> findAllInterview(@AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return interviewService.findAllInterview(userPrincipal.getUserId());
-    }
-
-
 }

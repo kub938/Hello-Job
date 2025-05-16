@@ -918,39 +918,6 @@ public class InterviewService {
         return projects;
     }
 
-    public List<InterviewThumbNailResponseDto> findAllInterview(Integer userId) {
-
-    }
-
-    public InterviewThumbNailResponseDto findAllInterview(Integer interviewId, Integer userId) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
-        Interview interview = interviewReadService.findInterviewByIdAndUserOrElseThrow(interviewId, user);
-
-        List<InterviewVideo> videos = interviewVideoRepository.findAllByInterviewOrderByStartDesc(interview);
-
-        List<InterviewResponseDto> selectQuestionInterview = new ArrayList<>();
-        List<InterviewResponseDto> simulateInterview = new ArrayList<>();
-
-        for (InterviewVideo video : videos) {
-            InterviewResponseDto dto = InterviewResponseDto.builder()
-                    .type(video.getInterviewCategory().name())
-                    .start(video.getStart())
-                    .firstQuestion(getFirstQuestion(video))
-                    .build();
-
-            if (video.isSelectQuestion()) {
-                selectQuestionInterview.add(dto);
-            } else {
-                simulateInterview.add(dto);
-            }
-        }
-
-        return InterviewThumbNailResponseDto.builder()
-                .selectQuestionInterview(selectQuestionInterview)
-                .simulateInterview(simulateInterview)
-                .build();
-    }
-
     private String getFirstQuestion(InterviewVideo video) {
         List<InterviewAnswer> answers = interviewAnswerRepository
                 .findByInterviewVideoOrderByCreatedAtAsc(video);
