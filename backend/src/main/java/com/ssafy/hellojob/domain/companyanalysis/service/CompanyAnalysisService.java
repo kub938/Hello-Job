@@ -10,10 +10,7 @@ import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFast
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.*;
 import com.ssafy.hellojob.domain.companyanalysis.entity.*;
-import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookmarkRepository;
-import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
-import com.ssafy.hellojob.domain.companyanalysis.repository.DartAnalysisRepository;
-import com.ssafy.hellojob.domain.companyanalysis.repository.NewsAnalysisRepository;
+import com.ssafy.hellojob.domain.companyanalysis.repository.*;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
@@ -41,6 +38,7 @@ public class CompanyAnalysisService {
     private final FastApiClientService fastApiClientService;
     private final CompanyReadService companyReadService;
     private final CompanyAnalysisReadService companyAnalysisReadService;
+    private final SwotAnalysisRepository swotAnalysisRepository;
 
     // 토큰 확인
     public boolean tokenCheck(Integer userId) {
@@ -82,6 +80,8 @@ public class CompanyAnalysisService {
                 .base(requestDto.isBasic())
                 .plus(requestDto.isPlus())
                 .fin(requestDto.isFinancial())
+//                .swot(requestDto.isSwot())
+                .swot(false)
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 
@@ -122,14 +122,14 @@ public class CompanyAnalysisService {
 
         newsAnalysisRepository.save(news);
 
-        String strengthContent;
-        String strengthTag;
-        String weaknessContent;
-        String weaknessTag;
-        String opportunityContent;
-        String opportunityTag;
-        String threatContent;
-        String threatTag;
+        String strengthContent = "[]";
+        String strengthTag = "[]";
+        String weaknessContent = "[]";
+        String weaknessTag = "[]";
+        String opportunityContent = "[]";
+        String opportunityTag = "[]";
+        String threatContent = "[]";
+        String threatTag = "[]";
         try {
             strengthContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getStrengths().getContents());
             strengthTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getStrengths().getTags());
@@ -143,7 +143,10 @@ public class CompanyAnalysisService {
             throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
         }
 
-        SwotAnalysis swotAnalysis = SwotAnalysis.of(strengthContent, strengthTag, weaknessContent, weaknessTag, opportunityContent, opportunityTag, threatContent, threatTag, responseDto.getSwot().getSwot_memory());
+        String swotSummary = responseDto.getSwot().getSwot_summary() == null ? "[]" : responseDto.getSwot().getSwot_summary();
+
+        SwotAnalysis swotAnalysis = SwotAnalysis.of(strengthContent, strengthTag, weaknessContent, weaknessTag, opportunityContent, opportunityTag, threatContent, threatTag, swotSummary);
+        swotAnalysisRepository.save(swotAnalysis);
 
         // CompanyAnalysis 저장
         CompanyAnalysis companyAnalysis = CompanyAnalysis.of(requestDto.getCompanyAnalysisTitle(), user, company, dart, news, swotAnalysis, requestDto.isPublic(), requestDto.getUserPrompt());
