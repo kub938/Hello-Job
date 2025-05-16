@@ -87,7 +87,7 @@ public class InterviewService {
     private String openAiKey;
 
     // cs 질문 목록 조회
-    public List<QuestionListResponseDto> getCsQuestionList(Integer userId){
+    public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
         List<CsQuestionBank> questionList = csQuestionBankRepository.findAll();
 
@@ -105,7 +105,7 @@ public class InterviewService {
                 .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, questionBank);
-        if(memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+        if (memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
 
         return QuestionDetailResponseDto.builder()
                 .questionBankId(questionId)
@@ -115,7 +115,7 @@ public class InterviewService {
     }
 
     // 인성 질문 목록 조회
-    public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId){
+    public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
         List<PersonalityQuestionBank> questionList = personalityQuestionBankRepository.findAll();
 
@@ -133,7 +133,7 @@ public class InterviewService {
                 .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, questionBank);
-        if(memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+        if (memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
 
         return QuestionDetailResponseDto.builder()
                 .questionBankId(questionId)
@@ -143,11 +143,11 @@ public class InterviewService {
     }
 
     // 자소서 기반 질문 목록 조회
-    public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId){
+    public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
 
-        if(!userId.equals(coverLetter.getUser().getUserId())){
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
@@ -174,11 +174,11 @@ public class InterviewService {
         CoverLetterQuestionBank questionBank = coverLetterQuestionBankRepository.findByIdWithCoverLetterInterview(questionId)
                 .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
-        if(!questionBank.getCoverLetterInterview().equals(coverLetterInterview))
+        if (!questionBank.getCoverLetterInterview().equals(coverLetterInterview))
             throw new BaseException(COVER_LETTER_QUESTION_MISMATCH);
 
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, questionBank);
-        if(memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+        if (memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
 
         return QuestionDetailResponseDto.builder()
                 .questionBankId(questionId)
@@ -188,7 +188,7 @@ public class InterviewService {
     }
 
     // 문항 카테고리 선택 cs
-    public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId){
+    public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저인 경우)
@@ -210,7 +210,7 @@ public class InterviewService {
     }
 
     // 문항 카테고리 선택 인성
-    public SelectInterviewStartResponseDto startPersonalitySelectInterview(Integer userId){
+    public SelectInterviewStartResponseDto startPersonalitySelectInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저인 경우)
@@ -232,7 +232,7 @@ public class InterviewService {
     }
 
     // 구현 폐기
-    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer coverLetterId, Integer userId){
+    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
@@ -256,7 +256,7 @@ public class InterviewService {
     }
 
     // cs 모의 면접 시작
-    public InterviewStartResponseDto startCsRandomInterview(Integer userId){
+    public InterviewStartResponseDto startCsRandomInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저)
@@ -299,7 +299,7 @@ public class InterviewService {
     }
 
     // 인성 모의 면접 시작
-    public InterviewStartResponseDto startPersonalityRandomInterview(Integer userId){
+    public InterviewStartResponseDto startPersonalityRandomInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저인 경우)
@@ -342,18 +342,18 @@ public class InterviewService {
     }
 
     // 자소서 모의 면접 시작
-    public InterviewStartResponseDto startCoverLetterRandomInterview(Integer coverLetterId, Integer userId){
+    public InterviewStartResponseDto startCoverLetterRandomInterview(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
 
-        if(!userId.equals(coverLetter.getUser().getUserId())){
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
         // 면접이 없을 경우(처음 시도한느 유저)
         CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
-                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); 
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter);
                     return coverLetterInterviewRepository.save(newInterview);
                 });
 
@@ -390,13 +390,13 @@ public class InterviewService {
     }
 
     // 문항 선택 면접 cs 질문 선택
-    public InterviewStartResponseDto saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+    public InterviewStartResponseDto saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
 
         Interview interview = interviewReadService.findInterviewById(video.getInterview().getInterviewId());
-        if(!userId.equals(interview.getUser().getUserId())){
+        if (!userId.equals(interview.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
@@ -416,11 +416,11 @@ public class InterviewService {
             interviewAnswerRepository.save(answer);
 
             questionList.add(
-                QuestionAndAnswerListResponseDto.builder()
-                        .questionBankId(questionId)
-                        .question(question.getCsQuestion())
-                        .interviewAnswerId(answer.getInterviewAnswerId())
-                        .build()
+                    QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(questionId)
+                            .question(question.getCsQuestion())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .build()
             );
         }
 
@@ -432,13 +432,13 @@ public class InterviewService {
     }
 
     // 문항 선택 면접 인성 질문 선택
-    public InterviewStartResponseDto savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto){
+    public InterviewStartResponseDto savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
 
         Interview interview = interviewReadService.findInterviewById(video.getInterview().getInterviewId());
-        if(!userId.equals(interview.getUser().getUserId())){
+        if (!userId.equals(interview.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
@@ -475,10 +475,10 @@ public class InterviewService {
     }
 
     // 문항 선택 면접 자소서 질문 선택
-    public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto){
+    public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
-        if(!userId.equals(coverLetter.getUser().getUserId())){
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
         CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByCoverLetter(coverLetter);
@@ -518,29 +518,29 @@ public class InterviewService {
     }
 
     // 자소서 기반으로 생성된 질문 저장
-    public Map<String, String> saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
+    public Map<String, String> saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        if(!userId.equals(coverLetter.getUser().getUserId())){
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
         // 면접 었을 시 생성
         CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
                 .orElseGet(() -> {
-                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); 
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter);
                     return coverLetterInterviewRepository.save(newInterview);
                 });
 
         List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
 
-        for(String newQuestion: requestDto.getCoverLetterQuestion()){
+        for (String newQuestion : requestDto.getCoverLetterQuestion()) {
 
             CoverLetterQuestionBank newQuestions = CoverLetterQuestionBank.of(coverLetterInterview, newQuestion);
             coverLetterQuestionBankRepository.save(newQuestions);
             questionIdList.add(CoverLetterQuestionIdDto.builder()
-                            .coverLetterQuestionBankId(newQuestions.getCoverLetterQuestionBankId())
+                    .coverLetterQuestionBankId(newQuestions.getCoverLetterQuestionBankId())
                     .build());
         }
 
@@ -552,7 +552,7 @@ public class InterviewService {
         CsQuestionBank csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
 
-        if(memo != null) {
+        if (memo != null) {
             memo.updateMemo(requestDto.getMemo());
         } else {
             memo = InterviewQuestionMemo.builder()
@@ -572,10 +572,10 @@ public class InterviewService {
 
     public WriteMemoResponseDto createPersonalityMemo(WriteMemoRequestDto requestDto, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
-        PersonalityQuestionBank personalityQuestionBank  = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
+        PersonalityQuestionBank personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
 
-        if(memo != null) {
+        if (memo != null) {
             memo.updateMemo(requestDto.getMemo());
         } else {
             memo = InterviewQuestionMemo.builder()
@@ -598,13 +598,13 @@ public class InterviewService {
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
         CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
 
-        if(!coverLetterInterview.equals(coverLetterQuestionBank.getCoverLetterInterview())) {
+        if (!coverLetterInterview.equals(coverLetterQuestionBank.getCoverLetterInterview())) {
             throw new BaseException(COVER_LETTER_QUESTION_MISMATCH);
         }
 
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
 
-        if(memo != null) {
+        if (memo != null) {
             memo.updateMemo(requestDto.getMemo());
         } else {
             memo = InterviewQuestionMemo.builder()
@@ -625,7 +625,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
 
-        if(!memo.getUser().equals(user)) {
+        if (!memo.getUser().equals(user)) {
             throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
         }
 
@@ -638,7 +638,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
 
-        if(!memo.getUser().equals(user)) {
+        if (!memo.getUser().equals(user)) {
             throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
         }
 
@@ -699,14 +699,14 @@ public class InterviewService {
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
 
-        if(interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")){
+        if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
-            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
-            if(!userId.equals(interview.getUser().getUserId())){
+            if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         }
@@ -751,14 +751,14 @@ public class InterviewService {
 
         return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
-    
+
     // Fast API 자소서 기반 질문 생성
     @Transactional
-    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto){
+    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        if(!userId.equals(coverLetter.getUser().getUserId())){
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
@@ -775,18 +775,18 @@ public class InterviewService {
         List<Integer> experienceIds = new ArrayList<>();
         List<Integer> projectIds = new ArrayList<>();
 
-        for(CoverLetterOnlyContentDto content:coverLetterContents){
+        for (CoverLetterOnlyContentDto content : coverLetterContents) {
             experienceIds = coverLetterExperienceRepository.findExperiencesByContentId(content.getContentId());
             projectIds = coverLetterExperienceRepository.findProjectsByContentId(content.getContentId());
         }
 
         List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
         List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
-        if(!experienceIds.isEmpty()){
+        if (!experienceIds.isEmpty()) {
             experiences = searchExperiencesByCoverLetterContentId(experienceIds);
         }
 
-        if(!projects.isEmpty()){
+        if (!projects.isEmpty()) {
             projects = searchProjectsByCoverLetterContentId(projectIds);
         }
 
@@ -831,14 +831,14 @@ public class InterviewService {
         }
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
-        if(interviewVideo.getCoverLetterInterview() != null){
+        if (interviewVideo.getCoverLetterInterview() != null) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
-            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
-            if(!userId.equals(interview.getUser().getUserId())){
+            if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         }
@@ -854,7 +854,7 @@ public class InterviewService {
                         .toList();
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
-        if(interviewQuestionAndAnswerRequestDto.isEmpty()){
+        if (interviewQuestionAndAnswerRequestDto.isEmpty()) {
             return EndInterviewResponseDto.builder()
                     .interviewVideoId(interviewVideo.getInterviewVideoId())
                     .build();
@@ -863,7 +863,7 @@ public class InterviewService {
         // 자소서 조회
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
 
-        if(interviewVideo.getCoverLetterInterview() != null){
+        if (interviewVideo.getCoverLetterInterview() != null) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
             List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(coverLetterInterview.getCoverLetter().getCoverLetterId());
             coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
@@ -881,7 +881,7 @@ public class InterviewService {
         // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
 
-        for(SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback:fastAPIResponseDto.getSingle_feedbacks()){
+        for (SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback : fastAPIResponseDto.getSingle_feedbacks()) {
 
             InterviewAnswer targetAnswer = interviewAnswers.stream()
                     .filter(ans -> ans.getInterviewAnswerId().equals(singleInterviewFeedback.getInterview_answer_id()))
@@ -906,9 +906,9 @@ public class InterviewService {
     }
 
     // 면접 질문 + 답변 객체 조회
-    public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers){
+    public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers) {
         List<InterviewQuestionAndAnswerRequestDto> result = new ArrayList<>();
-        for(InterviewAnswer answer:interviewAnswers){
+        for (InterviewAnswer answer : interviewAnswers) {
             result.add(
                     InterviewQuestionAndAnswerRequestDto.builder()
                             .interview_answer_id(answer.getInterviewAnswerId())
@@ -922,9 +922,9 @@ public class InterviewService {
     }
 
     // fast API 요청 보낼 때 자소서 전문 조회 함수
-    public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents){
+    public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents) {
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
-        for(CoverLetterOnlyContentDto content:coverLetterContents){
+        for (CoverLetterOnlyContentDto content : coverLetterContents) {
             coverLetterContentFastAPIRequestDto.add(
                     CoverLetterContentFastAPIRequestDto.builder()
                             .cover_letter_content_number(content.getContentNumber())
