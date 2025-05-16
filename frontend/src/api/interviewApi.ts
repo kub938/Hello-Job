@@ -59,25 +59,24 @@ export const interviewApi = {
   },
 
   // 미디어 저장 API - 통합 방식
-  completeQuestion: (interviewInfo: InterviewAnswerInfo, audioFile: File) => {
+  completeQuestion: (
+    interviewAnswerId: number,
+    videoFile: File,
+    audioFile: File
+  ) => {
     const formData = new FormData();
 
-    formData.append("interviewInfo", JSON.stringify(interviewInfo));
+    // interviewAnswerId를 application/json 형식으로 설정
+    const jsonBlob = new Blob([JSON.stringify(interviewAnswerId)], {
+      type: "application/json",
+    });
+    formData.append("interviewAnswerId", jsonBlob);
+
+    // 파일 필드는 그대로 추가
+    formData.append("videoFile", videoFile);
     formData.append("audioFile", audioFile);
 
-    return authApi.post("/api/v1/interview/practice/voice", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-  },
-  completeInterview: (interviewInfo: InterviewAnswerInfo, videoFile: File) => {
-    const formData = new FormData();
-
-    formData.append("interviewInfo", JSON.stringify(interviewInfo));
-    formData.append("videoFile", videoFile);
-
-    return authApi.post("/api/v1/interview/practice/video", formData, {
+    return authApi.post("/api/v1/interview/practice/question", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
