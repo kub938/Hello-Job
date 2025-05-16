@@ -116,7 +116,7 @@ export const useUpdateScheduleStatus = () => {
       return { previousSchedules };
     },
 
-    onError: (error, variables, context) => {
+    onError: (_error, _variables, context) => {
       toast.error("일정 상태 수정에 실패했습니다.");
       if (context?.previousSchedules) {
         queryClient.setQueryData(["schedules"], context.previousSchedules);
