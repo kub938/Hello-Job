@@ -14,6 +14,17 @@
                 "NAVER_CLIENT_ID": "YOUR_NAVER_CLIENT_ID_IN_DOTENV",
                 "NAVER_CLIENT_SECRET": "YOUR_NAVER_CLIENT_SECRET_IN_DOTENV"
             }
+        },
+        "sequential-thinking": {
+            "command": "/usr/bin/npx",
+            "args": [
+                "-y",
+                "@smithery/cli@latest",
+                "run",
+                "@smithery-ai/server-sequential-thinking",
+                "--key",
+                "a6c0e55b-6ef1-44f7-83af-aac975f23805"
+            ]
         }
     }
 }
