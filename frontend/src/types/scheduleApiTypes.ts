@@ -34,3 +34,9 @@ export interface getSchedulesResponse {
   scheduleStatusStep: ScheduleStatusStep;
   coverLetterId: number | null;
 }
+
+export interface getScheduleCoverLettersResponse {
+  coverLetterId: number;
+  coverLetterTitle: string;
+  updatedAt: string;
+}

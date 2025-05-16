@@ -18,8 +18,13 @@ export interface Schedule {
   scheduleEndDate: string | null;
   scheduleStatusName: string;
   scheduleStatusStep: ScheduleStatusStep;
-  coverLetterId: number | null;
-  coverLetterTitle: string | null;
+  coverLetterId: number | 'none' | null;
+}
+
+export interface ScheduleCoverLetter {
+  coverLetterId: number;
+  coverLetterTitle: string;
+  updatedAt: string;
 }
 
 export interface ScheduleInputStoreType {
@@ -37,6 +42,7 @@ export interface ScheduleInputStoreType {
   setScheduleStartDate: (startDate: string | null) => void;
   setScheduleEndDate: (endDate: string | null) => void;
 }
+
 export const scheduleStatusList: Record<ScheduleStatusStep, ScheduleStatus[]> =
   {
     [ScheduleStatusStep.PENDING]: [

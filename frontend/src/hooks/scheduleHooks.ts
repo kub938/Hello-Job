@@ -3,6 +3,7 @@ import {
   postScheduleRequest,
   getScheduleResponse,
   getSchedulesResponse,
+  getScheduleCoverLettersResponse,
 } from "@/types/scheduleApiTypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -139,15 +140,28 @@ export const useUpdateScheduleStatus = () => {
   });
 };
 
-export const useDeleteSchedule = (scheduleId: number | undefined) => {
+// 일정 삭제 훅
+export const useDeleteSchedule = () => {
   return useMutation({
     mutationKey: ["delete-schedule"],
-    mutationFn: async () => {
+    mutationFn: async (scheduleId: number) => {
       if (scheduleId === undefined) {
         throw new Error("Schedule Id is undefined");
       }
       const response = await scheduleApi.deleteSchedule(scheduleId);
       return response.status;
+    },
+  });
+};
+
+// 자기소개서 목록 조회
+export const useGetScheduleCoverLetters = () => {
+  return useQuery<getScheduleCoverLettersResponse[]>({
+    queryKey: ["schedule-cover-letters"],
+    queryFn: async () => {
+      const response = await scheduleApi.getScheduleCoverLetters();
+      console.log("자기소개서 목록: ", response.data);
+      return response.data;
     },
   });
 };

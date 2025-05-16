@@ -4,6 +4,7 @@ import {
   postScheduleResponse,
   getScheduleResponse,
   getSchedulesResponse,
+  getScheduleCoverLettersResponse,
 } from "@/types/scheduleApiTypes";
 
 export const scheduleApi = {
@@ -32,5 +33,10 @@ export const scheduleApi = {
     return authApi.patch(`/api/v1/schedule/${scheduleId}/status`, {
       scheduleStatusName,
     });
+  },
+  getScheduleCoverLetters: () => {
+    return authApi.get<getScheduleCoverLettersResponse[]>(
+      `/api/v1/schedule/cover-letter`
+    );
   },
 };
