@@ -10,7 +10,6 @@ import { useNavigate } from "react-router";
 
 export type interviewType = "question" | "practice";
 export interface TypeSelectModalProps {
-  type: "question" | "practice";
   onClose: () => void;
 }
 
