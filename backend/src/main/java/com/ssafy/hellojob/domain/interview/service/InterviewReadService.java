@@ -93,4 +93,9 @@ public class InterviewReadService {
                 .orElseThrow(() -> new BaseException(INTERVIEW_NOT_FOUND));
     }
 
+    public CoverLetterInterview findCoverLetterInterviewByCoverLetter(CoverLetter coverLetter){
+        return coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseThrow(() -> new BaseException(INTERVIEW_NOT_FOUND));
+    }
+
 }
