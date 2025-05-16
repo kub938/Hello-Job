@@ -19,6 +19,9 @@ import {
 import { useState } from "react";
 import { statusColorMap } from "@/types/scheduleTypes";
 import { getSchedulesResponse } from "@/types/scheduleApiTypes";
+import ReadCoverLetter from "../ReadCoverLetter";
+import DetailModal from "@/components/Common/DetailModal";
+import { toast } from "sonner";
 
 interface CalendarProps {
   scheduleList: getSchedulesResponse[];
@@ -33,6 +36,18 @@ interface WeekEvent {
 }
 
 const Calendar = ({ scheduleList }: CalendarProps) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [researchId, setResearchId] = useState<number>(1);
+
+  const openReadModal = (id: number) => {
+    setResearchId(id);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+  };
+
   const [currentDate, setCurrentDate] = useState(new Date());
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth() + 1;
@@ -263,6 +278,13 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
                     className={`absolute rounded-lg ${colorClass} text-[11px] text-left px-3 py-1 rounded whitespace-nowrap overflow-hidden text-ellipsis opacity-70 hover:opacity-100 transition-opacity cursor-pointer`}
                     style={{ left, width, top }}
                     title={event.schedule.scheduleMemo ?? ""}
+                    onClick={() =>
+                      event.schedule.coverLetterId
+                        ? openReadModal(event.schedule.coverLetterId)
+                        : toast.warning(
+                            "일정과 연결된 자기소개서가 존재하지 않습니다."
+                          )
+                    }
                   >
                     {event.schedule.scheduleTitle}
                   </button>
@@ -272,6 +294,12 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
           </div>
         );
       })}
+      {/* 자기소개서 상세 페이지 모달 */}
+      {isModalOpen && (
+        <DetailModal isOpen={isModalOpen} onClose={closeModal}>
+          <ReadCoverLetter onClose={closeModal} id={researchId} page={0} />
+        </DetailModal>
+      )}
     </div>
   );
 };
