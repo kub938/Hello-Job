@@ -143,14 +143,19 @@ public class InterviewService {
 
     // 자소서 기반 질문 목록 조회
     public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId) {
-        userReadService.findUserByIdOrElseThrow(userId);
+        User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
 
         if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
-        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByCoverLetter(coverLetter);
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newCoverLetterInterview = CoverLetterInterview.of(user, coverLetter);
+                    return coverLetterInterviewRepository.save(newCoverLetterInterview);
+                });
+
 
         // 자소서 질문 조회
         List<CoverLetterQuestionBank> questionList = coverLetterQuestionBankRepository.findByCoverLetterInterview(coverLetterInterview);
