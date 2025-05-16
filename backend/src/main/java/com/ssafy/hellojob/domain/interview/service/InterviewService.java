@@ -41,10 +41,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
@@ -86,6 +83,7 @@ public class InterviewService {
 
     @Value("${OPENAI_API_KEY}")
     private static String openAiKey;
+    private final S3UploadService s3UploadService;
 
     // cs 질문 목록 조회
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
@@ -1129,4 +1127,40 @@ public class InterviewService {
                 .build();
     }
 
+    public Map<String, String> deleteInterviewVideo(Integer interviewVideoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(interviewVideoId);
+
+        // 소유권 확인
+        if((video.getInterview() != null && !video.getInterview().getUser().equals(user))
+                || (video.getCoverLetterInterview() != null && !video.getCoverLetterInterview().getUser().equals(user))
+                || (video.getInterview() == null && video.getCoverLetterInterview() == null)) {
+            throw new BaseException(INTERVIEW_VIDEO_MISMATCH);
+        }
+
+        List<InterviewAnswer> answers = interviewAnswerRepository.findAllByInterviewVideo(video);
+
+        if (!answers.isEmpty()) {
+            // S3 URL 목록 추출
+            List<String> s3Urls = answers.stream()
+                    .map(InterviewAnswer::getInterviewVideoUrl)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+            try {
+                // 배치 삭제 시도
+                s3UploadService.deleteVideos(s3Urls);
+
+                // 모든 S3 삭제 성공 시에만 DB 삭제
+                interviewAnswerRepository.deleteAll(answers);
+
+            } catch (BaseException e) {
+                log.error("❌ S3 삭제 실패로 인한 DB 삭제 취소");
+                throw e; // 트랜잭션 롤백
+            }
+        }
+        interviewVideoRepository.delete(video);
+
+        return Map.of("message", "면접 영상이 삭제되었습니다.");
+    }
 }
