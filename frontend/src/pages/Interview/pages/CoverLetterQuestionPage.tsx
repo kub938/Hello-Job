@@ -30,12 +30,11 @@ import {
 // }
 
 function CoverLetterQuestionPage() {
-  // 선택된 자기소개서 ID
+  //state 관련
   const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<
     number | null
   >(null);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
-  // 검색어
   const [searchTerm, setSearchTerm] = useState("");
 
   // 모달 관련 상태
@@ -43,12 +42,14 @@ function CoverLetterQuestionPage() {
   const [generatedQuestions, setGeneratedQuestions] =
     useState<CreateQuestionResponse | null>(null);
 
+  //훅
   const navigate = useNavigate();
+  const createQuestionMutation = useCreateCoverLetterQuestion();
+  const saveQuestionsMutation = useSaveCoverLetterQuestions();
+  const { data: questions } = useGetCoverLetterQuestions(selectedCoverLetterId);
 
-  // Intersection Observer를 위한 ref
+  //무한 스크롤
   const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  // useInfiniteQuery를 사용하여 무한 스크롤 구현
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: ["coverLetterList"],
@@ -62,13 +63,6 @@ function CoverLetterQuestionPage() {
       },
       initialPageParam: 0,
     });
-  // 기존 질문 생성 훅 사용
-  const createQuestionMutation = useCreateCoverLetterQuestion();
-
-  // 선택한 질문 저장 뮤테이션
-  const saveQuestionsMutation = useSaveCoverLetterQuestions();
-
-  // Intersection Observer를 사용하여 스크롤 감지
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -99,9 +93,6 @@ function CoverLetterQuestionPage() {
       "0"
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
-
-  // 예시 질문 데이터
-  const { data: questions } = useGetCoverLetterQuestions(selectedCoverLetterId);
 
   // 추가 질문 생성 핸들러
   const handleGenerateQuestions = () => {
