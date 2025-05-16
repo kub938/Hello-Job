@@ -18,15 +18,17 @@ public class ScheduleListResponseDto {
     private String scheduleTitle;
     private String scheduleStatusName;
     private String scheduleStatusStep;
+    private String scheduleMemo;
 
     @Builder
-    public ScheduleListResponseDto(Integer scheduleId, Date scheduleStartDate, Date scheduleEndDate, String scheduleTitle, String scheduleStatusName, String scheduleStatusStep){
+    public ScheduleListResponseDto(Integer scheduleId, Date scheduleStartDate, Date scheduleEndDate, String scheduleTitle, String scheduleStatusName, String scheduleStatusStep, String scheduleMemo){
         this.scheduleId = scheduleId;
         this.scheduleStartDate = scheduleStartDate;
         this.scheduleEndDate = scheduleEndDate;
         this.scheduleTitle = scheduleTitle;
         this.scheduleStatusName = scheduleStatusName;
         this.scheduleStatusStep = scheduleStatusStep;
+        this.scheduleMemo = scheduleMemo;
     }
 
 }
