@@ -23,6 +23,11 @@ public class InterviewReadService {
     private final InterviewVideoRepository interviewVideoRepository;
     private final InterviewRepository interviewRepository;
 
+    public InterviewVideo findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(Integer interviewVideoId) {
+        return interviewVideoRepository.findByIdWithInterviewAndCoverLetterInterview(interviewVideoId)
+                .orElseThrow(() -> new BaseException(INTERVIEW_VIDEO_NOT_FOUND));
+    }
+
     public CoverLetterInterview findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(User user, CoverLetter coverLetter) {
         return coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseThrow(() -> new BaseException(COVER_LETTER_QUESTION_MISMATCH));

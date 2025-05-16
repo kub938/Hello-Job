@@ -189,5 +189,9 @@ public class InterviewController {
         return interviewService.findAllInterview(userPrincipal.getUserId());
     }
 
+    @GetMapping("/{interviewVideoId}")
+    public InterviewDetailResponseDto findInterviewDetail(@PathVariable Integer interviewVideoId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findInterviewDetail(interviewVideoId, userPrincipal.getUserId());
+    }
 
 }
