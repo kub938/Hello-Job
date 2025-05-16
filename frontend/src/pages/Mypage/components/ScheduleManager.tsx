@@ -21,7 +21,12 @@ import {
 } from "@/hooks/scheduleHooks";
 import Loading from "@/components/Loading/Loading";
 import { useQueryClient } from "@tanstack/react-query";
-import { getSchedulesResponse } from "@/types/scheduleApiTypes";
+import {
+  getScheduleResponse,
+  getSchedulesResponse,
+} from "@/types/scheduleApiTypes";
+import { toast } from "sonner";
+import axios from "axios";
 
 function ScheduleManager() {
   const queryClient = useQueryClient();
@@ -30,7 +35,7 @@ function ScheduleManager() {
   >(undefined);
   const { data: schedulesList, isLoading } = useGetSchedules();
   const createMutation = useCreateSchedule();
-  const updateMutation = useUpdateSchedule(selectedSchedule?.scheduleId);
+  const updateMutation = useUpdateSchedule();
   const updateStatusMutation = useUpdateScheduleStatus();
   const [scheduleList, setScheduleList] = useState<
     getSchedulesResponse[] | undefined
@@ -57,28 +62,44 @@ function ScheduleManager() {
     });
   };
 
-  const handleAddSchedule = (scheduleData: Schedule) => {
+  const handleAddSchedule = (scheduleData: getSchedulesResponse) => {
     const payload = {
       scheduleTitle: scheduleData.scheduleTitle,
-      scheduleStartDate: scheduleData.scheduleStartDate ?? null,
-      scheduleEndDate: scheduleData.scheduleEndDate ?? null,
+      scheduleStartDate: scheduleData.scheduleStartDate || null,
+      scheduleEndDate: scheduleData.scheduleEndDate || null,
       scheduleStatusName: scheduleData.scheduleStatusName,
-      scheduleStatusStep: scheduleData.scheduleStatusStep,
       scheduleMemo: scheduleData.scheduleMemo,
-      coverLetterId: scheduleData.coverLetterId ?? null,
+      coverLetterId: scheduleData.coverLetterId || null,
     };
     if (modalMode === "edit" && scheduleData.scheduleId) {
-      updateMutation.mutate(payload, {
-        onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["update-schedule"] });
-          handleCloseModal();
-        },
-      });
+      console.log("수정 일정 데이터: ", payload);
+      updateMutation.mutate(
+        { inputData: payload, scheduleId: scheduleData.scheduleId },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["schedules"] });
+            handleCloseModal();
+            toast.success("일정 수정이 완료되었습니다.");
+          },
+          onError: (error) => {
+            if (axios.isAxiosError(error)) {
+              console.error("❌ Axios Error:", error.response?.data);
+            } else {
+              console.error("❌ Unknown Error:", error);
+            }
+          },
+        }
+      );
     } else {
+      console.log("등록 일정 데이터: ", payload);
       createMutation.mutate(payload, {
         onSuccess: () => {
-          queryClient.invalidateQueries({ queryKey: ["create-schedule"] });
+          queryClient.invalidateQueries({ queryKey: ["schedules"] });
           handleCloseModal();
+          toast.success("일정 등록이 완료되었습니다.");
+        },
+        onError: () => {
+          toast.error("일정 등록에 실패했습니다.");
         },
       });
     }
