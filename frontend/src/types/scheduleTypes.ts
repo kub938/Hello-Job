@@ -18,7 +18,7 @@ export interface Schedule {
   scheduleEndDate: string | null;
   scheduleStatusName: string;
   scheduleStatusStep: ScheduleStatusStep;
-  coverLetterId: number | 'none' | null;
+  coverLetterId: number | "none" | null;
 }
 
 export interface ScheduleCoverLetter {
@@ -124,43 +124,43 @@ export const stepLabelMap = {
 
 export const statusColorMap: Record<string, string> = {
   // PENDING - 연한 색
-  서류작성전: "bg-emerald-200",
-  서류작성중: "bg-sky-200",
-  미제출: "bg-slate-200",
+  서류작성전: "bg-[#E6BEAE]",
+  서류작성중: "bg-[#EFD3D7]",
+  미제출: "bg-[#D9D9D9]",
   // IN_PROGRESS - 중간 밝기 색
-  서류제출: "bg-yellow-300",
-  서류합격: "bg-amber-300",
-  "1차합격": "bg-orange-300",
-  "2차합격": "bg-lime-300",
-  "3차합격": "bg-green-300",
-  진행중: "bg-pink-300",
+  서류제출: "bg-[#FFE97F]",
+  서류합격: "bg-[#FFFB00]",
+  "1차합격": "bg-[#FFCC00]",
+  "2차합격": "bg-[#EEEF20]",
+  "3차합격": "bg-[#C4F72C]",
+  진행중: "bg-[#9EF01A]",
   // DONE - 진한 색
-  최종합격: "bg-purple-300",
-  최종탈락: "bg-teal-400",
-  서류탈락: "bg-violet-400",
-  "1차탈락": "bg-emerald-400",
-  "2차탈락": "bg-cyan-400",
-  "3차탈락": "bg-indigo-400",
-  전형종료: "bg-rose-200",
+  최종합격: "bg-[#AF9BFF]",
+  최종탈락: "bg-[#C1CDF9]",
+  서류탈락: "bg-[#B0D3F0]",
+  "1차탈락": "bg-[#A8CCFC]",
+  "2차탈락": "bg-[#8EB5F0]",
+  "3차탈락": "bg-[#64B5F6]",
+  전형종료: "bg-[#DABFFF]",
 };
 
 export const statusBorderColorMap: Record<string, string> = {
-  서류작성전: "border-l-emerald-200",
-  서류작성중: "border-l-sky-200",
-  미제출: "border-l-slate-200",
+  서류작성전: "border-l-[#E6BEAE]",
+  서류작성중: "border-l-[#EFD3D7]",
+  미제출: "border-l-[#D9D9D9]",
   // IN_PROGRESS
-  서류제출: "border-l-yellow-300",
-  서류합격: "border-l-amber-300",
-  "1차합격": "border-l-orange-300",
-  "2차합격": "border-l-lime-300",
-  "3차합격": "border-l-green-300",
-  진행중: "border-l-pink-300",
+  서류제출: "border-l-[#FFE97F]",
+  서류합격: "border-l-[#FFFB00]",
+  "1차합격": "border-l-[#FFCC00]",
+  "2차합격": "border-l-[#EEEF20]",
+  "3차합격": "border-l-[#C4F72C]",
+  진행중: "border-l-[#9EF01A]",
   // DONE
-  최종합격: "border-l-purple-400",
-  최종탈락: "border-l-teal-400",
-  서류탈락: "border-l-violet-300",
-  "1차탈락": "border-l-emerald-400",
-  "2차탈락": "border-l-cyan-400",
-  "3차탈락": "border-l-indigo-400",
-  전형종료: "border-l-rose-200",
+  최종합격: "border-l-[#AF9BFF]",
+  최종탈락: "border-l-[#C1CDF9]",
+  서류탈락: "border-l-[#B0D3F0]",
+  "1차탈락": "border-l-[#A8CCFC]",
+  "2차탈락": "border-l-[#8EB5F0]",
+  "3차탈락": "border-l-[#64B5F6]",
+  전형종료: "border-l-[#DABFFF]",
 };
