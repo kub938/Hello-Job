@@ -23,4 +23,6 @@ public class CompanyAnalysisFastApiResponseDto {
     private String news_summary;
     private List<String> news_urls;
 
+    private SwotDto swot;
+
 }
