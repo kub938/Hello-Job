@@ -226,7 +226,10 @@ public class ScheduleService {
                     .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
                     .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
                     .scheduleMemo(schedule.getScheduleMemo())
-                    .coverLetterId(schedule.getCoverLetter().getCoverLetterId())
+                    .coverLetterId(
+                            schedule.getCoverLetter() != null
+                            ? schedule.getCoverLetter().getCoverLetterId()
+                            : null)
                     .build());
         }
 
