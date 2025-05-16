@@ -1,9 +1,11 @@
 from fastapi import APIRouter
 from datetime import datetime
+import logging
 
 from app.schemas import company
 from app.services.company_analysis_service import company_analysis_all
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/company-analysis", tags=["company-analysis"])
 
 
@@ -15,10 +17,13 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
         request (company.CompanyAnalysisRequest): 기업 분석 요청 정보
     """
     
+    logger.info(f"CompanyAnalysisRequest: {request}")
+    
     company_name = request.company_name
     base = request.base
     plus = request.plus
     fin = request.fin
+    swot = request.swot
     user_prompt = request.user_prompt
     
     # company_analysis_all 함수를 호출하여 MCP 서버 설정을 한 번만 수행
@@ -34,6 +39,27 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
         "company_finance": result["company_finance"],  # 기업 재무 상태
         
         "news_summary": result["news_summary"],  # 기업 뉴스 요약
-        "news_urls": result["news_urls"]  # 기업 뉴스 링크
+        "news_urls": result["news_urls"],  # 기업 뉴스 링크
+        
+        "swot": {
+            "strengths": {
+                "contents": [],
+                "tags": []
+            },
+            "weaknesses": {
+                "contents": [],
+                "tags": []
+            },
+            "opportunities": {
+                "contents": [],
+                "tags": []
+            },
+            "threats": {
+                "contents": [],
+                "tags": []
+            },
+            "swot_summary": ""
+        }
+        
     }
     return response
