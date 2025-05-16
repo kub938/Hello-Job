@@ -6,14 +6,15 @@ import {
   ScheduleStatus,
   ScheduleStatusStep,
   scheduleStatusList,
-  Schedule,
 } from "@/types/scheduleTypes";
+import { getSchedulesResponse } from "@/types/scheduleApiTypes";
+import { toast } from "sonner";
 
 interface ScheduleModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (scheduleData: Schedule) => void;
-  data?: Schedule;
+  onSubmit: (scheduleData: getSchedulesResponse) => void;
+  data?: getSchedulesResponse;
   mode?: "create" | "edit";
 }
 
@@ -36,8 +37,6 @@ function ScheduleModal({
     scheduleStatusList[ScheduleStatusStep.PENDING][0]
   );
   const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<number>(0);
-  const [selectedCoverLetterTitle, setSelectedCoverLetterTitle] =
-    useState<string>("");
 
   const resetForm = () => {
     setTitle("");
@@ -47,7 +46,6 @@ function ScheduleModal({
     setSelectedStep(ScheduleStatusStep.PENDING);
     setSelectedStatus(scheduleStatusList[ScheduleStatusStep.PENDING][0]);
     setSelectedCoverLetterId(0);
-    setSelectedCoverLetterTitle("");
   };
 
   const typeOptions = [
@@ -72,9 +70,6 @@ function ScheduleModal({
       }
       if (data.coverLetterId) {
         setSelectedCoverLetterId(data.coverLetterId);
-      }
-      if (data.coverLetterTitle) {
-        setSelectedCoverLetterTitle(data.coverLetterTitle);
       }
     }
   }, [data]);
@@ -106,6 +101,18 @@ function ScheduleModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (title.length > 30) {
+      toast.warning("일정 제목은 30자 이하로 입력해주세요.");
+      return;
+    }
+    if (startDate > endDate) {
+      toast.warning("시작 날짜가 종료 날짜보다 이후일 수 없습니다.");
+      return;
+    }
+    if (memo.length > 16) {
+      toast.warning("메모는 16자 이하로 입력해주세요.");
+      return;
+    }
     const scheduleData = {
       scheduleTitle: title,
       scheduleStartDate: startDate,
@@ -114,8 +121,7 @@ function ScheduleModal({
       scheduleStatusStep: selectedStatus.step,
       scheduleMemo: memo,
       coverLetterId: selectedCoverLetterId,
-      coverLetterTitle: selectedCoverLetterTitle,
-      scheduleId: data?.scheduleId ?? 0,
+      scheduleId: data?.scheduleId || null,
     };
     onSubmit(scheduleData);
     resetForm();

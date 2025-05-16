@@ -14,7 +14,7 @@ export interface postScheduleResponse {
 }
 
 export interface getScheduleResponse {
-  scheduleId: number;
+  scheduleId: number | null;
   scheduleTitle: string;
   scheduleMemo: string | null;
   scheduleStartDate: string | null;
@@ -22,12 +22,10 @@ export interface getScheduleResponse {
   scheduleStatusName: string;
   scheduleStatusStep: ScheduleStatusStep;
   coverLetterId: number | null;
-  coverLetterTitle: string | null;
-  updatedAt: string;
 }
 
 export interface getSchedulesResponse {
-  scheduleId: number;
+  scheduleId: number | null;
   scheduleTitle: string;
   scheduleMemo: string | null;
   scheduleStartDate: string | null;
@@ -36,4 +34,3 @@ export interface getSchedulesResponse {
   scheduleStatusStep: ScheduleStatusStep;
   coverLetterId: number | null;
 }
-
