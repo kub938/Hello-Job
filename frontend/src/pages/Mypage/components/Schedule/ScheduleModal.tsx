@@ -7,8 +7,13 @@ import {
   ScheduleStatusStep,
   scheduleStatusList,
 } from "@/types/scheduleTypes";
-import { getSchedulesResponse } from "@/types/scheduleApiTypes";
+import {
+  getScheduleCoverLettersResponse,
+  getSchedulesResponse,
+} from "@/types/scheduleApiTypes";
 import { toast } from "sonner";
+import { useGetScheduleCoverLetters } from "@/hooks/scheduleHooks";
+import Modal from "@/components/Modal";
 
 interface ScheduleModalProps {
   isOpen: boolean;
@@ -16,12 +21,14 @@ interface ScheduleModalProps {
   onSubmit: (scheduleData: getSchedulesResponse) => void;
   data?: getSchedulesResponse;
   mode?: "create" | "edit";
+  onDelete: (scheduleId: number) => void;
 }
 
 function ScheduleModal({
   isOpen,
   onClose,
   onSubmit,
+  onDelete,
   data,
   mode = "create",
 }: ScheduleModalProps) {
@@ -36,7 +43,9 @@ function ScheduleModal({
   const [selectedStatus, setSelectedStatus] = useState<ScheduleStatus>(
     scheduleStatusList[ScheduleStatusStep.PENDING][0]
   );
-  const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<number>(0);
+  const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<
+    number | "none" | null
+  >(null);
 
   const resetForm = () => {
     setTitle("");
@@ -45,18 +54,23 @@ function ScheduleModal({
     setMemo("");
     setSelectedStep(ScheduleStatusStep.PENDING);
     setSelectedStatus(scheduleStatusList[ScheduleStatusStep.PENDING][0]);
-    setSelectedCoverLetterId(0);
+    setSelectedCoverLetterId(null);
   };
 
-  const typeOptions = [
-    { value: "공채", label: "공채" },
-    { value: "수시채용", label: "수시채용" },
-    { value: "인턴", label: "인턴" },
-    { value: "기타", label: "기타" },
-  ];
+  const { data: coverLetters } = useGetScheduleCoverLetters();
+  const [coverLetterList, setCoverLetterList] = useState<
+    getScheduleCoverLettersResponse[] | undefined
+  >();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   useEffect(() => {
-    if (data) {
+    setCoverLetterList(coverLetters);
+  }, [coverLetters]);
+
+  useEffect(() => {
+    if (isOpen && mode === "create") {
+      resetForm();
+    } else if (isOpen && mode === "edit" && data) {
       setTitle(data.scheduleTitle);
       setStartDate(data.scheduleStartDate || "");
       setEndDate(data.scheduleEndDate || "");
@@ -68,17 +82,9 @@ function ScheduleModal({
       if (status) {
         setSelectedStatus(status);
       }
-      if (data.coverLetterId) {
-        setSelectedCoverLetterId(data.coverLetterId);
-      }
+      setSelectedCoverLetterId(data.coverLetterId || null);
     }
-  }, [data]);
-
-  useEffect(() => {
-    if (isOpen && mode === "create") {
-      resetForm();
-    }
-  }, [isOpen, mode]);
+  }, [isOpen, mode, data]);
 
   // ESC 키를 누를 때 모달 닫기
   useEffect(() => {
@@ -109,8 +115,8 @@ function ScheduleModal({
       toast.warning("시작 날짜가 종료 날짜보다 이후일 수 없습니다.");
       return;
     }
-    if (memo.length > 16) {
-      toast.warning("메모는 16자 이하로 입력해주세요.");
+    if (memo.length > 160) {
+      toast.warning("메모는 160자 이하로 입력해주세요.");
       return;
     }
     const scheduleData = {
@@ -120,12 +126,23 @@ function ScheduleModal({
       scheduleStatusName: selectedStatus.name,
       scheduleStatusStep: selectedStatus.step,
       scheduleMemo: memo,
-      coverLetterId: selectedCoverLetterId,
+      coverLetterId:
+        selectedCoverLetterId === "none" ? null : selectedCoverLetterId,
       scheduleId: data?.scheduleId || null,
     };
     onSubmit(scheduleData);
     resetForm();
     onClose();
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    onDelete(data?.scheduleId || 0);
+    onClose();
+    setIsDeleteModalOpen(false);
   };
 
   if (!isOpen) return null;
@@ -154,7 +171,7 @@ function ScheduleModal({
               name="title"
               label="일정 제목"
               require
-              placeholder="일정 제목을 입력해주세요"
+              placeholder="일정 제목을 입력해주세요(30자 이하)"
               value={title}
               width="100%"
               onChange={(e) => setTitle(e.target.value)}
@@ -230,8 +247,8 @@ function ScheduleModal({
 
             <Select
               label="자기소개서"
-              options={typeOptions}
-              value={selectedCoverLetterId}
+              options={coverLetterList || []}
+              value={selectedCoverLetterId || null}
               onChange={setSelectedCoverLetterId}
               width="100%"
             />
@@ -239,7 +256,7 @@ function ScheduleModal({
               type="text"
               name="memo"
               label="메모"
-              placeholder="메모를 입력해주세요"
+              placeholder="메모를 입력해주세요(160자 이하)"
               value={memo}
               width="100%"
               onChange={(e) => setMemo(e.target.value)}
@@ -252,7 +269,7 @@ function ScheduleModal({
                 type="button"
                 variant="white"
                 className="w-24"
-                onClick={onClose}
+                onClick={handleDeleteClick}
               >
                 삭제
               </Button>
@@ -271,6 +288,17 @@ function ScheduleModal({
           </div>
         </form>
       </div>
+
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="일정 삭제"
+        warning={true}
+      >
+        <p>정말 삭제하시겠습니까?</p>
+      </Modal>
     </div>
   );
 }

@@ -8,35 +8,30 @@ import { FaPlus } from "react-icons/fa";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { useEffect, useState } from "react";
-import {
-  ScheduleStatusStep,
-  stepLabelMap,
-  Schedule,
-} from "@/types/scheduleTypes";
+import { ScheduleStatusStep, stepLabelMap } from "@/types/scheduleTypes";
 import {
   useCreateSchedule,
+  useDeleteSchedule,
   useGetSchedules,
   useUpdateSchedule,
   useUpdateScheduleStatus,
 } from "@/hooks/scheduleHooks";
 import Loading from "@/components/Loading/Loading";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  getScheduleResponse,
-  getSchedulesResponse,
-} from "@/types/scheduleApiTypes";
+import { getSchedulesResponse } from "@/types/scheduleApiTypes";
 import { toast } from "sonner";
 import axios from "axios";
 
 function ScheduleManager() {
   const queryClient = useQueryClient();
   const [selectedSchedule, setSelectedSchedule] = useState<
-    Schedule | undefined
+    getSchedulesResponse | undefined
   >(undefined);
   const { data: schedulesList, isLoading } = useGetSchedules();
   const createMutation = useCreateSchedule();
   const updateMutation = useUpdateSchedule();
   const updateStatusMutation = useUpdateScheduleStatus();
+  const deleteMutation = useDeleteSchedule();
   const [scheduleList, setScheduleList] = useState<
     getSchedulesResponse[] | undefined
   >();
@@ -105,7 +100,7 @@ function ScheduleManager() {
     }
   };
 
-  const handleOpenModal = (schedule?: Schedule) => {
+  const handleOpenModal = (schedule?: getSchedulesResponse) => {
     if (schedule) {
       setSelectedSchedule(schedule);
       setModalMode("edit");
@@ -120,6 +115,18 @@ function ScheduleManager() {
     setIsModalOpen(false);
     setSelectedSchedule(undefined);
     setModalMode("create");
+  };
+
+  const handleDeleteSchedule = (scheduleId: number) => {
+    deleteMutation.mutate(scheduleId, {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["schedules"] });
+        toast.success("일정 삭제가 완료되었습니다.");
+      },
+      onError: () => {
+        toast.error("일정 삭제에 실패했습니다.");
+      },
+    });
   };
 
   return (
@@ -178,6 +185,10 @@ function ScheduleManager() {
           onSubmit={handleAddSchedule}
           data={selectedSchedule}
           mode={modalMode}
+          onDelete={() =>
+            selectedSchedule?.scheduleId &&
+            handleDeleteSchedule(selectedSchedule.scheduleId)
+          }
         />
       </div>
     </DndProvider>
