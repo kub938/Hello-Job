@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react"; // React 훅 가져오기: 상태 관리, 생명주기, 참조 객체 생성에 사용
 import { Camera, Mic, MicOff } from "lucide-react"; // Lucide 아이콘 라이브러리에서 카메라와 마이크 관련 아이콘 가져오기
+import { useStartInterview } from "@/hooks/interviewHooks";
+import { useInterviewStore } from "@/store/interviewStore";
+import { useLocation, useNavigate } from "react-router";
+import { toast } from "sonner";
 
 // MediaDevice 관련 타입 정의 - 미디어 장치(카메라, 마이크)의 정보를 저장하는 인터페이스
 interface MediaDeviceInfo {
@@ -23,11 +27,47 @@ function PreparePage() {
   const [_, setIsVideoReady] = useState<boolean>(false); // 비디오가 로딩 완료되었는지 상태
 
   // useRef 훅을 사용한 참조 객체들
+
   const videoRef = useRef<HTMLVideoElement | null>(null); // 비디오 요소 DOM 참조
   const audioContextRef = useRef<AudioContext | null>(null); // 오디오 컨텍스트 참조(오디오 처리를 위한 API)
   const analyserRef = useRef<AnalyserNode | null>(null); // 오디오 분석기 노드 참조(볼륨 레벨 분석용)
   const animationFrameRef = useRef<number | null>(null); // requestAnimationFrame ID 저장용 참조
 
+  // 면접 시작 훅
+  //location 완전 모의면접/ 단일 문항 연습 구분 한 뒤에 다음 버튼 눌렀을 때 훅 부를지 말지 선택
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { selectCategory, selectInterviewType, selectCoverLetterId } =
+    useInterviewStore();
+  const startInterviewMutation = useStartInterview();
+
+  const handleStartInterview = () => {
+    if (selectInterviewType === "question") {
+      const locationState = location.state;
+      console.log(locationState);
+      navigate("/interview/practice", { state: locationState });
+    } else if (selectInterviewType === "practice") {
+      const mutationData =
+        selectCategory === "cover-letter" && selectCoverLetterId
+          ? { category: selectCategory, coverLetterId: selectCoverLetterId }
+          : { category: selectCategory };
+
+      startInterviewMutation.mutate(mutationData, {
+        onSuccess: (response) => {
+          navigate("/interview/practice", {
+            state: { response },
+          });
+        },
+        onError: (error) => {
+          console.log("면접 시작 오류", error);
+          toast.error("면접을 정상적으로 실행할 수 없습니다.");
+        },
+      });
+    } else {
+      alert("면접 유형을 선택해 주세요");
+      navigate("/interview/select");
+    }
+  };
   // 컴포넌트가 마운트될 때 실행되는 useEffect 훅 - 장치 목록 가져오기
   useEffect(() => {
     async function getDevices(): Promise<void> {
@@ -295,7 +335,6 @@ function PreparePage() {
           {cameraStream ? (
             <></>
           ) : (
-            // 카메라 스트림이 없으면 로딩 표시
             <div className="flex h-120 items-center justify-center absolute top-0 left-0 w-full">
               <div className="text-center text-white">
                 <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-gray-700 mx-auto">
@@ -306,7 +345,6 @@ function PreparePage() {
             </div>
           )}
 
-          {/* 마이크 음소거 버튼 - 오디오 스트림이 있을 때만 표시 */}
           {audioStream && (
             <button
               onClick={toggleMicrophone}
@@ -390,7 +428,7 @@ function PreparePage() {
           </button>
           {/* 면접 시작 버튼 */}
           <button
-            onClick={() => handleNavigation("/interview/mock-interview")}
+            onClick={handleStartInterview}
             className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
           >
             면접 시작하기
