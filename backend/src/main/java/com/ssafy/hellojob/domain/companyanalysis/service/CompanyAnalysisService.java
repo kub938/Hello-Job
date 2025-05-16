@@ -43,7 +43,7 @@ public class CompanyAnalysisService {
     private final CompanyAnalysisReadService companyAnalysisReadService;
 
     // 토큰 확인
-    public boolean TokenCheck(Integer userId) {
+    public boolean tokenCheck(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         if (user.getToken() <= 0) {
@@ -60,7 +60,7 @@ public class CompanyAnalysisService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 유저 토큰 확인
-        this.TokenCheck(userId);
+        this.tokenCheck(userId);
         user.decreaseToken();
 
         // 회사 이름 가져오기
