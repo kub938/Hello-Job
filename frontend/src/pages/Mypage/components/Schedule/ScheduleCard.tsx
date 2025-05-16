@@ -48,10 +48,13 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
       className={`flex flex-row items-center justify-between relative pl-1 p-1 px-2 w-full border border-gray-200 ${borderColor} border-l-4 rounded-r-sm shadow-xs cursor-move ${
         isDragging ? "opacity-50" : ""
       }`}
+      title={schedule.scheduleTitle}
     >
       <div className="px-2">
         <div className="text-sm font-semibold text-gray-900">
-          {schedule.scheduleTitle}
+          {schedule.scheduleTitle.length > 16
+            ? `${schedule.scheduleTitle.slice(0, 16)}...`
+            : schedule.scheduleTitle}
         </div>
         <div className="flex flex-row gap-x-1">
           <div className="text-xs text-gray-500">
@@ -67,7 +70,9 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
         onClick={() => onEdit(schedule)}
         className={`flex h-6 items-center ${bgColor} rounded-xl px-2 py-1 text-xs cursor-pointer`}
       >
-        {schedule.scheduleStatusName}
+        <span className="truncate max-w-[50px]">
+          {schedule.scheduleStatusName}
+        </span>
       </button>
     </li>
   );
