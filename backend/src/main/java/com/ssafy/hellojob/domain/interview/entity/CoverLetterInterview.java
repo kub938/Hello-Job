@@ -18,11 +18,11 @@ public class CoverLetterInterview {
     @Column(name = "cover_letter_interview_id", nullable = false)
     private Integer coverLetterInterviewId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cover_letter_id")
     private CoverLetter coverLetter;
 
