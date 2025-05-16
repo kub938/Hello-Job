@@ -1,27 +1,34 @@
 import { Button } from "@/components/Button";
 import { Mic, Users } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
-import TypeSelectModal from "../components/TypeSelectModal";
+import TypeSelectModal from "../components/CategorySelectModal";
+import { interviewType } from "@/types/interviewType";
+import { useInterviewStore } from "@/store/interviewStore";
 
 function TypeSelectPage() {
   const [isOpenSelectModal, setIsOpenSelectModal] = useState(false);
+  const { setSelectInterviewType } = useInterviewStore();
 
-  const handleOpenSelectQuestionModal = () => {
-    setIsOpenSelectModal(true);
+  const handleOpenSelectQuestionModal = (type: interviewType) => {
+    if (type === "question") {
+      setSelectInterviewType("question");
+      setIsOpenSelectModal(true);
+    } else if (type === "practice") {
+      setSelectInterviewType("practice");
+      setIsOpenSelectModal(true);
+    }
   };
 
   const onCloseSelectQuestionModal = () => {
     setIsOpenSelectModal(false);
   };
+
   return (
     <>
       {isOpenSelectModal && (
-        <TypeSelectModal
-          onClose={onCloseSelectQuestionModal}
-          type={"question"}
-        />
+        <TypeSelectModal onClose={onCloseSelectQuestionModal} />
       )}
+
       <div className="my-5 flex flex-col items-center ">
         <div className="mb-12 text-center">
           <h2 className="mb-2 text-2xl font-bold">면접 유형 선택</h2>
@@ -43,8 +50,9 @@ function TypeSelectPage() {
               약 5분 소요
             </div>
             <Button
-              onClick={handleOpenSelectQuestionModal}
-              className="w-full rounded-md h-12 border border-primary bg-white py-3 text-center font-medium text-primary transition-colors hover:bg-secondary-light"
+              onClick={() => handleOpenSelectQuestionModal("question")}
+              variant={"white"}
+              className="h-12"
             >
               단일 문항 시작하기
             </Button>
@@ -63,12 +71,12 @@ function TypeSelectPage() {
             <div className="mb-4 text-center text-sm text-gray-500">
               약 20분 소요
             </div>
-            <Link
-              to="/interview/prepare"
-              className="block w-full rounded-md bg-primary py-3 text-center font-medium text-primary-foreground transition-colors hover:bg-accent"
+            <Button
+              onClick={() => handleOpenSelectQuestionModal("practice")}
+              className="h-12"
             >
               완전 모의면접 시작하기
-            </Link>
+            </Button>
           </div>
         </div>
 

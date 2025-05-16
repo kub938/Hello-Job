@@ -1,16 +1,23 @@
 import { authApi } from "./instance";
 import {
-  InterviewAnswerInfo,
+  CreateQuestionResponse,
   InterviewCategory,
   InterviewVideoQuestionRequest,
   QuestionMemoRequest,
   QuestionResponse,
+  SaveQuestionRequest,
   StartInterviewResponse,
   StartQuestionInterviewResponse,
 } from "@/types/interviewApiTypes";
 
 export const interviewApi = {
   // 질문 조회 API - 카테고리를 인자로 받아 해당 카테고리의 질문 목록 반환
+  getCoverLetterQuestions: (coverLetterId: number | null | undefined) => {
+    return authApi.get<QuestionResponse[]>(
+      `/api/v1/interview/question/cover-letter/${coverLetterId}`
+    );
+  },
+
   getQuestions: (category: InterviewCategory) => {
     return authApi.get<QuestionResponse[]>(
       `/api/v1/interview/question/${category}`
@@ -23,39 +30,49 @@ export const interviewApi = {
       `/api/v1/interview/question/${category}/${questionId}`
     );
   },
-
   // 자기소개서 질문 생성 API
   createQuestion: (coverLetterId: number) => {
-    return authApi.post(
+    return authApi.post<CreateQuestionResponse>(
       `/api/v1/interview/question/cover-letter`,
-      coverLetterId
+      {
+        coverLetterId,
+      }
     );
   },
 
   // 자기소개서 질문 저장 API
-  saveQuestion: (coverLetterId: number) => {
+  saveQuestion: (questionData: SaveQuestionRequest) => {
     return authApi.post(
       `/api/v1/interview/question/cover-letter/save`,
-      coverLetterId
+      questionData
     );
   },
 
   // 문항 면접 시작 API - 카테고리를 인자로 받는 통합 방식
-  startQuestionInterview: (category: InterviewCategory) => {
+  selectCategory: (category: InterviewCategory) => {
     return authApi.post<StartQuestionInterviewResponse>(
       `/api/v1/interview/select/${category}`
     );
   },
 
-  // 연습 면접 API - 통합 방식
-  practiceInterview: (
+  selectQuestionComplete: (
     category: InterviewCategory,
-    inputData: InterviewVideoQuestionRequest
+    selectData: InterviewVideoQuestionRequest
   ) => {
     return authApi.post(
       `/api/v1/interview/practice/question/${category}`,
-      inputData
+      selectData
     );
+  },
+
+  selectCoverLetterQuestionComplete: (
+    coverLetterId: number,
+    questionIdList: number[]
+  ) => {
+    return authApi.post(`/api/v1/interview/practice/question/cover-letter`, {
+      coverLetterId,
+      questionIdList,
+    });
   },
 
   // 미디어 저장 API - 통합 방식
@@ -84,10 +101,15 @@ export const interviewApi = {
   },
 
   // 모의 면접 시작 API - 카테고리를 인자로 받는 통합 방식
-  startInterview: (interviewId: number, category: InterviewCategory) => {
+  startInterview: (category: InterviewCategory, coverLetterId?: number) => {
+    if (category === "cover-letter") {
+      return authApi.post<StartInterviewResponse>(
+        `/api/v1/interview/${category}`,
+        { coverLetterId }
+      );
+    }
     return authApi.post<StartInterviewResponse>(
-      `/api/v1/interview/${category}`,
-      interviewId
+      `/api/v1/interview/${category}`
     );
   },
 
@@ -137,7 +159,7 @@ export const interviewApi = {
   ) => {
     return authApi.post(
       `/api/v1/interview/question/cover-letter/${coverLetterId}/memo`,
-      memoData
+      { memoData }
     );
   },
 };

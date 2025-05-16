@@ -11,7 +11,7 @@ import { useCompleteQuestion } from "@/hooks/interviewHooks";
 
 function PracticeInterviewPage() {
   const [isAnswerStarted, setIsAnswerStarted] = useState<boolean>(false);
-  const [recordedBlob, setRecordedBlob] = useState<Blob | null>(null);
+  const [_, setRecordedBlob] = useState<Blob | null>(null);
   // API 제출 상태 추가
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
@@ -34,7 +34,7 @@ function PracticeInterviewPage() {
   } = useAudioDeviceStore();
 
   // useCameraStream 훅 사용
-  const { cameraStream, videoRef, isVideoReady } = useCameraStream({
+  const { cameraStream, videoRef } = useCameraStream({
     selectedDevice: selectedVideo,
     onError: (message) => toast.error(message),
   });

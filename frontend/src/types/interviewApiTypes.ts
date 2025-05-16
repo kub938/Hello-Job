@@ -10,13 +10,9 @@ export interface StartQuestionInterviewResponse {
   interviewVideoId: number;
 }
 
-export interface QuestionBankIdItem {
-  questionBankId: number;
-}
-
 export interface InterviewVideoQuestionRequest {
   interviewVideoId: number;
-  questionIdList: QuestionBankIdItem[];
+  questionIdList: number[];
 }
 
 export interface InterviewAnswerInfo {
@@ -38,4 +34,14 @@ export interface QuestionMemoRequest {
   questionBankId: number;
   interviewId: number;
   memo: string;
+}
+
+export interface SaveQuestionRequest {
+  coverLetterId: number;
+  coverLetterQuestion: string[];
+}
+
+export interface CreateQuestionResponse {
+  coverLetterId: number;
+  coverLetterQuestion: string[];
 }

@@ -11,46 +11,64 @@ import { Button } from "@/components/Button";
 import { useNavigate } from "react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { getCoverLetterList } from "@/api/mypageApi";
-import { useCreateCoverLetterQuestion } from "@/hooks/interviewHooks";
+import {
+  useCreateCoverLetterQuestion,
+  useGetCoverLetterQuestions,
+  useSaveCoverLetterQuestions,
+  useSelectCoverLetterQuestionComplete,
+} from "@/hooks/interviewHooks";
 import { toast } from "sonner";
+import CreateCoverLetterQuestionModal from "../components/CreateCoverLetterQuestionModal";
+import {
+  CreateQuestionResponse,
+  SaveQuestionRequest,
+} from "@/types/interviewApiTypes";
+
+// // 생성된 질문 응답 인터페이스
+// interface GeneratedQuestionsResponse {
+//   coverLetterInterviewId: number;
+//   coverLetterQuestionList: string[];
+// }
 
 function CoverLetterQuestionPage() {
-  // 선택된 자기소개서 ID
+  //state 관련
   const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<
     number | null
   >(null);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
-  // 생성 중 상태
-  // 검색어
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
+  // 모달 관련 상태
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [generatedQuestions, setGeneratedQuestions] =
+    useState<CreateQuestionResponse | null>(null);
+
+  //훅
   const navigate = useNavigate();
+  const createQuestionMutation = useCreateCoverLetterQuestion();
+  const saveQuestionsMutation = useSaveCoverLetterQuestions();
+  const { data: questions, refetch } = useGetCoverLetterQuestions(
+    selectedCoverLetterId
+  );
+  const selectQuestionCompleteMutation = useSelectCoverLetterQuestionComplete();
 
-  // Intersection Observer를 위한 ref
+  //무한 스크롤
   const observerTarget = useRef<HTMLDivElement | null>(null);
-
-  //react query hooks
-  // useInfiniteQuery를 사용하여 무한 스크롤 구현
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
     useInfiniteQuery({
       queryKey: ["coverLetterList"],
-      // 직접 API 함수를 호출하여 데이터를 가져옴
       queryFn: async ({ pageParam = 0 }) => {
         const response = await getCoverLetterList(Number(pageParam));
         return response.data;
       },
       getNextPageParam: (lastPage) => {
-        // 마지막 페이지인 경우 undefined 반환 (더 이상 페이지가 없음)
         if (lastPage.last) return undefined;
-        // 다음 페이지 번호 반환
         return lastPage.pageable.pageNumber + 1;
       },
       initialPageParam: 0,
     });
-
-  const mutation = useCreateCoverLetterQuestion();
-
-  // Intersection Observer를 사용하여 스크롤 감지
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -70,6 +88,24 @@ function CoverLetterQuestionPage() {
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
+  useEffect(() => {
+    // 이전 타이머가 있으면 clear
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    // 새 타이머 설정 (300ms)
+    debounceTimeout.current = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 200);
+
+    // 컴포넌트 언마운트나 searchTerm 변경 시 클린업
+    return () => {
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
+    };
+  }, [searchTerm]);
   // 모든 자기소개서 목록을 평탄화하여 하나의 배열로 만듦
   const coverLetters = data?.pages.flatMap((page) => page.content) || [];
 
@@ -82,47 +118,73 @@ function CoverLetterQuestionPage() {
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  // 예시 질문 데이터
-  const questions = [
-    {
-      id: 1,
-      coverLetterId: 1,
-      question: "지원자님이 백엔드 개발에 관심을 갖게 된 계기가 무엇인가요?",
-    },
-    {
-      id: 2,
-      coverLetterId: 1,
-      question: "가장 어려웠던 프로젝트와 그 해결 방법에 대해 설명해주세요.",
-    },
-    {
-      id: 3,
-      coverLetterId: 1,
-      question: "협업 과정에서 갈등이 있었을 때 어떻게 해결하셨나요?",
-    },
-    {
-      id: 4,
-      coverLetterId: 2,
-      question: "프론트엔드 개발자로서 사용자 경험을 개선한 경험이 있나요?",
-    },
-    {
-      id: 5,
-      coverLetterId: 2,
-      question: "최근에 학습한 기술과 그 적용 사례에 대해 설명해주세요.",
-    },
-  ];
-
-  // 현재 선택된 자기소개서에 해당하는 질문들
-
   // 추가 질문 생성 핸들러
   const handleGenerateQuestions = () => {
+    setIsModalOpen(true);
+
     if (!selectedCoverLetterId) {
-      toast.error("자기소개서를 다시 선택해 주세요s");
+      toast.error("자기소개서를 선택해 주세요");
       return;
     }
 
-    mutation.mutate(selectedCoverLetterId);
+    // 기존 mutation 호출
+    createQuestionMutation.mutate(selectedCoverLetterId, {
+      onSuccess: (data) => {
+        setGeneratedQuestions(data);
+        setIsModalOpen(true);
+      },
+      onError: () => {
+        toast.error("질문 생성에 실패했습니다. 다시 시도해 주세요.");
+      },
+    });
   };
 
+  // 모달 닫기 핸들러
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  // 선택한 질문 저장 핸들러
+  const handleSaveQuestions = (data: SaveQuestionRequest) => {
+    saveQuestionsMutation.mutate(data, {
+      onSuccess() {
+        refetch();
+        handleCloseModal();
+        toast.info("선택된 질문이 저장되었습니다.");
+      },
+    });
+  };
+
+  const handleSelectCoverLetter = (id: number) => {
+    if (selectedCoverLetterId === id) {
+      return;
+    }
+    setSelectedCoverLetterId(id);
+    setSelectedQuestions([]);
+  };
+
+  const handleSelectComplete = () => {
+    if (!selectedCoverLetterId) {
+      toast.warning("선택된 자기소개서가 없습니다");
+      return;
+    }
+    if (!selectedQuestions) {
+      toast.warning("문항을 선택해 주세요");
+      return;
+    }
+
+    selectQuestionCompleteMutation.mutate(
+      {
+        coverLetterId: selectedCoverLetterId,
+        questionIdList: selectedQuestions,
+      },
+      {
+        onSuccess: (response) => {
+          navigate("/interview/prepare", { state: response });
+        },
+      }
+    );
+  };
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
       <div className="mb-8">
@@ -158,12 +220,12 @@ function CoverLetterQuestionPage() {
                 </div>
               ) : (
                 <>
-                  {coverLetters.map((coverLetter, index) => (
+                  {coverLetters.map((coverLetter) => (
                     <button
-                      key={`${coverLetter.coverLetterId}-${index}`}
-                      onClick={() =>
-                        setSelectedCoverLetterId(coverLetter.coverLetterId)
-                      }
+                      key={`${coverLetter.coverLetterId}`}
+                      onClick={() => {
+                        handleSelectCoverLetter(coverLetter.coverLetterId);
+                      }}
                       className={`w-full text-left p-4 rounded-lg border transition-all ${
                         selectedCoverLetterId === coverLetter.coverLetterId
                           ? "border-primary bg-secondary-light"
@@ -246,32 +308,40 @@ function CoverLetterQuestionPage() {
 
               {/* 질문 목록 */}
               <div className="space-y-3 mb-6 max-h-[320px] overflow-y-auto pr-2">
-                {questions.length > 0 ? (
-                  questions.map((question) => {
-                    const isSelected = selectedQuestions.includes(question.id);
-                    return (
-                      <div
-                        key={question.id}
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedQuestions(
-                              selectedQuestions.filter(
-                                (id) => id !== question.id
-                              )
-                            );
-                          } else {
-                            if (selectedQuestions.length < 5) {
-                              setSelectedQuestions([
-                                ...selectedQuestions,
-                                question.id,
-                              ]);
+                {questions && questions.length > 0 ? (
+                  questions
+                    .filter((question) =>
+                      question.question
+                        .toLowerCase()
+                        .includes(debouncedSearchTerm.toLowerCase())
+                    )
+                    .map((question) => {
+                      const isSelected = selectedQuestions.includes(
+                        question.questionBankId
+                      );
+                      return (
+                        <div
+                          key={question.questionBankId}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedQuestions(
+                                selectedQuestions.filter(
+                                  (id) => id !== question.questionBankId
+                                )
+                              );
                             } else {
-                              // 최대 5개 선택 제한 - 실제로는 toast 메시지 등으로 알림
-                              alert("최대 5개까지 선택할 수 있습니다.");
+                              if (selectedQuestions.length < 5) {
+                                setSelectedQuestions([
+                                  ...selectedQuestions,
+                                  question.questionBankId,
+                                ]);
+                              } else {
+                                // 최대 5개 선택 제한 - 실제로는 toast 메시지 등으로 알림
+                                toast.error("최대 5개까지 선택할 수 있습니다.");
+                              }
                             }
-                          }
-                        }}
-                        className={`
+                          }}
+                          className={`
                           group relative rounded-lg border p-4 transition-all cursor-pointer
                           ${
                             isSelected
@@ -279,10 +349,10 @@ function CoverLetterQuestionPage() {
                               : "border-border bg-white hover:border-primary/30 hover:bg-secondary-light/50"
                           }
                         `}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`
                             flex-shrink-0 rounded-full w-6 h-6 border-2 flex items-center justify-center 
                             transition-colors mt-0.5
                             ${
@@ -291,17 +361,19 @@ function CoverLetterQuestionPage() {
                                 : "border-muted-foreground"
                             }
                           `}
-                          >
-                            {isSelected && <CheckCircle className="w-4 h-4" />}
-                          </div>
+                            >
+                              {isSelected && (
+                                <CheckCircle className="w-4 h-4" />
+                              )}
+                            </div>
 
-                          <p className="flex-grow text-secondary-foreground">
-                            {question.question}
-                          </p>
+                            <p className="flex-grow text-secondary-foreground">
+                              {question.question}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
                     {searchTerm ? "검색 결과가 없습니다." : "질문이 없습니다."}
@@ -313,10 +385,10 @@ function CoverLetterQuestionPage() {
               <div className="border-t border-border pt-5">
                 <button
                   onClick={handleGenerateQuestions}
-                  disabled={mutation.isPending}
+                  disabled={createQuestionMutation.isPending}
                   className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-lg border border-primary/50 bg-primary/5 text-primary hover:bg-primary/10 transition-colors disabled:opacity-70"
                 >
-                  {mutation.isPending ? (
+                  {createQuestionMutation.isPending ? (
                     <>
                       <RefreshCw className="w-5 h-5 animate-spin" />
                       질문 생성 중...
@@ -359,6 +431,7 @@ function CoverLetterQuestionPage() {
         </Button>
 
         <button
+          onClick={handleSelectComplete}
           className={`px-6 py-2.5 rounded-lg transition-colors ${
             selectedQuestions.length > 0
               ? "bg-primary text-primary-foreground hover:bg-accent"
@@ -369,6 +442,16 @@ function CoverLetterQuestionPage() {
           선택 완료 ({selectedQuestions.length})
         </button>
       </div>
+
+      <CreateCoverLetterQuestionModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        coverLetterId={generatedQuestions?.coverLetterId || null}
+        generatedQuestions={generatedQuestions}
+        isLoading={createQuestionMutation.isPending}
+        onSaveQuestions={handleSaveQuestions}
+        isSaving={saveQuestionsMutation.isPending}
+      />
     </div>
   );
 }
