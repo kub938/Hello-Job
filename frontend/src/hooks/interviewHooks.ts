@@ -102,3 +102,22 @@ export const useSelectQuestionComplete = () => {
     },
   });
 };
+
+export const useStartInterview = () => {
+  return useMutation({
+    mutationKey: ["start-interview"],
+    mutationFn: async ({
+      category,
+      coverLetterId,
+    }: {
+      category: InterviewCategory;
+      coverLetterId?: number;
+    }) => {
+      const response = await interviewApi.startInterview(
+        category,
+        coverLetterId
+      );
+      return response.data;
+    },
+  });
+};
