@@ -66,6 +66,16 @@ export const interviewApi = {
     );
   },
 
+  selectCoverLetterQuestionComplete: (
+    coverLetterId: number,
+    questionIdList: number[]
+  ) => {
+    return authApi.post(`/api/v1/interview/practice/question/cover-letter`, {
+      coverLetterId,
+      questionIdList,
+    });
+  },
+
   // 미디어 저장 API - 통합 방식
   completeQuestion: (interviewInfo: InterviewAnswerInfo, audioFile: File) => {
     const formData = new FormData();
@@ -79,6 +89,7 @@ export const interviewApi = {
       },
     });
   },
+
   completeInterview: (interviewInfo: InterviewAnswerInfo, videoFile: File) => {
     const formData = new FormData();
 

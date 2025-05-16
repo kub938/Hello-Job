@@ -17,8 +17,6 @@ export const useGetQuestions = (category: InterviewCategory) => {
 };
 
 export const useCreateCoverLetterQuestion = () => {
-  // const queryClient = useQueryClient();
-
   return useMutation({
     mutationKey: ["create-cover-letter-question"],
     mutationFn: async (coverLetterId: number) => {
@@ -27,7 +25,6 @@ export const useCreateCoverLetterQuestion = () => {
     },
     onSuccess: (data) => {
       console.log(data, "question 데이터 생성에 성공했습니다.");
-      // queryClient.invalidateQueries([]);
     },
   });
 };
@@ -49,7 +46,7 @@ export const useGetCoverLetterQuestions = (
   coverLetterId?: number | null | undefined
 ) => {
   return useQuery({
-    queryKey: ["cover-letter-questions"],
+    queryKey: ["cover-letter-questions", coverLetterId],
     queryFn: async () => {
       if (coverLetterId === null) {
         return null;
@@ -94,6 +91,24 @@ export const useSelectQuestionComplete = () => {
   });
 };
 
+export const useSelectCoverLetterQuestionComplete = () => {
+  return useMutation({
+    mutationKey: ["select-cover-letter-question-complete"],
+    mutationFn: async ({
+      coverLetterId,
+      questionIdList,
+    }: {
+      coverLetterId: number;
+      questionIdList: number[];
+    }) => {
+      const response = await interviewApi.selectCoverLetterQuestionComplete(
+        coverLetterId,
+        questionIdList
+      );
+      return response.data;
+    },
+  });
+};
 export const useStartInterview = () => {
   return useMutation({
     mutationKey: ["start-interview"],
