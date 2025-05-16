@@ -79,8 +79,8 @@ public class InterviewService {
     @Value("${FFPROBE_PATH}")
     private String ffprobePath;
 
-    @Value("${FFMPEG_PATH}")
-    private String ffmpegPath;
+//    @Value("${FFMPEG_PATH}")
+//    private String ffmpegPath;
 
     @Value("${OPENAI_API_URL}")
     private static String openAiUrl;
@@ -754,6 +754,8 @@ public class InterviewService {
 
         File mp4TempFile = File.createTempFile("converted", ".mp4");
         log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
+
+        String ffmpegPath = "ffmpeg";
 
         // ffmpeg 실행
         ProcessBuilder ffmpegPb = new ProcessBuilder(
