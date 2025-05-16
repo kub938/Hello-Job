@@ -918,7 +918,11 @@ public class InterviewService {
         return projects;
     }
 
-    public AllInterviewResponseDto findAllInterview(Integer interviewId, Integer userId) {
+    public List<InterviewThumbNailResponseDto> findAllInterview(Integer userId) {
+
+    }
+
+    public InterviewThumbNailResponseDto findAllInterview(Integer interviewId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         Interview interview = interviewReadService.findInterviewByIdAndUserOrElseThrow(interviewId, user);
 
@@ -941,7 +945,7 @@ public class InterviewService {
             }
         }
 
-        return AllInterviewResponseDto.builder()
+        return InterviewThumbNailResponseDto.builder()
                 .selectQuestionInterview(selectQuestionInterview)
                 .simulateInterview(simulateInterview)
                 .build();

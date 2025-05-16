@@ -161,9 +161,9 @@ public class InterviewController {
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
 
-    @GetMapping("/{interviewId}")
-    public AllInterviewResponseDto findAllInterview(@PathVariable Integer interviewId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return interviewService.findAllInterview(interviewId, userPrincipal.getUserId());
+    @GetMapping
+    public List<InterviewThumbNailResponseDto> findAllInterview(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findAllInterview(userPrincipal.getUserId());
     }
 
 
