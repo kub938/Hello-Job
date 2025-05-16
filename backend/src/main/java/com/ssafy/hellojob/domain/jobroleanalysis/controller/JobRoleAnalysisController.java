@@ -48,14 +48,14 @@ public class JobRoleAnalysisController {
 
     // 직무 분석 북마크 삭제
     @DeleteMapping("/bookmark/{jobRoleAnalysisBookmarkId}")
-    public void JobRoleAnalysisBookmarkDelete (@PathVariable("jobRoleAnalysisBookmarkId") Integer jobRoleAnalysisBookmarkId,
+    public void jobRoleAnalysisBookmarkDelete (@PathVariable("jobRoleAnalysisBookmarkId") Integer jobRoleAnalysisBookmarkId,
                                                @AuthenticationPrincipal UserPrincipal userPrincipal){
         jobRoleAnalysisService.deleteJobRoleBookmark(jobRoleAnalysisBookmarkId, userPrincipal.getUserId());
     }
 
     // 직무 분석 북마크 목록 조회
     @GetMapping("/bookmark")
-    public List<JobRoleAnalysisListResponseDto> JobRoleAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Integer companyId,
+    public List<JobRoleAnalysisListResponseDto> jobRoleAnalysisBookmarkList(@RequestParam(value = "companyId", required = false) Integer companyId,
                                                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         List<JobRoleAnalysisListResponseDto> result;
 
@@ -71,7 +71,7 @@ public class JobRoleAnalysisController {
 
     // 직무 분석 검색(기본값: companyId, 검색 조건: 직무명, 직무 분석 제목, 직무 카테고리)
     @GetMapping("/{companyId}/search")
-    public List<JobRoleAnalysisSearchListResponseDto> JobRoleAnalysisSearch(@PathVariable Integer companyId,
+    public List<JobRoleAnalysisSearchListResponseDto> jobRoleAnalysisSearch(@PathVariable Integer companyId,
                                                                             @ModelAttribute JobRoleAnalysisSearchCondition condition,
                                                                             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 
@@ -80,14 +80,14 @@ public class JobRoleAnalysisController {
 
     // 직무 분석 삭제
     @DeleteMapping("/{jobRoleAnalysisId}")
-    public void JobRoleAnalysisDelete(@PathVariable Integer jobRoleAnalysisId,
+    public void jobRoleAnalysisDelete(@PathVariable Integer jobRoleAnalysisId,
                                       @AuthenticationPrincipal UserPrincipal userPrincipal){
         jobRoleAnalysisService.deleteJobRoleAnalysis(userPrincipal.getUserId(), jobRoleAnalysisId);
     }
 
     // 직무 분석 수정
     @PutMapping()
-    public JobRoleAnalysisUpdateResponseDto JobRoleAnalysisUpdate(@Valid @RequestBody JobRoleAnalysisUpdateRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal){
+    public JobRoleAnalysisUpdateResponseDto jobRoleAnalysisUpdate(@Valid @RequestBody JobRoleAnalysisUpdateRequestDto requestDto, @AuthenticationPrincipal UserPrincipal userPrincipal){
         return jobRoleAnalysisService.updateJobRoleAnalysis(requestDto, userPrincipal.getUserId());
     }
 

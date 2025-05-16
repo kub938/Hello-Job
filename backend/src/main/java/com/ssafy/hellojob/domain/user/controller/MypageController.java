@@ -38,13 +38,13 @@ public class MypageController {
     private final ProjectService projectService;
 
     @GetMapping("/job-role-analysis")
-    public List<JobRoleAnalysisSearchListResponseDto> JobRoleAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public List<JobRoleAnalysisSearchListResponseDto> jobRoleAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         return jobRoleAnalysisService.searchJobRoleAnalysisByUserId(userPrincipal.getUserId());
     }
 
     @GetMapping("/company-analysis")
-    public List<CompanyAnalysisListResponseDto> CompanyAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+    public List<CompanyAnalysisListResponseDto> companyAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
         return companyAnalysisService.searchCompanyAnalysisByUserId(userPrincipal.getUserId());
     }
@@ -93,7 +93,6 @@ public class MypageController {
             @PathVariable Integer coverLetterId
     ) {
         Integer userId = principal.getUserId();
-        WholeCoverLetterContentDto response = coverLetterService.getWholeContentDetail(userId, coverLetterId);
-        return response;
+        return coverLetterService.getWholeContentDetail(userId, coverLetterId);
     }
 }

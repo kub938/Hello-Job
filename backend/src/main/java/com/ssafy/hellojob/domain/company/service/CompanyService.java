@@ -32,7 +32,7 @@ public class CompanyService {
         userReadService.findUserByIdOrElseThrow(userId);
         Company company = companyReadService.findCompanyByIdOrElseThrow(companyId);
 
-        CompanyDto result = CompanyDto.builder()
+        return CompanyDto.builder()
                 .id(companyId)
                 .companyName(company.getCompanyName())
                 .companyIndustry(company.getCompanyIndustry())
@@ -40,8 +40,6 @@ public class CompanyService {
                 .companySize(company.getCompanySize())
                 .updatedAt(company.getUpdatedAt())
                 .build();
-
-        return result;
     }
 
 }

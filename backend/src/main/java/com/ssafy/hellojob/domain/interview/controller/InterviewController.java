@@ -150,13 +150,13 @@ public class InterviewController {
 
     // 한 문항 종료
     @PostMapping("/practice/question")
-    public void stopVoiceRecoding(@RequestPart("interviewAnswerId") Integer interviewAnswerId,
+    public void stopVoiceRecoding(@RequestPart("interviewAnswerId") String interviewAnswerId,
                                   @RequestPart("videoFile") MultipartFile videoFile,
                                   @RequestPart("audioFile") MultipartFile audioFile,
-                                  @AuthenticationPrincipal UserPrincipal userPrincipal) throws Exception {
+                                  @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String url = s3UploadService.uploadVideo(videoFile);
         String result = interviewService.transcribeAudio(audioFile);
-        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, interviewAnswerId, videoFile);
+        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), videoFile);
     }
 
     // fast API 자소서 기반 질문 생성
