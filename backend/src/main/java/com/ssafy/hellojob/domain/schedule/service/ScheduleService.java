@@ -198,6 +198,8 @@ public class ScheduleService {
                 }
                 schedule.setScheduleCoverLetter(coverLetter);
             }
+        } else {
+            schedule.setScheduleCoverLetter(null);
         }
 
         schedule.setScheduleStartDate(requestDto.getScheduleStartDate());
