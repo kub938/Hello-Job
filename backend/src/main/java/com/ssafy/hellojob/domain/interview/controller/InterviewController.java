@@ -101,28 +101,28 @@ public class InterviewController {
     // 문항 선택 면접 cs 질문 선택
     @PostMapping("/practice/question/cs")
     public InterviewStartResponseDto selectCsQuestion(@RequestBody SelectQuestionRequestDto requestDto,
-                                 @AuthenticationPrincipal UserPrincipal userPrincipal){
+                                                      @AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.saveCsQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     // 문항 선택 면접 인성 질문 선택
     @PostMapping("/practice/question/personality")
     public InterviewStartResponseDto selectPersonalityQuestion(@RequestBody SelectQuestionRequestDto requestDto,
-                                 @AuthenticationPrincipal UserPrincipal userPrincipal){
+                                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.savePersonalityQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     // 문항 선택 면접 자소서 질문 선택
     @PostMapping("/practice/question/cover-letter")
     public InterviewStartResponseDto selectCoverLetterQuestion(@RequestBody SelectCoverLetterQuestionRequestDto requestDto,
-                                                                @AuthenticationPrincipal UserPrincipal userPrincipal){
+                                                               @AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.saveCoverLetterQuestions(userPrincipal.getUserId(), requestDto);
     }
 
     // 자소서 기반으로 생성된 질문 저장
     @PostMapping("/question/cover-letter/save")
     public Map<String, String> saveNewCoverLetterQuestion(@RequestBody CoverLetterQuestionSaveRequestDto requestDto,
-                                                                         @AuthenticationPrincipal UserPrincipal userPrincipal){
+                                                          @AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.saveNewCoverLetterQuestion(userPrincipal.getUserId(), requestDto);
     }
 
@@ -172,14 +172,9 @@ public class InterviewController {
     // 면접 종료
     @PostMapping("/practice/end")
     public EndInterviewResponseDto endInterview(@RequestBody EndInterviewRequestDto videoInfo,
-                                            @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
+                                                @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
 
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
-    }
-
-    @GetMapping("/{interviewId}")
-    public AllInterviewResponseDto findAllInterview(@PathVariable Integer interviewId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
-        return interviewService.findAllInterview(interviewId, userPrincipal.getUserId());
     }
 
     // 면접 피드백 상세 조회
