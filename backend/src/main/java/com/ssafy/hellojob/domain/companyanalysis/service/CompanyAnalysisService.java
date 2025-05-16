@@ -80,7 +80,8 @@ public class CompanyAnalysisService {
                 .base(requestDto.isBasic())
                 .plus(requestDto.isPlus())
                 .fin(requestDto.isFinancial())
-                .swot(requestDto.isSwot())
+//                .swot(requestDto.isSwot())
+                .swot(false)
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 

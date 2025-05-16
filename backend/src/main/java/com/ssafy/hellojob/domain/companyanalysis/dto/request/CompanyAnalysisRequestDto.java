@@ -28,7 +28,7 @@ public class CompanyAnalysisRequestDto {
     private boolean basic;
     private boolean plus;
     private boolean financial;
-    private boolean swot;
+//    private boolean swot;
     private String userPrompt;
 
 
