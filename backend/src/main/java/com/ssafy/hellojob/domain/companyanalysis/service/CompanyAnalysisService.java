@@ -9,10 +9,7 @@ import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBook
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.*;
-import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysis;
-import com.ssafy.hellojob.domain.companyanalysis.entity.CompanyAnalysisBookmark;
-import com.ssafy.hellojob.domain.companyanalysis.entity.DartAnalysis;
-import com.ssafy.hellojob.domain.companyanalysis.entity.NewsAnalysis;
+import com.ssafy.hellojob.domain.companyanalysis.entity.*;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.DartAnalysisRepository;
@@ -125,8 +122,32 @@ public class CompanyAnalysisService {
 
         newsAnalysisRepository.save(news);
 
+        String strengthContent;
+        String strengthTag;
+        String weaknessContent;
+        String weaknessTag;
+        String opportunityContent;
+        String opportunityTag;
+        String threatContent;
+        String threatTag;
+        try {
+            strengthContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getStrengths().getContents());
+            strengthTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getStrengths().getTags());
+            weaknessContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getWeaknesses().getContents());
+            weaknessTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getWeaknesses().getTags());
+            opportunityContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getOpportunities().getContents());
+            opportunityTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getOpportunities().getTags());
+            threatContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getThreats().getContents());
+            threatTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getThreats().getTags());
+        } catch (JsonProcessingException e) {
+            throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
+        }
+
+        SwotAnalysis swotAnalysis = SwotAnalysis.of(strengthContent, strengthTag, weaknessContent, weaknessTag, opportunityContent, opportunityTag, threatContent, threatTag, responseDto.getSwot().getSwot_memory());
+
+
         // CompanyAnalysis 저장
-        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(requestDto.getCompanyAnalysisTitle(), user, company, dart, news, requestDto.isPublic(), requestDto.getUserPrompt());
+        CompanyAnalysis companyAnalysis = CompanyAnalysis.of(requestDto.getCompanyAnalysisTitle(), user, company, dart, news, swotAnalysis, requestDto.isPublic(), requestDto.getUserPrompt());
         companyAnalysisRepository.save(companyAnalysis);
 
         // 기업 테이블 업데이트
@@ -251,6 +272,32 @@ public class CompanyAnalysisService {
             }
         }
 
+        SwotAnalysis swotAnalysis = companyAnalysis.getSwotAnalysis();
+
+        // swot 데이터 배열로 변환
+        List<String> swotStrengthContent = new ArrayList<>();
+        List<String> swotStrengthTag = new ArrayList<>();
+        List<String> swotWeaknessContent = new ArrayList<>();
+        List<String> swotWeaknessTag = new ArrayList<>();
+        List<String> swotOpportunityContent = new ArrayList<>();
+        List<String> swotOpportunityTag = new ArrayList<>();
+        List<String> swotThreatContent = new ArrayList<>();
+        List<String> swotThreatTag = new ArrayList<>();
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                swotStrengthContent = objectMapper.readValue(swotAnalysis.getStrengthsContent(), new TypeReference<List<String>>() {});
+                swotStrengthTag = objectMapper.readValue(swotAnalysis.getStrengthsTag(), new TypeReference<List<String>>() {});
+                swotWeaknessContent = objectMapper.readValue(swotAnalysis.getWeaknessesContent(), new TypeReference<List<String>>() {});
+                swotWeaknessTag = objectMapper.readValue(swotAnalysis.getWeaknessesTag(), new TypeReference<List<String>>() {});
+                swotOpportunityContent = objectMapper.readValue(swotAnalysis.getOpportunitiesContent(), new TypeReference<List<String>>() {});
+                swotOpportunityTag = objectMapper.readValue(swotAnalysis.getOpportunitiesTag(), new TypeReference<List<String>>() {});
+                swotThreatContent = objectMapper.readValue(swotAnalysis.getThreatsContent(), new TypeReference<List<String>>() {});
+                swotThreatTag = objectMapper.readValue(swotAnalysis.getThreatsTag(), new TypeReference<List<String>>() {});
+            } catch (Exception e) {
+                throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
+            }
+
+
         return CompanyAnalysisDetailResponseDto.builder()
                 .companyAnalysisTitle(companyAnalysis.getCompanyAnalysisTitle())
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
@@ -272,6 +319,15 @@ public class CompanyAnalysisService {
                 .dartVision(dart.getDartVision())
                 .dartFinancialSummery(dart.getDartFinancialSummary())
                 .dartCategory(dartCategory)
+                .swotStrengthContent(swotStrengthContent)
+                .swotStrengthTag(swotStrengthTag)
+                .swotWeaknessContent(swotWeaknessContent)
+                .swotWeaknessTag(swotWeaknessTag)
+                .swotOpportunityContent(swotOpportunityContent)
+                .swotOpportunityTag(swotOpportunityTag)
+                .swotThreatContent(swotThreatContent)
+                .swotThreatTag(swotThreatTag)
+                .swotSummary(swotAnalysis.getSwotSummary())
                 .build();
     }
 
