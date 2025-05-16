@@ -29,6 +29,7 @@ export const useGetSchedules = () => {
     queryKey: ["schedules"],
     queryFn: async () => {
       const response = await scheduleApi.getSchedules();
+      console.log(response.data);
       return response.data;
     },
   });
@@ -46,10 +47,16 @@ export const useCreateSchedule = () => {
 };
 
 // 일정 수정(전체 내용) 훅
-export const useUpdateSchedule = (scheduleId: number | undefined) => {
+export const useUpdateSchedule = () => {
   return useMutation({
     mutationKey: ["update-schedule"],
-    mutationFn: async (inputData: postScheduleRequest) => {
+    mutationFn: async ({
+      scheduleId,
+      inputData,
+    }: {
+      scheduleId: number;
+      inputData: postScheduleRequest;
+    }) => {
       if (scheduleId === undefined) {
         throw new Error("Schedule Id is undefined");
       }
