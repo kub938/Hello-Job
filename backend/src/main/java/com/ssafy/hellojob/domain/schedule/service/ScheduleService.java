@@ -23,7 +23,7 @@ import com.ssafy.hellojob.domain.schedule.entity.ScheduleStatus;
 import com.ssafy.hellojob.domain.schedule.repository.ScheduleRepository;
 import com.ssafy.hellojob.domain.schedule.repository.ScheduleStatusRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.repository.UserRepository;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ScheduleService {
 
-    private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
     private final CoverLetterRepository coverLetterRepository;
     private final CoverLetterContentRepository coverLetterContentRepository;
@@ -49,14 +48,14 @@ public class ScheduleService {
     private final DartAnalysisRepository dartAnalysisRepository;
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final JobRoleSnapshotRepository jobRoleSnapshotRepository;
+    private final UserReadService userReadService;
 
 
     // 일정 추가
     public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId) {
 
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
@@ -89,8 +88,7 @@ public class ScheduleService {
     public void deleteSchedule(Integer scheduleId, Integer userId) {
 
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -108,8 +106,7 @@ public class ScheduleService {
     // 일정 상태 수정
     public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -139,8 +136,7 @@ public class ScheduleService {
     // 일정 자기소개서 수정
     public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -170,8 +166,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 기존 스케줄 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -216,8 +211,7 @@ public class ScheduleService {
     // 일정 전체 조회
     public List<ScheduleListResponseDto> allSchedule(Integer userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         List<Schedule> schedules = scheduleRepository.findByUser(user);
 
@@ -232,6 +226,7 @@ public class ScheduleService {
                     .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
                     .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
                     .scheduleMemo(schedule.getScheduleMemo())
+                    .coverLetterId(schedule.getCoverLetter().getCoverLetterId())
                     .build());
         }
 
@@ -241,8 +236,7 @@ public class ScheduleService {
     // 일정 상세 조회
     public ScheduleDetailResponseDto detailSchedule(Integer scheduleId, Integer userId) {
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
