@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface InterviewVideoRepository extends JpaRepository<InterviewVideo, Integer> {
@@ -18,5 +19,13 @@ public interface InterviewVideoRepository extends JpaRepository<InterviewVideo, 
             "WHERE i.user = :user OR cli.user = :user " +
             "ORDER BY iv.start DESC NULLS LAST")
     List<InterviewVideo> findAllByUser(@Param("user") User user);
+
+
+    @Query("SELECT iv FROM InterviewVideo iv " +
+            "LEFT JOIN FETCH iv.coverLetterInterview " +
+            "LEFT JOIN FETCH iv.interview " +
+            "WHERE iv.interviewVideoId = :id")
+    Optional<InterviewVideo> findByIdWithInterviewAndCoverLetterInterview(@Param("id") Integer interviewVideoId);
+
 
 }

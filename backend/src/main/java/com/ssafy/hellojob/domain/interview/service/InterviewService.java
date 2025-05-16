@@ -354,7 +354,7 @@ public class InterviewService {
         // 면접이 없을 경우(처음 시도한느 유저)
         CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
-                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter);
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); 
                     return coverLetterInterviewRepository.save(newInterview);
                 });
 
@@ -1094,6 +1094,39 @@ public class InterviewService {
                         .firstQuestion(firstQuestionsByVideoId.get(video.getInterviewVideoId()))
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    public InterviewDetailResponseDto findInterviewDetail(Integer interviewVideoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(interviewVideoId);
+
+        // 소유권 확인
+        if((video.getInterview() != null && !video.getInterview().getUser().equals(user))
+            || (video.getCoverLetterInterview() != null && !video.getCoverLetterInterview().getUser().equals(user))
+            || (video.getInterview() == null && video.getCoverLetterInterview() == null)) {
+            throw new BaseException(INTERVIEW_VIDEO_MISMATCH);
+        }
+
+        List<InterviewAnswer> answers = interviewAnswerRepository.findAllByInterviewVideo(video);
+
+        List<InterviewQuestionResponseDto> questions = answers.stream()
+                        .map(answer -> InterviewQuestionResponseDto.builder()
+                                .interviewAnswerId(answer.getInterviewAnswerId())
+                                .interviewVideoUrl(answer.getInterviewVideoUrl())
+                                .videoLength(answer.getVideoLength())
+                                .interviewQuestion(answer.getInterviewQuestion())
+                                .interviewQuestionCategory(answer.getInterviewQuestionCategory())
+                                .build())
+                        .toList();
+
+        return InterviewDetailResponseDto.builder()
+                .interviewVideoId(video.getInterviewVideoId())
+                .interviewCategory(video.getInterviewCategory())
+                .selectQuestion(video.isSelectQuestion())
+                .interviewTitle(video.getInterviewTitle())
+                .start(video.getStart())
+                .questions(questions)
+                .build();
     }
 
 }

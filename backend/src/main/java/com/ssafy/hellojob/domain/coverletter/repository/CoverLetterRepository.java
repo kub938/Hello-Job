@@ -52,9 +52,10 @@ public interface CoverLetterRepository extends JpaRepository<CoverLetter, Intege
 
     @Query("""
             SELECT new com.ssafy.hellojob.domain.coverletter.dto.response.ScheduleCoverLetterDto(
-            c.coverLetterId, c.coverLetterTitle)
+            c.coverLetterId, c.coverLetterTitle, c.updatedAt)
             FROM CoverLetter c
             WHERE c.user.userId = :userId
+            ORDER BY c.updatedAt DESC
             """)
     List<ScheduleCoverLetterDto> findCoverLetterForSchedule(@Param("userId") Integer userId);
 }
