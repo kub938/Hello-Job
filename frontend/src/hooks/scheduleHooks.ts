@@ -30,7 +30,6 @@ export const useGetSchedules = () => {
     queryKey: ["schedules"],
     queryFn: async () => {
       const response = await scheduleApi.getSchedules();
-      console.log(response.data);
       return response.data;
     },
   });
@@ -82,17 +81,10 @@ export const useUpdateScheduleStatus = () => {
       if (scheduleId === undefined) {
         throw new Error("Schedule Id is undefined");
       }
-      console.log(
-        "일정 상태 변경 id: ",
-        scheduleId,
-        "status: ",
-        scheduleStatusName
-      );
       const response = await scheduleApi.patchScheduleStatus(
         scheduleId,
         scheduleStatusName
       );
-      console.log(response.data);
       return response.data;
     },
 
@@ -125,7 +117,6 @@ export const useUpdateScheduleStatus = () => {
     },
 
     onError: (error, variables, context) => {
-      console.log(error.message);
       toast.error("일정 상태 수정에 실패했습니다.");
       if (context?.previousSchedules) {
         queryClient.setQueryData(["schedules"], context.previousSchedules);
@@ -160,7 +151,6 @@ export const useGetScheduleCoverLetters = () => {
     queryKey: ["schedule-cover-letters"],
     queryFn: async () => {
       const response = await scheduleApi.getScheduleCoverLetters();
-      console.log("자기소개서 목록: ", response.data);
       return response.data;
     },
   });

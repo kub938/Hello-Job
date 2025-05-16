@@ -67,7 +67,6 @@ function ScheduleManager() {
       coverLetterId: scheduleData.coverLetterId || null,
     };
     if (modalMode === "edit" && scheduleData.scheduleId) {
-      console.log("수정 일정 데이터: ", payload);
       updateMutation.mutate(
         { inputData: payload, scheduleId: scheduleData.scheduleId },
         {
@@ -86,7 +85,6 @@ function ScheduleManager() {
         }
       );
     } else {
-      console.log("등록 일정 데이터: ", payload);
       createMutation.mutate(payload, {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: ["schedules"] });
