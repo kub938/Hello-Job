@@ -145,7 +145,6 @@ public class CompanyAnalysisService {
 
         SwotAnalysis swotAnalysis = SwotAnalysis.of(strengthContent, strengthTag, weaknessContent, weaknessTag, opportunityContent, opportunityTag, threatContent, threatTag, responseDto.getSwot().getSwot_memory());
 
-
         // CompanyAnalysis 저장
         CompanyAnalysis companyAnalysis = CompanyAnalysis.of(requestDto.getCompanyAnalysisTitle(), user, company, dart, news, swotAnalysis, requestDto.isPublic(), requestDto.getUserPrompt());
         companyAnalysisRepository.save(companyAnalysis);
