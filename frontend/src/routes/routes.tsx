@@ -33,7 +33,6 @@ import PreparePage from "@/pages/Interview/pages/PreparePage";
 import SelectQuestionPage from "@/pages/Interview/pages/SelectQuestionPage";
 import PracticeInterviewPage from "@/pages/Interview/pages/PracticeInterviewPage";
 import { categoryValidator } from "@/pages/Interview/util/validRouteCategory";
-import InterviewTest from "@/pages/Interview/pages/InterviewTest";
 import MyCompanies from "@/pages/Mypage/components/MyCompanies";
 import MyJobs from "@/pages/Mypage/components/MyJobs";
 import CoverLetterQuestionPage from "@/pages/Interview/pages/CoverLetterQuestionPage";
@@ -142,16 +141,6 @@ const router = createBrowserRouter([
                   <SuspenseWrapper>
                     <ErrorBoundary FallbackComponent={RenderErrorFallback}>
                       <PreparePage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
-              },
-              {
-                path: "test",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <InterviewTest />
                     </ErrorBoundary>
                   </SuspenseWrapper>
                 ),
