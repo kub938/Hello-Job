@@ -18,7 +18,6 @@ import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepos
 import com.ssafy.hellojob.domain.companyanalysis.repository.DartAnalysisRepository;
 import com.ssafy.hellojob.domain.companyanalysis.repository.NewsAnalysisRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
@@ -41,7 +40,6 @@ public class CompanyAnalysisService {
     private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
     private final DartAnalysisRepository dartAnalysisRepository;
     private final NewsAnalysisRepository newsAnalysisRepository;
-    private final UserRepository userRepository;
     private final UserReadService userReadService;
     private final FastApiClientService fastApiClientService;
     private final CompanyReadService companyReadService;
@@ -49,8 +47,7 @@ public class CompanyAnalysisService {
 
     // 토큰 확인
     public boolean TokenCheck(Integer userId){
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         if (user.getToken() <= 0) {
             throw new BaseException(ErrorCode.REQUEST_TOKEN_LIMIT_EXCEEDED);
@@ -67,11 +64,7 @@ public class CompanyAnalysisService {
 
         // 유저 토큰 확인
         this.TokenCheck(userId);
-
-        if(userId != 3){
-            // 토큰 감소(종훈오빠 제외)
-            user.decreaseToken();
-        }
+        user.decreaseToken();
 
         // 회사 이름 가져오기
         Company company = companyReadService.findCompanyByIdOrElseThrow(requestDto.getCompanyId());
@@ -149,7 +142,7 @@ public class CompanyAnalysisService {
     public List<CompanyAnalysisListResponseDto> searchAllCompanyAnalysis(Integer userId) {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
 
-        List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+        return analysisList.stream()
                 .filter(analysis ->
                         analysis.isPublic() || analysis.getUser().getUserId().equals(userId)) // 공개된 기업 분석만 조회
                 .map(analysis -> {
@@ -178,15 +171,13 @@ public class CompanyAnalysisService {
                             .build();
                 })
                 .toList();
-
-        return result;
     }
 
     // 해당 유저가 작성한 기업 분석 목록 조회
     public List<CompanyAnalysisListResponseDto> searchCompanyAnalysisByUserId(Integer userId) {
         List<CompanyAnalysis> analysisList = companyAnalysisRepository.findAll();
 
-        List<CompanyAnalysisListResponseDto> result = analysisList.stream()
+        return analysisList.stream()
                 .filter(analysis -> analysis.getUser().getUserId().equals(userId))
                 .map(analysis -> {
                     DartAnalysis dart = analysis.getDartAnalysis();
@@ -214,8 +205,6 @@ public class CompanyAnalysisService {
                             .build();
                 })
                 .toList();
-
-        return result;
     }
 
 
