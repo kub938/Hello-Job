@@ -169,7 +169,7 @@ public class S3UploadService {
 
                     // 재시도 간 딜레이 (선택 사항)
                     try {
-                        Thread.sleep(1000 * attempt); // 1초, 2초, 3초... 점진적 딜레이
+                        Thread.sleep(1000 * (long)attempt); // 1초, 2초, 3초... 점진적 딜레이
                     } catch (InterruptedException ie) {
                         Thread.currentThread().interrupt();
                         log.warn("⚠️ 대기 중 인터럽트 발생");

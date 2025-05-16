@@ -718,13 +718,16 @@ public class InterviewService {
             }
         }
 
-        String videoLength = null;
+        String videoLength = "";
         try {
             videoLength = getVideoDurationWithFFprobe(videoFile);
-//            videoLength = getAudioDurationWithFFprobe(videoFile);
-        } catch (InterruptedException | IOException e) {
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // interrupt 상태 복원
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        } catch (IOException e) {
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
+
 
         interviewAnswer.addInterviewAnswer(answer);
         interviewAnswer.addInterviewVideoUrl(url);
