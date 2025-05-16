@@ -122,7 +122,7 @@ export const useGetContentStatus = (coverLetterId: number) => {
 
 export const useSaveCoverLetter = () => {
   return useMutation({
-    mutationKey: [],
+    mutationKey: ["save-cover-letter-question"],
     mutationFn: async (saveData: SaveCoverLetterRequest) => {
       const response = await coverLetterApi.saveCoverLetter(saveData);
       return response.data;
