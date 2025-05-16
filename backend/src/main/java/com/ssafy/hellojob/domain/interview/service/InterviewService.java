@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
@@ -1060,5 +1061,39 @@ public class InterviewService {
 
     }
 
+    public List<InterviewThumbNailResponseDto> findAllInterview(Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        // 한 번의 쿼리로 모든 InterviewVideo 조회 (Join 활용, 날짜 기준 내림차순 정렬)
+        List<InterviewVideo> interviewVideos = interviewVideoRepository.findAllByUser(user);
+
+        // 모든 InterviewVideo ID를 수집
+        List<Integer> videoIds = interviewVideos.stream()
+                .map(InterviewVideo::getInterviewVideoId)
+                .collect(Collectors.toList());
+
+        // 한 번의 쿼리로 각 InterviewVideo의 첫 번째 답변 조회
+        List<Map<String, Object>> firstQuestionsResults = interviewAnswerRepository
+                .findFirstQuestionsByVideoIds(videoIds);
+
+        // Map<videoId, firstQuestion> 형태로 변환
+        Map<Integer, String> firstQuestionsByVideoId = firstQuestionsResults.stream()
+                .collect(Collectors.toMap(
+                        map -> (Integer) map.get("videoId"),
+                        map -> (String) map.get("firstQuestion")
+                ));
+
+        // DTO 구성
+        return interviewVideos.stream()
+                .map(video -> InterviewThumbNailResponseDto.builder()
+                        .interviewVideoId(video.getInterviewVideoId())
+                        .interviewCategory(video.getInterviewCategory())
+                        .selectQuestion(video.isSelectQuestion())
+                        .interviewTitle(video.getInterviewTitle())
+                        .start(video.getStart())
+                        .firstQuestion(firstQuestionsByVideoId.get(video.getInterviewVideoId()))
+                        .build())
+                .collect(Collectors.toList());
+    }
 
 }
