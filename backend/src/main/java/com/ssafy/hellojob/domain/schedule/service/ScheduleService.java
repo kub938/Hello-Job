@@ -52,18 +52,18 @@ public class ScheduleService {
 
 
     // 일정 추가
-    public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId){
+    public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId) {
 
         // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
 
         ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
-                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
 
 
         CoverLetter coverLetter = null;
-        if(requestDto.getCoverLetterId() != null){
+        if (requestDto.getCoverLetterId() != null) {
             coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
         }
 
@@ -86,7 +86,7 @@ public class ScheduleService {
     }
 
     // 일정 삭제
-    public void deleteSchedule(Integer scheduleId, Integer userId){
+    public void deleteSchedule(Integer scheduleId, Integer userId) {
 
         // 유저 정보 조회
         User user = userRepository.findById(userId)
@@ -97,7 +97,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
 
         // 작성자와 userId가 같을 때만 삭제
-        if(userId == schedule.getUser().getUserId()){
+        if (userId == schedule.getUser().getUserId()) {
             scheduleRepository.delete(schedule);
         } else {
             throw new BaseException(ErrorCode.INVALID_USER);
@@ -106,7 +106,7 @@ public class ScheduleService {
     }
 
     // 일정 상태 수정
-    public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId){
+    public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -122,7 +122,7 @@ public class ScheduleService {
 
         // 새로운 상태 조회
         ScheduleStatus newStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
-                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
         if (newStatus == null) {
             throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND);
         }
@@ -137,7 +137,7 @@ public class ScheduleService {
     }
 
     // 일정 자기소개서 수정
-    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId){
+    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -153,7 +153,7 @@ public class ScheduleService {
 
         // 자기소개서 조회
         CoverLetter coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
-        if(coverLetter == null){
+        if (coverLetter == null) {
             throw new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND);
         }
 
@@ -183,7 +183,7 @@ public class ScheduleService {
 
         // 상태 값 수정
         ScheduleStatus status = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
-                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
         if (status == null) {
             throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND);
         }
@@ -214,7 +214,7 @@ public class ScheduleService {
     }
 
     // 일정 전체 조회
-    public List<ScheduleListResponseDto> allSchedule(Integer userId){
+    public List<ScheduleListResponseDto> allSchedule(Integer userId) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
@@ -223,14 +223,15 @@ public class ScheduleService {
 
         List<ScheduleListResponseDto> responseDto = new ArrayList<>();
 
-        for(Schedule schedule: schedules){
+        for (Schedule schedule : schedules) {
             responseDto.add(ScheduleListResponseDto.builder()
-                            .scheduleId(schedule.getScheduleId())
-                            .scheduleStartDate(schedule.getScheduleStartDate())
-                            .scheduleEndDate(schedule.getScheduleEndDate())
-                            .scheduleTitle(schedule.getScheduleTitle())
-                            .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
-                            .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
+                    .scheduleId(schedule.getScheduleId())
+                    .scheduleStartDate(schedule.getScheduleStartDate())
+                    .scheduleEndDate(schedule.getScheduleEndDate())
+                    .scheduleTitle(schedule.getScheduleTitle())
+                    .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
+                    .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
+                    .scheduleMemo(schedule.getScheduleMemo())
                     .build());
         }
 
@@ -290,7 +291,8 @@ public class ScheduleService {
             if (newsAnalysis.getNewsAnalysisUrl() != null && !newsAnalysis.getNewsAnalysisUrl().isBlank()) {
                 try {
                     ObjectMapper objectMapper = new ObjectMapper();
-                    newsUrls = objectMapper.readValue(newsAnalysis.getNewsAnalysisUrl(), new TypeReference<List<String>>() {});
+                    newsUrls = objectMapper.readValue(newsAnalysis.getNewsAnalysisUrl(), new TypeReference<List<String>>() {
+                    });
                 } catch (Exception e) {
                     throw new RuntimeException("뉴스 URL 파싱 실패", e);
                 }
