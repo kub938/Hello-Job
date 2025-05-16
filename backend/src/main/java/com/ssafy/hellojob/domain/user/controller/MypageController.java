@@ -40,17 +40,13 @@ public class MypageController {
     @GetMapping("/job-role-analysis")
     public List<JobRoleAnalysisSearchListResponseDto> JobRoleAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        Integer userId = userPrincipal.getUserId();
-        List<JobRoleAnalysisSearchListResponseDto> result = jobRoleAnalysisService.searchJobRoleAnalysisByUserId(userId);
-
-        return result;
+        return jobRoleAnalysisService.searchJobRoleAnalysisByUserId(userPrincipal.getUserId());
     }
 
     @GetMapping("/company-analysis")
     public List<CompanyAnalysisListResponseDto> CompanyAnalysisListSearchByUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
 
-        Integer userId = userPrincipal.getUserId();
-        return companyAnalysisService.searchCompanyAnalysisByUserId(userId);
+        return companyAnalysisService.searchCompanyAnalysisByUserId(userPrincipal.getUserId());
     }
 
     @GetMapping("/cover-letter")

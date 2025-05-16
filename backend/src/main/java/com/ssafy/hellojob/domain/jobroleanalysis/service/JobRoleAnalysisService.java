@@ -1,9 +1,7 @@
 package com.ssafy.hellojob.domain.jobroleanalysis.service;
 
 import com.ssafy.hellojob.domain.company.entity.Company;
-import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.company.service.CompanyReadService;
-import com.ssafy.hellojob.domain.companyanalysis.service.CompanyAnalysisReadService;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.request.JobRoleAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.request.JobRoleAnalysisSaveRequestDto;
 import com.ssafy.hellojob.domain.jobroleanalysis.dto.request.JobRoleAnalysisSearchCondition;
@@ -14,7 +12,6 @@ import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysisBookmark;
 import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisBookmarkRepository;
 import com.ssafy.hellojob.domain.jobroleanalysis.repository.JobRoleAnalysisRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
@@ -36,11 +33,8 @@ public class JobRoleAnalysisService {
 
     private final JobRoleAnalysisRepository jobRoleAnalysisRepository;
     private final JobRoleAnalysisBookmarkRepository jobRoleAnalysisBookmarkRepository;
-    private final UserRepository userRepository;
-    private final CompanyRepository companyRepository;
     private final UserReadService userReadService;
     private final CompanyReadService companyReadService;
-    private final CompanyAnalysisReadService companyAnalysisReadService;
     private final JobRoleAnalysisReadService jobRoleAnalysisReadService;
 
     // 직무 분석 데이터 저장
@@ -113,7 +107,7 @@ public class JobRoleAnalysisService {
                 .jobRolePreferences(jobRoleAnalysis.getJobRolePreferences())
                 .jobRoleEtc(jobRoleAnalysis.getJobRoleEtc())
                 .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
-                .isPublic(jobRoleAnalysis.getIsPublic())
+                .isPublic(jobRoleAnalysis.isPublic())
                 .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory())
                 .createdAt(jobRoleAnalysis.getCreatedAt())
                 .updatedAt(jobRoleAnalysis.getUpdatedAt())
@@ -205,7 +199,7 @@ public class JobRoleAnalysisService {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
             // 직무 분석이 '비공개'인 경우는 제외
-            if (!jobRoleAnalysis.getIsPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
+            if (!jobRoleAnalysis.isPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -216,7 +210,7 @@ public class JobRoleAnalysisService {
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum을 문자열로
-                    .isPublic(jobRoleAnalysis.getIsPublic())
+                    .isPublic(jobRoleAnalysis.isPublic())
                     .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(true) // 북마크 목록이니까 무조건 true
@@ -248,7 +242,7 @@ public class JobRoleAnalysisService {
             JobRoleAnalysis jobRoleAnalysis = bookmark.getJobRoleAnalysis();
 
             // 직무 분석이 '비공개'인 경우는 제외
-            if (!jobRoleAnalysis.getIsPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
+            if (!jobRoleAnalysis.isPublic() && !userId.equals(jobRoleAnalysis.getUser().getUserId())) {
                 continue;
             }
 
@@ -259,7 +253,7 @@ public class JobRoleAnalysisService {
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum을 문자열로
-                    .isPublic(jobRoleAnalysis.getIsPublic())
+                    .isPublic(jobRoleAnalysis.isPublic())
                     .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(true) // 북마크 목록이니까 무조건 true
@@ -293,7 +287,7 @@ public class JobRoleAnalysisService {
         List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
                 .filter(analysis -> analysis.getCompany().getCompanyId().equals(companyId)) // companyId 일치
                 .filter(analysis ->
-                        analysis.getIsPublic() || analysis.getUser().getUserId().equals(userId))
+                        analysis.isPublic() || analysis.getUser().getUserId().equals(userId))
                 .filter(analysis -> {
                     if (condition.getJobRoleName() != null && !condition.getJobRoleName().isEmpty()) {
                         return analysis.getJobRoleName().startsWith(condition.getJobRoleName()); // jobRoleName이 시작하는 경우
@@ -314,7 +308,7 @@ public class JobRoleAnalysisService {
                 })
                 .sorted(Comparator.comparing(JobRoleAnalysis::getUpdatedAt).reversed()) // 최신순 정렬
                 .limit(10) // 최대 10개만
-                .collect(Collectors.toList());
+                .toList();
 
         // 3. 결과를 변환
         List<JobRoleAnalysisSearchListResponseDto> result = new ArrayList<>();
@@ -326,7 +320,7 @@ public class JobRoleAnalysisService {
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum -> 문자열
-                    .isPublic(jobRoleAnalysis.getIsPublic())
+                    .isPublic(jobRoleAnalysis.isPublic())
                     .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(bookmarkedAnalysisIds.contains(jobRoleAnalysis.getJobRoleAnalysisId())) // 북마크 여부
@@ -356,7 +350,7 @@ public class JobRoleAnalysisService {
         // userId 기반 직무 분석 데이터 조회
         List<JobRoleAnalysis> jobRoleAnalysisList = jobRoleAnalysisRepository.findAll().stream()
                 .filter(analysis -> userId.equals(analysis.getUser().getUserId()))
-                .collect(Collectors.toList());
+                .toList();
 
         // 결과를 변환
         List<JobRoleAnalysisSearchListResponseDto> result = new ArrayList<>();
@@ -367,7 +361,7 @@ public class JobRoleAnalysisService {
                     .jobRoleName(jobRoleAnalysis.getJobRoleName())
                     .jobRoleAnalysisTitle(jobRoleAnalysis.getJobRoleTitle())
                     .jobRoleCategory(jobRoleAnalysis.getJobRoleCategory().name()) // enum -> 문자열
-                    .isPublic(jobRoleAnalysis.getIsPublic())
+                    .isPublic(jobRoleAnalysis.isPublic())
                     .jobRoleViewCount(jobRoleAnalysis.getJobRoleViewCount())
                     .jobRoleBookmarkCount(jobRoleAnalysis.getJobRoleBookmarkCount())
                     .bookmark(bookmarkedAnalysisIds.contains(jobRoleAnalysis.getJobRoleAnalysisId())) // 북마크 여부
@@ -388,7 +382,7 @@ public class JobRoleAnalysisService {
         JobRoleAnalysis jobRoleAnalysis = jobRoleAnalysisReadService.findJobRoleAnalysisById(jobRoleAnalysisId);
 
         // 작성자와 userId가 같을 때만 삭제
-        if(userId == jobRoleAnalysis.getUser().getUserId()){
+        if(userId.equals(jobRoleAnalysis.getUser().getUserId())){
             jobRoleAnalysisRepository.delete(jobRoleAnalysis);
         } else {
             throw new BaseException(ErrorCode.INVALID_USER);
