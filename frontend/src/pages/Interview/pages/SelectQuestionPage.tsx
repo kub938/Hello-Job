@@ -12,8 +12,8 @@ import { toast } from "sonner";
 function SelectQuestionPage() {
   const [selectQuestions, setSelectQuestions] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const { category } = useParams();
-  const { selectCategory, setSelectCategory } = useInterviewStore();
+  // const { category } = useParams();
+  const { selectCategory } = useInterviewStore();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -24,17 +24,6 @@ function SelectQuestionPage() {
   //react query hooks
   const questionList = useGetQuestions(selectCategory);
   const selectCompleteMutation = useSelectQuestionComplete();
-
-  //useEffects
-  useEffect(() => {
-    if (
-      category === "cs" ||
-      category === "cover-letter" ||
-      category === "personality"
-    ) {
-      setSelectCategory(category);
-    }
-  }, [category]);
 
   // 문항 선택
   const handleSelectQuestions = (selectQuestionsId: number) => {
@@ -57,7 +46,6 @@ function SelectQuestionPage() {
       toast.error("문항을 1개 이상 선택해 주세요");
       return;
     }
-    console.log(1234);
 
     selectCompleteMutation.mutate(
       {
@@ -67,7 +55,12 @@ function SelectQuestionPage() {
           questionIdList: selectQuestions,
         },
       },
-      { onSuccess: (data) => console.log("문항선택 성공", data) }
+      {
+        onSuccess: (response) => {
+          console.log("문항선택 성공", response);
+          navigate("/interview/prepare", { state: response });
+        },
+      }
     );
   };
   // 검색 필터링
@@ -191,9 +184,8 @@ function SelectQuestionPage() {
           >
             이전
           </Button>
-          <Link
-            to="/interview/prepare"
-            className={`flex items-center justify-center rounded-lg px-6 py-2.5 font-medium transition-colors ${
+          <Button
+            className={`w-30 ${
               selectQuestions.length > 0
                 ? "bg-primary text-primary-foreground hover:bg-accent"
                 : "bg-muted-foreground/30 text-muted cursor-not-allowed"
@@ -203,7 +195,7 @@ function SelectQuestionPage() {
             }}
           >
             선택 완료 ({selectQuestions.length})
-          </Link>
+          </Button>
         </div>
       </div>
 
