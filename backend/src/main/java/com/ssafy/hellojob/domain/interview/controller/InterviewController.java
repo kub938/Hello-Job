@@ -177,6 +177,11 @@ public class InterviewController {
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
 
+    @GetMapping("/{interviewId}")
+    public AllInterviewResponseDto findAllInterview(@PathVariable Integer interviewId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.findAllInterview(interviewId, userPrincipal.getUserId());
+    }
+
     // 면접 피드백 상세 조회
     @GetMapping("/feedback/{interviewVideoId}")
     public InterviewFeedbackResponseDto findInterviewFeedbackDetail(@PathVariable("interviewVideoId") Integer interviewVideoId,
