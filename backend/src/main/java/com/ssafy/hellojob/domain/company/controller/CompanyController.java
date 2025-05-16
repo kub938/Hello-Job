@@ -37,8 +37,7 @@ public class CompanyController {
     public CompanyDto getCompanyDetail(@PathVariable("companyId") Integer companyId,
                                        @AuthenticationPrincipal UserPrincipal userPrincipal){
 
-        CompanyDto result = companyService.getCompanyByCompanyId(companyId);
-        return result;
+        return companyService.getCompanyByCompanyId(userPrincipal.getUserId(), companyId);
     }
 
 

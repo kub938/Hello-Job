@@ -1,5 +1,7 @@
 package com.ssafy.hellojob.domain.schedule.controller;
 
+import com.ssafy.hellojob.domain.coverletter.dto.response.ScheduleCoverLetterDto;
+import com.ssafy.hellojob.domain.coverletter.service.CoverLetterService;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleAddRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleCoverLetterRequestDto;
 import com.ssafy.hellojob.domain.schedule.dto.request.ScheduleUpdateScheduleStatusRequestDto;
@@ -23,6 +25,7 @@ import java.util.List;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
+    private final CoverLetterService coverLetterService;
 
     // 일정 추가
     @PostMapping()
@@ -98,5 +101,13 @@ public class ScheduleController {
         return responseDto;
     }
 
+    // 일정 자기소개서 목록 조회
+    @GetMapping("/cover-letter")
+    public List<ScheduleCoverLetterDto> getCoverLetterForSchedule(
+            @AuthenticationPrincipal UserPrincipal principal
+    ) {
+        Integer userId = principal.getUserId();
+        return coverLetterService.getCoverLetterForSchedule(userId);
+    }
 
 }

@@ -1,6 +1,5 @@
 package com.ssafy.hellojob.domain.companyanalysis.entity;
 
-import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleAnalysis;
 import com.ssafy.hellojob.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
