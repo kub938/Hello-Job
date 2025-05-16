@@ -23,4 +23,6 @@ public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer
             "                            WHERE ia2.interviewVideo = ia.interviewVideo)")
     List<Map<String, Object>> findFirstQuestionsByVideoIds(@Param("videoIds") List<Integer> videoIds);
 
+    List<InterviewAnswer> findAllByInterviewVideo(InterviewVideo interviewVideo);
+
 }

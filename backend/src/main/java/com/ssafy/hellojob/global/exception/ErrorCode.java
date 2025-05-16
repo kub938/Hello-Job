@@ -71,6 +71,7 @@ public enum ErrorCode {
     COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
     COVER_LETTER_QUESTION_MISMATCH(HttpStatus.FORBIDDEN, "자기소개서 기반 면접 질문의 소유자와 요청 유저가 일치하지 않습니다."),
     INTERVIEW_MISMATCH(HttpStatus.FORBIDDEN, "면접 소유자와 요청 유저가 일치하지 않습니다."),
+    INTERVIEW_VIDEO_MISMATCH(HttpStatus.FORBIDDEN, "면접 영상 소유자와 요청 유저가 일치하지 않습니다."),
     GET_VIDEO_LENGTH_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "영상 길이 추출에 실패했습니다."),
 
     // 메모
