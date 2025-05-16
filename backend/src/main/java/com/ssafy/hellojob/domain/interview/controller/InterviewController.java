@@ -156,7 +156,7 @@ public class InterviewController {
                                   @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String url = s3UploadService.uploadVideo(videoFile);
         String result = interviewService.transcribeAudio(audioFile);
-        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), audioFile);
+        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), videoFile);
     }
 
     // fast API 자소서 기반 질문 생성
