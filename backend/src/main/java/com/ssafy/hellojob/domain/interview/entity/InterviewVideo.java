@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -44,6 +46,9 @@ public class InterviewVideo {
 
     @Column(name = "interview_title")
     private String interviewTitle;
+
+    @OneToMany(mappedBy = "interviewVideo", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<InterviewAnswer> interviewAnswers = new ArrayList<>();
 
     public static InterviewVideo of(CoverLetterInterview coverLetterInterview, Interview interview, boolean selectQuestion, LocalDateTime start, InterviewCategory interviewCategory){
         InterviewVideo video = new InterviewVideo();

@@ -693,10 +693,10 @@ public class InterviewService {
 
     // 한 문항 종료(면접 답변 저장)
     @Transactional
-    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, InterviewInfo interviewInfo, MultipartFile videoFile) {
+    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, Integer interviewAnswerId, MultipartFile videoFile) {
         userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
+        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
 
         if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {

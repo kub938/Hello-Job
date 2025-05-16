@@ -43,7 +43,7 @@ public class CompanyAnalysisService {
     private final CompanyAnalysisReadService companyAnalysisReadService;
 
     // 토큰 확인
-    public boolean TokenCheck(Integer userId){
+    public boolean TokenCheck(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         if (user.getToken() <= 0) {
@@ -266,15 +266,15 @@ public class CompanyAnalysisService {
         if (news.getNewsAnalysisUrl() != null && !news.getNewsAnalysisUrl().isBlank()) {
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                newsUrls = objectMapper.readValue(news.getNewsAnalysisUrl(), new TypeReference<List<String>>() {});
+                newsUrls = objectMapper.readValue(news.getNewsAnalysisUrl(), new TypeReference<List<String>>() {
+                });
             } catch (Exception e) {
+                log.debug("여기?");
                 throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
             }
         }
 
-        SwotAnalysis swotAnalysis = companyAnalysis.getSwotAnalysis();
-
-        // swot 데이터 배열로 변환
+        SwotAnalysis swotAnalysis = null;
         List<String> swotStrengthContent = new ArrayList<>();
         List<String> swotStrengthTag = new ArrayList<>();
         List<String> swotWeaknessContent = new ArrayList<>();
@@ -283,19 +283,38 @@ public class CompanyAnalysisService {
         List<String> swotOpportunityTag = new ArrayList<>();
         List<String> swotThreatContent = new ArrayList<>();
         List<String> swotThreatTag = new ArrayList<>();
+        String swotSummary = "";
+
+        if (companyAnalysis.getSwotAnalysis() != null) {
+            swotAnalysis = companyAnalysis.getSwotAnalysis();
+            swotSummary = companyAnalysis.getSwotAnalysis().getSwotSummary();
+
+            // swot 데이터 배열로 변환
+
             try {
                 ObjectMapper objectMapper = new ObjectMapper();
-                swotStrengthContent = objectMapper.readValue(swotAnalysis.getStrengthsContent(), new TypeReference<List<String>>() {});
-                swotStrengthTag = objectMapper.readValue(swotAnalysis.getStrengthsTag(), new TypeReference<List<String>>() {});
-                swotWeaknessContent = objectMapper.readValue(swotAnalysis.getWeaknessesContent(), new TypeReference<List<String>>() {});
-                swotWeaknessTag = objectMapper.readValue(swotAnalysis.getWeaknessesTag(), new TypeReference<List<String>>() {});
-                swotOpportunityContent = objectMapper.readValue(swotAnalysis.getOpportunitiesContent(), new TypeReference<List<String>>() {});
-                swotOpportunityTag = objectMapper.readValue(swotAnalysis.getOpportunitiesTag(), new TypeReference<List<String>>() {});
-                swotThreatContent = objectMapper.readValue(swotAnalysis.getThreatsContent(), new TypeReference<List<String>>() {});
-                swotThreatTag = objectMapper.readValue(swotAnalysis.getThreatsTag(), new TypeReference<List<String>>() {});
+                swotStrengthContent = objectMapper.readValue(swotAnalysis.getStrengthsContent(), new TypeReference<List<String>>() {
+                });
+                swotStrengthTag = objectMapper.readValue(swotAnalysis.getStrengthsTag(), new TypeReference<List<String>>() {
+                });
+                swotWeaknessContent = objectMapper.readValue(swotAnalysis.getWeaknessesContent(), new TypeReference<List<String>>() {
+                });
+                swotWeaknessTag = objectMapper.readValue(swotAnalysis.getWeaknessesTag(), new TypeReference<List<String>>() {
+                });
+                swotOpportunityContent = objectMapper.readValue(swotAnalysis.getOpportunitiesContent(), new TypeReference<List<String>>() {
+                });
+                swotOpportunityTag = objectMapper.readValue(swotAnalysis.getOpportunitiesTag(), new TypeReference<List<String>>() {
+                });
+                swotThreatContent = objectMapper.readValue(swotAnalysis.getThreatsContent(), new TypeReference<List<String>>() {
+                });
+                swotThreatTag = objectMapper.readValue(swotAnalysis.getThreatsTag(), new TypeReference<List<String>>() {
+                });
             } catch (Exception e) {
+                log.debug("오류메시지: {}", e);
                 throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
             }
+
+        }
 
 
         return CompanyAnalysisDetailResponseDto.builder()
@@ -313,7 +332,7 @@ public class CompanyAnalysisService {
                 .isPublic(companyAnalysis.isPublic())
                 .newsAnalysisData(news.getNewsAnalysisData())
                 .newsAnalysisDate(news.getNewsAnalysisDate())
-                .newsAnalysisUrl(newsUrls) 
+                .newsAnalysisUrl(newsUrls)
                 .dartBrand(dart.getDartBrand())
                 .dartCompanyAnalysis(dart.getDartCompanyAnalysis())
                 .dartVision(dart.getDartVision())
@@ -327,7 +346,7 @@ public class CompanyAnalysisService {
                 .swotOpportunityTag(swotOpportunityTag)
                 .swotThreatContent(swotThreatContent)
                 .swotThreatTag(swotThreatTag)
-                .swotSummary(swotAnalysis.getSwotSummary())
+                .swotSummary(swotSummary)
                 .build();
     }
 
@@ -421,7 +440,7 @@ public class CompanyAnalysisService {
 
     // 기업 분석 북마크 해제
     @Transactional
-    public void deleteCompanyAnalysisBookmark(Integer companyAnalysisId, Integer userId){
+    public void deleteCompanyAnalysisBookmark(Integer companyAnalysisId, Integer userId) {
 
         // 유저 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
@@ -435,7 +454,7 @@ public class CompanyAnalysisService {
         CompanyAnalysis companyAnalysis = bookmark.getCompanyAnalysis();
 
         // 북마크 정보의 userId와 요청한 userId가 같을 때만 요청 처리
-        if(userId.equals(bookmark.getUser().getUserId())){
+        if (userId.equals(bookmark.getUser().getUserId())) {
             companyAnalysisBookmarkRepository.delete(bookmark);
         } else {
             throw new BaseException(ErrorCode.INVALID_USER);
@@ -448,7 +467,7 @@ public class CompanyAnalysisService {
 
     // 기업 분석 북마크 목록 조회(기업 상관 없이 전부)
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkList(Integer userId) {
-        
+
         // 유저 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -498,7 +517,7 @@ public class CompanyAnalysisService {
 
     // 기업 분석 북마크 목록 조회(기업별)
     public List<CompanyAnalysisBookmarkListResponseDto> searchCompanyAnalysisBookmarkListWithCompanyId(Integer userId, Integer companyId) {
-        
+
         // 유저, 회사 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         companyReadService.findCompanyByIdOrElseThrow(companyId);
