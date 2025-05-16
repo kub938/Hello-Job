@@ -39,6 +39,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -75,16 +76,16 @@ public class InterviewService {
     private static final int MAX_WAIT_SECONDS = 60;
     private static final int POLL_INTERVAL_MS = 500;
 
-    private final Integer QUESTION_SIZE = 5;
+    private static final Integer QUESTION_SIZE = 5;
 
     @Value("${FFPROBE_PATH}")
-    private String ffprobe_path;
+    private static String ffprobe_path;
 
     @Value("${OPENAI_API_URL}")
-    private String openAiUrl;
+    private static String openAiUrl;
 
     @Value("${OPENAI_API_KEY}")
-    private String openAiKey;
+    private static String openAiKey;
 
     // cs 질문 목록 조회
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
@@ -144,7 +145,7 @@ public class InterviewService {
 
     // 자소서 기반 질문 목록 조회
     public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
 
         if (!userId.equals(coverLetter.getUser().getUserId())) {
@@ -391,7 +392,7 @@ public class InterviewService {
 
     // 문항 선택 면접 cs 질문 선택
     public InterviewStartResponseDto saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
 
@@ -433,7 +434,7 @@ public class InterviewService {
 
     // 문항 선택 면접 인성 질문 선택
     public InterviewStartResponseDto savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
 
@@ -476,7 +477,7 @@ public class InterviewService {
 
     // 문항 선택 면접 자소서 질문 선택
     public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
         if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
@@ -680,8 +681,7 @@ public class InterviewService {
             // text만 추출
             if (response.getStatusCode().is2xxSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                String text = objectMapper.readTree(response.getBody()).get("text").asText();
-                return text;
+                return objectMapper.readTree(response.getBody()).get("text").asText();
             } else {
                 return "stt 변환에 실패했습니다";
             }
@@ -693,7 +693,7 @@ public class InterviewService {
 
     // 한 문항 종료(면접 답변 저장)
     @Transactional
-    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, InterviewInfo interviewInfo, MultipartFile videoFile) throws InterruptedException, IOException {
+    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, InterviewInfo interviewInfo, MultipartFile videoFile) {
         userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
@@ -711,9 +711,16 @@ public class InterviewService {
             }
         }
 
+        String videoLength = null;
+        try {
+            videoLength = getVideoDurationWithFFprobe(videoFile);
+        } catch (Exception e) {
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        }
+
         interviewAnswer.addInterviewAnswer(answer);
         interviewAnswer.addInterviewVideoUrl(url);
-        interviewAnswer.addVideoLength(getVideoDurationWithFFprobe(videoFile));
+        interviewAnswer.addVideoLength(videoLength);
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
@@ -735,7 +742,12 @@ public class InterviewService {
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         String durationStr = reader.readLine();
         process.waitFor();
-        tempFile.delete();
+
+        try {
+            Files.delete(tempFile.toPath());
+        } catch (IOException e) {
+            log.error("⚠️ 임시 파일 삭제 실패: {}", tempFile.getAbsolutePath(), e);
+        }
 
         if (durationStr == null) {
             log.error("⚠️ ffprobe 결과가 null입니다. 영상 길이를 분석하지 못했습니다.");
@@ -755,7 +767,7 @@ public class InterviewService {
     // Fast API 자소서 기반 질문 생성
     @Transactional
     public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
         if (!userId.equals(coverLetter.getUser().getUserId())) {
@@ -799,19 +811,17 @@ public class InterviewService {
         // fast API 요청 전송
         CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
 
-        CreateCoverLetterQuestionResponseDto responseDto = CreateCoverLetterQuestionResponseDto.builder()
+        return CreateCoverLetterQuestionResponseDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
                 .coverLetterQuestion(fastAPIResponseDto.getExpected_questions())
                 .build();
-
-        return responseDto;
     }
 
     // 면접 종료
     @Transactional
     public EndInterviewResponseDto endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
@@ -892,7 +902,7 @@ public class InterviewService {
             try {
                 jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("꼬리 질문 직렬화 실패", e);
+                throw new BaseException(SERIALIZATION_FAIL);
             }
 
             targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
@@ -937,10 +947,10 @@ public class InterviewService {
     }
 
     // 자소서 기반 경험 조회
-    public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds){
+    public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds) {
         List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
-        if(!experienceIds.isEmpty()){
-            for(Integer experienceId: experienceIds){
+        if (!experienceIds.isEmpty()) {
+            for (Integer experienceId : experienceIds) {
                 Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
                 experiences.add(
                         ExperienceFastAPIRequestDto.builder()
@@ -958,9 +968,9 @@ public class InterviewService {
     }
 
     // 자소서 기반 경험 조회
-    public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds){
+    public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds) {
         List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
-        for(Integer projectId:projectIds){
+        for (Integer projectId : projectIds) {
             Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
             projects.add(
                     ProjectFastAPIRequestDto.builder()
@@ -990,19 +1000,19 @@ public class InterviewService {
     }
 
     // 면접 피드백 상세 조회
-    public InterviewFeedbackResponseDto findInterviewFeedbackDetail(Integer interviewVideoId, Integer userId){
+    public InterviewFeedbackResponseDto findInterviewFeedbackDetail(Integer interviewVideoId, Integer userId) {
 
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+        userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewVideoId);
 
-        if(interviewVideo.getCoverLetterInterview() != null){
+        if (interviewVideo.getCoverLetterInterview() != null) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
-            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
-            if(!userId.equals(interview.getUser().getUserId())){
+            if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         }
@@ -1012,16 +1022,17 @@ public class InterviewService {
 
         List<InterviewFeedbackDetailDto> interviewFeedbackDetailList = new ArrayList<>();
 
-        for(InterviewAnswer answer:interviewAnswers){
+        for (InterviewAnswer answer : interviewAnswers) {
 
             // 답변 꼬리질문 String > List<String> 역직렬화
             List<String> followUpQuestions = new ArrayList<>();
             String rawJson = answer.getInterviewFollowUpQuestion();
             if (rawJson != null && !rawJson.isBlank()) {
                 try {
-                    followUpQuestions = new ObjectMapper().readValue(rawJson, new TypeReference<List<String>>() {});
+                    followUpQuestions = new ObjectMapper().readValue(rawJson, new TypeReference<List<String>>() {
+                    });
                 } catch (JsonProcessingException e) {
-                    throw new RuntimeException("꼬리 질문 역직렬화 실패", e);
+                    throw new BaseException(DESERIALIZATION_FAIL);
                 }
             }
 

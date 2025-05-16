@@ -10,7 +10,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetUrlRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.io.IOException;
 import java.util.UUID;
 
 @Slf4j
@@ -24,7 +23,7 @@ public class S3UploadService {
     private String bucketName;
 
     // S3에 영상 업로드
-    public String uploadVideo(MultipartFile file) throws IOException {
+    public String uploadVideo(MultipartFile file) {
         String originalFileName = file.getOriginalFilename();
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 

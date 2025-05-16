@@ -26,8 +26,7 @@ public class InterviewController {
     // cs 질문 목록 조회
     @GetMapping("/question/cs")
     public List<QuestionListResponseDto> csQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<QuestionListResponseDto> responseDto = interviewService.getCsQuestionList(userPrincipal.getUserId());
-        return responseDto;
+        return interviewService.getCsQuestionList(userPrincipal.getUserId());
     }
 
     @GetMapping("/question/cs/{questionId}")
@@ -38,8 +37,7 @@ public class InterviewController {
     // 인성 질문 목록 조회
     @GetMapping("/question/personality")
     public List<QuestionListResponseDto> personalityQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<QuestionListResponseDto> responseDto = interviewService.getPersonalityQuestionList(userPrincipal.getUserId());
-        return responseDto;
+        return interviewService.getPersonalityQuestionList(userPrincipal.getUserId());
     }
 
     @GetMapping("/question/personality/{questionId}")
@@ -51,8 +49,7 @@ public class InterviewController {
     @GetMapping("/question/cover-letter/{coverLetterId}")
     public List<QuestionListResponseDto> coverLetterQuestionList(@PathVariable("coverLetterId") Integer coverLetterId,
                                                                  @AuthenticationPrincipal UserPrincipal userPrincipal){
-        List<QuestionListResponseDto> responseDto = interviewService.getCoverLetterQuestionList(coverLetterId, userPrincipal.getUserId());
-        return responseDto;
+        return interviewService.getCoverLetterQuestionList(coverLetterId, userPrincipal.getUserId());
     }
 
     @GetMapping("/question/cover-letter/{coverLetterId}/{questionId}")

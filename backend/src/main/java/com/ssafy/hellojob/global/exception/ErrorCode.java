@@ -71,6 +71,7 @@ public enum ErrorCode {
     COVER_LETTER_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "자기소개서 기반 면접 질문을 찾을 수 없습니다."),
     COVER_LETTER_QUESTION_MISMATCH(HttpStatus.FORBIDDEN, "자기소개서 기반 면접 질문의 소유자와 요청 유저가 일치하지 않습니다."),
     INTERVIEW_MISMATCH(HttpStatus.FORBIDDEN, "면접 소유자와 요청 유저가 일치하지 않습니다."),
+    GET_VIDEO_LENGTH_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "영상 길이 추출에 실패했습니다."),
 
     // 메모
     QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
@@ -78,8 +79,9 @@ public enum ErrorCode {
     INTERVIEW_QUESTION_MEMO_MISMATCH(HttpStatus.FORBIDDEN, "메모 작성자와 요청 유저가 일치하지 않습니다."),
 
     // FastAPI
-    FAST_API_RESPONSE_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "AI 응답 중 에러가 발생하였습니다. 잠시 후 다시 시도해주세요.")
-
+    FAST_API_RESPONSE_ERROR(HttpStatus.SERVICE_UNAVAILABLE, "AI 응답 중 에러가 발생하였습니다. 잠시 후 다시 시도해주세요."),
+    SERIALIZATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "직렬화 실패"),
+    DESERIALIZATION_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "역직렬화 실패")
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.

@@ -54,7 +54,7 @@ public class JobRoleAnalysis extends BaseTimeEntity {
     private Integer jobRoleViewCount = 0;
 
     @Column(name = "public", nullable = false)
-    private Boolean isPublic = true;
+    private boolean isPublic = true;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "job_role_category")
@@ -62,7 +62,6 @@ public class JobRoleAnalysis extends BaseTimeEntity {
 
     @Column(name = "job_role_bookmark_count", nullable = false)
     private Integer jobRoleBookmarkCount = 0;
-
 
     @Builder
     public JobRoleAnalysis(User user,
