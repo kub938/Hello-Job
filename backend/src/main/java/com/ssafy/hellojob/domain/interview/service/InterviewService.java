@@ -667,6 +667,7 @@ public class InterviewService {
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
             log.debug("면접 invalid");
+            log.debug("interviewId: {}", interview.getInterviewId());
             log.debug("userId: {}", userId);
             log.debug("interviewUserId: {}", interview.getUser().getUserId());
             if (!userId.equals(interview.getUser().getUserId())) {
