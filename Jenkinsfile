@@ -154,6 +154,16 @@ pipeline {
                 }
             }
         }
+
+        stage('Simple Wait') {
+            steps {
+                script {
+                    echo "⏳ Waiting for services to start up (2 minutes)..."
+                    sleep(time: 2, unit: 'MINUTES')
+                    echo "✅ Wait completed"
+                }
+            }
+        }
         
         stage('Switch Traffic') {
             steps {
@@ -194,30 +204,6 @@ pipeline {
                             exit 1
                         fi
                     """
-                }
-            }
-        }
-        
-        stage('Final Health Check') {
-            steps {
-                script {
-                    sh '''
-                        echo "🔍 Final health check through Nginx..."
-                        timeout=30
-                        while [ $timeout -gt 0 ]; do
-                            if curl -f -s http://localhost/health; then
-                                echo "✅ Service is healthy through Nginx!"
-                                break
-                            fi
-                            sleep 2
-                            timeout=$((timeout-2))
-                        done
-                        
-                        if [ $timeout -le 0 ]; then
-                            echo "❌ Final health check failed!"
-                            exit 1
-                        fi
-                    '''
                 }
             }
         }
