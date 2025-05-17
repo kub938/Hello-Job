@@ -25,14 +25,8 @@ import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -69,6 +63,7 @@ public class InterviewService {
     private final UserReadService userReadService;
     private final CoverLetterContentService coverLetterContentService;
     private final FastApiClientService fastApiClientService;
+    private final S3UploadService s3UploadService;
 
     // polling 전 정의
     private static final int MAX_WAIT_SECONDS = 60;
@@ -82,12 +77,6 @@ public class InterviewService {
     @Value("${FFMPEG_PATH}")
     private String ffmpegPath;
 
-    @Value("${OPENAI_API_URL}")
-    private String openAiUrl;
-
-    @Value("${OPENAI_API_KEY}")
-    private String openAiKey;
-    private final S3UploadService s3UploadService;
 
     // cs 질문 목록 조회
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
@@ -484,12 +473,16 @@ public class InterviewService {
 
     // 문항 선택 면접 자소서 질문 선택
     public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto) {
-        userReadService.findUserByIdOrElseThrow(userId);
+        User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
         if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
-        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByCoverLetter(coverLetter);
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter);
+                    return coverLetterInterviewRepository.save(newInterview);
+                });
 
         InterviewVideo video = interviewVideoRepository.save(InterviewVideo.of(coverLetterInterview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER")));
 
@@ -653,73 +646,6 @@ public class InterviewService {
         interviewQuestionMemoRepository.delete(memo);
         return Map.of("message", "메모가 삭제되었습니다.");
     }
-
-    // stt
-    public String transcribeAudio(MultipartFile audioFile) {
-
-        if (audioFile.getSize() > 25 * 1024 * 1024) {
-            throw new BaseException(VIDEO_TOO_LARGE);
-        }
-
-        int maxRetries = 5;
-        int attempt = 0;
-
-        while (attempt < maxRetries) {
-            try {
-                RestTemplate restTemplate = new RestTemplate();
-
-                Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
-                    @Override
-                    public String getFilename() {
-                        return audioFile.getOriginalFilename();
-                    }
-                };
-
-                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-                body.add("file", audioResource);
-                body.add("model", "whisper-1");
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-                headers.setBearerAuth(openAiKey);
-
-                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                        openAiUrl,
-                        HttpMethod.POST,
-                        requestEntity,
-                        String.class
-                );
-
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    return objectMapper.readTree(response.getBody()).get("text").asText();
-                } else {
-                    throw new RuntimeException("Whisper STT 응답 실패: " + response.getStatusCode());
-                }
-
-            } catch (Exception e) {
-                attempt++;
-                if (attempt >= maxRetries) {
-                    return "stt 변환에 실패했습니다";
-                }
-
-                // 로그 출력 (선택)
-                System.out.println("⚠️ STT 변환 실패 - 재시도 중 (" + attempt + "/" + maxRetries + "): " + e.getMessage());
-
-                try {
-                    Thread.sleep(1000L * (long) attempt); // 점진적 대기: 1s, 2s, ...
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new BaseException(STT_TRANSCRIBE_INTERRUPTED);
-                }
-            }
-        }
-
-        return "stt 변환에 실패했습니다";
-    }
-
 
 
     // 한 문항 종료(면접 답변 저장)
