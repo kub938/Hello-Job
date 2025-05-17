@@ -8,6 +8,7 @@ export interface InterviewStore {
   selectCoverLetterId?: number | null;
   setSelectCategory: (category: InterviewCategory) => void;
   setSelectInterviewType: (type: InterviewType) => void;
+  setSelectCoverLetterId: (coverLetterId: number | null) => void;
 }
 
 export const useInterviewStore = create<InterviewStore>((set) => ({
