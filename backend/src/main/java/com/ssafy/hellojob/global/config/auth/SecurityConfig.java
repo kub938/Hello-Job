@@ -47,6 +47,7 @@ public class SecurityConfig {
                 //요청 권한 설정
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**", "/oauth2/**", "/login/**", "/error").permitAll()
+                        .requestMatchers("/sse/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
