@@ -32,15 +32,17 @@ function App() {
 
   useEffect(() => {
     if (isLoginAlert) {
-      toast("현재 로그아웃 상태입니다", {
-        id: "login-alert",
-        description: "다양한 기능 사용을 위해 로그인 해주세요.",
-        action: {
-          label: "로그인",
-          onClick: () => navigate("/login"),
-        },
-      });
-      setIsLoginAlert(false);
+      toast.info("현재 로그아웃 상태입니다.");
+      navigate("/login");
+      // toast("현재 로그아웃 상태입니다", {
+      //   id: "login-alert",
+      //   description: "다양한 기능 사용을 위해 로그인 해주세요.",
+      //   action: {
+      //     label: "로그인",
+      //     onClick: () => navigate("/login"),
+      //   },
+      // });
+      // setIsLoginAlert(false);
     }
   }, [isLoginAlert, setIsLoginAlert, navigate]);
 

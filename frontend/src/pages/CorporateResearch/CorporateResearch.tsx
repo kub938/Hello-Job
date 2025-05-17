@@ -14,6 +14,7 @@ import { getCompanyDetail } from "@/api/companyApi";
 
 interface CorporateReport {
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -24,19 +25,31 @@ interface CorporateReport {
   public: boolean;
 }
 
-function CorporateResearch() {
+export interface CorporateResearchProps {
+  type?: "modal";
+  companyId?: number;
+  modalClose?: () => void;
+}
+
+function CorporateResearch({
+  modalClose,
+  type,
+  companyId,
+}: CorporateResearchProps) {
   const params = useParams();
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalView, setModalView] = useState<"create" | "read">("create");
   const [researchId, setResearchId] = useState<number>(1);
+  const id = params.id ? params.id : String(companyId);
 
+  console.log(params.id ? "true" : "false");
   // tanstack query를 사용한 특정 기업의 모든 리포트 불러오기
   const { data: corporateReportListData, isLoading } = useQuery({
-    queryKey: ["corporateReportList", params.id],
+    queryKey: ["corporateReportList", id],
     queryFn: async () => {
       const response = await corporateReportApi.getCorporateReportList(
-        parseInt(params.id ? params.id : "1")
+        parseInt(id)
       );
       return response.data;
     },
@@ -46,9 +59,15 @@ function CorporateResearch() {
   const { data: companyDetail, isLoading: isDetailLoading } = useQuery({
     queryKey: ["companyDetail", params.id],
     queryFn: async () => {
-      const response = await getCompanyDetail(
-        parseInt(params.id ? params.id : "1")
-      );
+      let id;
+      if (params.id) {
+        id = parseInt(params.id);
+      } else if (companyId) {
+        id = companyId;
+      } else {
+        id = 1;
+      }
+      const response = await getCompanyDetail(id);
       return response.data;
     },
   });
@@ -61,6 +80,7 @@ function CorporateResearch() {
     const temp =
       corporateReportListData?.map((corporateReport) => ({
         companyAnalysisId: corporateReport.companyAnalysisId,
+        companyAnalysisTitle: corporateReport.companyAnalysisTitle,
         companyName: corporateReport.companyName,
         createdAt: corporateReport.createdAt,
         companyViewCount: corporateReport.companyViewCount,
@@ -72,7 +92,6 @@ function CorporateResearch() {
         public: corporateReport.public,
       })) || [];
     setCorporateReportList(temp);
-    debugger;
   }, [corporateReportListData]);
 
   const openCreateModal = () => {
@@ -91,8 +110,12 @@ function CorporateResearch() {
   };
 
   return (
-    <div className="flex flex-col justify-between w-full h-full p-6">
-      <h2 className="text-2xl font-bold mb-4">기업 분석 검색 결과</h2>
+    <div className="justify-between w-full h-full p-6">
+      <h2 className="text-2xl font-bold mb-4">
+        {type === "modal"
+          ? "사용하실 기업분석 레포트를 북마크해 주세요!"
+          : "기업 분석 검색 결과"}
+      </h2>
       {isDetailLoading ? (
         <h1 className="text-3xl font-bold mb-1">불러오는 중...</h1>
       ) : (
@@ -122,7 +145,10 @@ function CorporateResearch() {
               onClick={() => {
                 openReadModal(corporateReport.companyAnalysisId);
               }}
-              companyName={corporateReport.companyName}
+              modalClose={modalClose}
+              reportId={corporateReport.companyAnalysisId}
+              companyId={id}
+              companyAnalysisTitle={corporateReport.companyAnalysisTitle}
               createdAt={corporateReport.createdAt}
               companyViewCount={corporateReport.companyViewCount}
               companyLocation={corporateReport.companyLocation}
@@ -131,6 +157,8 @@ function CorporateResearch() {
               }
               bookmark={corporateReport.bookmark}
               dartCategory={corporateReport.dartCategory}
+              isPublic={corporateReport.public}
+              isFinding={type === "modal" ? true : false} //companyId가 있으면 자소서 작성 중임임
             />
           ))
         ) : (
@@ -141,32 +169,38 @@ function CorporateResearch() {
         )}
       </div>
 
-      <footer className="fixed left-0 bottom-0 w-full flex justify-center gap-4 pb-6 pt-10 bg-gradient-to-t from-[#FFFFFF]/70 via-[#FFFFFF]/70 to-transparent">
-        <Button
-          onClick={() => navigate(-1)}
-          variant={"white"}
-          className="text-base"
-        >
-          이전
-        </Button>
-        <Button
-          onClick={() => navigate(`/job-research/${params.id}`)}
-          variant={"default"}
-          className="text-base"
-        >
-          직무 분석으로
-        </Button>
-      </footer>
+      {type !== "modal" && (
+        <footer className="fixed left-0 bottom-0 w-full flex justify-center gap-4 pb-6 pt-10 bg-gradient-to-t from-[#FFFFFF]/70 via-[#FFFFFF]/70 to-transparent">
+          <Button
+            onClick={() => navigate(-1)}
+            variant={"white"}
+            className="text-base"
+          >
+            이전
+          </Button>
+          <Button
+            onClick={() => navigate(`/job-research/${params.id}`)}
+            variant={"default"}
+            className="text-base"
+          >
+            직무 분석으로
+          </Button>
+        </footer>
+      )}
 
       {isModalOpen && (
         <DetailModal isOpen={isModalOpen} onClose={closeModal}>
           {modalView === "create" ? (
             <CreateCorporate
               onClose={closeModal}
-              corporateId={parseInt(params.id ? params.id : "1")}
+              corporateId={parseInt(id ? id : "1")}
             />
           ) : (
-            <ReadCorporate onClose={closeModal} id={researchId} />
+            <ReadCorporate
+              onClose={closeModal}
+              id={researchId}
+              companyId={id}
+            />
           )}
         </DetailModal>
       )}

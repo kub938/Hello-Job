@@ -16,8 +16,13 @@ export const useCoverLetterStore = create<ChatStore>((set) => ({
       chatLog: [
         {
           sender: "ai",
-          message:
-            "안녕하세요! 초안작성을 도와드립니다! 궁금하신점을 수정할 수 있도록 도와드려요!",
+          message: `안녕하세요!
+저는 당신의 자소서 멘토, 제트예요! 
+문장 하나하나를 꼼꼼히 다듬고,
+지원하는 직무와 기업에 맞는 방향성까지 안내해 드려요.
+
+단순한 교정이 아닌,
+진짜 설득력 있는 자소서를 함께 만들어봐요! 📝`,
         },
         ...chatLogData,
       ],
@@ -141,5 +146,18 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
           contents,
         },
       })),
+    updateContent: (
+      contentIndex: number,
+      updatedData: Partial<CoverLetterRequestContent>
+    ) => {
+      set((state) => ({
+        inputData: {
+          ...state.inputData,
+          contents: state.inputData.contents.map((content, index) =>
+            index === contentIndex ? { ...content, ...updatedData } : content
+          ),
+        },
+      }));
+    },
   })
 );

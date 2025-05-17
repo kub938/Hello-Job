@@ -1,9 +1,10 @@
 import { Input } from "@/components/ui/input";
 import GradientCard from "../../components/GradientCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SelectModal from "./components/SelectModal";
 import { corporateListApi } from "@/api/corporateReport";
 import { useQuery } from "@tanstack/react-query";
+import { timeParser } from "@/hooks/timeParser";
 
 // 인터페이스 수정
 interface CorporateData {
@@ -20,13 +21,27 @@ function CorporateSearch() {
   const [selectedCorporate, setSelectedCorporate] = useState("");
   const [selectedCorporateId, setSelectedCorporateId] = useState("");
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
 
-  // tanstack query를 사용한 데이터 불러오기
+  // 검색어 디바운스 처리
+  useEffect(() => {
+    const timerId = setTimeout(() => {
+      setDebouncedKeyword(searchKeyword);
+      //console.log(searchKeyword);
+    }, 300); // 0.3초 지연
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [searchKeyword]);
+
+  // tanstack query를 사용한 데이터 불러오기 (디바운스된 검색어 사용)
   const { data: corporateList, isLoading } = useQuery({
-    queryKey: ["corporateList", searchKeyword],
+    queryKey: ["corporateList", debouncedKeyword],
     queryFn: async () => {
-      const response = await corporateListApi.getCorporateList(searchKeyword);
-      debugger;
+      const response = await corporateListApi.getCorporateList(
+        debouncedKeyword
+      );
       return response.data;
     },
   });
@@ -39,7 +54,7 @@ function CorporateSearch() {
       corSize: company.companySize,
       industryName: company.companyIndustry,
       region: company.companyLocation,
-      updatedAt: "1시간 전", // 하드코딩된 업데이트 시간
+      updatedAt: company.updatedAt, // 하드코딩된 업데이트 시간
     })) || [];
 
   const handleCardClick = (corName: string, id: string) => {
@@ -70,7 +85,7 @@ function CorporateSearch() {
           />
         </div>
         <h2 className="w-full text-2xl font-bold mb-[2vh]">기업 목록</h2>
-        <div className="flex justify-start gap-4 w-[968px] mx-auto flex-wrap pb-[196px]">
+        <div className="flex justify-start gap-4 w-[968px] mx-auto flex-wrap pb-[212px]">
           {isLoading ? (
             <div>로딩 중...</div>
           ) : corporates.length > 0 ? (
@@ -79,20 +94,23 @@ function CorporateSearch() {
                 key={corporate.id}
                 id={corporate.id}
                 width={230}
-                height={360}
+                height={376}
                 initialWidth={230}
                 initialHeight={180}
                 corName={corporate.corName}
                 corSize={corporate.corSize}
                 industryName={corporate.industryName}
                 region={corporate.region}
-                updatedAt={corporate.updatedAt}
+                updatedAt={timeParser(corporate.updatedAt)}
                 isGradient={true}
                 onClick={() => handleCardClick(corporate.corName, corporate.id)}
               />
             ))
           ) : (
-            <div>검색 결과가 없습니다.</div>
+            <div>
+              현재는 Dart에서 지원하는 상장 기업만 등장합니다. 검색 결과가
+              없습니다.
+            </div>
           )}
         </div>
       </div>

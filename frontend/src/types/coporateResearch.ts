@@ -5,6 +5,7 @@ export interface getCorporateListResponse {
   companyLocation: string;
   companySize: string;
   companyIndustry: string;
+  updatedAt: string;
 }
 //특정 기업 상세 API
 export interface getCompanyDetailResponse {
@@ -28,6 +29,7 @@ export interface postBookmarkResponse {
 //특정 기업 분석 레포트 목록 API
 export interface getCorporateReportListResponse {
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -43,6 +45,7 @@ export interface getCorporateReportListResponse {
 //특정 기업 분석 레포트 상세 API
 export interface getCorporateReportDetailResponse {
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -55,11 +58,12 @@ export interface getCorporateReportDetailResponse {
   newsAnalysisDate: string;
   newsAnalysisUrl: string[];
   dartBrand: string;
-  dartCurrIssue: string;
+  dartCompanyAnalysis: string;
   dartVision: string;
   dartFinancialSummery: string;
   dartCategory: string[];
   public: boolean;
+  userPrompt: string;
 }
 
 //기업 분석 생성 API
@@ -69,6 +73,8 @@ export interface postCorporateReportRequest {
   basic: boolean;
   plus: boolean;
   financial: boolean;
+  userPrompt: string;
+  companyAnalysisTitle: string;
 }
 
 export interface postCorporateReportResponse {

@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ErrorBoundary } from "react-error-boundary";
 import Loading from "./components/Loading/Loading.tsx";
 import RouterErrorHandler from "./components/Error/RouterErrorHandler.tsx";
+// import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
       <Suspense fallback={<Loading />}>
         <RouterProvider router={router} />
       </Suspense>
+      {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   </ErrorBoundary>
 );

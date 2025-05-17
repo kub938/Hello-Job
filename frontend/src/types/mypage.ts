@@ -57,3 +57,144 @@ export interface GetCoverLetterListResponse {
   numberOfElements: number; // 현재 페이지에 남긴 데이터 개수
   empty: boolean; // 현재 페이지 데이터가 비어있는지 여부
 }
+
+// 자기소개서 삭제 응답 인터페이스
+export interface DeleteCoverLetterResponse {
+  message: string;
+}
+
+// 내 프로젝트 불러오기기
+export interface MyProject {
+  projectId: number;
+  projectName: string;
+  projectIntro: string;
+  projectSkills: string;
+  updatedAt: string;
+}
+
+export interface GetMyProjectListResponse {
+  content: MyProject[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  numberOfElements: number;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  empty: boolean;
+}
+
+export interface GetMyProjectDetailResponse {
+  projectId: number;
+  projectName: string;
+  projectIntro: string;
+  projectRole: string;
+  projectSkills: string;
+  projectStartDate: string;
+  projectEndDate: string;
+  projectDetail: string;
+  projectClient: string;
+  updatedAt: string;
+}
+
+export interface UpdateMyProjectRequest {
+  projectName: string;
+  projectIntro: string;
+  projectRole: string;
+  projectSkills: string; // ", "(쉼표 + 띄어쓰기)로 구분
+  projectStartDate: string;
+  projectEndDate: string;
+  projectDetail: string;
+  projectClient: string;
+}
+export interface UpdateMyProjectResponse {
+  message: string;
+}
+
+export interface DeleteMyProjectResponse {
+  message: string;
+}
+
+// 내 경험 불러오기
+export interface MyExperience {
+  experienceId: number;
+  experienceName: string;
+  experienceRole: string;
+  updatedAt: string;
+}
+
+export interface GetMyExperienceListResponse {
+  content: MyExperience[];
+  pageable: {
+    pageNumber: number;
+    pageSize: number;
+    sort: {
+      empty: boolean;
+      sorted: boolean;
+      unsorted: boolean;
+    };
+    offset: number;
+    paged: boolean;
+    unpaged: boolean;
+  };
+  last: boolean;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  numberOfElements: number;
+  size: number;
+  number: number;
+  sort: {
+    empty: boolean;
+    sorted: boolean;
+    unsorted: boolean;
+  };
+  empty: boolean;
+}
+
+export interface GetMyExperienceDetailResponse {
+  experienceId: number;
+  experienceName: string;
+  experienceDetail: string;
+  experienceRole: string;
+  experienceStartDate: string;
+  experienceEndDate: string;
+  experienceClient: string;
+  updatedAt: string;
+}
+
+export interface UpdateMyExperienceRequest {
+  experienceName: string;
+  experienceDetail: string;
+  experienceRole: string;
+  experienceStartDate: string;
+  experienceEndDate: string;
+  experienceClient: string;
+}
+export interface UpdateMyExperienceResponse {
+  message: string;
+}
+export interface DeleteMyExperienceResponse {
+  message: string;
+}
+
+export interface GetTokenResponse {
+  token: number;
+}

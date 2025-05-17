@@ -1,18 +1,25 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FaRegBookmark, FaBookmark } from "react-icons/fa";
+import { FaRegBookmark, FaBookmark, FaLock } from "react-icons/fa";
 import { useState, useEffect } from "react";
 import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { Button } from "@/components/Button";
+import Modal from "@/components/Modal";
+import JobInfo from "./JobInfo";
+import JobEdit from "./JobEdit";
 
 interface ReadJobProps {
   onClose: () => void;
   id: number;
+  companyId: string;
 }
 
-function ReadJob({ onClose, id }: ReadJobProps) {
+function ReadJob({ onClose, id, companyId }: ReadJobProps) {
   const queryClient = useQueryClient();
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isValidId, setIsValidId] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+
   // id 유효성 검사
   useEffect(() => {
     if (Number.isInteger(id) && id > 0) {
@@ -32,6 +39,19 @@ function ReadJob({ onClose, id }: ReadJobProps) {
     enabled: isValidId,
   });
 
+  // 직무 분석 레포트 삭제 mutation
+  const { mutate: deleteJob } = useMutation({
+    mutationFn: () => jobRoleAnalysis.deleteJobRoleAnalysis(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["jobResearchList", companyId],
+      });
+      // 마이 페이지 직무 목록도 갱싱해야 함
+      // queryClient.invalidateQueries({ queryKey: ["jobResearchList", companyId] });
+      onClose();
+    },
+  });
+
   // jobDetail이이 변경될 때 북마크 상태 업데이트
   useEffect(() => {
     if (jobDetail) {
@@ -48,7 +68,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["jobRoleList"] });
+      queryClient.invalidateQueries({ queryKey: ["jobRoleList", companyId] });
     },
   });
 
@@ -61,7 +81,7 @@ function ReadJob({ onClose, id }: ReadJobProps) {
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", id],
       });
-      queryClient.invalidateQueries({ queryKey: ["jobRoleList"] });
+      queryClient.invalidateQueries({ queryKey: ["jobRoleList", companyId] });
     },
   });
   // 북마크 토글 핸들러
@@ -77,13 +97,42 @@ function ReadJob({ onClose, id }: ReadJobProps) {
     return new Date(dateString).toLocaleDateString("ko-KR");
   };
 
+  const handleEditMode = () => {
+    setIsEditMode(!isEditMode);
+  };
+
+  const handleEditComplete = () => {
+    setIsEditMode(false);
+  };
+
+  const handleDeleteClick = () => {
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    deleteJob();
+    setIsDeleteModalOpen(false);
+  };
+
   return (
     <div className="h-[90vh] w-[940px] bg-white rounded-t-xl py-8 px-12 overflow-y-auto">
       <header className="flex w-full justify-between items-end mb-6">
         <div>
           <h1 className="text-2xl font-bold mb-1">
-            {isLoading || !jobDetail ? "로딩 중..." : jobDetail.companyName} -{" "}
-            {isLoading || !jobDetail ? "" : jobDetail.jobRoleAnalysisTitle}
+            {isLoading || !jobDetail ? (
+              "로딩 중..."
+            ) : (
+              <>
+                {jobDetail.isPublic === false && (
+                  <FaLock
+                    className="inline-block mr-2 text-gray-500"
+                    size={16}
+                  />
+                )}
+                {jobDetail.companyName}
+              </>
+            )}{" "}
+            - {isLoading || !jobDetail ? "" : jobDetail.jobRoleAnalysisTitle}
           </h1>
           <p className="text-gray-500 text-sm">
             {isLoading || !jobDetail ? "" : jobDetail.jobRoleCategory} | 작성일:{" "}
@@ -107,75 +156,71 @@ function ReadJob({ onClose, id }: ReadJobProps) {
         <div className="flex justify-center items-center h-64">
           <p className="text-lg">로딩 중...</p>
         </div>
-      ) : (
-        <div className="space-y-8">
-          {/* 카테고리 및 조회수 정보 */}
-          <div className="flex justify-between items-center py-3 border-b border-gray-200">
-            <span className="px-3 py-1 bg-[#6F52E0]/10 text-[#6F52E0] rounded-md text-sm">
-              {jobDetail.jobRoleName}
-            </span>
-            <div className="text-sm text-gray-500">
-              <span>조회수: {jobDetail.jobRoleViewCount}</span>
-              <span className="mx-2">|</span>
-              <span>북마크: {jobDetail.jobRoleAnalysisBookmarkCount}</span>
-            </div>
+      ) : isEditMode ? (
+        <>
+          <JobEdit
+            onEditComplete={handleEditComplete}
+            jobDetail={jobDetail}
+            jobId={id}
+            companyId={companyId}
+          />
+          <div className="mt-12 flex justify-center gap-4">
+            <Button
+              className="px-4 text-base"
+              onClick={() => handleEditMode()}
+              variant="white"
+            >
+              취소
+            </Button>
+            <Button
+              className="px-4 text-base"
+              variant="default"
+              type="submit"
+              form="job-edit-form"
+            >
+              수정 완료
+            </Button>
           </div>
-
-          {/* 주요 업무 */}
-          <section>
-            <h2 className="text-lg font-bold mb-2">주요 업무</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-line">
-              {jobDetail.jobRoleWork}
-            </div>
-          </section>
-
-          {/* 기술 스택 */}
-          <section>
-            <h2 className="text-lg font-bold mb-2">기술 스택</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-line">
-              {jobDetail.jobRoleSkills
-                ? jobDetail.jobRoleSkills
-                : "등록된 정보가 없습니다."}
-            </div>
-          </section>
-
-          {/* 자격 요건 */}
-          <section>
-            <h2 className="text-lg font-bold mb-2">자격 요건</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-line">
-              {jobDetail.jobRoleRequirements
-                ? jobDetail.jobRoleRequirements
-                : "등록된 정보가 없습니다."}
-            </div>
-          </section>
-
-          {/* 우대 사항 */}
-          <section>
-            <h2 className="text-lg font-bold mb-2">우대 사항</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-line">
-              {jobDetail.jobRolePreferences
-                ? jobDetail.jobRolePreferences
-                : "등록된 정보가 없습니다."}
-            </div>
-          </section>
-
-          {/* 기타 정보 */}
-          <section>
-            <h2 className="text-lg font-bold mb-2">커스텀 정보 & 프롬프트</h2>
-            <div className="p-4 bg-gray-50 rounded-lg whitespace-pre-line">
-              {jobDetail.jobRoleEtc
-                ? jobDetail.jobRoleEtc
-                : "등록된 정보가 없습니다."}
-            </div>
-          </section>
-        </div>
+        </>
+      ) : (
+        <>
+          <JobInfo jobDetail={jobDetail} />
+          <div className="mt-8 flex gap-4 justify-end">
+            {jobDetail?.writtenByMe && (
+              <>
+                <Button
+                  className="px-6"
+                  variant="white"
+                  onClick={() => handleEditMode()}
+                >
+                  수정
+                </Button>
+                <Button
+                  className="px-6 hover:bg-red-600 hover:text-white hover:border-red-600 active:bg-red-700 active:text-white active:border-red-700"
+                  variant="white"
+                  onClick={handleDeleteClick}
+                >
+                  삭제
+                </Button>
+              </>
+            )}
+            <Button className="px-6" onClick={onClose}>
+              창 닫기
+            </Button>
+          </div>
+        </>
       )}
 
-      <div className="mt-8 text-end">
-        <Button className="px-6" onClick={onClose}>
-          창 닫기
-        </Button>
-      </div>
+      {/* 삭제 확인 모달 */}
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="프로젝트 삭제"
+        warning={true}
+      >
+        <p>정말 삭제하시겠습니까?</p>
+      </Modal>
     </div>
   );
 }

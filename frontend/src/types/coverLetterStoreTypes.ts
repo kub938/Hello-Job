@@ -44,4 +44,8 @@ export interface CoverLetterInputStoreType {
 
   addQuestion: () => void;
   setAllQuestions: (contents: CoverLetterRequestContent[]) => void;
+  updateContent: (
+    contentIndex: number,
+    updatedData: Partial<CoverLetterRequestContent>
+  ) => void;
 }

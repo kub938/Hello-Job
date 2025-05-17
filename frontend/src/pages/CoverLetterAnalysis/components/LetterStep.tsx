@@ -1,11 +1,8 @@
-import { Button } from "@/components/Button";
-
 interface LetterStepProps {
   nowStep: number;
-  handleStep: (stepNum: number) => void;
 }
 
-function LetterStep({ nowStep, handleStep }: LetterStepProps) {
+function LetterStep({ nowStep }: LetterStepProps) {
   const stepTitle = [
     "기업/직무 입력",
     "1. 기업분석",
@@ -21,22 +18,12 @@ function LetterStep({ nowStep, handleStep }: LetterStepProps) {
   };
 
   return (
-    <aside className="sticky  bg-white top-20 border w-[18rem] h-full flex flex-col items-center gap-5 p-10 ">
+    <aside className="select-none sticky  bg-white top-20 border w-[18rem] h-full flex flex-col items-center gap-5 p-10 ">
       {stepTitle.map((title, index) => (
-        <div
-          key={index}
-          className={stepStyle(nowStep === index)}
-          onClick={() => handleStep(index)}
-        >
+        <div key={index} className={stepStyle(nowStep === index)}>
           {title}
         </div>
       ))}
-      <div className="flex gap-5">
-        <Button variant={"white"} size="lg">
-          이전
-        </Button>
-        <Button size="lg">다음</Button>
-      </div>
     </aside>
   );
 }

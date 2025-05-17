@@ -59,6 +59,7 @@ export interface JobBookMarkResponse {
 export interface CompanyBookMarkResponse {
   companyAnalysisBookmarkId: number;
   companyAnalysisId: number;
+  companyAnalysisTitle: string;
   companyName: string;
   createdAt: string;
   companyViewCount: number;
@@ -67,6 +68,7 @@ export interface CompanyBookMarkResponse {
   companyIndustry: string;
   companyAnalysisBookmarkCount: number;
   bookmark: boolean;
+  dartCategory: string[];
   public: boolean;
 }
 

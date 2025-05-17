@@ -15,9 +15,17 @@ interface sendMessageRequest {
   contentDetail: string;
 }
 
+export interface postCoverLetterResponse {
+  coverLetterId: number;
+  firstContentId: number;
+  message: string;
+}
 export const coverLetterApi = {
   postCoverLetter: (postCoverLetterRequest: CoverLetterPostRequest) => {
-    return authApi.post("/api/v1/cover-letter", postCoverLetterRequest);
+    return authApi.post<postCoverLetterResponse>(
+      "/api/v1/cover-letter",
+      postCoverLetterRequest
+    );
   },
   getCoverLetter: (contentId: number) => {
     return authApi.get<getCoverLetterResponse>(

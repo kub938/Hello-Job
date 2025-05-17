@@ -3,6 +3,8 @@ import {
   getJobRoleDetail,
   postJobBookmarkRequest,
   postJobRoleAnalysisRequest,
+  putJobRoleAnalysisRequest,
+  putJobRoleAnalysisResponse,
 } from "@/types/jobResearch";
 import { api } from "./api";
 import { authApi } from "./instance";
@@ -14,9 +16,10 @@ export const jobRoleAnalysis = {
     );
   },
 
-  getAllJobList: (companyId: number) => {
+  getAllJobList: (companyId: number, jobRoleCategory?: string) => {
     return authApi.get<getAllJobList[]>(
-      `/api/v1/job-role-analysis/${companyId}/search`
+      `/api/v1/job-role-analysis/${companyId}/search`,
+      { params: { jobRoleCategory } }
     );
   },
 
@@ -45,5 +48,18 @@ export const jobRoleAnalysis = {
       `/api/v1/job-role-analysis`,
       postJobRoleAnalysisRequest
     );
+  },
+
+  putJobRoleAnalysis: (
+    putJobRoleAnalysisRequest: putJobRoleAnalysisRequest
+  ) => {
+    return authApi.put<putJobRoleAnalysisResponse>(
+      `/api/v1/job-role-analysis`,
+      putJobRoleAnalysisRequest
+    );
+  },
+
+  deleteJobRoleAnalysis: (jobRoleAnalysisId: number) => {
+    return authApi.delete(`/api/v1/job-role-analysis/${jobRoleAnalysisId}`);
   },
 };

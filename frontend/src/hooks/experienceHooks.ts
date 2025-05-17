@@ -3,7 +3,7 @@ import {
   GetExperienceResponse,
   PostExperienceRequest,
 } from "@/api/experienceApi";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useGetExperiences = () => {
   return useQuery<GetExperienceResponse[]>({
@@ -16,11 +16,16 @@ export const useGetExperiences = () => {
 };
 
 export const usePostExperience = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["experienceFormData"],
     mutationFn: async (experienceFormData: PostExperienceRequest) => {
       const response = await experienceApi.postExperience(experienceFormData);
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["experiences"] });
     },
   });
 };
