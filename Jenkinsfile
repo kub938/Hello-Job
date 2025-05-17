@@ -5,7 +5,8 @@ pipeline {
         DOCKER_COMPOSE = 'docker-compose'
         // 현재 활성 환경 확인 (nginx 설정 기반)
         CURRENT_ENV = sh(script: '''
-            if grep -q "weight=100" /etc/nginx/conf.d/default.conf | grep -q "blue"; then
+            # Docker 명령을 사용하여 nginx 설정 파일을 확인
+            if docker exec nginx-proxy grep -q "server backend-blue:8080 weight=100" /etc/nginx/conf.d/default.conf; then
                 echo "blue"
             else
                 echo "green"
@@ -39,15 +40,16 @@ pipeline {
                     echo "New Environment: ${NEW_ENV}"
                     
                     // 공유 서비스 시작 (처음 실행 시)
-                   sh '''
+                sh """
                         # 먼저 필요한 네트워크 생성
-                        docker network create shared-network || true
+                        ${DOCKER_COMPOSE} network create shared-network || true
                         
-                        if ! docker ps | grep -q nginx-proxy; then
+                        # nginx-proxy 컨테이너 확인
+                        if ! ${DOCKER_COMPOSE} ps | grep -q nginx-proxy; then
                             echo "Starting shared services..."
-                            docker-compose -f docker-compose.shared.yml up -d
+                            ${DOCKER_COMPOSE} -f docker-compose.shared.yml up -d
                         fi
-                    '''
+                    """
                 }
             }
         }
@@ -158,8 +160,8 @@ pipeline {
         stage('Simple Wait') {
             steps {
                 script {
-                    echo "⏳ Waiting for services to start up (2 minutes)..."
-                    sleep(time: 2, unit: 'MINUTES')
+                    echo "⏳ Waiting for services to start up (10 seconds)..."
+                    sleep(time: 10, unit: 'SECONDS')
                     echo "✅ Wait completed"
                 }
             }
@@ -168,11 +170,10 @@ pipeline {
         stage('Switch Traffic') {
             steps {
                 script {
+                    echo "🔄 Switching traffic to ${NEW_ENV} environment..."
+                    
                     sh """
-                        echo "🔄 Switching traffic to ${NEW_ENV} environment..."
-                        
-                        # Nginx 컨테이너 내에서 설정 파일 수정
-                        docker exec nginx-proxy bash -c '
+                        ${DOCKER_COMPOSE} exec nginx-proxy bash -c '
                             # Nginx 설정 파일 백업
                             cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.backup || echo "Backup failed but continuing"
                             
@@ -247,16 +248,15 @@ pipeline {
             script {
                 def userName = getUserName()
                 
-                // 롤백 시도
+                // 롤백 로직...
                 sh """
-                    echo "🔄 Rolling back to ${CURRENT_ENV} environment..."
-                    docker-compose -f docker-compose.${NEW_ENV}.yml down
-                    
                     # Nginx 설정 롤백
-                    if [ -f /etc/nginx/conf.d/default.conf.backup ]; then
-                        cp /etc/nginx/conf.d/default.conf.backup /etc/nginx/conf.d/default.conf
-                        nginx -s reload
-                    fi
+                    docker exec nginx-proxy bash -c '
+                        if [ -f /etc/nginx/conf.d/default.conf.backup ]; then
+                            cp /etc/nginx/conf.d/default.conf.backup /etc/nginx/conf.d/default.conf
+                            nginx -s reload
+                        fi
+                    ' || echo "Nginx rollback failed"
                 """
                 
                 sh "${DOCKER_COMPOSE} logs > pipeline_failure.log"
