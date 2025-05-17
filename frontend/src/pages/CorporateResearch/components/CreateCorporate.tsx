@@ -42,7 +42,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
     },
     gcTime: 1000,
     onSuccess: () => {
-      toast.success("기업 분석이 완료되었습니다.");
+      // toast.success("기업 분석이 완료되었습니다.");
       setIsSubmitting(false);
       // 페이지 이동시키기
       onClose();
@@ -100,7 +100,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const onSubmitClicked = (e: React.BaseSyntheticEvent) => {
     e?.preventDefault();
     if (isSubmitting) return; // 연속 클릭 방지
-    toast.success("분석 요청을 보냈습니다.");
+    toast.success("분석 요청을 보냈습니다.\n 완료 시 알림을 보내드립니다.");
     setIsSubmitting(true);
     handleSubmit(onValidSubmit, onInvalidSubmit)();
   };
