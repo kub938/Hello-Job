@@ -70,7 +70,7 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
         onClick={() => onEdit(schedule)}
         className={`flex h-6 items-center ${bgColor} rounded-xl px-2 py-1 text-xs cursor-pointer`}
       >
-        <span className="truncate max-w-[50px]">
+        <span className="truncate max-w-[52px]">
           {schedule.scheduleStatusName}
         </span>
       </button>
