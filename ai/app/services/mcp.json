@@ -16,15 +16,13 @@
             }
         },
         "sequential-thinking": {
-            "command": "/usr/bin/npx",
+            "command": "/usr/bin/node",
             "args": [
-                "-y",
-                "@smithery/cli@latest",
-                "run",
-                "@smithery-ai/server-sequential-thinking",
-                "--key",
-                "a6c0e55b-6ef1-44f7-83af-aac975f23805"
-            ]
+                "/root/hellojob/app/mcp/sequentialthinking/dist/index.js"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--max-http-header-size=16384"
+            }
         }
     }
 }
