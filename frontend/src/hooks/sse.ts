@@ -1,26 +1,41 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-// import { useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
-const baseURL = import.meta.env.DEV ? "" : "http://localhost:8080";
+export default function useSSE(isLoggedIn: boolean) {
+  const navigate = useNavigate();
 
-export default function useSSE(userId: number) {
-  // const navigate = useNavigate();
   useEffect(() => {
+    if (!isLoggedIn) return;
+
     const eventSource = new EventSource(
-      `${baseURL}/api/v1/users/${userId}/sse/subscribe`
+      "https://k12b105.p.ssafy.io/api/v1/sse/subscribe"
     );
 
-    // event 이름이 없는 일반 메시지
-    eventSource.onmessage = (e: MessageEvent) => {
-      console.log("📨 일반 메시지:", e.data);
-    };
-
-    // 커스텀 이벤트 수신
-    eventSource.addEventListener("company-analysis-completed", () => {
-      // const companyAnalysisId = JSON.parse(e.data);
-      toast.success("기업 분석이 완료되었습니다.");
+    // 핑 이벤트 수신
+    eventSource.addEventListener("ping", (e: MessageEvent) => {
+      console.debug("📨 핑 이벤트:", e.data);
     });
+
+    // 기업 분석 완료 이벤트 수신
+    eventSource.addEventListener(
+      "company-analysis-completed",
+      (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        console.log("기업 분석 완료 이벤트:", data);
+        const { companyId, companyAnalysisId } = data;
+        toast("기업 분석이 완료되었습니다!", {
+          description: "결과를 확인하려면 클릭하세요",
+          action: {
+            label: "보러가기",
+            onClick: () =>
+              navigate(
+                `/corporate-research?companyId=${companyId}&openId=${companyAnalysisId}`
+              ),
+          },
+        });
+      }
+    );
 
     eventSource.onerror = (err) => {
       console.error("SSE 오류:", err);
@@ -29,5 +44,5 @@ export default function useSSE(userId: number) {
     return () => {
       eventSource.close();
     };
-  }, [userId]);
+  }, [isLoggedIn]);
 }
