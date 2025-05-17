@@ -83,10 +83,10 @@ public class InterviewService {
     private String ffmpegPath;
 
     @Value("${OPENAI_API_URL}")
-    private static String openAiUrl;
+    private String openAiUrl;
 
     @Value("${OPENAI_API_KEY}")
-    private static String openAiKey;
+    private String openAiKey;
     private final S3UploadService s3UploadService;
 
     // cs 질문 목록 조회
@@ -656,46 +656,70 @@ public class InterviewService {
 
     // stt
     public String transcribeAudio(MultipartFile audioFile) {
-        try {
-            RestTemplate restTemplate = new RestTemplate();
 
-            // 파일 리소스로 변환
-            Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return audioFile.getOriginalFilename();
-                }
-            };
-
-            // Form 데이터 생성
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", audioResource);
-            body.add("model", "whisper-1");
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            headers.setBearerAuth(openAiKey);
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    openAiUrl,
-                    HttpMethod.POST,
-                    requestEntity,
-                    String.class
-            );
-
-            // text만 추출
-            if (response.getStatusCode().is2xxSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.readTree(response.getBody()).get("text").asText();
-            } else {
-                return "stt 변환에 실패했습니다";
-            }
-        } catch (Exception e) {
-            return "stt 변환에 실패했습니다";
+        if (audioFile.getSize() > 25 * 1024 * 1024) {
+            throw new BaseException(VIDEO_TOO_LARGE);
         }
+
+        int maxRetries = 5;
+        int attempt = 0;
+
+        while (attempt < maxRetries) {
+            try {
+                RestTemplate restTemplate = new RestTemplate();
+
+                Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
+                    @Override
+                    public String getFilename() {
+                        return audioFile.getOriginalFilename();
+                    }
+                };
+
+                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+                body.add("file", audioResource);
+                body.add("model", "whisper-1");
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+                headers.setBearerAuth(openAiKey);
+
+                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+                ResponseEntity<String> response = restTemplate.exchange(
+                        openAiUrl,
+                        HttpMethod.POST,
+                        requestEntity,
+                        String.class
+                );
+
+                if (response.getStatusCode().is2xxSuccessful()) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    return objectMapper.readTree(response.getBody()).get("text").asText();
+                } else {
+                    throw new RuntimeException("Whisper STT 응답 실패: " + response.getStatusCode());
+                }
+
+            } catch (Exception e) {
+                attempt++;
+                if (attempt >= maxRetries) {
+                    return "stt 변환에 실패했습니다";
+                }
+
+                // 로그 출력 (선택)
+                System.out.println("⚠️ STT 변환 실패 - 재시도 중 (" + attempt + "/" + maxRetries + "): " + e.getMessage());
+
+                try {
+                    Thread.sleep(1000L * (long) attempt); // 점진적 대기: 1s, 2s, ...
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                    throw new BaseException(STT_TRANSCRIBE_INTERRUPTED);
+                }
+            }
+        }
+
+        return "stt 변환에 실패했습니다";
     }
+
 
 
     // 한 문항 종료(면접 답변 저장)
