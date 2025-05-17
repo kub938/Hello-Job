@@ -27,7 +27,7 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
     user_prompt = request.user_prompt
     
     # company_analysis_all 함수를 호출하여 MCP 서버 설정을 한 번만 수행
-    result = await company_analysis_all(company_name, base, plus, fin, user_prompt)
+    result = await company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
     
     response = {
         "company_name": company_name,  # 기업 명
@@ -41,25 +41,7 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
         "news_summary": result["news_summary"],  # 기업 뉴스 요약
         "news_urls": result["news_urls"],  # 기업 뉴스 링크
         
-        "swot": {
-            "strengths": {
-                "contents": [],
-                "tags": []
-            },
-            "weaknesses": {
-                "contents": [],
-                "tags": []
-            },
-            "opportunities": {
-                "contents": [],
-                "tags": []
-            },
-            "threats": {
-                "contents": [],
-                "tags": []
-            },
-            "swot_summary": ""
-        }
+        "swot": result["swot"]
         
     }
     return response

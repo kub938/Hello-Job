@@ -48,8 +48,35 @@ class CompanyAnalysisFin(BaseModel):
     operating_cash_flow: str = None  # 영업활동 현금흐름
     investing_cash_flow: str = None  # 투자활동 현금흐름
     financing_cash_flow: str = None  # 재무활동 현금흐름
-    
 
+# SWOT 분석 강점
+class SwotStrengths(BaseModel):
+    contents: List[str] = None
+    tags: List[str] = None
+
+# SWOT 분석 약점
+class SwotWeaknesses(BaseModel):
+    contents: List[str] = None
+    tags: List[str] = None
+
+# SWOT 분석 기회
+class SwotOpportunities(BaseModel):
+    contents: List[str] = None
+    tags: List[str] = None
+
+# SWOT 분석 위협
+class SwotThreats(BaseModel):
+    contents: List[str] = None
+    tags: List[str] = None
+    
+# SWOT: 기업 swot 분석
+class CompanyAnalysisSwot(BaseModel):
+    strengths: Optional[SwotStrengths] = None  # 강점
+    weaknesses: Optional[SwotWeaknesses] = None  # 약점
+    opportunities: Optional[SwotOpportunities] = None  # 기회
+    threats: Optional[SwotThreats] = None  # 위협
+    swot_summary: Optional[str] = None  # SWOT 종합 분석 및 시사점
+    
 
 class CompanyNews(BaseModel):
     summary: str  # 기업 뉴스 요약
@@ -65,3 +92,4 @@ class CompanyAnalysisResponse(BaseModel):
     company_finance: str  # 재정상황
     news_summary: str  # 뉴스 기사 분석 요약
     news_urls: list[str]  # 뉴스 링크 리스트 
+    swot: CompanyAnalysisSwot  # SWOT 분석 결과

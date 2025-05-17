@@ -1,8 +1,17 @@
+"""
+MCP(Model Control Protocol) 서버 초기화 및 관리 모듈
+"""
 import json
 import os
 import logging
+import subprocess
+import threading
+import signal
 from typing import List, Any
 from agents.mcp import MCPServerStdio
+
+# Node.js 환경변수 설정 - 메모리 누수 경고 방지
+os.environ["NODE_OPTIONS"] = "--max-http-header-size=16384"
 
 logger = logging.getLogger(__name__)
 
@@ -68,12 +77,11 @@ async def setup_mcp_servers():
 
     return servers
 
-# 싱글톤 인스턴스
-_mcp_servers: List[Any] = []
+# MCP 서버 목록을 전역적으로 관리
+_mcp_servers = []
 
 def get_mcp_servers() -> List[Any]:
     """전역 MCP 서버 인스턴스 반환 (싱글톤 패턴)"""
-    global _mcp_servers
     return _mcp_servers
 
 def set_mcp_servers(servers: List[Any]) -> None:

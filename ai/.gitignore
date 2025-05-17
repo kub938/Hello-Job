@@ -1,6 +1,9 @@
 # Created by https://www.toptal.com/developers/gitignore/api/windows,macos,python,visualstudiocode,dotenv,venv
 # Edit at https://www.toptal.com/developers/gitignore?templates=windows,macos,python,visualstudiocode,dotenv,venv
 
+node_modules/
+dist/
+
 ### dotenv ###
 .env
 .env.production
