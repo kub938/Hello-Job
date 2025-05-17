@@ -17,7 +17,7 @@ public class SSEController {
 
     private final SSEService sseService;
 
-    @GetMapping(value = "/sse/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter subscribe(@AuthenticationPrincipal UserPrincipal principal){
         Integer userId = principal.getUserId();
         SseEmitter emitter = new SseEmitter(60 * 1000L * 5); // 5분 유지
