@@ -12,9 +12,13 @@ COPY src src
 RUN ./gradlew build -x test
 
 # 실행 스테이지
-RUN apt-get update && apt-get install -y ffmpeg
 FROM openjdk:17-slim
 WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y ffmpeg && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # 시간대 설정 추가
 ENV TZ=Asia/Seoul
