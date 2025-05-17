@@ -719,6 +719,9 @@ public class InterviewService {
         File mp4TempFile = File.createTempFile("converted", ".mp4");
         log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
 
+        log.debug("ffmpegPath: {}", ffmpegPath);
+        log.debug("ffprobePath: {}", ffprobePath);
+
         // ffmpeg 실행
         ProcessBuilder ffmpegPb = new ProcessBuilder(
                 ffmpegPath, "-y",
