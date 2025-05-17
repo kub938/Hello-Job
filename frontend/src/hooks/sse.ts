@@ -9,7 +9,7 @@ export default function useSSE(isLoggedIn: boolean) {
     if (!isLoggedIn) return;
 
     const eventSource = new EventSource(
-      "https://k12b105.p.ssafy.io/api/v1/sse/subscribe"
+      "https://k12b105.p.ssafy.io/sse/subscribe"
     );
 
     // 핑 이벤트 수신
