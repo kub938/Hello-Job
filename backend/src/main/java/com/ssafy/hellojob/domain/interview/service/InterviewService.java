@@ -656,6 +656,9 @@ public class InterviewService {
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
 
+        log.debug("interviewAnswerId: {}", interviewAnswer.getInterviewAnswerId());
+        log.debug("interviewVideoId: {}", interviewVideo.getInterviewVideoId());
+
         if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
             log.debug("자소서 invalid");
@@ -667,6 +670,7 @@ public class InterviewService {
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
             log.debug("면접 invalid");
+            log.debug("interviewId: {}", interview.getInterviewId());
             log.debug("userId: {}", userId);
             log.debug("interviewUserId: {}", interview.getUser().getUserId());
             if (!userId.equals(interview.getUser().getUserId())) {
