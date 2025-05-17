@@ -4,6 +4,7 @@ import com.ssafy.hellojob.domain.interview.dto.request.*;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
 import com.ssafy.hellojob.domain.interview.service.InterviewService;
 import com.ssafy.hellojob.domain.interview.service.S3UploadService;
+import com.ssafy.hellojob.domain.interview.service.SttService;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ public class InterviewController {
 
     private final InterviewService interviewService;
     private final S3UploadService s3UploadService;
+    private final SttService sttService;
 
     // cs 질문 목록 조회
     @GetMapping("/question/cs")
@@ -155,7 +157,7 @@ public class InterviewController {
                                   @RequestPart("audioFile") MultipartFile audioFile,
                                   @AuthenticationPrincipal UserPrincipal userPrincipal) {
         String url = s3UploadService.uploadVideo(videoFile);
-        String result = interviewService.transcribeAudio(audioFile);
+        String result = sttService.transcribeAudio(audioFile);
         interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), videoFile);
     }
 

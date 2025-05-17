@@ -25,8 +25,22 @@ public class S3UploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+    @Value("${cloud.aws.credentials.access-key}")
+    private String accessKey;
+
+    @Value("${cloud.aws.credentials.secret-key}")
+    private String secretKey;
+
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
     // S3에 영상 업로드
     public String uploadVideo(MultipartFile file) {
+
+        if(file.getSize() > 500 * 1024 * 1024){
+            throw new BaseException(VIDEO_TOO_LARGE);
+        }
+
         String originalFileName = file.getOriginalFilename();
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 
@@ -43,6 +57,8 @@ public class S3UploadService {
             try {
                 s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
+                log.debug("S3 업로드 성공");
+                
                 // 업로드 성공 시 URL 반환
                 return s3Client.utilities()
                         .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())

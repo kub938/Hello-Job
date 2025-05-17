@@ -25,14 +25,8 @@ import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -69,6 +63,7 @@ public class InterviewService {
     private final UserReadService userReadService;
     private final CoverLetterContentService coverLetterContentService;
     private final FastApiClientService fastApiClientService;
+    private final S3UploadService s3UploadService;
 
     // polling 전 정의
     private static final int MAX_WAIT_SECONDS = 60;
@@ -82,12 +77,6 @@ public class InterviewService {
     @Value("${FFMPEG_PATH}")
     private String ffmpegPath;
 
-    @Value("${OPENAI_API_URL}")
-    private static String openAiUrl;
-
-    @Value("${OPENAI_API_KEY}")
-    private static String openAiKey;
-    private final S3UploadService s3UploadService;
 
     // cs 질문 목록 조회
     public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
@@ -484,12 +473,16 @@ public class InterviewService {
 
     // 문항 선택 면접 자소서 질문 선택
     public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto) {
-        userReadService.findUserByIdOrElseThrow(userId);
+        User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
         if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
-        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByCoverLetter(coverLetter);
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter);
+                    return coverLetterInterviewRepository.save(newInterview);
+                });
 
         InterviewVideo video = interviewVideoRepository.save(InterviewVideo.of(coverLetterInterview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER")));
 
@@ -654,49 +647,6 @@ public class InterviewService {
         return Map.of("message", "메모가 삭제되었습니다.");
     }
 
-    // stt
-    public String transcribeAudio(MultipartFile audioFile) {
-        try {
-            RestTemplate restTemplate = new RestTemplate();
-
-            // 파일 리소스로 변환
-            Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
-                @Override
-                public String getFilename() {
-                    return audioFile.getOriginalFilename();
-                }
-            };
-
-            // Form 데이터 생성
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", audioResource);
-            body.add("model", "whisper-1");
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-            headers.setBearerAuth(openAiKey);
-
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    openAiUrl,
-                    HttpMethod.POST,
-                    requestEntity,
-                    String.class
-            );
-
-            // text만 추출
-            if (response.getStatusCode().is2xxSuccessful()) {
-                ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.readTree(response.getBody()).get("text").asText();
-            } else {
-                return "stt 변환에 실패했습니다";
-            }
-        } catch (Exception e) {
-            return "stt 변환에 실패했습니다";
-        }
-    }
-
 
     // 한 문항 종료(면접 답변 저장)
     @Transactional
@@ -706,13 +656,23 @@ public class InterviewService {
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
 
+        log.debug("interviewAnswerId: {}", interviewAnswer.getInterviewAnswerId());
+        log.debug("interviewVideoId: {}", interviewVideo.getInterviewVideoId());
+
         if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            log.debug("자소서 invalid");
+            log.debug("userId: {}", userId);
+            log.debug("coverLetterInterviewUserId: {}", coverLetterInterview.getUser().getUserId());
             if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            log.debug("면접 invalid");
+            log.debug("interviewId: {}", interview.getInterviewId());
+            log.debug("userId: {}", userId);
+            log.debug("interviewUserId: {}", interview.getUser().getUserId());
             if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
@@ -723,11 +683,15 @@ public class InterviewService {
             videoLength = getVideoDurationWithFFprobe(videoFile);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // interrupt 상태 복원
+            log.debug("영상 길이 추출 실패 - interrupt: {}", e);
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         } catch (IOException e) {
+            log.debug("영상 길이 추출 실패 - IOException: {}", e);
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        } catch (Exception e){
+            log.debug("영상 길이 추출 실패 - Exception: {}", e);
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
-
 
         interviewAnswer.addInterviewAnswer(answer);
         interviewAnswer.addInterviewVideoUrl(url);
@@ -754,6 +718,9 @@ public class InterviewService {
 
         File mp4TempFile = File.createTempFile("converted", ".mp4");
         log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
+
+        log.debug("ffmpegPath: {}", ffmpegPath);
+        log.debug("ffprobePath: {}", ffprobePath);
 
         // ffmpeg 실행
         ProcessBuilder ffmpegPb = new ProcessBuilder(
