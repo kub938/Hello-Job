@@ -683,11 +683,15 @@ public class InterviewService {
             videoLength = getVideoDurationWithFFprobe(videoFile);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // interrupt 상태 복원
+            log.debug("영상 길이 추출 실패 - interrupt: {}", e);
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         } catch (IOException e) {
+            log.debug("영상 길이 추출 실패 - IOException: {}", e);
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        } catch (Exception e){
+            log.debug("영상 길이 추출 실패 - Exception: {}", e);
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
-
 
         interviewAnswer.addInterviewAnswer(answer);
         interviewAnswer.addInterviewVideoUrl(url);
@@ -714,6 +718,9 @@ public class InterviewService {
 
         File mp4TempFile = File.createTempFile("converted", ".mp4");
         log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
+
+        log.debug("ffmpegPath: {}", ffmpegPath);
+        log.debug("ffprobePath: {}", ffprobePath);
 
         // ffmpeg 실행
         ProcessBuilder ffmpegPb = new ProcessBuilder(
