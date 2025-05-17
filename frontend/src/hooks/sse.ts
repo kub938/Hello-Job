@@ -30,7 +30,7 @@ export default function useSSE(isLoggedIn: boolean) {
             label: "보러가기",
             onClick: () =>
               navigate(
-                `/corporate-research?companyId=${companyId}&openId=${companyAnalysisId}`
+                `/corporate-research/${companyId}?openId=${companyAnalysisId}`
               ),
           },
         });
