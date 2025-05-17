@@ -27,6 +27,11 @@ public class S3UploadService {
 
     // S3에 영상 업로드
     public String uploadVideo(MultipartFile file) {
+
+        if(file.getSize() > 500 * 1024 * 1024){
+            throw new BaseException(VIDEO_TOO_LARGE);
+        }
+
         String originalFileName = file.getOriginalFilename();
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 

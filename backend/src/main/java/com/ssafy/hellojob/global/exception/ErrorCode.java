@@ -73,6 +73,9 @@ public enum ErrorCode {
     INTERVIEW_MISMATCH(HttpStatus.FORBIDDEN, "면접 소유자와 요청 유저가 일치하지 않습니다."),
     INTERVIEW_VIDEO_MISMATCH(HttpStatus.FORBIDDEN, "면접 영상 소유자와 요청 유저가 일치하지 않습니다."),
     GET_VIDEO_LENGTH_FAIL(HttpStatus.INTERNAL_SERVER_ERROR, "영상 길이 추출에 실패했습니다."),
+    VIDEO_TOO_LARGE(HttpStatus.BAD_REQUEST, "영상 파일의 최대 저장 가능한 크기는 500MB입니다."),
+    AUDIO_TOO_LARGE(HttpStatus.BAD_REQUEST, "음성 파일의 최대 변환 가능한 크기는 25MB입니다."),
+    STT_TRANSCRIBE_INTERRUPTED(HttpStatus.INTERNAL_SERVER_ERROR, "stt 변환 중 인터럽트 발생"),
 
     // 메모
     QUESTION_TYPE_REQUIRED(HttpStatus.BAD_REQUEST, "최소 하나의 질문 유형이 전달되어야 합니다."),
