@@ -9,6 +9,11 @@ echo "Building Naver Search MCP..."
 cd /root/hellojob/app/mcp/naver-search-mcp
 npm install
 
+echo "Building Sequential Thinking MCP..."
+# Navigate to the MCP directory and build
+cd /root/hellojob/app/mcp/sequentialthinking
+npm install
+
 echo "Starting FastAPI application..."
 # Execute the main application command
 cd /root/hellojob

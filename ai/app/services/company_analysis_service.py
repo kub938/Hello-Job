@@ -3,7 +3,7 @@ import os
 import hashlib
 from pydantic import BaseModel, create_model
 from typing import List, Optional, Any, Dict, Tuple
-from agents import Agent
+from agents import Agent, WebSearchTool
 import logging
 
 from app.schemas import company
@@ -90,7 +90,7 @@ async def format_company_analysis(result_obj: Any) -> str:
 
 
 # 기업 분석 및 뉴스 데이터 분석 결과 반환 -> 현재 사용
-async def company_analysis_all(company_name, base, plus, fin, user_prompt):
+async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt):
     """OpenAI Agent 와 MCP를 활용하여 기업 분석 및 뉴스 데이터를 한번에 분석하여 반환합니다.
 
     Args:
@@ -98,6 +98,7 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
         base (bool): 기본 정보 포함 여부
         plus (bool): 추가 정보 포함 여부
         fin (bool): 재무 정보 포함 여부
+        swot (bool): SWOT 분석 포함 여부
         user_prompt (str): 사용자 프롬프트
     Returns:
         dict: 기업 분석 및 뉴스 분석 결과를 포함한 딕셔너리
@@ -158,7 +159,7 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
             
         # Agent 생성 - 미리 설정된 MCP 서버 사용
         dart_agent = Agent(
-            name="Company Analysis Assistant",
+            name=f"Company Dart Assistant: {company_name}",
             instructions=instructions,
             model="gpt-4.1",
             output_type=CompanyAnalysisOutput,
@@ -280,9 +281,9 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
         
         # Agent 생성 - 미리 설정된 MCP 서버 사용
         news_agent = Agent(
-            name="Company News Analyzer",
+            name=f"Company News Analyzer: {company_name}",
             instructions=instructions,
-            model="gpt-4.1",
+            model="gpt-4.5-preview",
             output_type=company.CompanyNews,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
         )
@@ -311,6 +312,100 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
             "summary": news_result.final_output.summary or "뉴스 요약 정보가 없습니다.",
             "urls": news_result.final_output.urls or []
         }
+        
+
+    # 3. SWOT 분석
+    swot_cache_key = f"{cache_key_base}_swot"
+    
+    # SWOT 분석을 위한 비동기 함수 정의
+    async def perform_swot_analysis():
+        from pydantic import BaseModel, Field
+        from typing import List, Dict, Optional
+
+        # 단순화된 SWOT 분석 모델 정의 (동적으로)
+        class SimpleSwot(BaseModel):
+            strengths: List[str] = Field(default_factory=list, description="기업의 강점 목록")
+            weaknesses: List[str] = Field(default_factory=list, description="기업의 약점 목록")
+            opportunities: List[str] = Field(default_factory=list, description="기업의 기회 목록")
+            threats: List[str] = Field(default_factory=list, description="기업의 위협 목록")
+            strength_tags: List[str] = Field(default_factory=list, description="강점 관련 태그 목록")
+            weakness_tags: List[str] = Field(default_factory=list, description="약점 관련 태그 목록")
+            opportunity_tags: List[str] = Field(default_factory=list, description="기회 관련 태그 목록")
+            threat_tags: List[str] = Field(default_factory=list, description="위협 관련 태그 목록")
+            swot_summary: Optional[str] = Field(None, description="SWOT 분석 종합 요약")
+        
+        instructions = ""
+        if user_prompt:
+            instructions += f"""당신은 '제트'라는 이름의 AI로, 기업 SWOT 분석을 하는 전문가입니다. 검색 MCP를 활용하여 사용자의 요청 사항을 반영하는 SWOT 분석 데이터를 반환합니다.
+            사용자 요청사항: {user_prompt}"""
+        else:
+            instructions = f"당신은 '제트'라는 이름의 AI로, 기업 SWOT 분석을 하는 전문가입니다. 검색 MCP를 활용하여 SWOT 분석 데이터를 반환합니다."
+        
+        # Agent 생성 - 미리 설정된 MCP 서버 사용
+        swot_agent = Agent(
+            name=f"Company SWOT Analyzer: {company_name}",
+            instructions=instructions,
+            model="gpt-4.1-mini",
+            output_type=SimpleSwot,
+            mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
+        )
+        
+        swot_context = f"SWOT 분석을 위한 전략을 수립하고(sequential-thinking), 최신 정보를 활용하여 {company_name} 기업을 SWOT 분석하고 결과를 반환하세요."
+        
+        try:
+            swot_result = await RateLimitedRunner.run(
+                starting_agent=swot_agent,
+                input=swot_context,
+                max_turns=30
+            )
+            
+            if not swot_result or not swot_result.final_output:
+                raise ValueError("SWOT 분석 결과가 없습니다.")
+                
+            # 출력 형식을 원래 형식으로 변환
+            result = swot_result.final_output
+            return {
+                "strengths": {
+                    "contents": result.strengths,
+                    "tags": result.strength_tags
+                },
+                "weaknesses": {
+                    "contents": result.weaknesses,
+                    "tags": result.weakness_tags
+                },
+                "opportunities": {
+                    "contents": result.opportunities,
+                    "tags": result.opportunity_tags
+                },
+                "threats": {
+                    "contents": result.threats,
+                    "tags": result.threat_tags
+                },
+                "swot_summary": result.swot_summary or ""
+            }
+        except Exception as e:
+            logger.error(f"SWOT 분석 중 오류 발생: {str(e)}")
+            # 오류 발생 시 기본 값 반환
+            return {
+                "strengths": {
+                    "contents": [],
+                    "tags": []
+                },
+                "weaknesses": {
+                    "contents": [],
+                    "tags": []
+                },
+                "opportunities": {
+                    "contents": [],
+                    "tags": []
+                },
+                "threats": {
+                    "contents": [],
+                    "tags": []
+                },
+                "swot_summary": f"SWOT 분석 중 오류가 발생했습니다: {str(e)}"
+            }
+        
     
     # 3. 큐를 통해 분석 작업 실행 (DART 분석 우선순위 높게)
     try:
@@ -318,7 +413,7 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
         dart_result_task = request_queue.enqueue(
             perform_dart_analysis,
             priority=5,  # 낮은 숫자 = 높은 우선순위
-            estimated_tokens=15000,
+            estimated_tokens=20000,
             cache_key=dart_cache_key
         )
         
@@ -328,16 +423,26 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
             estimated_tokens=10000,
             cache_key=news_cache_key
         )
+        if swot:
+            swot_result_task = request_queue.enqueue(
+                perform_swot_analysis,
+                priority=15,  # 낮은 숫자 = 높은 우선순위
+                estimated_tokens=20000,
+                cache_key=swot_cache_key
+            )
+        
         
         # 모든 작업 완료 대기
         dart_result = await dart_result_task
         news_result = await news_result_task
+        swot_result = await swot_result_task if swot else None
         
         # 4. 결과 합치기
         response = {
             **dart_result,
             "news_summary": news_result["summary"],
-            "news_urls": news_result["urls"]
+            "news_urls": news_result["urls"],
+            "swot": swot_result if swot else None
         }
         
         return response
@@ -354,5 +459,24 @@ async def company_analysis_all(company_name, base, plus, fin, user_prompt):
             "company_vision": "처리 중 오류 발생",
             "company_finance": "처리 중 오류 발생",
             "news_summary": "처리 중 오류 발생",
-            "news_urls": []
+            "news_urls": [],
+            "swot": {
+                "strengths": {
+                    "contents": [],
+                    "tags": []
+                },
+                "weaknesses": {
+                    "contents": [],
+                    "tags": []
+                },
+                "opportunities": {
+                    "contents": [],
+                    "tags": []
+                },
+                "threats": {
+                    "contents": [],
+                    "tags": []
+                },
+                "swot_summary": ""
+            }
         }
