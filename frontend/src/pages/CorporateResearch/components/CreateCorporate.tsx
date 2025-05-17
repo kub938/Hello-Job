@@ -100,7 +100,13 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const onSubmitClicked = (e: React.BaseSyntheticEvent) => {
     e?.preventDefault();
     if (isSubmitting) return; // 연속 클릭 방지
-    toast.success("분석 요청을 보냈습니다.\n 완료 시 알림을 보내드립니다.");
+    toast.success(
+      <div>
+        분석 요청을 보냈습니다.
+        <br />
+        완료 시 알림을 보내드립니다.
+      </div>
+    );
     setIsSubmitting(true);
     handleSubmit(onValidSubmit, onInvalidSubmit)();
   };
