@@ -37,8 +37,6 @@ public class S3UploadService {
     // S3에 영상 업로드
     public String uploadVideo(MultipartFile file) {
 
-        log.debug("S3 키값 확인: access-key: {}, secret-key: {}", accessKey, secretKey);
-
         if(file.getSize() > 500 * 1024 * 1024){
             throw new BaseException(VIDEO_TOO_LARGE);
         }
@@ -59,6 +57,8 @@ public class S3UploadService {
             try {
                 s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
+                log.debug("S3 업로드 성공");
+                
                 // 업로드 성공 시 URL 반환
                 return s3Client.utilities()
                         .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())

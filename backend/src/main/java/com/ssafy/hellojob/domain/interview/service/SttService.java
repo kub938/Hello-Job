@@ -68,6 +68,7 @@ public class SttService {
 
                 if (response.getStatusCode().is2xxSuccessful()) {
                     ObjectMapper objectMapper = new ObjectMapper();
+                    log.debug("stt 변환 성공");
                     return objectMapper.readTree(response.getBody()).get("text").asText();
                 } else {
                     throw new RuntimeException("Whisper STT 응답 실패: " + response.getStatusCode());
