@@ -41,20 +41,20 @@ function TypeSelectPage() {
               <Mic className="h-12 w-12 text-primary" />
             </div>
             <h3 className="mb-4 text-center text-xl font-bold">
-              단일 문항 연습
+              선택 문항 연습
             </h3>
             <p className="mb-6 text-center text-gray-600">
               특정 질문에 대한 답변을 집중적으로 연습하고 피드백을 받아보세요
             </p>
             <div className="mb-4 text-center text-sm text-gray-500">
-              약 5분 소요
+              선택한 문항 갯수에 따라 약 5~20분 소요
             </div>
             <Button
               onClick={() => handleOpenSelectQuestionModal("question")}
               variant={"white"}
               className="h-12"
             >
-              단일 문항 시작하기
+              선택 문항 시작하기
             </Button>
           </div>
 
@@ -63,7 +63,7 @@ function TypeSelectPage() {
               <Users className="h-12 w-12 text-primary" />
             </div>
             <h3 className="mb-4 text-center text-xl font-bold">
-              완전 모의면접
+              랜덤 문항 면접
             </h3>
             <p className="mb-6 text-center text-gray-600">
               실제 면접처럼 여러 질문에 대해 연속적으로 답변해보세요
@@ -75,7 +75,7 @@ function TypeSelectPage() {
               onClick={() => handleOpenSelectQuestionModal("practice")}
               className="h-12"
             >
-              완전 모의면접 시작하기
+              랜덤 문항 연습
             </Button>
           </div>
         </div>

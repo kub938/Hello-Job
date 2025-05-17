@@ -1,3 +1,8 @@
+import {
+  DeleteInterviewResultResponse,
+  InterviewResultDetailResponse,
+  InterviewResultListResponse,
+} from "@/types/interviewResult";
 import { authApi } from "./instance";
 import {
   CreateQuestionResponse,
@@ -160,6 +165,22 @@ export const interviewApi = {
     return authApi.post(
       `/api/v1/interview/question/cover-letter/${coverLetterId}/memo`,
       { memoData }
+    );
+  },
+};
+
+export const interviewResultApi = {
+  getInterviewList: () => {
+    return authApi.get<InterviewResultListResponse>(`/api/v1/interview`);
+  },
+  getInterviewDetail: (interviewVideoId: number) => {
+    return authApi.get<InterviewResultDetailResponse>(
+      `/api/v1/interview/${interviewVideoId}`
+    );
+  },
+  deleteInterviewResult: (interviewVideoId: number) => {
+    return authApi.delete<DeleteInterviewResultResponse>(
+      `/api/v1/interview/${interviewVideoId}`
     );
   },
 };

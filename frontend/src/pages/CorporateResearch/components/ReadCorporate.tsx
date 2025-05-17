@@ -7,6 +7,7 @@ import { parseData, Section } from "@/hooks/researchParseHook";
 import AnalysisSummary from "./AnalysisSummary";
 import PublicInformation from "./PublicInformation";
 import NewsInformation from "./NewsInformation";
+import SWOTAnalysis from "./SWOTAnalysis";
 
 interface ReadCorporateProps {
   id: number;
@@ -15,7 +16,7 @@ interface ReadCorporateProps {
 }
 
 // 탭 타입 정의
-type TabType = "분석 요약" | "공시 정보" | "뉴스 정보";
+type TabType = "분석 요약" | "공시 정보" | "뉴스 정보" | "SWOT 분석";
 
 function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
   const queryClient = useQueryClient();
@@ -135,21 +136,21 @@ function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
         {/* 탭 메뉴 */}
         <div className="border-b border-gray-200 mb-8">
           <div className="flex">
-            {(["분석 요약", "공시 정보", "뉴스 정보"] as TabType[]).map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`py-2 px-4 text-center font-medium text-gray-700 hover:text-[#6F52E0] transition-colors ${
-                    activeTab === tab
-                      ? "text-[#6F52E0] border-b-2 border-[#6F52E0]"
-                      : ""
-                  }`}
-                >
-                  {tab}
-                </button>
-              )
-            )}
+            {(
+              ["분석 요약", "공시 정보", "뉴스 정보", "SWOT 분석"] as TabType[]
+            ).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`py-2 px-4 text-center font-medium text-gray-700 hover:text-[#6F52E0] transition-colors ${
+                  activeTab === tab
+                    ? "text-[#6F52E0] border-b-2 border-[#6F52E0]"
+                    : ""
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -172,6 +173,9 @@ function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
             )}
             {activeTab === "뉴스 정보" && (
               <NewsInformation reportDetail={reportDetail} />
+            )}
+            {activeTab === "SWOT 분석" && (
+              <SWOTAnalysis reportDetail={reportDetail} />
             )}
           </>
         )}
