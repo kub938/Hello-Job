@@ -155,57 +155,6 @@ pipeline {
             }
         }
         
-        stage('Health Check') {
-            steps {
-                script {
-                    def backendPort = NEW_ENV == 'blue' ? '8080' : '8081'
-                    def frontendPort = NEW_ENV == 'blue' ? '5173' : '5174'
-                    def aiPort = NEW_ENV == 'blue' ? '8000' : '8001'
-                    
-                    sh """
-                        echo "🔍 Running health checks for ${NEW_ENV} environment..."
-                        timeout=120
-                        while [ \$timeout -gt 0 ]; do
-                            echo "Checking services... (remaining: \$timeout seconds)"
-                            
-                            # 각 서비스 체크
-                            backend_ok=false
-                            frontend_ok=false
-                            ai_ok=false
-                            
-                            if curl -f -s http://localhost:${backendPort}/actuator/health; then
-                                backend_ok=true
-                                echo "✅ Backend is healthy"
-                            fi
-                            
-                            if curl -f -s http://localhost:${frontendPort}; then
-                                frontend_ok=true
-                                echo "✅ Frontend is healthy"
-                            fi
-                            
-                            if curl -f -s http://localhost:${aiPort}/health; then
-                                ai_ok=true
-                                echo "✅ AI service is healthy"
-                            fi
-                            
-                            if [ "\$backend_ok" = true ] && [ "\$frontend_ok" = true ] && [ "\$ai_ok" = true ]; then
-                                echo "✅ All services are healthy!"
-                                break
-                            fi
-                            
-                            sleep 5
-                            timeout=\$((timeout-5))
-                        done
-                        
-                        if [ \$timeout -le 0 ]; then
-                            echo "❌ Health check timeout!"
-                            exit 1
-                        fi
-                    """
-                }
-            }
-        }
-        
         stage('Switch Traffic') {
             steps {
                 script {
