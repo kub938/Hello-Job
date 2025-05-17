@@ -2,10 +2,8 @@ pipeline {
     agent any
     
     environment {
-        DOCKER_COMPOSE = 'docker-compose'
         // 현재 활성 환경 확인 (nginx 설정 기반)
         CURRENT_ENV = sh(script: '''
-            # Docker 명령을 사용하여 nginx 설정 파일을 확인
             if docker exec nginx-proxy grep -q "server backend-blue:8080 weight=100" /etc/nginx/conf.d/default.conf; then
                 echo "blue"
             else
@@ -40,16 +38,15 @@ pipeline {
                     echo "New Environment: ${NEW_ENV}"
                     
                     // 공유 서비스 시작 (처음 실행 시)
-                sh """
+                   sh '''
                         # 먼저 필요한 네트워크 생성
-                        ${DOCKER_COMPOSE} network create shared-network || true
+                        docker network create shared-network || true
                         
-                        # nginx-proxy 컨테이너 확인
-                        if ! ${DOCKER_COMPOSE} ps | grep -q nginx-proxy; then
+                        if ! docker ps | grep -q nginx-proxy; then
                             echo "Starting shared services..."
-                            ${DOCKER_COMPOSE} -f docker-compose.shared.yml up -d
+                            docker-compose -f docker-compose.shared.yml up -d
                         fi
-                    """
+                    '''
                 }
             }
         }
@@ -116,7 +113,6 @@ pipeline {
                         string(credentialsId: 'GMS_API_BASE', variable: 'GMS_API_BASE'),
                         string(credentialsId: 'FFPROBE_PATH', variable: 'FFPROBE_PATH'),
                         string(credentialsId: 'FFMPEG_PATH', variable: 'FFMPEG_PATH')
-
                     ]) {
                         sh """
                             echo "🔄 Building new environment: ${NEW_ENV}..."
@@ -148,7 +144,6 @@ pipeline {
                                 --build-arg FFPROBE_PATH=\$FFPROBE_PATH \
                                 --build-arg FFMPEG_PATH=\$FFMPEG_PATH
 
-
                             echo "🚀 Starting new environment: ${NEW_ENV}..."
                             docker-compose -f docker-compose.${NEW_ENV}.yml up -d
                         """
@@ -160,8 +155,8 @@ pipeline {
         stage('Simple Wait') {
             steps {
                 script {
-                    echo "⏳ Waiting for services to start up (10 seconds)..."
-                    sleep(time: 10, unit: 'SECONDS')
+                    echo "⏳ Waiting for services to start up (30 seconds)..."
+                    sleep(time: 30, unit: 'SECONDS')  // 단위 수정: SECONDE -> SECONDS
                     echo "✅ Wait completed"
                 }
             }
@@ -173,13 +168,19 @@ pipeline {
                     echo "🔄 Switching traffic to ${NEW_ENV} environment..."
                     
                     sh """
-                        ${DOCKER_COMPOSE} exec nginx-proxy bash -c '
-                            # Nginx 설정 파일 백업
+                        docker exec nginx-proxy bash -c '
+                            # 설정 파일 존재 확인
+                            if [ ! -f /etc/nginx/conf.d/default.conf ]; then
+                                echo "Error: default.conf not found!"
+                                find /etc/nginx -name "*.conf"
+                                exit 1
+                            fi
+                            
+                            # 설정 백업
                             cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.backup || echo "Backup failed but continuing"
                             
-                            # 새 환경으로 트래픽 전환
+                            # 트래픽 전환
                             if [ "${NEW_ENV}" == "blue" ]; then
-                                # Blue 환경으로 전환
                                 sed -i "s/server backend-blue:8080 weight=0;/server backend-blue:8080 weight=100;/g" /etc/nginx/conf.d/default.conf
                                 sed -i "s/server backend-green:8080 weight=100;/server backend-green:8080 weight=0;/g" /etc/nginx/conf.d/default.conf
                                 sed -i "s/server frontend-blue:5173 weight=0;/server frontend-blue:5173 weight=100;/g" /etc/nginx/conf.d/default.conf
@@ -187,7 +188,6 @@ pipeline {
                                 sed -i "s/server ai-blue:8000 weight=0;/server ai-blue:8000 weight=100;/g" /etc/nginx/conf.d/default.conf
                                 sed -i "s/server ai-green:8000 weight=100;/server ai-green:8000 weight=0;/g" /etc/nginx/conf.d/default.conf
                             else
-                                # Green 환경으로 전환
                                 sed -i "s/server backend-blue:8080 weight=100;/server backend-blue:8080 weight=0;/g" /etc/nginx/conf.d/default.conf
                                 sed -i "s/server backend-green:8080 weight=0;/server backend-green:8080 weight=100;/g" /etc/nginx/conf.d/default.conf
                                 sed -i "s/server frontend-blue:5173 weight=100;/server frontend-blue:5173 weight=0;/g" /etc/nginx/conf.d/default.conf
@@ -196,7 +196,7 @@ pipeline {
                                 sed -i "s/server ai-green:8000 weight=0;/server ai-green:8000 weight=100;/g" /etc/nginx/conf.d/default.conf
                             fi
                             
-                            # Nginx 설정 테스트 및 재로드
+                            # 설정 테스트
                             nginx -t
                             if [ \$? -eq 0 ]; then
                                 nginx -s reload
@@ -215,8 +215,8 @@ pipeline {
         stage('Cleanup Old Environment') {
             steps {
                 script {
+                    echo "🧹 Cleaning up old environment: ${CURRENT_ENV}..."
                     sh """
-                        echo "🧹 Cleaning up old environment: ${CURRENT_ENV}..."
                         docker-compose -f docker-compose.${CURRENT_ENV}.yml down
                         
                         echo "🗑️ Removing old Docker images..."
@@ -248,18 +248,18 @@ pipeline {
             script {
                 def userName = getUserName()
                 
-                // 롤백 로직...
+                // 롤백 로직
                 sh """
-                    # Nginx 설정 롤백
+                    # Nginx 설정 롤백 시도
                     docker exec nginx-proxy bash -c '
                         if [ -f /etc/nginx/conf.d/default.conf.backup ]; then
                             cp /etc/nginx/conf.d/default.conf.backup /etc/nginx/conf.d/default.conf
-                            nginx -s reload
+                            nginx -s reload || echo "Nginx reload failed during rollback"
                         fi
                     ' || echo "Nginx rollback failed"
                 """
                 
-                sh "${DOCKER_COMPOSE} logs > pipeline_failure.log"
+                sh "docker-compose logs > pipeline_failure.log"
                 
                 withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                     sh """
