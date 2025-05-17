@@ -1,0 +1,80 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: backend-green
+    ports:
+      - "8081:8080"  # 포트를 다르게 설정
+    environment:
+      - TZ=Asia/Seoul
+      - SPRING_PROFILES_ACTIVE=dev
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URL=${GOOGLE_REDIRECT_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - DB_URL=${DB_URL}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - FRONTEND_URL=${FRONTEND_URL}
+      - SERVER_DOMAIN=${SERVER_DOMAIN}
+      - FASTAPI_URL=${FASTAPI_URL}
+      - AES_SECRET_KEY=${AES_SECRET_KEY}
+      - MATTERMOST_WEBHOOK=${MATTERMOST_WEBHOOK}
+      - OPENAI_API_URL=${OPENAI_API_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY}
+      - S3_SECRET_KEY=${S3_SECRET_KEY}
+      - FFPROBE_PATH=${FFPROBE_PATH}
+      - FFMPEG_PATH=${FFMPEG_PATH}
+    volumes:
+      - gradle-cache:/home/gradle/.gradle
+    networks:
+      - green-network
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-green
+    ports:
+      - "5174:5173"  # 포트를 다르게 설정
+    depends_on:
+      - backend
+      - ai
+    volumes:
+      - npm-cache:/root/.npm
+    networks:
+      - green-network
+
+  ai:
+    build: ./ai
+    container_name: ai-green
+    ports:
+      - "8001:8000"  # 포트를 다르게 설정
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - DART_API_KEY=${DART_API_KEY}
+      - NAVER_CLIENT_ID=${NAVER_CLIENT_ID}
+      - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
+      - GMS_KEY=${GMS_KEY}
+      - GMS_API_BASE=${GMS_API_BASE}
+    volumes:
+      - pip-cache:/root/.cache/pip
+    networks:
+      - green-network
+
+networks:
+  green-network:
+    name: green-network
+  shared-network:
+    name: shared-network
+    external: true  # blue.yml에서 생성된 네트워크 사용
+
+volumes:
+  mysql_data:
+    external: true  # blue.yml에서 생성된 볼륨 사용
+  npm-cache:
+    external: true
+  gradle-cache:
+    external: true
+  pip-cache:
+    external: true

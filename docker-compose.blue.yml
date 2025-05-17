@@ -1,11 +1,12 @@
-version: '3.8'           # docker-compose 파일 스펙 버전
+version: '3.8'
 
 services:
   backend:
-    build: ./backend     # backend Dockerfile 위치
+    build: ./backend
+    container_name: backend-blue
     ports:
-      - "8080:8080"      # 외부:내부 포트
-    environment:         # 환경변수 설정
+      - "8080:8080"
+    environment:
       - TZ=Asia/Seoul
       - SPRING_PROFILES_ACTIVE=dev
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
@@ -26,14 +27,17 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - FFPROBE_PATH=${FFPROBE_PATH}
       - FFMPEG_PATH=${FFMPEG_PATH}
-    depends_on:          # 의존성 설정
+    depends_on:
       mysql:
         condition: service_healthy
     volumes:
       - gradle-cache:/home/gradle/.gradle
+    networks:
+      - blue-network
 
   frontend:
-    build: ./frontend    # frontend Dockerfile 위치
+    build: ./frontend
+    container_name: frontend-blue
     ports:
       - "5173:5173"
     depends_on:
@@ -41,15 +45,14 @@ services:
       - ai
     volumes:
       - npm-cache:/root/.npm
+    networks:
+      - blue-network
 
   ai:
     build: ./ai
+    container_name: ai-blue
     ports:
       - "8000:8000"
-    # networks:
-    #   default:
-    #     aliases:
-    #       - hellojob-app
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - DART_API_KEY=${DART_API_KEY}
@@ -62,30 +65,19 @@ services:
         condition: service_healthy
     volumes:
       - pip-cache:/root/.cache/pip
-      # - ./ai/app:/root/hellojob/app
-  
-  nginx:
-    build: ./nginx
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - frontend
-      - backend
-      - ai
-    restart: always
-    volumes:
-      - /var/www/certbot:/var/www/certbot
-      - /etc/letsencrypt:/etc/letsencrypt
+    networks:
+      - blue-network
 
+  # MySQL은 공유 가능하도록 shared 네트워크에 연결
   mysql:
-    image: mysql:8.0.4     # MySQL 이미지
+    image: mysql:8.0.4
+    container_name: mysql-shared
     healthcheck:
       test: ["CMD", "mysql", "--user=${MYSQL_USER}", "--password=${MYSQL_PASSWORD}", "-e", "SELECT 1"]
-      interval: 5s    # 5초마다 체크
-      timeout: 3s     # 체크 타임아웃 3초
-      retries: 3      # 3번 재시도
-      start_period: 15s  # 초기 시작 대기 시간 15초
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=hellojob
@@ -94,12 +86,22 @@ services:
       - TZ=Asia/Seoul
     ports:
       - "23309:3306"
-    volumes:            # 데이터 영속성
+    volumes:
       - mysql_data:/var/lib/mysql
     command: --default-time-zone='+09:00'
+    networks:
+      - blue-network
+      - green-network
+      - shared-network
+
+networks:
+  blue-network:
+    name: blue-network
+  shared-network:
+    name: shared-network
 
 volumes:
-  mysql_data:          # MySQL 데이터 저장용 볼륨
-  npm-cache:           # npm 캐싱 볼륨
-  gradle-cache:        # gradle 캐싱 볼륨
-  pip-cache:           # pip 캐싱 볼륨
+  mysql_data:
+  npm-cache:
+  gradle-cache:
+  pip-cache:
