@@ -11,7 +11,9 @@ import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequ
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.*;
 import com.ssafy.hellojob.domain.companyanalysis.entity.*;
 import com.ssafy.hellojob.domain.companyanalysis.repository.*;
+import com.ssafy.hellojob.domain.sse.service.SSEService;
 import com.ssafy.hellojob.domain.user.entity.User;
+import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
@@ -25,6 +27,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -37,9 +41,11 @@ public class CompanyAnalysisService {
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final UserReadService userReadService;
     private final FastApiClientService fastApiClientService;
+    private final SSEService sseService;
     private final CompanyReadService companyReadService;
     private final CompanyAnalysisReadService companyAnalysisReadService;
     private final SwotAnalysisRepository swotAnalysisRepository;
+    private final UserRepository userRepository;
 
     // 토큰 확인
     public boolean tokenCheck(Integer userId) {
@@ -54,7 +60,7 @@ public class CompanyAnalysisService {
 
     // 기업 분석 저장
     @Transactional
-    public CompanyAnalysisBookmarkSaveRequestDto createCompanyAnalysis(Integer userId, CompanyAnalysisRequestDto requestDto) {
+    public Map<String, String> createCompanyAnalysis(Integer userId, CompanyAnalysisRequestDto requestDto) {
 
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -89,8 +95,40 @@ public class CompanyAnalysisService {
         log.debug("fast API로 요청 보냄 !!!");
 
         // FastAPI 호출
-        CompanyAnalysisFastApiResponseDto responseDto = fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto);
+        requestCompanyAnalysisAsync(user, company, requestDto, fastApiRequestDto);
 
+        return Map.of("message", "기업 분석이 요청되었습니다.");
+    }
+
+    // fastAPI 응답 비동기 처리 및 SSE 알림
+    public void requestCompanyAnalysisAsync(
+            User user,
+            Company company,
+            CompanyAnalysisRequestDto requestDto,
+            CompanyAnalysisFastApiRequestDto fastApiRequestDto) {
+        CompletableFuture
+                .supplyAsync(() -> fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto))
+                .thenApply(fastApiResponseDto -> {
+                    CompanyAnalysisSseResponseDto responseDto = saveCompanyAnalysis(user, company, fastApiResponseDto, requestDto);
+                    return responseDto;
+                })
+                .thenAccept(companyAnalysisId ->
+                        sseService.sendToUser(user.getUserId(), "company-analysis-completed", companyAnalysisId))
+                .exceptionally(e -> {
+                    log.error("❌ 기업 분석 실패", e.getMessage());
+                    sseService.sendToUser(user.getUserId(), "company-analysis-failed", "기업 분석 실패");
+                    user.increaseToken(1);
+                    userRepository.save(user);
+                    return null;
+                });
+    }
+
+    @Transactional
+    public CompanyAnalysisSseResponseDto saveCompanyAnalysis(
+            User user,
+            Company company,
+            CompanyAnalysisFastApiResponseDto responseDto,
+            CompanyAnalysisRequestDto requestDto) {
         log.debug("fast API에서 응답 받음 !!!");
         log.debug("기업 분석 : {}", responseDto.getCompany_analysis());
 
@@ -194,11 +232,11 @@ public class CompanyAnalysisService {
         // 기업 테이블 업데이트
         company.setUpdatedAt(LocalDateTime.now());
 
-        return CompanyAnalysisBookmarkSaveRequestDto.builder()
+        return  CompanyAnalysisSseResponseDto.builder()
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
+                .companyId(companyAnalysis.getCompany().getCompanyId())
                 .build();
     }
-
 
     // 기업 분석 목록 전체 조회
     public List<CompanyAnalysisListResponseDto> searchAllCompanyAnalysis(Integer userId) {

@@ -15,6 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -42,7 +43,7 @@ public class CompanyAnalysisController {
 
     // 기업 분석 요청(fast API)
     @PostMapping
-    public CompanyAnalysisBookmarkSaveRequestDto requestCompanyAnalysis(
+    public Map<String, String> requestCompanyAnalysis(
             @RequestBody CompanyAnalysisRequestDto requestDto,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
 

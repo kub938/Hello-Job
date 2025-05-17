@@ -51,6 +51,10 @@ public class User extends BaseTimeEntity {
         }
     }
 
+    public void increaseToken(int cnt) {
+        this.token += cnt;
+    }
+
     public void changeNickname(String nickname) {
         this.nickname = nickname;
     }
