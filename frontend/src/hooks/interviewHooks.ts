@@ -5,6 +5,7 @@ import {
   SaveQuestionRequest,
 } from "@/types/interviewApiTypes";
 import { useMutation, useQuery } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useGetQuestions = (category: InterviewCategory) => {
   return useQuery({
@@ -124,6 +125,34 @@ export const useStartInterview = () => {
         coverLetterId
       );
       return response.data;
+    },
+  });
+};
+
+export const useCompleteQuestion = () => {
+  return useMutation({
+    mutationKey: ["complete-question"],
+    mutationFn: async ({
+      interviewAnswerId,
+      videoFile,
+      audioFile,
+    }: {
+      interviewAnswerId: number;
+      videoFile: File;
+      audioFile: File;
+    }) => {
+      const response = await interviewApi.completeQuestion(
+        interviewAnswerId,
+        videoFile,
+        audioFile
+      );
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("답변이 성공적으로 제출되었습니다!");
+    },
+    onError: () => {
+      toast.error("답변 제출에 실패했습니다.");
     },
   });
 };
