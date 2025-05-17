@@ -283,7 +283,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         news_agent = Agent(
             name=f"Company News Analyzer: {company_name}",
             instructions=instructions,
-            model="gpt-4.5-preview",
+            model="gpt-4.1",
             output_type=company.CompanyNews,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
         )
