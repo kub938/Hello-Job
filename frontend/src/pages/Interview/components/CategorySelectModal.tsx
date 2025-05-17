@@ -8,7 +8,7 @@ import {
 import { FileText, Code, Users } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useState } from "react";
-import CategorySelectModalLayout from "./\bCategorySelectModalLayout";
+import CategorySelectModalLayout from "./CategorySelectModalLayout";
 
 export type interviewType = "question" | "practice";
 export interface TypeSelectModalProps {
