@@ -658,11 +658,17 @@ public class InterviewService {
 
         if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            log.debug("자소서 invalid");
+            log.debug("userId: {}", userId);
+            log.debug("coverLetterInterviewUserId: {}", coverLetterInterview.getUser().getUserId());
             if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            log.debug("면접 invalid");
+            log.debug("userId: {}", userId);
+            log.debug("interviewUserId: {}", interview.getUser().getUserId());
             if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
