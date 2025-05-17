@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface InterviewRepository extends JpaRepository<Interview, Integer> {
 
-    Optional<Interview> findByUserAndCs(User user, boolean cs);
+    Optional<Interview> findTopByUserAndCsOrderByInterviewId(User user, boolean cs);
 
     Optional<Interview> findByUserAndInterviewId(User user, Integer interviewId);
 
