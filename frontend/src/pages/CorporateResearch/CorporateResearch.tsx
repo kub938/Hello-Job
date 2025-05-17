@@ -1,5 +1,5 @@
 import { Button } from "@/components/Button";
-import { useNavigate, useParams } from "react-router";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { corporateReportApi } from "@/api/corporateReport";
@@ -42,6 +42,8 @@ function CorporateResearch({
   const [modalView, setModalView] = useState<"create" | "read">("create");
   const [researchId, setResearchId] = useState<number>(1);
   const id = params.id ? params.id : String(companyId);
+  const [searchParams] = useSearchParams();
+  const openId = searchParams.get("openId");
 
   console.log(params.id ? "true" : "false");
   // tanstack query를 사용한 특정 기업의 모든 리포트 불러오기
@@ -93,6 +95,18 @@ function CorporateResearch({
       })) || [];
     setCorporateReportList(temp);
   }, [corporateReportListData]);
+
+  useEffect(() => {
+    if (openId) {
+      const parsedId = parseInt(openId);
+      if (!isNaN(parsedId)) {
+        openReadModal(parsedId);
+        // URL에서 openId를 제거
+        searchParams.delete("openId");
+        navigate(`${location.pathname}`, { replace: true });
+      }
+    }
+  }, [openId]);
 
   const openCreateModal = () => {
     setModalView("create");
