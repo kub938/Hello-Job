@@ -37,17 +37,11 @@ services:
     command: --default-time-zone='+09:00'
     networks:
       - shared-network
-      - blue-network
-      - green-network
     restart: always
 
 networks:
   shared-network:
     name: shared-network
-  blue-network:
-    name: blue-network
-  green-network:
-    name: green-network
 
 volumes:
   mysql_data:

@@ -34,6 +34,7 @@ services:
       - gradle-cache:/home/gradle/.gradle
     networks:
       - blue-network
+      - shared-network
 
   frontend:
     build: ./frontend
@@ -47,6 +48,7 @@ services:
       - npm-cache:/root/.npm
     networks:
       - blue-network
+      - shared-network
 
   ai:
     build: ./ai
@@ -67,31 +69,6 @@ services:
       - pip-cache:/root/.cache/pip
     networks:
       - blue-network
-
-  # MySQL은 공유 가능하도록 shared 네트워크에 연결
-  mysql:
-    image: mysql:8.0.4
-    container_name: mysql-shared
-    healthcheck:
-      test: ["CMD", "mysql", "--user=${MYSQL_USER}", "--password=${MYSQL_PASSWORD}", "-e", "SELECT 1"]
-      interval: 5s
-      timeout: 3s
-      retries: 3
-      start_period: 15s
-    environment:
-      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
-      - MYSQL_DATABASE=hellojob
-      - MYSQL_USER=${MYSQL_USER}
-      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
-      - TZ=Asia/Seoul
-    ports:
-      - "23309:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    command: --default-time-zone='+09:00'
-    networks:
-      - blue-network
-      - green-network
       - shared-network
 
 networks:
@@ -99,9 +76,11 @@ networks:
     name: blue-network
   shared-network:
     name: shared-network
+    external: true  # 외부에 정의된 네트워크 사용
 
 volumes:
-  mysql_data:
-  npm-cache:
   gradle-cache:
+  npm-cache:
   pip-cache:
+  mysql_data:
+    external: true

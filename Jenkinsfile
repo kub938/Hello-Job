@@ -39,7 +39,10 @@ pipeline {
                     echo "New Environment: ${NEW_ENV}"
                     
                     // 공유 서비스 시작 (처음 실행 시)
-                    sh '''
+                   sh '''
+                        # 먼저 필요한 네트워크 생성
+                        docker network create shared-network || true
+                        
                         if ! docker ps | grep -q nginx-proxy; then
                             echo "Starting shared services..."
                             docker-compose -f docker-compose.shared.yml up -d
@@ -295,7 +298,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                     sh """
                         curl -X POST -H 'Content-Type: application/json' -d '{
-                            "text": "✅ ${userName}(이)가 요청한 블루-그린 배포 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER} (환경: ${NEW_ENV})"
+                            "text": "✅ ${userName}(이)가 요청한 블루-그린 빌드 성공! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
                         }' \$WEBHOOK_URL
                     """
                 }
@@ -323,7 +326,7 @@ pipeline {
                 withCredentials([string(credentialsId: 'MATTERMOST_WEBHOOK', variable: 'WEBHOOK_URL')]) {
                     sh """
                         curl -X POST -H 'Content-Type: application/json' -d '{
-                            "text": "❌ ${userName}(이)가 요청한 블루-그린 배포 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER} (롤백됨)"
+                            "text": "❌ ${userName}(이)가 요청한 블루-그린 빌드 실패! ${env.JOB_NAME} #${env.BUILD_NUMBER}"
                         }' \$WEBHOOK_URL
                     """
                 }

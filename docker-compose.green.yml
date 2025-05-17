@@ -31,6 +31,7 @@ services:
       - gradle-cache:/home/gradle/.gradle
     networks:
       - green-network
+      - shared-network
 
   frontend:
     build: ./frontend
@@ -44,6 +45,7 @@ services:
       - npm-cache:/root/.npm
     networks:
       - green-network
+      - shared-network
 
   ai:
     build: ./ai
@@ -61,6 +63,7 @@ services:
       - pip-cache:/root/.cache/pip
     networks:
       - green-network
+      - shared-network
 
 networks:
   green-network:
