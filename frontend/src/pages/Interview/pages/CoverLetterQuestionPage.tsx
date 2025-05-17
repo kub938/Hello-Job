@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import {
   FileText,
-  ChevronRight,
   PlusCircle,
   RefreshCw,
   CheckCircle,
@@ -9,12 +8,11 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/Button";
 import { useNavigate } from "react-router";
-import { useInfiniteQuery } from "@tanstack/react-query";
-import { getCoverLetterList } from "@/api/mypageApi";
 import {
   useCreateCoverLetterQuestion,
   useGetCoverLetterQuestions,
   useSaveCoverLetterQuestions,
+  useSelectCoverLetterQuestionComplete,
 } from "@/hooks/interviewHooks";
 import { toast } from "sonner";
 import CreateCoverLetterQuestionModal from "../components/CreateCoverLetterQuestionModal";
@@ -22,12 +20,7 @@ import {
   CreateQuestionResponse,
   SaveQuestionRequest,
 } from "@/types/interviewApiTypes";
-
-// // 생성된 질문 응답 인터페이스
-// interface GeneratedQuestionsResponse {
-//   coverLetterInterviewId: number;
-//   coverLetterQuestionList: string[];
-// }
+import CoverLetterSelectionPanel from "../components/CoverLetterSelectionPanel";
 
 function CoverLetterQuestionPage() {
   //state 관련
@@ -36,6 +29,8 @@ function CoverLetterQuestionPage() {
   >(null);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
 
   // 모달 관련 상태
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,53 +41,29 @@ function CoverLetterQuestionPage() {
   const navigate = useNavigate();
   const createQuestionMutation = useCreateCoverLetterQuestion();
   const saveQuestionsMutation = useSaveCoverLetterQuestions();
-  const { data: questions } = useGetCoverLetterQuestions(selectedCoverLetterId);
+  const { data: questions, refetch } = useGetCoverLetterQuestions(
+    selectedCoverLetterId
+  );
+  const selectQuestionCompleteMutation = useSelectCoverLetterQuestionComplete();
 
-  //무한 스크롤
-  const observerTarget = useRef<HTMLDivElement | null>(null);
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, status } =
-    useInfiniteQuery({
-      queryKey: ["coverLetterList"],
-      queryFn: async ({ pageParam = 0 }) => {
-        const response = await getCoverLetterList(Number(pageParam));
-        return response.data;
-      },
-      getNextPageParam: (lastPage) => {
-        if (lastPage.last) return undefined;
-        return lastPage.pageable.pageNumber + 1;
-      },
-      initialPageParam: 0,
-    });
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      },
-      { rootMargin: "0px 0px 200px 0px", threshold: 0.1 }
-    );
-
-    if (observerTarget.current) {
-      observer.observe(observerTarget.current);
+    // 이전 타이머가 있으면 clear
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
     }
 
+    // 새 타이머 설정 (300ms)
+    debounceTimeout.current = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 200);
+
+    // 컴포넌트 언마운트나 searchTerm 변경 시 클린업
     return () => {
-      observer.disconnect();
+      if (debounceTimeout.current) {
+        clearTimeout(debounceTimeout.current);
+      }
     };
-  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
-  // 모든 자기소개서 목록을 평탄화하여 하나의 배열로 만듦
-  const coverLetters = data?.pages.flatMap((page) => page.content) || [];
-
-  // 날짜 포맷팅 함수
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}-${String(date.getDate()).padStart(2, "0")}`;
-  };
+  }, [searchTerm]);
 
   // 추가 질문 생성 핸들러
   const handleGenerateQuestions = () => {
@@ -106,7 +77,6 @@ function CoverLetterQuestionPage() {
     // 기존 mutation 호출
     createQuestionMutation.mutate(selectedCoverLetterId, {
       onSuccess: (data) => {
-        // 성공 시 생성된 질문 데이터 저장 및 모달 열기
         setGeneratedQuestions(data);
         setIsModalOpen(true);
       },
@@ -123,7 +93,44 @@ function CoverLetterQuestionPage() {
 
   // 선택한 질문 저장 핸들러
   const handleSaveQuestions = (data: SaveQuestionRequest) => {
-    saveQuestionsMutation.mutate(data);
+    saveQuestionsMutation.mutate(data, {
+      onSuccess() {
+        refetch();
+        handleCloseModal();
+        toast.info("선택된 질문이 저장되었습니다.");
+      },
+    });
+  };
+
+  const handleSelectCoverLetter = (id: number) => {
+    if (selectedCoverLetterId === id) {
+      return;
+    }
+    setSelectedCoverLetterId(id);
+    setSelectedQuestions([]);
+  };
+
+  const handleSelectComplete = () => {
+    if (!selectedCoverLetterId) {
+      toast.warning("선택된 자기소개서가 없습니다");
+      return;
+    }
+    if (selectedQuestions.length === 0) {
+      toast.warning("문항을 선택해 주세요");
+      return;
+    }
+
+    selectQuestionCompleteMutation.mutate(
+      {
+        coverLetterId: selectedCoverLetterId,
+        questionIdList: selectedQuestions,
+      },
+      {
+        onSuccess: (response) => {
+          navigate("/interview/prepare", { state: response });
+        },
+      }
+    );
   };
 
   return (
@@ -139,84 +146,12 @@ function CoverLetterQuestionPage() {
 
       {/* 2단 레이아웃 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* 왼쪽: 자기소개서 선택 패널 */}
+        {/* 왼쪽: 자기소개서 선택 패널 (컴포넌트화) */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-xl shadow-sm border border-border p-5">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <FileText className="w-5 h-5 text-primary mr-2" />내 자기소개서
-            </h2>
-
-            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-              {status === "pending" ? (
-                <div className="py-4 flex justify-center">
-                  <RefreshCw className="w-5 h-5 animate-spin text-primary" />
-                </div>
-              ) : status === "error" ? (
-                <div className="text-center py-8 text-red-500">
-                  데이터를 불러오는 중 오류가 발생했습니다.
-                </div>
-              ) : coverLetters.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">
-                  자기소개서가 없습니다.
-                </div>
-              ) : (
-                <>
-                  {coverLetters.map((coverLetter, index) => (
-                    <button
-                      key={`${coverLetter.coverLetterId}-${index}`}
-                      onClick={() =>
-                        setSelectedCoverLetterId(coverLetter.coverLetterId)
-                      }
-                      className={`w-full text-left p-4 rounded-lg border transition-all ${
-                        selectedCoverLetterId === coverLetter.coverLetterId
-                          ? "border-primary bg-secondary-light"
-                          : "border-border hover:border-primary/30 hover:bg-secondary-light/50"
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold text-secondary-foreground">
-                            {coverLetter.coverLetterTitle}
-                          </h3>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {coverLetter.companyName} -{" "}
-                            {coverLetter.jobRoleName}
-                          </p>
-                        </div>
-                        <ChevronRight
-                          className={`w-5 h-5 ${
-                            selectedCoverLetterId === coverLetter.coverLetterId
-                              ? "text-primary"
-                              : "text-muted-foreground"
-                          }`}
-                        />
-                      </div>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        최종 수정: {formatDate(coverLetter.updatedAt)}
-                      </p>
-                    </button>
-                  ))}
-
-                  {/* Intersection Observer의 대상이 되는 div */}
-                  <div ref={observerTarget} className="h-4 w-full" />
-                </>
-              )}
-
-              {/* 로딩 표시 */}
-              {isFetchingNextPage && (
-                <div className="py-4 flex justify-center">
-                  <RefreshCw className="w-5 h-5 animate-spin text-primary" />
-                </div>
-              )}
-
-              {/* 더 이상 데이터가 없을 때 */}
-              {!hasNextPage && coverLetters.length > 0 && (
-                <div className="py-4 text-center text-sm text-muted-foreground">
-                  모든 자기소개서를 불러왔습니다.
-                </div>
-              )}
-            </div>
-          </div>
+          <CoverLetterSelectionPanel
+            selectedCoverLetterId={selectedCoverLetterId}
+            onSelectCoverLetter={handleSelectCoverLetter}
+          />
         </div>
 
         {/* 오른쪽: 질문 선택 및 생성 패널 */}
@@ -250,33 +185,39 @@ function CoverLetterQuestionPage() {
               {/* 질문 목록 */}
               <div className="space-y-3 mb-6 max-h-[320px] overflow-y-auto pr-2">
                 {questions && questions.length > 0 ? (
-                  questions.map((question) => {
-                    const isSelected = selectedQuestions.includes(
-                      question.questionBankId
-                    );
-                    return (
-                      <div
-                        key={question.questionBankId}
-                        onClick={() => {
-                          if (isSelected) {
-                            setSelectedQuestions(
-                              selectedQuestions.filter(
-                                (id) => id !== question.questionBankId
-                              )
-                            );
-                          } else {
-                            if (selectedQuestions.length < 5) {
-                              setSelectedQuestions([
-                                ...selectedQuestions,
-                                question.questionBankId,
-                              ]);
+                  questions
+                    .filter((question) =>
+                      question.question
+                        .toLowerCase()
+                        .includes(debouncedSearchTerm.toLowerCase())
+                    )
+                    .map((question) => {
+                      const isSelected = selectedQuestions.includes(
+                        question.questionBankId
+                      );
+                      return (
+                        <div
+                          key={question.questionBankId}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedQuestions(
+                                selectedQuestions.filter(
+                                  (id) => id !== question.questionBankId
+                                )
+                              );
                             } else {
-                              // 최대 5개 선택 제한 - 실제로는 toast 메시지 등으로 알림
-                              toast.error("최대 5개까지 선택할 수 있습니다.");
+                              if (selectedQuestions.length < 5) {
+                                setSelectedQuestions([
+                                  ...selectedQuestions,
+                                  question.questionBankId,
+                                ]);
+                              } else {
+                                // 최대 5개 선택 제한 - 실제로는 toast 메시지 등으로 알림
+                                toast.error("최대 5개까지 선택할 수 있습니다.");
+                              }
                             }
-                          }
-                        }}
-                        className={`
+                          }}
+                          className={`
                           group relative rounded-lg border p-4 transition-all cursor-pointer
                           ${
                             isSelected
@@ -284,10 +225,10 @@ function CoverLetterQuestionPage() {
                               : "border-border bg-white hover:border-primary/30 hover:bg-secondary-light/50"
                           }
                         `}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`
                             flex-shrink-0 rounded-full w-6 h-6 border-2 flex items-center justify-center 
                             transition-colors mt-0.5
                             ${
@@ -296,20 +237,24 @@ function CoverLetterQuestionPage() {
                                 : "border-muted-foreground"
                             }
                           `}
-                          >
-                            {isSelected && <CheckCircle className="w-4 h-4" />}
-                          </div>
+                            >
+                              {isSelected && (
+                                <CheckCircle className="w-4 h-4" />
+                              )}
+                            </div>
 
-                          <p className="flex-grow text-secondary-foreground">
-                            {question.question}
-                          </p>
+                            <p className="flex-grow text-secondary-foreground">
+                              {question.question}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })
                 ) : (
                   <div className="text-center py-8 text-muted-foreground">
-                    {searchTerm ? "검색 결과가 없습니다." : "질문이 없습니다."}
+                    {debouncedSearchTerm
+                      ? "검색 결과가 없습니다."
+                      : "질문이 없습니다."}
                   </div>
                 )}
               </div>
@@ -364,6 +309,7 @@ function CoverLetterQuestionPage() {
         </Button>
 
         <button
+          onClick={handleSelectComplete}
           className={`px-6 py-2.5 rounded-lg transition-colors ${
             selectedQuestions.length > 0
               ? "bg-primary text-primary-foreground hover:bg-accent"

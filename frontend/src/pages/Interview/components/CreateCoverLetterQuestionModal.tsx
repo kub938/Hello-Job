@@ -30,27 +30,6 @@ function CreateCoverLetterQuestionModal({
 }: CoverLetterQuestionModalProps) {
   const [selectedQuestions, setSelectedQuestions] = useState<string[]>([]);
   const modalRef = useRef<HTMLDivElement>(null);
-
-  // 모달 바깥 클릭 시 닫기
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
   // 모달이 열릴 때마다 선택된 질문 초기화
   useEffect(() => {
     if (isOpen) {

@@ -1,7 +1,6 @@
 import { authApi } from "./instance";
 import {
   CreateQuestionResponse,
-  InterviewAnswerInfo,
   InterviewCategory,
   InterviewVideoQuestionRequest,
   QuestionMemoRequest,
@@ -66,26 +65,35 @@ export const interviewApi = {
     );
   },
 
-  // 미디어 저장 API - 통합 방식
-  completeQuestion: (interviewInfo: InterviewAnswerInfo, audioFile: File) => {
-    const formData = new FormData();
-
-    formData.append("interviewInfo", JSON.stringify(interviewInfo));
-    formData.append("audioFile", audioFile);
-
-    return authApi.post("/api/v1/interview/practice/voice", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+  selectCoverLetterQuestionComplete: (
+    coverLetterId: number,
+    questionIdList: number[]
+  ) => {
+    return authApi.post(`/api/v1/interview/practice/question/cover-letter`, {
+      coverLetterId,
+      questionIdList,
     });
   },
-  completeInterview: (interviewInfo: InterviewAnswerInfo, videoFile: File) => {
+
+  // 미디어 저장 API - 통합 방식
+  completeQuestion: (
+    interviewAnswerId: number,
+    videoFile: File,
+    audioFile: File
+  ) => {
     const formData = new FormData();
 
-    formData.append("interviewInfo", JSON.stringify(interviewInfo));
-    formData.append("videoFile", videoFile);
+    // interviewAnswerId를 application/json 형식으로 설정
+    const jsonBlob = new Blob([JSON.stringify(interviewAnswerId)], {
+      type: "application/json",
+    });
+    formData.append("interviewAnswerId", jsonBlob);
 
-    return authApi.post("/api/v1/interview/practice/video", formData, {
+    // 파일 필드는 그대로 추가
+    formData.append("videoFile", videoFile);
+    formData.append("audioFile", audioFile);
+
+    return authApi.post("/api/v1/interview/practice/question", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

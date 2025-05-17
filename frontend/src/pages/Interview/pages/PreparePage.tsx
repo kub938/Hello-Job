@@ -1,5 +1,12 @@
 import { useState, useEffect, useRef } from "react"; // React 훅 가져오기: 상태 관리, 생명주기, 참조 객체 생성에 사용
-import { Camera, Mic, MicOff } from "lucide-react"; // Lucide 아이콘 라이브러리에서 카메라와 마이크 관련 아이콘 가져오기
+import {
+  useAudioDeviceStore,
+  useCameraDeviceStore,
+  useSpeakerDeviceStore,
+} from "@/store/deviceStore";
+import { Button } from "@/components/Button";
+import VideoDisplay from "../components/VideoDisplay";
+import { useCameraStream } from "../hooks/cameraStream";
 import { useStartInterview } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
 import { useLocation, useNavigate } from "react-router";
@@ -14,21 +21,165 @@ interface MediaDeviceInfo {
 }
 
 function PreparePage() {
-  // 상태 관리를 위한 useState 훅 사용
-  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null); // 카메라 스트림 상태
-  const [audioStream, setAudioStream] = useState<MediaStream | null>(null); // 오디오 스트림 상태
-  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]); // 사용 가능한 카메라 장치 목록
-  const [audioDevices, setAudioDevices] = useState<MediaDeviceInfo[]>([]); // 사용 가능한 마이크 장치 목록
-  const [selectedVideo, setSelectedVideo] = useState<string>(""); // 선택된 카메라 장치 ID
-  const [selectedAudio, setSelectedAudio] = useState<string>(""); // 선택된 마이크 장치 ID
+  const {
+    videoDevices, //사용 가능한 카메라 장치 목록
+    setVideoDevices,
+    selectedVideo, //선택된 카메라 장치 ID
+    setSelectedVideo,
+  } = useCameraDeviceStore();
+
+  // useCameraStream 훅 사용
+  const { cameraStream, videoRef } = useCameraStream({
+    selectedDevice: selectedVideo,
+    onError: (message) => setError(message),
+  });
+
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null);
+
+  const { audioDevices, setAudioDevices, selectedAudio, setSelectedAudio } =
+    useAudioDeviceStore();
+
+  const {
+    speakerDevices,
+    setSpeakerDevices,
+    selectedSpeaker,
+    setSelectedSpeaker,
+  } = useSpeakerDeviceStore();
+
+  const navigate = useNavigate();
+
   const [audioLevel, setAudioLevel] = useState<number>(0); // 현재 오디오 입력 레벨(볼륨)
-  const [isMicMuted, setIsMicMuted] = useState<boolean>(false); // 마이크 음소거 상태
   const [error, setError] = useState<string>(""); // 오류 메시지 상태
-  const [_, setIsVideoReady] = useState<boolean>(false); // 비디오가 로딩 완료되었는지 상태
+
+  const [isAudioTest, setIsAudioTest] = useState<boolean>(false); // 오디오 테스트 상태
+
+  // 테스트용 오디오 연결을 저장할 참조 객체 추가
+  const audioSourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
+  const audioDestinationRef = useRef<MediaStreamAudioDestinationNode | null>(
+    null
+  );
+  const delayNodeRef = useRef<DelayNode | null>(null);
+  const testAudioElementRef = useRef<HTMLAudioElement | null>(null);
+  const outputAnalyserRef = useRef<AnalyserNode | null>(null); // 출력 음량 분석을 위한 추가 참조
+
+  const handleTestAudio = () => {
+    // 다음 상태의 반대값을 미리 계산
+    const nextAudioTestState = !isAudioTest;
+    setIsAudioTest(nextAudioTestState);
+
+    // 오디오 테스트 상태에 따른 동작
+    if (nextAudioTestState) {
+      // 오디오 테스트 시작 - 마이크 켜기
+      if (audioStream && selectedSpeaker) {
+        // 오디오 컨텍스트가 없으면 새로 생성
+        if (!audioContextRef.current) {
+          const AudioContextClass =
+            window.AudioContext || (window as any).webkitAudioContext;
+          audioContextRef.current = new AudioContextClass();
+        }
+
+        const audioCtx = audioContextRef.current;
+
+        // 마이크 입력을 오디오 컨텍스트의 소스로 연결
+        audioSourceRef.current = audioCtx.createMediaStreamSource(audioStream);
+
+        // 지연 노드 생성 (1초 지연)
+        delayNodeRef.current = audioCtx.createDelay(3.0);
+        delayNodeRef.current.delayTime.value = 1.0; // 1초 지연
+
+        // 출력 음량 분석을 위한 분석기 노드 생성
+        outputAnalyserRef.current = audioCtx.createAnalyser();
+        outputAnalyserRef.current.fftSize = 256;
+
+        // 오디오 출력 대상 생성
+        audioDestinationRef.current = audioCtx.createMediaStreamDestination();
+
+        // 노드들을 연결: 소스 -> 지연 -> 분석기 -> 출력
+        audioSourceRef.current.connect(delayNodeRef.current);
+        delayNodeRef.current.connect(outputAnalyserRef.current);
+        outputAnalyserRef.current.connect(audioDestinationRef.current);
+
+        // 오디오 요소 생성 및 출력 스트림 설정
+        const audioElement = new Audio();
+        audioElement.srcObject = audioDestinationRef.current.stream;
+        testAudioElementRef.current = audioElement;
+
+        // 오디오 요소에 선택된 스피커 설정
+        if (typeof audioElement.setSinkId !== "undefined") {
+          audioElement
+            .setSinkId(selectedSpeaker)
+            .then(() => {
+              console.log("테스트 오디오의 출력 장치가 성공적으로 설정됨");
+              audioElement
+                .play()
+                .catch((err) => console.error("오디오 재생 실패:", err));
+
+              // 출력 레벨 업데이트 시작
+              updateOutputLevel();
+            })
+            .catch((err) => console.error("출력 장치 설정 실패:", err));
+        } else {
+          console.warn(
+            "이 브라우저는 오디오 출력 장치 선택을 지원하지 않습니다."
+          );
+          audioElement
+            .play()
+            .catch((err) => console.error("오디오 재생 실패:", err));
+
+          // 출력 레벨 업데이트 시작
+          updateOutputLevel();
+        }
+
+        console.log("오디오 테스트 시작됨");
+      } else {
+        console.error("마이크 또는 스피커가 선택되지 않았습니다.");
+        setIsAudioTest(false); // 오류 시 상태 되돌림
+      }
+    } else {
+      // 오디오 테스트 종료 - 마이크 끄기
+      if (testAudioElementRef.current) {
+        testAudioElementRef.current.pause();
+        testAudioElementRef.current.srcObject = null;
+        testAudioElementRef.current = null;
+      }
+
+      // 애니메이션 프레임 취소
+      if (animationFrameRef.current) {
+        cancelAnimationFrame(animationFrameRef.current);
+        animationFrameRef.current = null;
+      }
+
+      // 오디오 연결 해제
+      if (outputAnalyserRef.current) {
+        outputAnalyserRef.current.disconnect();
+        outputAnalyserRef.current = null;
+      }
+
+      if (delayNodeRef.current) {
+        delayNodeRef.current.disconnect();
+        delayNodeRef.current = null;
+      }
+
+      if (audioSourceRef.current) {
+        audioSourceRef.current.disconnect();
+        audioSourceRef.current = null;
+      }
+
+      if (audioDestinationRef.current) {
+        audioDestinationRef.current.disconnect();
+        audioDestinationRef.current = null;
+      }
+
+      // 테스트 종료 후 마이크 입력 레벨 측정으로 복귀
+      if (!isAudioTest && analyserRef.current) {
+        updateAudioLevel();
+      }
+
+      console.log("오디오 테스트 종료됨");
+    }
+  };
 
   // useRef 훅을 사용한 참조 객체들
-
-  const videoRef = useRef<HTMLVideoElement | null>(null); // 비디오 요소 DOM 참조
   const audioContextRef = useRef<AudioContext | null>(null); // 오디오 컨텍스트 참조(오디오 처리를 위한 API)
   const analyserRef = useRef<AnalyserNode | null>(null); // 오디오 분석기 노드 참조(볼륨 레벨 분석용)
   const animationFrameRef = useRef<number | null>(null); // requestAnimationFrame ID 저장용 참조
@@ -36,7 +187,6 @@ function PreparePage() {
   // 면접 시작 훅
   //location 완전 모의면접/ 단일 문항 연습 구분 한 뒤에 다음 버튼 눌렀을 때 훅 부를지 말지 선택
   const location = useLocation();
-  const navigate = useNavigate();
   const { selectCategory, selectInterviewType, selectCoverLetterId } =
     useInterviewStore();
   const startInterviewMutation = useStartInterview();
@@ -89,17 +239,24 @@ function PreparePage() {
         const audios = devices.filter(
           (device) => device.kind === "audioinput"
         ) as MediaDeviceInfo[];
+        //스피커 장치 찾기
+        const speakers = devices.filter(
+          (device) => device.kind === "audiooutput"
+        ) as MediaDeviceInfo[];
 
         console.log("발견된 비디오 장치:", videos);
         console.log("발견된 오디오 장치:", audios);
+        console.log("발견된 스피커 장치:", speakers);
 
         // 필터링된 장치 목록을 상태에 저장
         setVideoDevices(videos);
         setAudioDevices(audios);
+        setSpeakerDevices(speakers);
 
         // 장치가 있으면 첫 번째 장치를 기본값으로 선택
         if (videos.length > 0) setSelectedVideo(videos[0].deviceId);
         if (audios.length > 0) setSelectedAudio(audios[0].deviceId);
+        if (speakers.length > 0) setSelectedSpeaker(speakers[0].deviceId);
       } catch (err) {
         console.error("장치 목록을 가져오는 중 오류 발생:", err);
         setError("카메라 또는 마이크 접근 권한이 필요합니다.");
@@ -110,7 +267,9 @@ function PreparePage() {
 
     // 컴포넌트 언마운트 시 정리(clean-up) 함수 - 메모리 누수 방지
     return () => {
-      stopMediaStreams(); // 모든 미디어 스트림 중지
+      if (audioStream) {
+        audioStream.getTracks().forEach((track) => track.stop());
+      }
       if (audioContextRef.current) {
         audioContextRef.current.close(); // 오디오 컨텍스트 종료
       }
@@ -120,14 +279,6 @@ function PreparePage() {
     };
   }, []); // 빈 배열을 전달하여 컴포넌트 마운트 시에만 실행
 
-  // 선택된 비디오 장치가 변경될 때 스트림 업데이트하는 useEffect 훅
-  useEffect(() => {
-    if (selectedVideo) {
-      console.log("선택된 비디오 장치 변경됨:", selectedVideo);
-      startVideoStream(); // 새 비디오 스트림 시작
-    }
-  }, [selectedVideo]); // selectedVideo 상태가 변경될 때마다 실행
-
   // 선택된 오디오 장치가 변경될 때 스트림 업데이트하는 useEffect 훅
   useEffect(() => {
     if (selectedAudio) {
@@ -136,45 +287,37 @@ function PreparePage() {
     }
   }, [selectedAudio]); // selectedAudio 상태가 변경될 때마다 실행
 
-  // 비디오 요소가 데이터를 로드했을 때 호출되는 이벤트 핸들러
-  const handleVideoLoadedData = () => {
-    console.log("비디오 데이터 로드됨");
-    setIsVideoReady(true); // 비디오 준비 완료 상태로 설정
-  };
+  //선택된 스피커 장치가 변경될 때.
+  useEffect(() => {
+    if (selectedSpeaker) {
+      console.log("선택된 스피커 장치 변경됨:", selectedSpeaker);
 
-  // 비디오 스트림을 시작하는 함수
-  const startVideoStream = async (): Promise<void> => {
-    try {
-      // 기존 비디오 스트림이 있으면 중지(리소스 정리)
-      if (cameraStream) {
-        console.log("기존 카메라 스트림 중지 중...");
-        cameraStream.getTracks().forEach((track) => track.stop());
-      }
+      // 브라우저가 setSinkId API를 지원하는지 확인
+      if (typeof HTMLMediaElement.prototype.setSinkId !== "undefined") {
+        // 현재 페이지의 모든 오디오/비디오 요소 찾기
+        const mediaElements = document.querySelectorAll("video, audio");
 
-      console.log("카메라 연결 시도 중...");
-      // 선택된 카메라 장치로 미디어 스트림 요청
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          deviceId: selectedVideo ? { exact: selectedVideo } : undefined, // 선택된 장치 ID 지정
-        },
-      });
-      console.log("카메라 스트림 획득 성공:", stream);
-
-      setCameraStream(stream); // 카메라 스트림 상태 업데이트
-      setIsVideoReady(false); // 새 스트림이 로드될 때까지 준비 상태 false로 설정
-
-      // 비디오 요소에 스트림 연결
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream; // 비디오 요소의 srcObject에 스트림 할당
-        console.log("비디오 요소에 스트림 연결됨");
+        // 각 미디어 요소의 출력 장치 변경
+        mediaElements.forEach((element: any) => {
+          if (element.setSinkId) {
+            element
+              .setSinkId(selectedSpeaker)
+              .then(() => {
+                console.log("출력 장치가 성공적으로 변경됨");
+              })
+              .catch((err: Error) => {
+                console.error("출력 장치 변경 실패:", err);
+                setError("스피커 변경 중 오류가 발생했습니다.");
+              });
+          }
+        });
       } else {
-        console.error("비디오 요소 참조를 찾을 수 없음");
+        console.warn(
+          "이 브라우저는 오디오 출력 장치 선택을 지원하지 않습니다."
+        );
       }
-    } catch (err) {
-      console.error("카메라 스트림 시작 중 오류 발생:", err);
-      setError("카메라를 시작할 수 없습니다. 권한을 확인해주세요.");
     }
-  };
+  }, [selectedSpeaker]); // selectedSpeaker 상태가 변경될 때마다 실행
 
   // 오디오 스트림을 시작하고 오디오 레벨 분석을 설정하는 함수
   const startAudioStream = async (): Promise<void> => {
@@ -220,12 +363,6 @@ function PreparePage() {
       source.connect(analyser); // 소스를 분석기에 연결
       console.log("오디오 분석 파이프라인 설정 완료");
 
-      // 현재 음소거 상태에 따라 오디오 트랙 활성화/비활성화
-      stream.getAudioTracks().forEach((track) => {
-        track.enabled = !isMicMuted; // enabled = false면 음소거
-      });
-      console.log("마이크 음소거 상태 설정:", isMicMuted);
-
       // 오디오 레벨 업데이트 시작
       updateAudioLevel();
     } catch (err) {
@@ -253,37 +390,34 @@ function PreparePage() {
     animationFrameRef.current = requestAnimationFrame(updateAudioLevel);
   };
 
-  // 모든 미디어 스트림을 중지하는 함수
-  const stopMediaStreams = (): void => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => track.stop());
-    }
+  // 오디오 출력 레벨(볼륨)을 지속적으로 업데이트하는 함수
+  const updateOutputLevel = (): void => {
+    if (!outputAnalyserRef.current || !audioContextRef.current) return;
 
-    if (audioStream) {
-      audioStream.getTracks().forEach((track) => track.stop());
-    }
+    // 주파수 데이터를 저장할 Uint8Array 생성
+    const dataArray = new Uint8Array(
+      outputAnalyserRef.current.frequencyBinCount
+    );
+    // 현재 오디오 주파수 데이터 가져오기
+    outputAnalyserRef.current.getByteFrequencyData(dataArray);
 
-    console.log("모든 미디어 스트림이 중지됨");
-  };
+    // 모든 주파수 값의 평균을 계산하여 오디오 레벨 결정
+    const average =
+      dataArray.reduce((acc, val) => acc + val, 0) / dataArray.length;
+    setAudioLevel(average); // 오디오 레벨 상태 업데이트
 
-  // 마이크 음소거 상태를 토글하는 함수
-  const toggleMicrophone = (): void => {
-    if (audioStream) {
-      const newMuteState = !isMicMuted;
-      // 오디오 트랙의 enabled 속성을 변경하여 음소거 처리
-      audioStream.getAudioTracks().forEach((track) => {
-        track.enabled = !newMuteState; // true면 활성화, false면 비활성화(음소거)
-      });
-      setIsMicMuted(newMuteState); // 음소거 상태 업데이트
-      console.log("마이크 음소거 상태 변경:", newMuteState);
-    }
+    // 애니메이션 프레임을 요청하여 다음 프레임에서도 업데이트 계속
+    animationFrameRef.current = requestAnimationFrame(updateOutputLevel);
   };
 
   // 다른 페이지로 이동하는 함수 (React Router의 Link 대신 사용)
   const handleNavigation = (path: string): void => {
-    if (typeof window !== "undefined") {
-      window.location.href = path; // 브라우저 URL을 변경하여 페이지 이동
-    }
+    navigate(path);
+  };
+
+  // 비디오 로딩 완료 이벤트 핸들러
+  const handleVideoLoadedData = () => {
+    console.log("비디오 데이터 로드됨");
   };
 
   return (
@@ -297,24 +431,6 @@ function PreparePage() {
       </div>
 
       <div className="mx-auto max-w-3xl">
-        {/* 선택한 질문 정보 표시 */}
-        <div className="mb-6 rounded-lg bg-gray-100 p-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-800">
-              !
-            </div>
-            <div>
-              <h4 className="font-medium">선택한 질문:</h4>
-              <p className="text-sm text-gray-600">
-                본인의 강점과 약점에 대해 말씀해 주세요.
-              </p>
-              <p className="mt-1 text-xs text-gray-500">
-                카테고리: 자기소개 | 예상 답변 시간: 2-3분
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* 오류 메시지 표시 */}
         {error && (
           <div className="mb-4 rounded-lg bg-red-50 p-3 text-red-600">
@@ -322,83 +438,40 @@ function PreparePage() {
           </div>
         )}
 
-        {/* 비디오 미리보기 영역 */}
-        <div className="mb-8 overflow-hidden h-120 rounded-lg bg-gray-900 relative">
-          <video
-            ref={videoRef} // DOM 요소 참조 연결
-            autoPlay // 자동 재생
-            playsInline // 모바일에서 인라인 재생(전체 화면 방지)
-            muted // 오디오 음소거(피드백 방지)
-            className="h-full w-full object-cover"
-            onLoadedData={handleVideoLoadedData} //  비디오 데이터 로드 완료 이벤트 핸들러
-          />
-          {cameraStream ? (
-            <></>
-          ) : (
-            <div className="flex h-120 items-center justify-center absolute top-0 left-0 w-full">
-              <div className="text-center text-white">
-                <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-gray-700 mx-auto">
-                  <Camera className="h-6 w-6 text-gray-400" />
-                </div>
-                <p className="text-gray-400">카메라 연결 중...</p>
-              </div>
-            </div>
-          )}
-
-          {audioStream && (
-            <button
-              onClick={toggleMicrophone}
-              className="absolute bottom-3 right-3 rounded-full bg-gray-800 p-2 text-white"
-            >
-              {isMicMuted ? (
-                <MicOff className="h-5 w-5" /> // 음소거 상태면 MicOff 아이콘
-              ) : (
-                <Mic className="h-5 w-5" /> // 음소거 아닌 상태면 Mic 아이콘
-              )}
-            </button>
-          )}
+        {/* 카메라 선택 드롭다운 */}
+        <h1 className="mb-4 text-xl  font-bold">1. 비디오 설정</h1>
+        <div className="mb-4">
+          <label className="mb-2 block text-sm font-medium">카메라</label>
+          <select
+            className="w-1/2 rounded-md border border-gray-300 p-2 text-sm"
+            value={selectedVideo}
+            onChange={(e) => setSelectedVideo(e.target.value)} // 선택 변경 시 상태 업데이트
+          >
+            {videoDevices.length === 0 && (
+              <option value="">카메라를 찾을 수 없음</option>
+            )}
+            {videoDevices.map((device: MediaDeviceInfo) => (
+              <option key={device.deviceId} value={device.deviceId}>
+                {device.label || `카메라 ${videoDevices.indexOf(device) + 1}`}{" "}
+                {/* 장치 레이블이 없으면 번호로 표시 */}
+              </option>
+            ))}
+          </select>
         </div>
+        {/* 비디오 미리보기 영역 */}
+        <VideoDisplay
+          cameraStream={cameraStream}
+          videoRef={videoRef}
+          onVideoLoadedData={handleVideoLoadedData}
+          height={420}
+        />
 
-        {/* 오디오 레벨 미터 - 오디오 스트림이 있을 때만 표시 */}
-        {audioStream && (
-          <div className="mb-6">
-            <p className="mb-1 text-sm font-medium">마이크 입력 레벨:</p>
-            <div className="h-2 w-full rounded-full bg-gray-200">
-              <div
-                className="h-full rounded-full bg-green-500 transition-all duration-100"
-                style={{ width: `${Math.min(audioLevel, 100)}%` }} // 오디오 레벨에 따라 너비 조정(최대 100%)
-              />
-            </div>
-            <p className="mt-1 text-xs text-gray-500">
-              {isMicMuted ? "마이크가 음소거되었습니다" : "말을 해보세요!"}
-            </p>
-          </div>
-        )}
-
+        <h1 className="mt-6 mb-4 text-xl font-bold">2. 음성 설정</h1>
         {/* 장치 선택 영역 */}
         <div className="mb-8 grid grid-cols-2 gap-4">
-          {/* 카메라 선택 드롭다운 */}
-          <div>
-            <label className="mb-2 block text-sm font-medium">카메라</label>
-            <select
-              className="w-full rounded-md border border-gray-300 p-2 text-sm"
-              value={selectedVideo}
-              onChange={(e) => setSelectedVideo(e.target.value)} // 선택 변경 시 상태 업데이트
-            >
-              {videoDevices.length === 0 && (
-                <option value="">카메라를 찾을 수 없음</option>
-              )}
-              {videoDevices.map((device: MediaDeviceInfo) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label || `카메라 ${videoDevices.indexOf(device) + 1}`}{" "}
-                  {/* 장치 레이블이 없으면 번호로 표시 */}
-                </option>
-              ))}
-            </select>
-          </div>
           {/* 마이크 선택 드롭다운 */}
           <div>
-            <label className="mb-2 block text-sm font-medium">마이크</label>
+            <label className="mb-2 block text-sm font-medium">녹음장치</label>
             <select
               className="w-full rounded-md border border-gray-300 p-2 text-sm"
               value={selectedAudio}
@@ -415,10 +488,54 @@ function PreparePage() {
               ))}
             </select>
           </div>
+          {/* 스피커 선택 드롭다운 */}
+          <div>
+            <label className="mb-2 block text-sm font-medium">출력장치</label>
+            <select
+              className="w-full rounded-md border border-gray-300 p-2 text-sm"
+              value={selectedSpeaker}
+              onChange={(e) => setSelectedSpeaker(e.target.value)} // 선택 변경 시 상태 업데이트
+            >
+              {speakerDevices.length === 0 && (
+                <option value="">스피커를 찾을 수 없음</option>
+              )}
+              {speakerDevices.map((device: MediaDeviceInfo) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label ||
+                    `스피커 ${speakerDevices.indexOf(device) + 1}`}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
+        {/* 오디오 레벨 미터 - 오디오 스트림이 있을 때만 표시 */}
+        {audioStream && (
+          <div className="mb-6">
+            <p className=" mb-1 text-sm font-medium">마이크 테스트하기:</p>
+            <div className="flex items-center gap-2">
+              <Button onClick={handleTestAudio} className="w-[110px]">
+                {isAudioTest ? "테스트 중지하기" : "들어보기"}
+              </Button>
+              <div className="flex-1">
+                <div className="h-4"></div>
+                <div className="h-2 w-full rounded-full bg-gray-200">
+                  <div
+                    className="h-full rounded-full bg-blue-600 transition-all duration-100"
+                    style={{ width: `${Math.min(audioLevel, 100)}%` }}
+                  />
+                </div>
+                <p className="mt-1 text-xs text-gray-500">
+                  {isAudioTest
+                    ? "출력 음성이 명확하게 들리나요?"
+                    : "자신감 있는 목소리가 담기고 있나요?"}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* 네비게이션 버튼 */}
-        <div className="flex justify-between">
+        <div className="flex justify-between mt-10">
           {/* 이전 페이지 버튼 */}
           <button
             onClick={() => handleNavigation("/interview/single-question")}
@@ -427,12 +544,12 @@ function PreparePage() {
             이전
           </button>
           {/* 면접 시작 버튼 */}
-          <button
+          <Button
+            className="rounded-md px-6 py-2 text-white"
             onClick={handleStartInterview}
-            className="rounded-md bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
           >
             면접 시작하기
-          </button>
+          </Button>
         </div>
       </div>
     </>
