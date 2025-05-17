@@ -79,8 +79,8 @@ public class InterviewService {
     @Value("${FFPROBE_PATH}")
     private String ffprobePath;
 
-//    @Value("${FFMPEG_PATH}")
-//    private String ffmpegPath;
+    @Value("${FFMPEG_PATH}")
+    private String ffmpegPath;
 
     @Value("${OPENAI_API_URL}")
     private static String openAiUrl;
@@ -200,7 +200,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저인 경우)
-        Interview interview = interviewRepository.findByUserAndCs(user, true)
+        Interview interview = interviewRepository.findTopByUserAndCsOrderByInterviewId(user, true)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, true);
                     return interviewRepository.save(newInterview);
@@ -222,7 +222,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저인 경우)
-        Interview interview = interviewRepository.findByUserAndCs(user, false)
+        Interview interview = interviewRepository.findTopByUserAndCsOrderByInterviewId(user, false)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, false);
                     return interviewRepository.save(newInterview);
@@ -268,7 +268,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저)
-        Interview interview = interviewRepository.findByUserAndCs(user, true)
+        Interview interview = interviewRepository.findTopByUserAndCsOrderByInterviewId(user, true)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, true);
                     return interviewRepository.save(newInterview);
@@ -311,9 +311,9 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         // 면접이 없을 때(처음 시도하는 유저인 경우)
-        Interview interview = interviewRepository.findByUserAndCs(user, true)
+        Interview interview = interviewRepository.findTopByUserAndCsOrderByInterviewId(user, false)
                 .orElseGet(() -> {
-                    Interview newInterview = Interview.of(user, true);
+                    Interview newInterview = Interview.of(user, false);
                     return interviewRepository.save(newInterview);
                 });
 
@@ -754,8 +754,6 @@ public class InterviewService {
 
         File mp4TempFile = File.createTempFile("converted", ".mp4");
         log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
-
-        String ffmpegPath = "ffmpeg";
 
         // ffmpeg 실행
         ProcessBuilder ffmpegPb = new ProcessBuilder(
