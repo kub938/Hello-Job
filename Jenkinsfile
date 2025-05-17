@@ -141,10 +141,10 @@ pipeline {
                                 --build-arg OPENAI_API_URL=\$OPENAI_API_URL \
                                 --build-arg S3_ACCESS_KEY=\$S3_ACCESS_KEY \
                                 --build-arg S3_SECRET_KEY=\$S3_SECRET_KEY \
-                                --build-arg GMS_KEY=$GMS_KEY \
-                                --build-arg GMS_API_BASE=$GMS_API_BASE \
-                                --build-arg FFPROBE_PATH=$FFPROBE_PATH \
-                                --build-arg FFMPEG_PATH=$FFMPEG_PATH
+                                --build-arg GMS_KEY=\$GMS_KEY \
+                                --build-arg GMS_API_BASE=\$GMS_API_BASE \
+                                --build-arg FFPROBE_PATH=\$FFPROBE_PATH \
+                                --build-arg FFMPEG_PATH=\$FFMPEG_PATH
 
 
                             echo "🚀 Starting new environment: ${NEW_ENV}..."

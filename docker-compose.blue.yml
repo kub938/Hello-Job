@@ -27,9 +27,6 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - FFPROBE_PATH=${FFPROBE_PATH}
       - FFMPEG_PATH=${FFMPEG_PATH}
-    depends_on:
-      mysql:
-        condition: service_healthy
     volumes:
       - gradle-cache:/home/gradle/.gradle
     networks:
@@ -62,9 +59,6 @@ services:
       - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
       - GMS_KEY=${GMS_KEY}
       - GMS_API_BASE=${GMS_API_BASE}
-    depends_on:
-      mysql:
-        condition: service_healthy
     volumes:
       - pip-cache:/root/.cache/pip
     networks:
