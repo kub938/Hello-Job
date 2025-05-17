@@ -171,38 +171,41 @@ pipeline {
                     sh """
                         echo "🔄 Switching traffic to ${NEW_ENV} environment..."
                         
-                        # Nginx 설정 파일 백업
-                        cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.backup
-                        
-                        # 새 환경으로 트래픽 전환
-                        if [ "${NEW_ENV}" == "blue" ]; then
-                            # Blue 환경으로 전환
-                            sed -i 's/server backend-blue:8080 weight=0;/server backend-blue:8080 weight=100;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server backend-green:8080 weight=100;/server backend-green:8080 weight=0;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server frontend-blue:5173 weight=0;/server frontend-blue:5173 weight=100;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server frontend-green:5173 weight=100;/server frontend-green:5173 weight=0;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server ai-blue:8000 weight=0;/server ai-blue:8000 weight=100;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server ai-green:8000 weight=100;/server ai-green:8000 weight=0;/' /etc/nginx/conf.d/default.conf
-                        else
-                            # Green 환경으로 전환
-                            sed -i 's/server backend-blue:8080 weight=100;/server backend-blue:8080 weight=0;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server backend-green:8080 weight=0;/server backend-green:8080 weight=100;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server frontend-blue:5173 weight=100;/server frontend-blue:5173 weight=0;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server frontend-green:5173 weight=0;/server frontend-green:5173 weight=100;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server ai-blue:8000 weight=100;/server ai-blue:8000 weight=0;/' /etc/nginx/conf.d/default.conf
-                            sed -i 's/server ai-green:8000 weight=0;/server ai-green:8000 weight=100;/' /etc/nginx/conf.d/default.conf
-                        fi
-                        
-                        # Nginx 설정 테스트 및 재로드
-                        nginx -t
-                        if [ \$? -eq 0 ]; then
-                            nginx -s reload
-                            echo "✅ Traffic switched to ${NEW_ENV} environment"
-                        else
-                            echo "❌ Nginx configuration error!"
-                            cp /etc/nginx/conf.d/default.conf.backup /etc/nginx/conf.d/default.conf
-                            exit 1
-                        fi
+                        # Nginx 컨테이너 내에서 설정 파일 수정
+                        docker exec nginx-proxy bash -c '
+                            # Nginx 설정 파일 백업
+                            cp /etc/nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf.backup || echo "Backup failed but continuing"
+                            
+                            # 새 환경으로 트래픽 전환
+                            if [ "${NEW_ENV}" == "blue" ]; then
+                                # Blue 환경으로 전환
+                                sed -i "s/server backend-blue:8080 weight=0;/server backend-blue:8080 weight=100;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server backend-green:8080 weight=100;/server backend-green:8080 weight=0;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server frontend-blue:5173 weight=0;/server frontend-blue:5173 weight=100;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server frontend-green:5173 weight=100;/server frontend-green:5173 weight=0;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server ai-blue:8000 weight=0;/server ai-blue:8000 weight=100;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server ai-green:8000 weight=100;/server ai-green:8000 weight=0;/g" /etc/nginx/conf.d/default.conf
+                            else
+                                # Green 환경으로 전환
+                                sed -i "s/server backend-blue:8080 weight=100;/server backend-blue:8080 weight=0;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server backend-green:8080 weight=0;/server backend-green:8080 weight=100;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server frontend-blue:5173 weight=100;/server frontend-blue:5173 weight=0;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server frontend-green:5173 weight=0;/server frontend-green:5173 weight=100;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server ai-blue:8000 weight=100;/server ai-blue:8000 weight=0;/g" /etc/nginx/conf.d/default.conf
+                                sed -i "s/server ai-green:8000 weight=0;/server ai-green:8000 weight=100;/g" /etc/nginx/conf.d/default.conf
+                            fi
+                            
+                            # Nginx 설정 테스트 및 재로드
+                            nginx -t
+                            if [ \$? -eq 0 ]; then
+                                nginx -s reload
+                                echo "✅ Traffic switched to ${NEW_ENV} environment"
+                            else
+                                echo "❌ Nginx configuration error!"
+                                cp /etc/nginx/conf.d/default.conf.backup /etc/nginx/conf.d/default.conf
+                                exit 1
+                            fi
+                        '
                     """
                 }
             }
