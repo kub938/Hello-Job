@@ -3,6 +3,7 @@ import CoverLetterSelectionPanel from "./CoverLetterSelectionPanel";
 import { Button } from "@/components/Button";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { useInterviewStore } from "@/store/interviewStore";
 
 interface CategorySelectModalLayoutProps {
   onClose: () => void;
@@ -14,6 +15,7 @@ function CategorySelectModalLayout({
   const [selectedCoverLetterId, setSelectedCoverLetterId] = useState<
     number | null
   >(null);
+  const { setSelectCoverLetterId } = useInterviewStore();
   const navigate = useNavigate();
   const handleSelectCoverLetter = (id: number) => {
     if (selectedCoverLetterId === id) {
@@ -23,6 +25,7 @@ function CategorySelectModalLayout({
   };
 
   const onNext = () => {
+    setSelectCoverLetterId(selectedCoverLetterId);
     navigate("/interview/prepare");
   };
   return (
