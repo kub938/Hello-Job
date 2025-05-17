@@ -25,8 +25,19 @@ public class S3UploadService {
     @Value("${cloud.aws.s3.bucket}")
     private String bucketName;
 
+    @Value("${cloud.aws.credentials.access-key}")
+    private String accessKey;
+
+    @Value("${cloud.aws.credentials.secret-key}")
+    private String secretKey;
+
+    @Value("${cloud.aws.region.static}")
+    private String region;
+
     // S3에 영상 업로드
     public String uploadVideo(MultipartFile file) {
+
+        log.debug("S3 키값 확인: access-key: {}, secret-key: {}", accessKey, secretKey);
 
         if(file.getSize() > 500 * 1024 * 1024){
             throw new BaseException(VIDEO_TOO_LARGE);
