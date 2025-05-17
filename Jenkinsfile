@@ -87,7 +87,8 @@ pipeline {  // 파이프라인 정의 시작
                         string(credentialsId: 'S3_SECRET_KEY', variable: 'S3_SECRET_KEY'),
                         string(credentialsId: 'GMS_KEY', variable: 'GMS_KEY'),
                         string(credentialsId: 'GMS_API_BASE', variable: 'GMS_API_BASE'),
-                        string(credentialsId: 'FFPROBE_PATH', variable: 'FFPROBE_PATH')
+                        string(credentialsId: 'FFPROBE_PATH', variable: 'FFPROBE_PATH'),
+                        string(credentialsId: 'FFMPEG_PATH', variable: 'FFMPEG_PATH')
                     ]) {
                         sh '''
                             echo "🔄 Stopping existing containers..."
@@ -122,7 +123,8 @@ pipeline {  // 파이프라인 정의 시작
                                 --build-arg S3_SECRET_KEY=$S3_SECRET_KEY \
                                 --build-arg GMS_KEY=$GMS_KEY \
                                 --build-arg GMS_API_BASE=$GMS_API_BASE \
-                                --build-arg FFPROBE_PATH=$FFPROBE_PATH
+                                --build-arg FFPROBE_PATH=$FFPROBE_PATH \
+                                --build-arg FFMPEG_PATH=$FFMPEG_PATH
 
                             echo "🧹 Removing local Docker images..."
                             docker rmi workspace-backend || true
