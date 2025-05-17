@@ -5,10 +5,7 @@ import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepos
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.*;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
-import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterCreateResponseDto;
-import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
-import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterSummaryDto;
-import com.ssafy.hellojob.domain.coverletter.dto.response.MyPageCoverLetterDto;
+import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ContentQuestionStatusDto;
@@ -108,7 +105,10 @@ public class CoverLetterService {
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot()))
+                .job_role_analysis(
+                        coverLetter.getJobRoleSnapshot() != null
+                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                        : null)
                 .contents(coverLetter.getContents().stream()
                         .map(content -> ContentDto.builder()
                                 .content_number(content.getContentNumber())
@@ -181,8 +181,12 @@ public class CoverLetterService {
         return CoverLetterSummaryDto.builder()
                 .coverLetterTitle(coverLetter.getCoverLetterTitle())
                 .contentIds(contentIds)
-                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId().intValue())
-                .jobRoleSnapshotId(coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId())
+                .companyAnalysisId(coverLetter.getCompanyAnalysis().getCompanyAnalysisId())
+                .jobRoleSnapshotId(
+                        coverLetter.getJobRoleSnapshot() != null
+                                ? coverLetter.getJobRoleSnapshot().getJobRoleSnapshotId()
+                                : null
+                )
                 .build();
     }
 
@@ -233,5 +237,11 @@ public class CoverLetterService {
                 .build();
 
         return response;
+    }
+
+    // 일정 자기소개서 목록 조회
+    public List<ScheduleCoverLetterDto> getCoverLetterForSchedule(Integer userId) {
+        userReadService.findUserByIdOrElseThrow(userId);
+        return coverLetterRepository.findCoverLetterForSchedule(userId);
     }
 }

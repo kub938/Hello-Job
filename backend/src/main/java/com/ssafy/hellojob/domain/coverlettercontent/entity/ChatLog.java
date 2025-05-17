@@ -17,7 +17,7 @@ public class ChatLog extends BaseTimeEntity {
     @Id
     private Integer coverLetterContentId;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "cover_letter_content_id")
     private CoverLetterContent coverLetterContent;

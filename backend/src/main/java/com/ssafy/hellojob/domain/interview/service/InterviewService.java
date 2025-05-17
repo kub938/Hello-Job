@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -34,11 +35,15 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
@@ -65,17 +70,28 @@ public class InterviewService {
     private final CoverLetterContentService coverLetterContentService;
     private final FastApiClientService fastApiClientService;
 
-    private final Integer QUESTION_SIZE = 3;
+    // polling 전 정의
+    private static final int MAX_WAIT_SECONDS = 60;
+    private static final int POLL_INTERVAL_MS = 500;
+
+    private static final Integer QUESTION_SIZE = 5;
+
+    @Value("${FFPROBE_PATH}")
+    private String ffprobePath;
+
+//    @Value("${FFMPEG_PATH}")
+//    private String ffmpegPath;
 
     @Value("${OPENAI_API_URL}")
-    private String openAiUrl;
+    private static String openAiUrl;
 
     @Value("${OPENAI_API_KEY}")
-    private String openAiKey;
+    private static String openAiKey;
+    private final S3UploadService s3UploadService;
 
-    public List<QuestionListResponseDto> getCsQuestionList(Integer userId){
+    // cs 질문 목록 조회
+    public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
-
         List<CsQuestionBank> questionList = csQuestionBankRepository.findAll();
 
         return questionList.stream()
@@ -86,9 +102,24 @@ public class InterviewService {
                 .toList();
     }
 
-    public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId){
-        userReadService.findUserByIdOrElseThrow(userId);
+    public QuestionDetailResponseDto findCsQuestionDetail(Integer questionId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CsQuestionBank questionBank = csQuestionBankRepository.findById(questionId)
+                .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, questionBank);
+        if (memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+
+        return QuestionDetailResponseDto.builder()
+                .questionBankId(questionId)
+                .question(questionBank.getCsQuestion())
+                .memo(memo.getMemo())
+                .build();
+    }
+
+    // 인성 질문 목록 조회
+    public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId) {
+        userReadService.findUserByIdOrElseThrow(userId);
         List<PersonalityQuestionBank> questionList = personalityQuestionBankRepository.findAll();
 
         return questionList.stream()
@@ -99,15 +130,38 @@ public class InterviewService {
                 .toList();
     }
 
-    public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId){
+    public QuestionDetailResponseDto findPersonalityQuestionDetail(Integer questionId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
+        PersonalityQuestionBank questionBank = personalityQuestionBankRepository.findById(questionId)
+                .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
 
-        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, questionBank);
+        if (memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
 
-        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_INTERVIEW_NOT_FOUND));
+        return QuestionDetailResponseDto.builder()
+                .questionBankId(questionId)
+                .question(questionBank.getPersonalityQuestion())
+                .memo(memo.getMemo())
+                .build();
+    }
 
+    // 자소서 기반 질문 목록 조회
+    public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
+
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
+            throw new BaseException(INVALID_USER);
+        }
+
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newCoverLetterInterview = CoverLetterInterview.of(user, coverLetter);
+                    return coverLetterInterviewRepository.save(newCoverLetterInterview);
+                });
+
+
+        // 자소서 질문 조회
         List<CoverLetterQuestionBank> questionList = coverLetterQuestionBankRepository.findByCoverLetterInterview(coverLetterInterview);
 
         return questionList.stream()
@@ -118,16 +172,42 @@ public class InterviewService {
                 .toList();
     }
 
-    public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId){
+    public QuestionDetailResponseDto findCoverLetterQuestionDetail(Integer questionId, Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
+
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetterIdWithGraph(user, coverLetterId)
+                .orElseThrow(() -> new BaseException(COVER_LETTER_INTERVIEW_NOT_FOUND));
+
+        CoverLetterQuestionBank questionBank = coverLetterQuestionBankRepository.findByIdWithCoverLetterInterview(questionId)
+                .orElseThrow(() -> new BaseException(QUESTION_NOT_FOUND));
+
+        if (!questionBank.getCoverLetterInterview().equals(coverLetterInterview))
+            throw new BaseException(COVER_LETTER_QUESTION_MISMATCH);
+
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, questionBank);
+        if (memo == null) throw new BaseException(INTERVIEW_QUESTION_MEMO_NOT_FOUND);
+
+        return QuestionDetailResponseDto.builder()
+                .questionBankId(questionId)
+                .question(questionBank.getCoverLetterQuestion())
+                .memo(memo.getMemo())
+                .build();
+    }
+
+    // 문항 카테고리 선택 cs
+    public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        // 면접이 없을 때(처음 시도하는 유저인 경우)
         Interview interview = interviewRepository.findByUserAndCs(user, true)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, true);
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        // 면접 영상 생성
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("CS"));
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
@@ -137,16 +217,19 @@ public class InterviewService {
 
     }
 
-    public SelectInterviewStartResponseDto startPersonalitySelectInterview(Integer userId){
+    // 문항 카테고리 선택 인성
+    public SelectInterviewStartResponseDto startPersonalitySelectInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
+        // 면접이 없을 때(처음 시도하는 유저인 경우)
         Interview interview = interviewRepository.findByUserAndCs(user, false)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, false);
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        // 면접 영상 생성
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("PERSONALITY"));
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
@@ -156,7 +239,8 @@ public class InterviewService {
 
     }
 
-    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer coverLetterId, Integer userId){
+    // 구현 폐기
+    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
         CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
@@ -169,7 +253,7 @@ public class InterviewService {
                 });
 
 
-        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
+        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
         return SelectInterviewStartResponseDto.builder()
@@ -179,18 +263,22 @@ public class InterviewService {
 
     }
 
-    public InterviewStartResponseDto startCsRandomInterview(Integer userId){
+    // cs 모의 면접 시작
+    public InterviewStartResponseDto startCsRandomInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
+        // 면접이 없을 때(처음 시도하는 유저)
         Interview interview = interviewRepository.findByUserAndCs(user, true)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, true);
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        // 면접 영상 생성
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("CS"));
         interviewVideoRepository.save(video);
 
+        // cs 질문 랜덤하게 가져오기
         List<CsQuestionBank> all = csQuestionBankRepository.findAll();
         Collections.shuffle(all); // Java 내부에서 무작위 섞기
         List<CsQuestionBank> selectedQuestion = all.stream()
@@ -218,18 +306,22 @@ public class InterviewService {
 
     }
 
-    public InterviewStartResponseDto startPersonalityRandomInterview(Integer userId){
+    // 인성 모의 면접 시작
+    public InterviewStartResponseDto startPersonalityRandomInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
+        // 면접이 없을 때(처음 시도하는 유저인 경우)
         Interview interview = interviewRepository.findByUserAndCs(user, true)
                 .orElseGet(() -> {
                     Interview newInterview = Interview.of(user, true);
                     return interviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now());
+        // 면접 영상 생성
+        InterviewVideo video = InterviewVideo.of(null, interview, true, LocalDateTime.now(), InterviewCategory.valueOf("PERSONALITY"));
         interviewVideoRepository.save(video);
 
+        // 인성 질문 랜덤하게 가져오기
         List<PersonalityQuestionBank> all = personalityQuestionBankRepository.findAll();
         Collections.shuffle(all); // Java 내부에서 무작위 섞기
         List<PersonalityQuestionBank> selectedQuestion = all.stream()
@@ -257,21 +349,27 @@ public class InterviewService {
 
     }
 
-    public InterviewStartResponseDto startCoverLetterRandomInterview(Integer coverLetterId, Integer userId){
+    // 자소서 모의 면접 시작
+    public InterviewStartResponseDto startCoverLetterRandomInterview(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
 
-        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
+            throw new BaseException(INVALID_USER);
+        }
 
+        // 면접이 없을 경우(처음 시도한느 유저)
         CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
-                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); // 팩토리 메서드 예시
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); 
                     return coverLetterInterviewRepository.save(newInterview);
                 });
 
-        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now());
+        // 면접 영상 생성
+        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
+        // 질문 랜덤하게 가져오기
         List<CoverLetterQuestionBank> all = coverLetterQuestionBankRepository.findByCoverLetterInterview(interview);
         Collections.shuffle(all); // Java 내부에서 무작위 섞기
         List<CoverLetterQuestionBank> selectedQuestion = all.stream()
@@ -299,14 +397,21 @@ public class InterviewService {
 
     }
 
-    public void saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto){
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+    // 문항 선택 면접 cs 질문 선택
+    public InterviewStartResponseDto saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
+        userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
 
-        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
-            Integer questionId = dto.getQuestionBankId();
+        Interview interview = interviewReadService.findInterviewById(video.getInterview().getInterviewId());
+        if (!userId.equals(interview.getUser().getUserId())) {
+            throw new BaseException(INVALID_USER);
+        }
+
+        List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
+
+        // front에서 받은 질문 id로 질문(string) 조회 후 interviewAnswer 객체 생성
+        for (Integer questionId : requestDto.getQuestionIdList()) {
 
             CsQuestionBank question = csQuestionBankRepository.findById(questionId)
                     .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
@@ -317,19 +422,38 @@ public class InterviewService {
                     InterviewQuestionCategory.valueOf(question.getCsCategory().name())
             );
             interviewAnswerRepository.save(answer);
+
+            questionList.add(
+                    QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(questionId)
+                            .question(question.getCsQuestion())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .build()
+            );
         }
 
-
+        return InterviewStartResponseDto.builder()
+                .interviewId(video.getInterviewVideoId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
     }
 
-    public void savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto){
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+    // 문항 선택 면접 인성 질문 선택
+    public InterviewStartResponseDto savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
+        userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(requestDto.getInterviewVideoId());
 
-        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
-            Integer questionId = dto.getQuestionBankId();
+        Interview interview = interviewReadService.findInterviewById(video.getInterview().getInterviewId());
+        if (!userId.equals(interview.getUser().getUserId())) {
+            throw new BaseException(INVALID_USER);
+        }
+
+        List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
+
+        // front에서 받은 질문 id로 질문(string) 조회 후 interviewAnswer 객체 생성
+        for (Integer questionId : requestDto.getQuestionIdList()) {
 
             PersonalityQuestionBank question = personalityQuestionBankRepository.findById(questionId)
                     .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
@@ -340,20 +464,40 @@ public class InterviewService {
                     InterviewQuestionCategory.valueOf("인성면접")
             );
             interviewAnswerRepository.save(answer);
+
+            questionList.add(
+                    QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(questionId)
+                            .question(question.getPersonalityQuestion())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .build()
+            );
         }
 
+        return InterviewStartResponseDto.builder()
+                .interviewId(video.getInterviewVideoId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
 
     }
 
-    public void saveCoverLetterQuestions(Integer userId, SelectQuestionRequestDto requestDto){
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+    // 문항 선택 면접 자소서 질문 선택
+    public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto) {
+        userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
+            throw new BaseException(INVALID_USER);
+        }
+        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByCoverLetter(coverLetter);
 
-        InterviewVideo video = interviewVideoRepository.findById(requestDto.getInterviewVideoId())
-                .orElseThrow(() -> new BaseException(ErrorCode.INTERVIEW_VIDEO_NOT_FOUND));
+        InterviewVideo video = interviewVideoRepository.save(InterviewVideo.of(coverLetterInterview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER")));
 
-        for (QuestionBankIdDto dto : requestDto.getQuestionIdList()) {
-            Integer questionId = dto.getQuestionBankId();
+        List<QuestionAndAnswerListResponseDto> questionList = new ArrayList<>();
 
+        for (Integer questionId : requestDto.getQuestionIdList()) {
+
+            // front에서 받은 질문 id로 질문(string) 조회 후 interviewAnswer 객체 생성
             CoverLetterQuestionBank question = coverLetterQuestionBankRepository.findById(questionId)
                     .orElseThrow(() -> new BaseException(ErrorCode.QUESTION_NOT_FOUND));
 
@@ -363,71 +507,118 @@ public class InterviewService {
                     InterviewQuestionCategory.valueOf("자기소개서면접")
             );
             interviewAnswerRepository.save(answer);
+
+            questionList.add(
+                    QuestionAndAnswerListResponseDto.builder()
+                            .questionBankId(questionId)
+                            .question(question.getCoverLetterQuestion())
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .build()
+            );
         }
 
+        return InterviewStartResponseDto.builder()
+                .interviewId(video.getInterviewVideoId())
+                .interviewVideoId(video.getInterviewVideoId())
+                .questionList(questionList)
+                .build();
 
     }
 
-    public CoverLetterQuestionSaveResponseDto saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto){
+    // 자소서 기반으로 생성된 질문 저장
+    public Map<String, String> saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
+            throw new BaseException(INVALID_USER);
+        }
 
-        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
+        // 면접 었을 시 생성
+        CoverLetterInterview coverLetterInterview = coverLetterInterviewRepository.findByCoverLetter(coverLetter)
+                .orElseGet(() -> {
+                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter);
+                    return coverLetterInterviewRepository.save(newInterview);
+                });
 
         List<CoverLetterQuestionIdDto> questionIdList = new ArrayList<>();
 
-        for(CoverLetterQuestionDto dto: requestDto.getCoverLetterQuestion()){
-            String newQuestion = dto.getCoverLetterQuestion();
+        for (String newQuestion : requestDto.getCoverLetterQuestion()) {
+
             CoverLetterQuestionBank newQuestions = CoverLetterQuestionBank.of(coverLetterInterview, newQuestion);
             coverLetterQuestionBankRepository.save(newQuestions);
             questionIdList.add(CoverLetterQuestionIdDto.builder()
-                            .coverLetterQuestionBankId(newQuestions.getCoverLetterQuestionBankId())
+                    .coverLetterQuestionBankId(newQuestions.getCoverLetterQuestionBankId())
                     .build());
         }
 
-        return CoverLetterQuestionSaveResponseDto.builder()
-                .coverLetterId(coverLetter.getCoverLetterId())
-                .coverLetterInterviewId(coverLetterInterview.getCoverLetterInterviewId())
-                .coverLetterQuestionSaveId(questionIdList)
-                .build();
+        return Map.of("message", "성공적으로 저장되었습니다.");
     }
 
-    public WriteMemoResponseDto createMemo(WriteMemoRequestDto requestDto, Integer userId) {
-
+    public WriteMemoResponseDto createCsMemo(WriteMemoRequestDto requestDto, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
-        CsQuestionBank csQuestionBank = null;
-        PersonalityQuestionBank personalityQuestionBank = null;
-        CoverLetterQuestionBank coverLetterQuestionBank = null;
-        CoverLetterInterview coverLetterInterview = null;
-        InterviewQuestionMemo memo = null;
+        CsQuestionBank csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
 
-        if(requestDto.getCsQuestionBankId() != null) {
-            csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getCsQuestionBankId());
-            memo = interviewReadService.findInterviewQuestionMemoByUserAndCsQuestionOrElseReturnNull(user, csQuestionBank);
-        } else if(requestDto.getPersonalityQuestionBankId() != null) {
-            personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getPersonalityQuestionBankId());
-            memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
-        } else if(requestDto.getCoverLetterQuestionBankId() != null) {
-            coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getCoverLetterQuestionBankId());
-            coverLetterInterview = interviewReadService.findCoverLetterInterviewByIWithUserdOrElseThrow(requestDto.getInterviewId());
-            if(!coverLetterQuestionBank.getCoverLetterInterview().equals(coverLetterInterview) || !coverLetterInterview.getUser().equals(user)) {
-                throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
-            }
-            memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
-        } else {
-            throw new BaseException(QUESTION_TYPE_REQUIRED);
-        }
-
-        if(memo != null) {
+        if (memo != null) {
             memo.updateMemo(requestDto.getMemo());
         } else {
             memo = InterviewQuestionMemo.builder()
                     .user(user)
                     .csQuestionBank(csQuestionBank)
+                    .personalityQuestionBank(null)
+                    .coverLetterQuestionBank(null)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+
+    }
+
+    public WriteMemoResponseDto createPersonalityMemo(WriteMemoRequestDto requestDto, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        PersonalityQuestionBank personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndPersonalityQuestionOrElseReturnNull(user, personalityQuestionBank);
+
+        if (memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(null)
                     .personalityQuestionBank(personalityQuestionBank)
+                    .coverLetterQuestionBank(null)
+                    .memo(requestDto.getMemo())
+                    .build();
+        }
+
+        interviewQuestionMemoRepository.save(memo);
+
+        return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
+    }
+
+    public WriteMemoResponseDto createCoverLetterMemo(WriteMemoRequestDto requestDto, Integer coverLetterId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        CoverLetterQuestionBank coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getQuestionBankId());
+        CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
+        CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewByUserAndCoverLetterOrElseThrow(user, coverLetter);
+
+        if (!coverLetterInterview.equals(coverLetterQuestionBank.getCoverLetterInterview())) {
+            throw new BaseException(COVER_LETTER_QUESTION_MISMATCH);
+        }
+
+        InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoByUserAndCoverLetterQuestionOrElseReturnNull(user, coverLetterQuestionBank);
+
+        if (memo != null) {
+            memo.updateMemo(requestDto.getMemo());
+        } else {
+            memo = InterviewQuestionMemo.builder()
+                    .user(user)
+                    .csQuestionBank(null)
+                    .personalityQuestionBank(null)
                     .coverLetterQuestionBank(coverLetterQuestionBank)
                     .memo(requestDto.getMemo())
                     .build();
@@ -442,7 +633,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
 
-        if(!memo.getUser().equals(user)) {
+        if (!memo.getUser().equals(user)) {
             throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
         }
 
@@ -455,7 +646,7 @@ public class InterviewService {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
 
-        if(!memo.getUser().equals(user)) {
+        if (!memo.getUser().equals(user)) {
             throw new BaseException(INTERVIEW_QUESTION_MEMO_MISMATCH);
         }
 
@@ -463,77 +654,199 @@ public class InterviewService {
         return Map.of("message", "메모가 삭제되었습니다.");
     }
 
-    public String transcribeAudio(MultipartFile audioFile) throws Exception {
-        RestTemplate restTemplate = new RestTemplate();
+    // stt
+    public String transcribeAudio(MultipartFile audioFile) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
 
-        // 파일 리소스로 변환
-        Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
-            @Override
-            public String getFilename() {
-                return audioFile.getOriginalFilename();
+            // 파일 리소스로 변환
+            Resource audioResource = new ByteArrayResource(audioFile.getBytes()) {
+                @Override
+                public String getFilename() {
+                    return audioFile.getOriginalFilename();
+                }
+            };
+
+            // Form 데이터 생성
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", audioResource);
+            body.add("model", "whisper-1");
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            headers.setBearerAuth(openAiKey);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    openAiUrl,
+                    HttpMethod.POST,
+                    requestEntity,
+                    String.class
+            );
+
+            // text만 추출
+            if (response.getStatusCode().is2xxSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.readTree(response.getBody()).get("text").asText();
+            } else {
+                return "stt 변환에 실패했습니다";
             }
-        };
-
-        // Form 데이터 생성
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        body.add("file", audioResource);
-        body.add("model", "whisper-1");
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        headers.setBearerAuth(openAiKey);
-
-        HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-        ResponseEntity<String> response = restTemplate.exchange(
-                openAiUrl,
-                HttpMethod.POST,
-                requestEntity,
-                String.class
-        );
-
-        if (response.getStatusCode().is2xxSuccessful()) {
-
-            ObjectMapper objectMapper = new ObjectMapper();
-            String text = objectMapper.readTree(response.getBody()).get("text").asText();
-
-            return text;
-        } else {
-            throw new RuntimeException("OpenAI API 요청 실패: " + response.getStatusCode());
+        } catch (Exception e) {
+            return "stt 변환에 실패했습니다";
         }
     }
 
+
+    // 한 문항 종료(면접 답변 저장)
     @Transactional
-    public void saveInterviewAnswer(Integer userId, String answer, InterviewInfo interviewInfo){
+    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, Integer interviewAnswerId, MultipartFile videoFile) {
         userReadService.findUserByIdOrElseThrow(userId);
 
-        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewInfo.getInterviewAnswerId());
+        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewAnswer.getInterviewVideo().getInterviewVideoId());
 
-        if(interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")){
+        if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
-            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
-            if(!userId.equals(interview.getUser().getUserId())){
+            if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         }
 
+        String videoLength = "";
+        try {
+            videoLength = getVideoDurationWithFFprobe(videoFile);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt(); // interrupt 상태 복원
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        } catch (IOException e) {
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        }
+
+
         interviewAnswer.addInterviewAnswer(answer);
+        interviewAnswer.addInterviewVideoUrl(url);
+        interviewAnswer.addVideoLength(videoLength);
+
+        return Map.of("message", "정상적으로 저장되었습니다.");
     }
 
+    // 동영상에서 시간 뽑아내기
+    // 영상 길이 추출 + .webm -> .mp4 자동 변환
+    public String getVideoDurationWithFFprobe(MultipartFile videoFile) throws IOException, InterruptedException {
+        long start = System.nanoTime();
+        log.debug("▶ getVideoDurationWithFFprobe 시작");
+
+        String originalFilename = videoFile.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".")
+                ? originalFilename.substring(originalFilename.lastIndexOf("."))
+                : ".webm";
+        log.debug("⏺️ 원본 파일명: {}, 추출된 확장자: {}", originalFilename, extension);
+
+        File webmTempFile = File.createTempFile("upload", extension);
+        videoFile.transferTo(webmTempFile);
+        log.debug("📁 임시 webm 파일 생성 및 저장 완료: {}", webmTempFile.getAbsolutePath());
+
+        File mp4TempFile = File.createTempFile("converted", ".mp4");
+        log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
+
+        String ffmpegPath = "ffmpeg";
+
+        // ffmpeg 실행
+        ProcessBuilder ffmpegPb = new ProcessBuilder(
+                ffmpegPath, "-y",
+                "-i", webmTempFile.getAbsolutePath(),
+                "-c:v", "libx264",
+                "-preset", "ultrafast",
+                "-c:a", "aac",
+                "-strict", "experimental",
+                mp4TempFile.getAbsolutePath()
+        );
+        ffmpegPb.redirectErrorStream(true);
+        Process ffmpegProcess = ffmpegPb.start();
+        log.debug("⚙️ ffmpeg 프로세스 시작");
+
+        // 출력 스트림 소비 (중단 방지)
+        new Thread(() -> {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(ffmpegProcess.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    log.debug("ffmpeg ▶ {}", line);
+                }
+            } catch (IOException e) {
+                log.warn("⚠️ ffmpeg 로그 읽기 실패", e);
+            }
+        }).start();
+
+        boolean ffmpegFinished = ffmpegProcess.waitFor(30, TimeUnit.SECONDS);
+        if (!ffmpegFinished) {
+            ffmpegProcess.destroyForcibly();
+            log.error("❌ ffmpeg 시간 초과로 강제 종료됨");
+            throw new IOException("ffmpeg 변환 시간 초과");
+        }
+        log.debug("✅ ffmpeg 변환 완료 (파일 경로: {})", mp4TempFile.getAbsolutePath());
+
+        // ffprobe 실행
+        ProcessBuilder ffprobePb = new ProcessBuilder(
+                ffprobePath,
+                "-v", "error",
+                "-show_entries", "format=duration",
+                "-of", "default=noprint_wrappers=1:nokey=1",
+                mp4TempFile.getAbsolutePath()
+        );
+        Process ffprobeProcess = ffprobePb.start();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(ffprobeProcess.getInputStream()));
+        String durationStr = reader.readLine();
+        ffprobeProcess.waitFor();
+        log.debug("🧪 ffprobe 결과: {}", durationStr);
+
+        try {
+            Files.deleteIfExists(webmTempFile.toPath());
+            Files.deleteIfExists(mp4TempFile.toPath());
+            log.debug("🧹 임시 파일 삭제 완료");
+        } catch (IOException e) {
+            log.warn("⚠️ 임시 파일 삭제 실패", e);
+        }
+
+        if (durationStr == null || durationStr.trim().isEmpty() || durationStr.trim().equalsIgnoreCase("N/A")) {
+            log.warn("⚠️ ffprobe 결과로부터 duration 추출 실패: '{}'", durationStr);
+            return "";
+        }
+
+        double durationInSeconds;
+        try {
+            durationInSeconds = Double.parseDouble(durationStr.trim());
+        } catch (NumberFormatException e) {
+            log.error("❌ duration 값이 유효하지 않음: '{}'", durationStr);
+            return "";
+        }
+
+        int hours = (int) durationInSeconds / 3600;
+        int minutes = ((int) durationInSeconds % 3600) / 60;
+        int seconds = (int) durationInSeconds % 60;
+
+        String result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        long end = System.nanoTime();
+        log.debug("✅ 변환된 영상 길이: {}, 총 소요 시간: {} ms", result, (end - start) / 1_000_000);
+        return result;
+    }
+
+    // Fast API 자소서 기반 질문 생성
     @Transactional
-    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto){
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+    public CreateCoverLetterQuestionResponseDto createCoverLetterQuestion(Integer userId, CoverLetterIdRequestDto requestDto) {
+        userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
 
-        if(!userId.equals(coverLetter.getUser().getUserId())){
+        if (!userId.equals(coverLetter.getUser().getUserId())) {
             throw new BaseException(INVALID_USER);
         }
 
+        // 자소서 내용 조회
         List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(requestDto.getCoverLetterId());
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
 
@@ -542,21 +855,22 @@ public class InterviewService {
                 .cover_letter_contents(coverLetterContentFastAPIRequestDto)
                 .build();
 
+        // 경험 및 프로젝트 조회
         List<Integer> experienceIds = new ArrayList<>();
         List<Integer> projectIds = new ArrayList<>();
 
-        for(CoverLetterOnlyContentDto content:coverLetterContents){
+        for (CoverLetterOnlyContentDto content : coverLetterContents) {
             experienceIds = coverLetterExperienceRepository.findExperiencesByContentId(content.getContentId());
             projectIds = coverLetterExperienceRepository.findProjectsByContentId(content.getContentId());
         }
 
         List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
         List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
-        if(!experienceIds.isEmpty()){
+        if (!experienceIds.isEmpty()) {
             experiences = searchExperiencesByCoverLetterContentId(experienceIds);
         }
 
-        if(!projects.isEmpty()){
+        if (!projects.isEmpty()) {
             projects = searchProjectsByCoverLetterContentId(projectIds);
         }
 
@@ -566,45 +880,78 @@ public class InterviewService {
                 .projects(projects)
                 .build();
 
+        // fast API 요청 전송
         CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
 
-        CreateCoverLetterQuestionResponseDto responseDto = CreateCoverLetterQuestionResponseDto.builder()
-                .coverLetterInterviewId(coverLetter.getCoverLetterId())
-                .coverLetterQuestionList(fastAPIResponseDto.getExpected_questions())
+        return CreateCoverLetterQuestionResponseDto.builder()
+                .coverLetterId(coverLetter.getCoverLetterId())
+                .coverLetterQuestion(fastAPIResponseDto.getExpected_questions())
                 .build();
-
-        return responseDto;
     }
 
+    // 면접 종료
     @Transactional
-    public void endInterview(Integer userId, String url, VideoInfo videoInfo){
-        User user = userReadService.findUserByIdOrElseThrow(userId);
+    public EndInterviewResponseDto endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
+        // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
+        userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
-        if(interviewVideo.getCoverLetterInterview() != null){
+        // Polling: 최대 MAX_WAIT_SECONDS까지 대기
+        int waited = 0;
+        while (waited < MAX_WAIT_SECONDS * 1000) {
+            boolean hasPendingStt = interviewAnswers.stream()
+                    .anyMatch(ans -> ans.getInterviewAnswer() == null);
+
+            if (!hasPendingStt) break;  // 모두 STT 완료됨
+
+            Thread.sleep(POLL_INTERVAL_MS);  // 0.5초 대기
+            waited += POLL_INTERVAL_MS;
+
+            // 최신 상태로 다시 로드
+            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+        }
+
+        // 인터뷰 유저와 요청한 유저 유효성 검사
+        if (interviewVideo.getCoverLetterInterview() != null) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
-            if(!userId.equals(coverLetterInterview.getUser().getUserId())){
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         } else {
             Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
-            if(!userId.equals(interview.getUser().getUserId())){
+            if (!userId.equals(interview.getUser().getUserId())) {
                 throw new BaseException(INVALID_USER);
             }
         }
 
-        interviewVideo.addInterviewVideoUrl(url);
+        interviewVideo.addTitle(videoInfo.getInterviewTitle());
+        interviewVideo.addEndTime(LocalDateTime.now());
 
-        List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto = searchInterviewQuestionAndAnswer(interviewAnswers);
+        // 여기서부터 fast API 관련 로직
+        // 답변 객체 조회(stt 변환에 성공한 경우만)
+        List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto =
+                searchInterviewQuestionAndAnswer(interviewAnswers).stream()
+                        .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
+                        .toList();
+
+        // 모든 항목의 답변이 stt변환에 실패했을 때
+        if (interviewQuestionAndAnswerRequestDto.isEmpty()) {
+            return EndInterviewResponseDto.builder()
+                    .interviewVideoId(interviewVideo.getInterviewVideoId())
+                    .build();
+        }
+
+        // 자소서 조회
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
 
-        if(interviewVideo.getCoverLetterInterview() != null){
+        if (interviewVideo.getCoverLetterInterview() != null) {
             CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
             List<CoverLetterOnlyContentDto> coverLetterContents = coverLetterContentService.getWholeContentDetail(coverLetterInterview.getCoverLetter().getCoverLetterId());
             coverLetterContentFastAPIRequestDto = searchCoverLetterContents(coverLetterContents);
         }
 
+        // fast API 호출에 활용할 객체 생성
         InterviewFeedbackFastAPIRequestDto fastAPIRequestDto = InterviewFeedbackFastAPIRequestDto.builder()
                 .interview_question_answer_pairs(interviewQuestionAndAnswerRequestDto)
                 .cover_letter_contents(coverLetterContentFastAPIRequestDto)
@@ -612,26 +959,38 @@ public class InterviewService {
 
         // fast API 호출
         InterviewFeedbackFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto);
+
+        // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
 
-        for(SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback:fastAPIResponseDto.getSingle_feedbacks()){
+        for (SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback : fastAPIResponseDto.getSingle_feedbacks()) {
+
+            InterviewAnswer targetAnswer = interviewAnswers.stream()
+                    .filter(ans -> ans.getInterviewAnswerId().equals(singleInterviewFeedback.getInterview_answer_id()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("해당 interview_answer_id를 찾을 수 없습니다: " + singleInterviewFeedback.getInterview_answer_id()));
 
             String jsonFeedbacks;
             try {
                 jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
             } catch (JsonProcessingException e) {
-                throw new RuntimeException("꼬리 질문 직렬화 실패", e);
+                throw new BaseException(SERIALIZATION_FAIL);
             }
 
-            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
-            interviewAnswers.get(singleInterviewFeedback.getInterview_answer_id()).addInterviewFollowUpQuestion(jsonFeedbacks);
+            targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
+            targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
+
         }
 
+        return EndInterviewResponseDto.builder()
+                .interviewVideoId(interviewVideo.getInterviewVideoId())
+                .build();
     }
 
-    public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers){
+    // 면접 질문 + 답변 객체 조회
+    public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers) {
         List<InterviewQuestionAndAnswerRequestDto> result = new ArrayList<>();
-        for(InterviewAnswer answer:interviewAnswers){
+        for (InterviewAnswer answer : interviewAnswers) {
             result.add(
                     InterviewQuestionAndAnswerRequestDto.builder()
                             .interview_answer_id(answer.getInterviewAnswerId())
@@ -644,9 +1003,10 @@ public class InterviewService {
         return result;
     }
 
-    public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents){
+    // fast API 요청 보낼 때 자소서 전문 조회 함수
+    public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents) {
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
-        for(CoverLetterOnlyContentDto content:coverLetterContents){
+        for (CoverLetterOnlyContentDto content : coverLetterContents) {
             coverLetterContentFastAPIRequestDto.add(
                     CoverLetterContentFastAPIRequestDto.builder()
                             .cover_letter_content_number(content.getContentNumber())
@@ -658,10 +1018,11 @@ public class InterviewService {
         return coverLetterContentFastAPIRequestDto;
     }
 
-    public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds){
+    // 자소서 기반 경험 조회
+    public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds) {
         List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
-        if(!experienceIds.isEmpty()){
-            for(Integer experienceId: experienceIds){
+        if (!experienceIds.isEmpty()) {
+            for (Integer experienceId : experienceIds) {
                 Experience experience = experienceReadService.findExperienceByIdOrElseThrow(experienceId);
                 experiences.add(
                         ExperienceFastAPIRequestDto.builder()
@@ -678,9 +1039,10 @@ public class InterviewService {
         return experiences;
     }
 
-    public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds){
+    // 자소서 기반 경험 조회
+    public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds) {
         List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
-        for(Integer projectId:projectIds){
+        for (Integer projectId : projectIds) {
             Project project = projectReadService.findProjectByIdOrElseThrow(projectId);
             projects.add(
                     ProjectFastAPIRequestDto.builder()
@@ -698,4 +1060,170 @@ public class InterviewService {
         return projects;
     }
 
+    // 면접 피드백 상세 조회
+    public InterviewFeedbackResponseDto findInterviewFeedbackDetail(Integer interviewVideoId, Integer userId) {
+
+        userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(interviewVideoId);
+
+        if (interviewVideo.getCoverLetterInterview() != null) {
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if (!userId.equals(interview.getUser().getUserId())) {
+                throw new BaseException(INVALID_USER);
+            }
+        }
+
+        // 면접 답변 조회
+        List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+
+        List<InterviewFeedbackDetailDto> interviewFeedbackDetailList = new ArrayList<>();
+
+        for (InterviewAnswer answer : interviewAnswers) {
+
+            // 답변 꼬리질문 String > List<String> 역직렬화
+            List<String> followUpQuestions = new ArrayList<>();
+            String rawJson = answer.getInterviewFollowUpQuestion();
+            if (rawJson != null && !rawJson.isBlank()) {
+                try {
+                    followUpQuestions = new ObjectMapper().readValue(rawJson, new TypeReference<List<String>>() {
+                    });
+                } catch (JsonProcessingException e) {
+                    throw new BaseException(DESERIALIZATION_FAIL);
+                }
+            }
+
+            interviewFeedbackDetailList.add(
+                    InterviewFeedbackDetailDto.builder()
+                            .interviewAnswerId(answer.getInterviewAnswerId())
+                            .interviewQuestion(answer.getInterviewQuestion())
+                            .interviewAnswer(answer.getInterviewAnswer())
+                            .interviewAnswerFeedback(answer.getInterviewAnswerFeedback())
+                            .interviewAnswerFollowUpQuestion(followUpQuestions)
+                            .interviewAnswerVideoUrl(answer.getInterviewVideoUrl())
+                            .interviewAnswerLength(answer.getVideoLength())
+                            .build()
+            );
+        }
+
+        return InterviewFeedbackResponseDto.builder()
+                .interviewVideoId(interviewVideoId)
+                .interviewTitle(interviewVideo.getInterviewTitle())
+                .interviewFeedback(interviewVideo.getInterviewFeedback())
+                .interviewCategory(interviewVideo.isSelectQuestion() ? "단일문항" : "모의면접")
+                .interviewQuestionCategory(interviewVideo.getInterviewCategory().name())
+                .date(interviewVideo.getStart().toLocalDate())
+                .interviewFeedbackList(interviewFeedbackDetailList)
+                .build();
+
+    }
+
+    public List<InterviewThumbNailResponseDto> findAllInterview(Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+
+        // 한 번의 쿼리로 모든 InterviewVideo 조회 (Join 활용, 날짜 기준 내림차순 정렬)
+        List<InterviewVideo> interviewVideos = interviewVideoRepository.findAllByUser(user);
+
+        // 모든 InterviewVideo ID를 수집
+        List<Integer> videoIds = interviewVideos.stream()
+                .map(InterviewVideo::getInterviewVideoId)
+                .toList();
+
+        // 한 번의 쿼리로 각 InterviewVideo의 첫 번째 답변 조회
+        List<Map<String, Object>> firstQuestionsResults = interviewAnswerRepository
+                .findFirstQuestionsByVideoIds(videoIds);
+
+        // Map<videoId, firstQuestion> 형태로 변환
+        Map<Integer, String> firstQuestionsByVideoId = firstQuestionsResults.stream()
+                .collect(Collectors.toMap(
+                        map -> (Integer) map.get("videoId"),
+                        map -> (String) map.get("firstQuestion")
+                ));
+
+        // DTO 구성
+        return interviewVideos.stream()
+                .map(video -> InterviewThumbNailResponseDto.builder()
+                        .interviewVideoId(video.getInterviewVideoId())
+                        .interviewCategory(video.getInterviewCategory())
+                        .selectQuestion(video.isSelectQuestion())
+                        .interviewTitle(video.getInterviewTitle())
+                        .start(video.getStart())
+                        .firstQuestion(firstQuestionsByVideoId.get(video.getInterviewVideoId()))
+                        .build())
+                .toList();
+    }
+
+    public InterviewDetailResponseDto findInterviewDetail(Integer interviewVideoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(interviewVideoId);
+
+        // 소유권 확인
+        if((video.getInterview() != null && !video.getInterview().getUser().equals(user))
+            || (video.getCoverLetterInterview() != null && !video.getCoverLetterInterview().getUser().equals(user))
+            || (video.getInterview() == null && video.getCoverLetterInterview() == null)) {
+            throw new BaseException(INTERVIEW_VIDEO_MISMATCH);
+        }
+
+        List<InterviewAnswer> answers = interviewAnswerRepository.findAllByInterviewVideo(video);
+
+        List<InterviewQuestionResponseDto> questions = answers.stream()
+                        .map(answer -> InterviewQuestionResponseDto.builder()
+                                .interviewAnswerId(answer.getInterviewAnswerId())
+                                .interviewVideoUrl(answer.getInterviewVideoUrl())
+                                .videoLength(answer.getVideoLength())
+                                .interviewQuestion(answer.getInterviewQuestion())
+                                .interviewQuestionCategory(answer.getInterviewQuestionCategory())
+                                .build())
+                        .toList();
+
+        return InterviewDetailResponseDto.builder()
+                .interviewVideoId(video.getInterviewVideoId())
+                .interviewCategory(video.getInterviewCategory())
+                .selectQuestion(video.isSelectQuestion())
+                .interviewTitle(video.getInterviewTitle())
+                .start(video.getStart())
+                .questions(questions)
+                .build();
+    }
+
+    public Map<String, String> deleteInterviewVideo(Integer interviewVideoId, Integer userId) {
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(interviewVideoId);
+
+        // 소유권 확인
+        if((video.getInterview() != null && !video.getInterview().getUser().equals(user))
+                || (video.getCoverLetterInterview() != null && !video.getCoverLetterInterview().getUser().equals(user))
+                || (video.getInterview() == null && video.getCoverLetterInterview() == null)) {
+            throw new BaseException(INTERVIEW_VIDEO_MISMATCH);
+        }
+
+        List<InterviewAnswer> answers = interviewAnswerRepository.findAllByInterviewVideo(video);
+
+        if (!answers.isEmpty()) {
+            // S3 URL 목록 추출
+            List<String> s3Urls = answers.stream()
+                    .map(InterviewAnswer::getInterviewVideoUrl)
+                    .filter(Objects::nonNull)
+                    .toList();
+
+            try {
+                // 배치 삭제 시도
+                s3UploadService.deleteVideos(s3Urls);
+
+                // 모든 S3 삭제 성공 시에만 DB 삭제
+                interviewAnswerRepository.deleteAll(answers);
+
+            } catch (BaseException e) {
+                log.error("❌ S3 삭제 실패로 인한 DB 삭제 취소");
+                throw e; // 트랜잭션 롤백
+            }
+        }
+        interviewVideoRepository.delete(video);
+
+        return Map.of("message", "면접 영상이 삭제되었습니다.");
+    }
 }

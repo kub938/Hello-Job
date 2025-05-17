@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class CreateCoverLetterQuestionResponseDto {
 
-    private Integer coverLetterInterviewId;
-    private List<String> coverLetterQuestionList;
+    private Integer coverLetterId;
+    private List<String> coverLetterQuestion;
 
 }

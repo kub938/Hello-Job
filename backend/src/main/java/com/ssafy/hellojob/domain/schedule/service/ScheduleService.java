@@ -23,7 +23,7 @@ import com.ssafy.hellojob.domain.schedule.entity.ScheduleStatus;
 import com.ssafy.hellojob.domain.schedule.repository.ScheduleRepository;
 import com.ssafy.hellojob.domain.schedule.repository.ScheduleStatusRepository;
 import com.ssafy.hellojob.domain.user.entity.User;
-import com.ssafy.hellojob.domain.user.repository.UserRepository;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class ScheduleService {
 
-    private final UserRepository userRepository;
     private final ScheduleRepository scheduleRepository;
     private final CoverLetterRepository coverLetterRepository;
     private final CoverLetterContentRepository coverLetterContentRepository;
@@ -49,21 +48,21 @@ public class ScheduleService {
     private final DartAnalysisRepository dartAnalysisRepository;
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final JobRoleSnapshotRepository jobRoleSnapshotRepository;
+    private final UserReadService userReadService;
 
 
     // 일정 추가
-    public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId){
+    public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId) {
 
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         ScheduleStatus scheduleStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
-                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
 
 
         CoverLetter coverLetter = null;
-        if(requestDto.getCoverLetterId() != null){
+        if (requestDto.getCoverLetterId() != null) {
             coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
         }
 
@@ -79,25 +78,24 @@ public class ScheduleService {
 
         scheduleRepository.save(newSchedule);
 
-        return new ScheduleIdResponseDto().builder()
+        return ScheduleIdResponseDto.builder()
                 .scheduleId(newSchedule.getScheduleId())
                 .build();
 
     }
 
     // 일정 삭제
-    public void deleteSchedule(Integer scheduleId, Integer userId){
+    public void deleteSchedule(Integer scheduleId, Integer userId) {
 
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
 
         // 작성자와 userId가 같을 때만 삭제
-        if(userId == schedule.getUser().getUserId()){
+        if (userId.equals(schedule.getUser().getUserId())) {
             scheduleRepository.delete(schedule);
         } else {
             throw new BaseException(ErrorCode.INVALID_USER);
@@ -106,10 +104,9 @@ public class ScheduleService {
     }
 
     // 일정 상태 수정
-    public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId){
+    public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -122,7 +119,7 @@ public class ScheduleService {
 
         // 새로운 상태 조회
         ScheduleStatus newStatus = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
-                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
         if (newStatus == null) {
             throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND);
         }
@@ -137,10 +134,9 @@ public class ScheduleService {
     }
 
     // 일정 자기소개서 수정
-    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId){
+    public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 스케줄 정보 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -152,10 +148,8 @@ public class ScheduleService {
         }
 
         // 자기소개서 조회
-        CoverLetter coverLetter = coverLetterRepository.getReferenceById(requestDto.getCoverLetterId());
-        if(coverLetter == null){
-            throw new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND);
-        }
+        CoverLetter coverLetter = coverLetterRepository.findById(requestDto.getCoverLetterId())
+                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
 
         // 상태 변경
         schedule.setScheduleCoverLetter(coverLetter);
@@ -170,8 +164,7 @@ public class ScheduleService {
     @Transactional
     public ScheduleIdResponseDto updateSchedule(ScheduleAddRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 조회
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
 
         // 기존 스케줄 조회
         Schedule schedule = scheduleRepository.findById(scheduleId)
@@ -183,7 +176,7 @@ public class ScheduleService {
 
         // 상태 값 수정
         ScheduleStatus status = scheduleStatusRepository.findByScheduleStatusName(requestDto.getScheduleStatusName())
-                .orElseThrow(()-> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
+                .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
         if (status == null) {
             throw new BaseException(ErrorCode.SCHEDULE_STATUS_NOT_FOUND);
         }
@@ -203,6 +196,8 @@ public class ScheduleService {
                 }
                 schedule.setScheduleCoverLetter(coverLetter);
             }
+        } else {
+            schedule.setScheduleCoverLetter(null);
         }
 
         schedule.setScheduleStartDate(requestDto.getScheduleStartDate());
@@ -214,23 +209,27 @@ public class ScheduleService {
     }
 
     // 일정 전체 조회
-    public List<ScheduleListResponseDto> allSchedule(Integer userId){
+    public List<ScheduleListResponseDto> allSchedule(Integer userId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        User user = userReadService.findUserByIdOrElseThrow(userId);
 
         List<Schedule> schedules = scheduleRepository.findByUser(user);
 
         List<ScheduleListResponseDto> responseDto = new ArrayList<>();
 
-        for(Schedule schedule: schedules){
+        for (Schedule schedule : schedules) {
             responseDto.add(ScheduleListResponseDto.builder()
-                            .scheduleId(schedule.getScheduleId())
-                            .scheduleStartDate(schedule.getScheduleStartDate())
-                            .scheduleEndDate(schedule.getScheduleEndDate())
-                            .scheduleTitle(schedule.getScheduleTitle())
-                            .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
-                            .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
+                    .scheduleId(schedule.getScheduleId())
+                    .scheduleStartDate(schedule.getScheduleStartDate())
+                    .scheduleEndDate(schedule.getScheduleEndDate())
+                    .scheduleTitle(schedule.getScheduleTitle())
+                    .scheduleStatusName(schedule.getScheduleStatus().getScheduleStatusName())
+                    .scheduleStatusStep(schedule.getScheduleStatus().getScheduleStatusStep().name())
+                    .scheduleMemo(schedule.getScheduleMemo())
+                    .coverLetterId(
+                            schedule.getCoverLetter() != null
+                            ? schedule.getCoverLetter().getCoverLetterId()
+                            : null)
                     .build());
         }
 
@@ -240,8 +239,7 @@ public class ScheduleService {
     // 일정 상세 조회
     public ScheduleDetailResponseDto detailSchedule(Integer scheduleId, Integer userId) {
 
-        userRepository.findById(userId)
-                .orElseThrow(() -> new BaseException(ErrorCode.USER_NOT_FOUND));
+        userReadService.findUserByIdOrElseThrow(userId);
 
         Schedule schedule = scheduleRepository.findById(scheduleId)
                 .orElseThrow(() -> new BaseException(ErrorCode.SCHEDULE_NOT_FOUND));
@@ -290,9 +288,10 @@ public class ScheduleService {
             if (newsAnalysis.getNewsAnalysisUrl() != null && !newsAnalysis.getNewsAnalysisUrl().isBlank()) {
                 try {
                     ObjectMapper objectMapper = new ObjectMapper();
-                    newsUrls = objectMapper.readValue(newsAnalysis.getNewsAnalysisUrl(), new TypeReference<List<String>>() {});
+                    newsUrls = objectMapper.readValue(newsAnalysis.getNewsAnalysisUrl(), new TypeReference<List<String>>() {
+                    });
                 } catch (Exception e) {
-                    throw new RuntimeException("뉴스 URL 파싱 실패", e);
+                    throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
                 }
             }
 

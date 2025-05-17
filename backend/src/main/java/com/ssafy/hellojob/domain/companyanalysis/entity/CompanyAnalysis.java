@@ -30,6 +30,9 @@ public class CompanyAnalysis {
     @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
+    @Column(name = "company_analysis_title", nullable = false)
+    private String companyAnalysisTitle;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -48,8 +51,15 @@ public class CompanyAnalysis {
     @JoinColumn(name = "news_analysis_id", nullable = false)
     private NewsAnalysis newsAnalysis;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "swot_analysis_id")
+    private SwotAnalysis swotAnalysis;
+
     @Column(name = "public", nullable = false)
     private boolean isPublic;
+
+    @Column(name = "company_analysis_user_prompt")
+    private String userPrompt;
 
     public void setCompanyAnalysisBookmarkCount(Integer companyAnalysisBookmarkCount) {
         this.companyAnalysisBookmarkCount = companyAnalysisBookmarkCount;
@@ -60,15 +70,18 @@ public class CompanyAnalysis {
     }
 
 
-    public static CompanyAnalysis of(User user, Company company, DartAnalysis dart, NewsAnalysis news, boolean isPublic) {
+    public static CompanyAnalysis of(String companyAnalysisTitle, User user, Company company, DartAnalysis dart, NewsAnalysis news, SwotAnalysis swotAnalysis, boolean isPublic, String userPrompt) {
         CompanyAnalysis ca = new CompanyAnalysis();
+        ca.companyAnalysisTitle = companyAnalysisTitle;
         ca.user = user;
         ca.company = company;
         ca.dartAnalysis = dart;
         ca.newsAnalysis = news;
+        ca.swotAnalysis = swotAnalysis;
         ca.companyAnalysisViewCount = 0;
         ca.companyAnalysisBookmarkCount = 0;
         ca.isPublic = isPublic;
+        ca.userPrompt = userPrompt;
         return ca;
     }
 

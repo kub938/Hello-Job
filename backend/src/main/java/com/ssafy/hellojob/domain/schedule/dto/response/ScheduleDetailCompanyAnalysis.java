@@ -1,9 +1,9 @@
 package com.ssafy.hellojob.domain.schedule.dto.response;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
-import java.sql.Date;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter

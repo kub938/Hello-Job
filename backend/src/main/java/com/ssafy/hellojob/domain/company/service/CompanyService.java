@@ -4,8 +4,7 @@ import com.ssafy.hellojob.domain.company.dto.CompanyDto;
 import com.ssafy.hellojob.domain.company.dto.CompanyListDto;
 import com.ssafy.hellojob.domain.company.entity.Company;
 import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
-import com.ssafy.hellojob.global.exception.BaseException;
-import com.ssafy.hellojob.global.exception.ErrorCode;
+import com.ssafy.hellojob.domain.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,7 +16,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CompanyService {
 
+    private final UserReadService userReadService;
     private final CompanyRepository companyRepository;
+    private final CompanyReadService companyReadService;
 
     public List<CompanyListDto> getAllCompany(){
         return companyRepository.getAllCompany();
@@ -27,19 +28,11 @@ public class CompanyService {
         return companyRepository.getCompanyByCompanyName(companyName);
     }
 
-    public String getCompanyNameByCompanyId(Integer companyId){
-        String result =  companyRepository.getCompanyNameByCompanyId(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
+    public CompanyDto getCompanyByCompanyId(Integer userId, Integer companyId){
+        userReadService.findUserByIdOrElseThrow(userId);
+        Company company = companyReadService.findCompanyByIdOrElseThrow(companyId);
 
-        return result;
-    }
-
-    public CompanyDto getCompanyByCompanyId(Integer companyId){
-
-        Company company = companyRepository.findByCompanyId(companyId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COMPANY_NOT_FOUND));
-
-        CompanyDto result = CompanyDto.builder()
+        return CompanyDto.builder()
                 .id(companyId)
                 .companyName(company.getCompanyName())
                 .companyIndustry(company.getCompanyIndustry())
@@ -47,8 +40,6 @@ public class CompanyService {
                 .companySize(company.getCompanySize())
                 .updatedAt(company.getUpdatedAt())
                 .build();
-
-        return result;
     }
 
 }

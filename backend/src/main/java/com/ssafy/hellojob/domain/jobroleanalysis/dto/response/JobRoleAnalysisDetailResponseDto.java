@@ -4,11 +4,13 @@ import com.ssafy.hellojob.domain.jobroleanalysis.entity.JobRoleCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Getter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class JobRoleAnalysisDetailResponseDto {
 
@@ -22,12 +24,13 @@ public class JobRoleAnalysisDetailResponseDto {
     private String jobRolePreferences;      // 우대사항
     private String jobRoleEtc;               // 기타 입력사항
     private Integer jobRoleViewCount;       // 조회수
-    private Boolean isPublic;               // 공개 여부 (true/false)
+    private boolean isPublic;               // 공개 여부 (true/false)
     private JobRoleCategory jobRoleCategory; // 직무 카테고리 (Enum 타입 그대로)
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;         // 최종 수정날짜
     private Integer jobRoleAnalysisBookmarkCount; // 총 즐겨찾기 수
-    private Boolean bookmark;                // 현재 유저가 즐겨찾기 했는지 여부
+    private boolean bookmark;                // 현재 유저가 즐겨찾기 했는지 여부
+    private boolean writtenByMe; // 이 유저가 작성자인지 여부
 
 }
 

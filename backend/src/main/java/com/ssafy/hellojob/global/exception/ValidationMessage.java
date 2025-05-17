@@ -32,7 +32,9 @@ public final class ValidationMessage {
 
     // Company Analysis
     public static final String COMPANY_ANALYSIS_BOOKMARK_COMPANY_ANALYSIS_ID_NOT_EMPTY = "기업 분석 아이디는 필수값 입니다.";
-
+    public static final String COMPANY_ANALYSIS_TITLE_NOT_EMPTY = "기업 분석 제목은 필수값입니다.";
+    public static final String COMPANY_ID_NOT_EMPTY = "기업 아이디는 필수값입니다.";
+    
 
     // Schedule
     public static final String SCHEDULE_TITLE_NOT_EMPTY = "스케쥴 제목은 필수값입니다.";
@@ -47,6 +49,7 @@ public final class ValidationMessage {
     public static final String COVER_LETTER_COMPANY_ANALYSIS_NOT_EMPTY = "자기소개서 기업분석은 필수값입니다.";
     public static final String COVER_LETTER_CONTENT_NUMBER = "문항 번호는 필수값입니다.";
     public static final String COVER_LETTER_CONTENT_QUESTION = "문항 질문은 필수값입니다.";
+    public static final String COVER_LETTER_CONTENT_LENGTH = "문항 글자수는 필수값입니다.";
 
     public static final String QUESTION_BANK_ID_NOT_EMPTY = "질문 아이디는 필수값입니다.";
 

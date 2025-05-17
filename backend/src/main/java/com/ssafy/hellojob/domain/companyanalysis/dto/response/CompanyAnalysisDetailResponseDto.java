@@ -13,8 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 public class CompanyAnalysisDetailResponseDto {
 
+    private String companyAnalysisTitle;
     private Integer companyAnalysisId;
     private String companyName;
+    private String userPrompt;
     private LocalDateTime createdAt;
     private Integer companyViewCount;
     private String companyLocation;
@@ -31,5 +33,14 @@ public class CompanyAnalysisDetailResponseDto {
     private String dartVision;
     private String dartFinancialSummery;
     private List<String> dartCategory;
+    private List<String> swotStrengthContent;
+    private List<String> swotStrengthTag;
+    private List<String> swotWeaknessContent;
+    private List<String> swotWeaknessTag;
+    private List<String> swotOpportunityContent;
+    private List<String> swotOpportunityTag;
+    private List<String> swotThreatContent;
+    private List<String> swotThreatTag;
+    private String swotSummary;
 
 }

@@ -20,7 +20,6 @@ public class AESUtil {
     // 암호화
     public String encrypt(String key) {
         try {
-            System.out.println("여기 들어오긴 하는건가?");
             SecretKeySpec secretKey = new SecretKeySpec(aesSecretKey.getBytes(StandardCharsets.UTF_8), "AES");
             Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cipher.init(Cipher.ENCRYPT_MODE, secretKey);
