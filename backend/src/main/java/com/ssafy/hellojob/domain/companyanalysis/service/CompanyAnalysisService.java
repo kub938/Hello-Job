@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -81,7 +82,7 @@ public class CompanyAnalysisService {
                 .plus(requestDto.isPlus())
                 .fin(requestDto.isFinancial())
 //                .swot(requestDto.isSwot())
-                .swot(false)
+                .swot(true)
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 
@@ -122,6 +123,8 @@ public class CompanyAnalysisService {
 
         newsAnalysisRepository.save(news);
 
+        ObjectMapper objectMapper = new ObjectMapper();
+
         String strengthContent = "[]";
         String strengthTag = "[]";
         String weaknessContent = "[]";
@@ -130,20 +133,56 @@ public class CompanyAnalysisService {
         String opportunityTag = "[]";
         String threatContent = "[]";
         String threatTag = "[]";
+
         try {
-            strengthContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getStrengths().getContents());
-            strengthTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getStrengths().getTags());
-            weaknessContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getWeaknesses().getContents());
-            weaknessTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getWeaknesses().getTags());
-            opportunityContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getOpportunities().getContents());
-            opportunityTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getOpportunities().getTags());
-            threatContent = new ObjectMapper().writeValueAsString(responseDto.getSwot().getThreats().getContents());
-            threatTag = new ObjectMapper().writeValueAsString(responseDto.getSwot().getThreats().getTags());
+            strengthContent = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getStrengths() != null && responseDto.getSwot().getStrengths().getContents() != null
+                            ? responseDto.getSwot().getStrengths().getContents()
+                            : Collections.emptyList());
+
+            strengthTag = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getStrengths() != null && responseDto.getSwot().getStrengths().getTags() != null
+                            ? responseDto.getSwot().getStrengths().getTags()
+                            : Collections.emptyList());
+
+            weaknessContent = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getWeaknesses() != null && responseDto.getSwot().getWeaknesses().getContents() != null
+                            ? responseDto.getSwot().getWeaknesses().getContents()
+                            : Collections.emptyList());
+
+            weaknessTag = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getWeaknesses() != null && responseDto.getSwot().getWeaknesses().getTags() != null
+                            ? responseDto.getSwot().getWeaknesses().getTags()
+                            : Collections.emptyList());
+
+            opportunityContent = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getOpportunities() != null && responseDto.getSwot().getOpportunities().getContents() != null
+                            ? responseDto.getSwot().getOpportunities().getContents()
+                            : Collections.emptyList());
+
+            opportunityTag = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getOpportunities() != null && responseDto.getSwot().getOpportunities().getTags() != null
+                            ? responseDto.getSwot().getOpportunities().getTags()
+                            : Collections.emptyList());
+
+            threatContent = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getThreats() != null && responseDto.getSwot().getThreats().getContents() != null
+                            ? responseDto.getSwot().getThreats().getContents()
+                            : Collections.emptyList());
+
+            threatTag = objectMapper.writeValueAsString(
+                    responseDto.getSwot() != null && responseDto.getSwot().getThreats() != null && responseDto.getSwot().getThreats().getTags() != null
+                            ? responseDto.getSwot().getThreats().getTags()
+                            : Collections.emptyList());
+
         } catch (JsonProcessingException e) {
             throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
         }
 
-        String swotSummary = responseDto.getSwot().getSwot_summary() == null ? "[]" : responseDto.getSwot().getSwot_summary();
+
+        String swotSummary = (responseDto.getSwot() != null && responseDto.getSwot().getSwot_summary() != null)
+                ? responseDto.getSwot().getSwot_summary()
+                : "[]";
 
         SwotAnalysis swotAnalysis = SwotAnalysis.of(strengthContent, strengthTag, weaknessContent, weaknessTag, opportunityContent, opportunityTag, threatContent, threatTag, swotSummary);
         swotAnalysisRepository.save(swotAnalysis);
