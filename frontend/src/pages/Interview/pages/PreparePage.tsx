@@ -205,7 +205,7 @@ function PreparePage() {
       startInterviewMutation.mutate(mutationData, {
         onSuccess: (response) => {
           navigate("/interview/practice", {
-            state: { response },
+            state: response,
           });
         },
         onError: (error) => {
@@ -459,12 +459,13 @@ function PreparePage() {
           </select>
         </div>
         {/* 비디오 미리보기 영역 */}
-        <VideoDisplay
-          cameraStream={cameraStream}
-          videoRef={videoRef}
-          onVideoLoadedData={handleVideoLoadedData}
-          height={420}
-        />
+        <div className="w-full h-120">
+          <VideoDisplay
+            cameraStream={cameraStream}
+            videoRef={videoRef}
+            onVideoLoadedData={handleVideoLoadedData}
+          />
+        </div>
 
         <h1 className="mt-6 mb-4 text-xl font-bold">2. 음성 설정</h1>
         {/* 장치 선택 영역 */}
