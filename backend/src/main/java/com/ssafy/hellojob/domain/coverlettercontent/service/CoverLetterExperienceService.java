@@ -66,15 +66,10 @@ public class CoverLetterExperienceService {
     }
 
     public List<Integer> getCoverLetterExperienceIds(Integer contentId) {
-        List<Integer> contentExperienceIds =
-                coverLetterExperienceRepository.findExperiencesByContentId(contentId);
-
-        return contentExperienceIds;
+        return coverLetterExperienceRepository.findExperiencesByContentId(contentId);
     }
 
     public List<Integer> getCoverLetterProjectIds(Integer contentId) {
-        List<Integer> contentProjectIds =
-                coverLetterExperienceRepository.findProjectsByContentId(contentId);
-        return contentProjectIds;
+        return coverLetterExperienceRepository.findProjectsByContentId(contentId);
     }
 }
