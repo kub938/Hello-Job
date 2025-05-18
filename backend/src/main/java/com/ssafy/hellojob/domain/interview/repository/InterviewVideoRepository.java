@@ -29,7 +29,7 @@ public interface InterviewVideoRepository extends JpaRepository<InterviewVideo, 
     Optional<InterviewVideo> findByIdWithInterviewAndCoverLetterInterview(@Param("id") Integer interviewVideoId);
 
 
-    List<InterviewVideo> findAllByEndBeforeAndInterviewTitleIsNull(LocalDateTime cutoff);
+    List<InterviewVideo> findAllByStartBeforeAndInterviewTitleIsNull(LocalDateTime cutoff);
 
 
 }
