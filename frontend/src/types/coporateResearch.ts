@@ -62,6 +62,15 @@ export interface getCorporateReportDetailResponse {
   dartVision: string;
   dartFinancialSummery: string;
   dartCategory: string[];
+  swotStrengthContent: string[];
+  swotWeaknessContent: string[];
+  swotOpportunityContent: string[];
+  swotThreatContent: string[];
+  swotStrengthTag: string[];
+  swotWeaknessTag: string[];
+  swotOpportunityTag: string[];
+  swotThreatTag: string[];
+  swotSummary: string;
   public: boolean;
   userPrompt: string;
 }
@@ -73,6 +82,7 @@ export interface postCorporateReportRequest {
   basic: boolean;
   plus: boolean;
   financial: boolean;
+  swot: boolean;
   userPrompt: string;
   companyAnalysisTitle: string;
 }
