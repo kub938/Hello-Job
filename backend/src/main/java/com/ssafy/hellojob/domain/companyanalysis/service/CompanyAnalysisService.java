@@ -120,20 +120,12 @@ public class CompanyAnalysisService {
                     return responseDto;
                 })
                 .thenAccept(data -> {
-                    try {
-                        sseService.sendToUser(user.getUserId(), "company-analysis-completed", data);
-                    } catch (Exception sseException) {
-                        // 알림만 실패 토큰 복구 없음
-                        log.warn("❗기업 분석 완료 알림 실패 - userId={}, reason={}", user.getUserId(), sseException.getMessage());
-                    }
+                    log.debug("기업 분석 완료됨. sse 송신 시도");
+                    sseService.sendToUser(user.getUserId(), "company-analysis-completed", data);
                 })
                 .exceptionally(e -> {
                     log.error("❌ 기업 분석 실패", e.getMessage());
-                    try {
-                        sseService.sendToUser(user.getUserId(), "company-analysis-failed", company.getCompanyId());
-                    } catch (Exception sseError) {
-                        log.warn("❗기업 분석 실패 알림 실패: {}", sseError.getMessage());
-                    }
+                    sseService.sendToUser(user.getUserId(), "company-analysis-failed", company.getCompanyId());
                     user.increaseToken(1);
                     userRepository.save(user);
                     return null;

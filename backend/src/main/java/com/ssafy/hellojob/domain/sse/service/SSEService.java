@@ -50,24 +50,25 @@ public class SSEService {
 
     public void sendToUser(Integer userId, String eventName, Object data) {
         userReadService.findUserByIdOrElseThrow(userId);
-
+        // 일단 큐에 넣음
+        queueEvent(userId, eventName, data);
         SseEmitter emitter = getEmitter(userId);
         if(emitter != null) {
             try {
                 emitter.send(SseEmitter.event()
                         .name(eventName)
                         .data(data));
+                // 해당 이벤트 큐에서 제거
+                removeTargetEvent(userId, eventName, data);
             } catch (IOException e) {
                 // 연결이 끊긴 경우
                 log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
-                log.debug("실패한 sse 큐에 저장");
-                queueEvent(userId, eventName, data);
+                log.debug("실패한 sse 큐에 보관");
                 emitter.completeWithError(e);
                 emitters.remove(userId);
             }
         } else {
-            log.debug("🔇 연결 없음 - userId = {}, 큐에 저장", userId);
-            queueEvent(userId, eventName, data);
+            log.debug("🔇 연결 없음 - userId = {}, 큐에 보관", userId);
         }
     }
 
@@ -79,10 +80,11 @@ public class SSEService {
 
     // 클라이언트 재접속 시 큐에 저장한 event 재실행
     public void replayQueuedEvents(Integer userId, SseEmitter emitter) {
+        log.debug("▶️ replayQueuedEvents 시작");
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
-        log.debug("▶️ replayQueuedEvents 시작 - userId={}, 큐 크기={}", userId, queue.size());
 
-        if (!queue.isEmpty()) {
+        if (queue != null && !queue.isEmpty()) {
+        log.debug("▶️ userId={}, 큐 크기={}", userId, queue.size());
             while (!queue.isEmpty()) {
                 SseEventWrapper event = queue.peek();
                 try {
@@ -114,5 +116,18 @@ public class SSEService {
                 emitters.remove(userId);
             }
         });
+    }
+
+    public void removeTargetEvent(Integer userId, String eventName, Object data) {
+        SseEventWrapper target = new SseEventWrapper(eventName, data);
+        Queue<SseEventWrapper> queue = retryQueue.get(userId);
+        if (queue != null && !queue.isEmpty()) {
+            boolean removed = queue.removeIf(e -> e.equals(target));
+            if (removed) {
+                log.debug("✅ 큐에서 이벤트 제거됨 - userId={}, eventName={}", userId, eventName);
+            } else {
+                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, eventName);
+            }
+        }
     }
 }
