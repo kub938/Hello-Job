@@ -82,7 +82,7 @@ public class SSEService {
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
         log.debug("▶️ replayQueuedEvents 시작 - userId={}, 큐 크기={}", userId, queue.size());
 
-        if (queue != null) {
+        if (!queue.isEmpty()) {
             while (!queue.isEmpty()) {
                 SseEventWrapper event = queue.peek();
                 try {
