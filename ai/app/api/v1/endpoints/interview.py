@@ -32,11 +32,14 @@ router = APIRouter(prefix="/interview", tags=["interview"])
 ######################################################## gms interview service ########################################################
 
 @router.post("/question/cover-letter")
-async def create_interview_question_from_cover_letter_gms(request: interview.CreateQuestionRequest)->List[str]:
+async def create_interview_question_from_cover_letter_gms(request: interview.CreateQuestionRequest)->interview.CreateQuestionResponse:
 
     questions = await gms_interview_service.create_interview_questions_from_cover_letter(request)
     
-    return questions
+    return interview.CreateQuestionResponse(
+        cover_letter_id=request.cover_letter.cover_letter_id,
+        expected_questions=questions
+    )
 
 @router.post("/feedback")
 async def feedback_interview_gms(request: interview.FeedbackInterviewRequest)->interview.FeedbackInterviewResponse:
