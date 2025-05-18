@@ -104,8 +104,8 @@ public class CoverLetterService {
                 .collect(Collectors.joining(", ")));
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
-                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(
+                .companyAnalysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .jobRoleAnalysis(
                         coverLetter.getJobRoleSnapshot() != null
                         ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
                         : null)
