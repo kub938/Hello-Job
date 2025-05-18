@@ -20,6 +20,7 @@ interface IForm {
   basic: boolean;
   plus: boolean;
   financial: boolean;
+  swot: boolean;
   userPrompt: string;
   companyAnalysisTitle: string;
 }
@@ -29,6 +30,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const [isBasic, setIsBasic] = useState(true);
   const [isPlus, setIsPlus] = useState(false);
   const [isFinancial, setIsFinancial] = useState(false);
+  const [isSWOT, setIsSWOT] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [token, setToken] = useState<number | undefined>();
 
@@ -78,6 +80,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
         basic: data.basic,
         plus: data.plus,
         financial: data.financial,
+        swot: data.swot,
         userPrompt: data.userPrompt,
         companyAnalysisTitle: data.companyAnalysisTitle,
       });
@@ -114,7 +117,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
   const tokenData = useGetToken(true);
 
   useEffect(() => {
-    if (tokenData.data?.token) {
+    if (tokenData.data?.token !== undefined) {
       setToken(tokenData.data.token);
     }
   }, [tokenData.data?.token]);
@@ -225,6 +228,19 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           name="financial"
           requiredMessage="재무 분석 여부는 필수 입력 항목입니다."
         />
+        <ToggleInput
+          label={isSWOT ? "SWOT 분석" : "SWOT 분석 사용하지 않음"}
+          description={
+            isSWOT
+              ? "기업의 강점, 약점, 기회, 위협 정보를 분석에 추가합니다."
+              : "SWOT 분석은 Dart 공시 정보 외에도 기업의 강점, 약점, 기회, 위협을 기반으로 분석을 제공합니다."
+          }
+          isOn={isSWOT}
+          onChange={setIsSWOT}
+          register={register}
+          name="swot"
+          requiredMessage="SWOT 분석 여부는 필수 입력 항목입니다."
+        />
 
         <div className="space-y-2 mt-4">
           <label
@@ -305,8 +321,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
             {/* 분석중인 경우 */}
             {(isSubmitting || mutation.isPending) && (
               <p className="text-center mt-2 text-gray-600 text-sm">
-                1분 이상 소요됩니다. 추후 SSE를 도입할 예정이니 조금만
-                기다려주세요!
+                1분 이상 소요됩니다. 분석이 완료되면 알림을 보내드릴게요!
               </p>
             )}
           </div>
