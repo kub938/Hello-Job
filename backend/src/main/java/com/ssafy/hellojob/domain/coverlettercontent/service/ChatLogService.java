@@ -45,8 +45,6 @@ public class ChatLogService {
 
         List<ChatMessageDto> chatLog = parseJson(chatLogString);
 
-        log.debug("🌞 chatLog {}", chatLog.toArray().toString());
-
         return chatLog;
     }
 
