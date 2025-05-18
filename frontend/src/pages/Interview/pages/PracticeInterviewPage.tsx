@@ -255,13 +255,13 @@ function PracticeInterviewPage() {
       )}
       <div className="relative h-full w-full">
         {/* 문항 및 버튼 헤더 */}
-        <div className="border border-l-4 mb-1 border-l-primary rounded w-full md:h-20 flex flex-col md:flex-row px-3 md:px-7 md:py-0 justify-between items-start md:items-center">
+        <div className="border border-l-4 mb-1 border-l-primary rounded w-full flex px-5 py-4 items-center justify-between">
           <div className="mb-2 md:mb-0">
             <div className="text-sm">
               문항 {nowQuestionNumber + 1} / {questions.length}
             </div>
-            <div className="text-xl font-bold">
-              질문 : {questions[nowQuestionNumber].question}
+            <div className="w-full text-xl font-semibold pr-50">
+              {questions[nowQuestionNumber].question}
             </div>
           </div>
           <Button onClick={handleAnswerCompleted} className="w-50 h-15 text-lg">
