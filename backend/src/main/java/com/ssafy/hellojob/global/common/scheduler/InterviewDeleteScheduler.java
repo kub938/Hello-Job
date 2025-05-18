@@ -24,19 +24,25 @@ public class InterviewDeleteScheduler {
 
     // 매일 자정에 실행
     @Transactional
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 45 16 * * ?")
     public void deleteInterviewVideo() {
         log.debug("{}시 면접 삭제 시작", LocalTime.now());
 
         try {
             LocalDateTime cutoff = LocalDateTime.now().minusDays(2);
-            List<InterviewVideo> videos = interviewVideoRepository.findAllByEndBeforeAndInterviewTitleIsNull(cutoff);
+            List<InterviewVideo> videos = interviewVideoRepository.findAllByStartBeforeAndInterviewTitleIsNull(cutoff);
 
             interviewVideoRepository.deleteAll(videos); // Cascade로 InterviewAnswer도 함께 삭제됨
 
             for(InterviewVideo video:videos){
+                log.debug("삭제될 videoId: {}", video.getInterviewVideoId());
                 for(InterviewAnswer answer:video.getInterviewAnswers()){
-                    s3UploadService.deleteVideo(answer.getInterviewVideoUrl());
+                    String url = answer.getInterviewVideoUrl();
+                    if (url != null && !url.isEmpty()) {
+                        s3UploadService.deleteVideo(url);
+                    } else {
+                        log.warn("⚠️ 삭제 대상 인터뷰 답변의 영상 URL이 비어 있습니다. interviewAnswerId={}", answer.getInterviewAnswerId());
+                    }
                 }
             }
 

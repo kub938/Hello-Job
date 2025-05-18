@@ -115,7 +115,7 @@ public class CompanyAnalysisService {
 
                     // ✅ updatedAt을 현재 시간으로 갱신
                     company.setUpdatedAt(LocalDateTime.now());
-                    companyRepository.save(company); 
+                    companyRepository.save(company);
 
                     return responseDto;
                 })
