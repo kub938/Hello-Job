@@ -25,8 +25,7 @@ public class CoverLetterContentController {
             @AuthenticationPrincipal UserPrincipal principal,
             @PathVariable Integer contentId) {
         Integer userId = principal.getUserId();
-        CoverLetterContentDto response = coverLetterContentService.getCoverLetterContent(userId, contentId);
-        return response;
+        return coverLetterContentService.getCoverLetterContent(userId, contentId);
     }
 
     @PatchMapping("/{contentId}")
