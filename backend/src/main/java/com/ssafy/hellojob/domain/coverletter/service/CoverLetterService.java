@@ -82,8 +82,8 @@ public class CoverLetterService {
         log.debug("🌞 coverLetterId : {}", newCoverLetterId);
 
         List<CoverLetterContent> contents = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents());
-        List<AICoverLetterResponseDto> AIResponses = getAIResponses(newCoverLetterId, contents);
-        coverLetterContentService.appendDetail(contents, AIResponses);
+        List<AICoverLetterResponseDto> aiResponse = getAIResponses(newCoverLetterId, contents);
+        coverLetterContentService.appendDetail(contents, aiResponse);
 
         return CoverLetterCreateResponseDto.builder()
                 .coverLetterId(newCoverLetterId)
