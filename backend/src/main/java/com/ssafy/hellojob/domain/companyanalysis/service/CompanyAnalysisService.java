@@ -89,11 +89,11 @@ public class CompanyAnalysisService {
                 .base(requestDto.isBasic())
                 .plus(requestDto.isPlus())
                 .fin(requestDto.isFinancial())
-//                .swot(requestDto.isSwot())
-                .swot(true)
+                .swot(requestDto.isSwot())
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 
+        log.debug("isSwot: {}", requestDto.isSwot());
         log.debug("fast API로 요청 보냄 !!!");
 
         // FastAPI 호출
