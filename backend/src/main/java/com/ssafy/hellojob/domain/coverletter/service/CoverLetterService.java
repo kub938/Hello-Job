@@ -107,8 +107,8 @@ public class CoverLetterService {
                 .companyAnalysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
                 .jobRoleAnalysis(
                         coverLetter.getJobRoleSnapshot() != null
-                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
-                        : null)
+                                ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                                : null)
                 .contents(coverLetter.getContents().stream()
                         .map(content -> ContentDto.builder()
                                 .content_number(content.getContentNumber())
@@ -140,9 +140,9 @@ public class CoverLetterService {
         log.debug("🌞 coverLetterId : {} ", coverLetterId);
         CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
 
-        contents.forEach(c -> {
-            log.debug("🧩 contentId={}, expSize={}", c.getContentId(), c.getExperiences().size());
-        });
+        contents.forEach(c ->
+                log.debug("🧩 contentId={}, expSize={}", c.getContentId(), c.getExperiences().size())
+        );
 
         coverLetter.assignContents(contents);
 
