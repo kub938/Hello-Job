@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
 import { QuestionList } from "@/types/interviewApiTypes";
+import { InterviewType } from "@/store/interviewStore";
 
 // CSS 스타일 추가
 const styles = `
@@ -58,15 +59,17 @@ interface PracticeInterviewPage {
   onStart: () => void;
   questions: QuestionList[];
   nowQuestionNumber: number;
+  type: InterviewType;
 }
 
 const InterviewPreparationPage = ({
   onStart,
   questions,
   nowQuestionNumber,
+  type,
 }: PracticeInterviewPage) => {
   // 30초 타이머 설정
-  const [timeLeft, setTimeLeft] = useState(30);
+  const [timeLeft, setTimeLeft] = useState(type === "practice" ? 5 : 30);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef(null);
 
@@ -99,7 +102,7 @@ const InterviewPreparationPage = ({
 
   // 원형 프로그레스 계산
   const calculateProgress = () => {
-    const totalTime = 30; // 총 준비 시간
+    const totalTime = type === "practice" ? 5 : 30; // 총 준비 시간
     const progress = (timeLeft / totalTime) * 100;
 
     // SVG 원의 둘레 계산 (2 * π * 반지름)
@@ -134,7 +137,6 @@ const InterviewPreparationPage = ({
   //   setIsPaused(true);
   //   handleProceed();
   // };
-
   return (
     <>
       <style>{styles}</style>
@@ -144,16 +146,22 @@ const InterviewPreparationPage = ({
             <div className="flex-1 flex justify-center">
               <div className="max-w-2xl w-full bg-white rounded-lg shadow-md p-8 flex flex-col items-center border border-[#E4E8F0]">
                 <h1 className="border-b pb-2 mb-4 w-full text-xl font-bold ">
-                  질문을 확인하고 준비가 완료되면 준비 완료 버튼을 눌러주세요!
+                  {type === "question"
+                    ? "질문을 확인하고 준비가 완료되면 준비 완료 버튼을 눌러주세요!"
+                    : "곧 다음 문항이 시작됩니다!"}
                 </h1>
 
-                <div className="w-full px-7 bg-[#F8F9FC] border-l-4 border-l-primary rounded-lg py-3 mb-8 border border-[#E4E8F0] relative">
-                  <div className="inline-block bg-[#F1F3F9] px-3 py-1 rounded-full text-xs font-medium text-[#6E7180] mb-3">
-                    질문 {nowQuestionNumber + 1} / {questions.length}
-                  </div>
+                <div className="w-full flex flex-col px-7 bg-[#F8F9FC] border-l-4 border-l-primary rounded-lg py-3 mb-8 border border-[#E4E8F0] relative">
+                  {type === "question" && (
+                    <div className="flex w-20 justify-center bg-[#F1F3F9] px-3 py-1 rounded-full text-xs font-medium text-[#6E7180] mb-3">
+                      질문 {nowQuestionNumber + 1} / {questions.length}
+                    </div>
+                  )}
 
-                  <h3 className="text-xl font-semibold text-[#2A2C35] mb-4">
-                    {questions[nowQuestionNumber].question}
+                  <h3 className="text-xl font-semibold text-[#2A2C35]">
+                    {type === "question"
+                      ? `${questions[nowQuestionNumber].question}`
+                      : `랜덤 문항 면접에서는 질문 미리보기가 제공되지 않습니다.`}
                   </h3>
                 </div>
 
@@ -206,35 +214,7 @@ const InterviewPreparationPage = ({
                     있습니다.
                   </div>
                 </div>
-                {/* 질문 카드 */}
 
-                {/* 가이드 */}
-                {/* <div className="w-full mb-10 bg-[#F8F9FC] p-5 rounded-lg border border-[#E4E8F0]">
-                <h3 className="text-base font-medium text-[#6E7180] mb-3 text-center">
-                  답변 준비를 위한 가이드
-                </h3>
-                <ul className="text-[#2A2C35] space-y-3">
-                  <li className="flex items-start">
-                    <span className="text-[#886BFB] mr-2">•</span>
-                    <span>구체적인 상황, 행동, 결과를 포함해 답변하세요.</span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#886BFB] mr-2">•</span>
-                    <span>
-                      실제 경험이 없다면, 가상의 상황을 설정해 답변해도
-                      좋습니다.
-                    </span>
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-[#886BFB] mr-2">•</span>
-                    <span>
-                      면접관의 질문 의도를 파악하고 답변하는 것이 중요합니다.
-                    </span>
-                  </li>
-                </ul>
-              </div> */}
-
-                {/* 버튼 */}
                 <Button onClick={handleProceed} className="w-33 h-15 text-lg">
                   준비 완료
                 </Button>
