@@ -227,7 +227,8 @@ function PracticeInterviewPage() {
       );
 
       completeQuestionMutation.mutate({
-        interviewAnswerId: 1, // 실제 인터뷰 정보 ID로 변경 필요
+        interviewAnswerId:
+          interviewData.questionList[nowQuestionNumber].interviewAnswerId, // 실제 인터뷰 정보 ID로 변경 필요
         videoFile,
         audioFile,
       });
