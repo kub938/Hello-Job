@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
+import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.company.service.CompanyReadService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
@@ -35,6 +36,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class CompanyAnalysisService {
 
+    private final CompanyRepository companyRepository;
     private final CompanyAnalysisRepository companyAnalysisRepository;
     private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
     private final DartAnalysisRepository dartAnalysisRepository;
@@ -110,6 +112,11 @@ public class CompanyAnalysisService {
                 .supplyAsync(() -> fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto))
                 .thenApply(fastApiResponseDto -> {
                     CompanyAnalysisSseResponseDto responseDto = saveCompanyAnalysis(user, company, fastApiResponseDto, requestDto);
+
+                    // ✅ updatedAt을 현재 시간으로 갱신
+                    company.setUpdatedAt(LocalDateTime.now());
+                    companyRepository.save(company); 
+
                     return responseDto;
                 })
                 .thenAccept(data -> {
