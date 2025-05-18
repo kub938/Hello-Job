@@ -156,3 +156,22 @@ export const useCompleteQuestion = () => {
     },
   });
 };
+
+export const useCompleteInterview = () => {
+  return useMutation({
+    mutationKey: ["complete-interview"],
+    mutationFn: async ({
+      interviewVideoId,
+      interviewTitle,
+    }: {
+      interviewVideoId: number;
+      interviewTitle: string;
+    }) => {
+      const response = await interviewApi.completeInterview(
+        interviewVideoId,
+        interviewTitle
+      );
+      return response.data;
+    },
+  });
+};
