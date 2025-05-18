@@ -159,14 +159,12 @@ public class CoverLetterService {
         List<ContentQuestionStatusDto> contentQuestionStatuses = coverLetterContentService.getCoverLetterContentQuestionStatues(coverLetterId);
         int totalContentQuestionCount = contentQuestionStatuses.size();
 
-        CoverLetterStatusesDto coverLetterStatusesDto = CoverLetterStatusesDto.builder()
+        return CoverLetterStatusesDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
                 .totalContentQuestionCount(totalContentQuestionCount)
                 .contentQuestionStatuses(contentQuestionStatuses)
                 .updatedAt(coverLetter.getUpdatedAt())
                 .build();
-
-        return coverLetterStatusesDto;
     }
 
     // 자기소개서 요약 조회
@@ -217,8 +215,7 @@ public class CoverLetterService {
     public Page<MyPageCoverLetterDto> getCoverLettersForMaPage(Integer userId, Pageable pageable) {
         userReadService.findUserByIdOrElseThrow(userId);
 
-        Page<MyPageCoverLetterDto> list = coverLetterRepository.getCoverLettersByUser(userId, pageable);
-        return list;
+        return coverLetterRepository.getCoverLettersByUser(userId, pageable);
     }
 
     public WholeCoverLetterContentDto getWholeContentDetail(Integer userId, Integer coverLetterId) {
@@ -229,14 +226,12 @@ public class CoverLetterService {
 
         List<CoverLetterOnlyContentDto> contents = coverLetterContentService.getWholeContentDetail(coverLetterId);
 
-        WholeCoverLetterContentDto response = WholeCoverLetterContentDto.builder()
+        return WholeCoverLetterContentDto.builder()
                 .coverLetterId(coverLetterId)
                 .contents(contents)
                 .finish(coverLetter.isFinish())
                 .updatedAt(coverLetter.getUpdatedAt())
                 .build();
-
-        return response;
     }
 
     // 일정 자기소개서 목록 조회
