@@ -113,6 +113,12 @@ export const interviewApi = {
     );
   },
 
+  completeInterview: (interviewVideoId: number, interviewTitle: string) => {
+    return authApi.post(`/api/v1/interview/practice/end`, {
+      interviewVideoId,
+      interviewTitle,
+    });
+  },
   // 면접 조회 API 아직 response 미정
   //   getInterview: {
   //     list: () => {
