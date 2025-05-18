@@ -13,7 +13,7 @@ export default function useSSE(isLoggedIn: boolean) {
     );
 
     // 핑 이벤트 수신
-    eventSource.addEventListener("ping", (e: MessageEvent) => {
+    eventSource.addEventListener("ping", (_e: MessageEvent) => {
       // console.debug("📨 핑 이벤트:", e.data);
     });
 
