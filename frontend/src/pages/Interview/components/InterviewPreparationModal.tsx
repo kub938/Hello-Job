@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/Button";
+import { QuestionList } from "@/types/interviewApiTypes";
 
 // CSS 스타일 추가
 const styles = `
@@ -53,21 +54,21 @@ const styles = `
   
 `;
 
-const InterviewPreparationPage = () => {
+interface PracticeInterviewPage {
+  onStart: () => void;
+  questions: QuestionList[];
+  nowQuestionNumber: number;
+}
+
+const InterviewPreparationPage = ({
+  onStart,
+  questions,
+  nowQuestionNumber,
+}: PracticeInterviewPage) => {
   // 30초 타이머 설정
   const [timeLeft, setTimeLeft] = useState(30);
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef(null);
-
-  // 현재 문항 정보
-  const [currentQuestion, _] = useState({
-    id: 3,
-    number: 3,
-    total: 5,
-    question:
-      "팀 내에서 의견 충돌이 있었을 때 어떻게 해결했는지 경험을 공유해주세요.",
-    category: "팀워크",
-  });
 
   // 타이머 로직
   useEffect(() => {
@@ -124,8 +125,8 @@ const InterviewPreparationPage = () => {
 
   // 답변 시작 함수
   const handleProceed = () => {
+    onStart();
     setIsPaused(true);
-    alert("면접 화면으로 이동합니다!"); // 실제로는 라우팅 또는 상태 변경으로 화면 전환
   };
 
   // 준비 시간 건너뛰기
@@ -137,77 +138,78 @@ const InterviewPreparationPage = () => {
   return (
     <>
       <style>{styles}</style>
-      <div className="flex flex-col">
-        <div className="flex-1 p-6 flex">
-          <div className="flex-1 flex justify-center">
-            <div className="max-w-2xl w-full bg-white rounded-lg shadow-md p-8 flex flex-col items-center border border-[#E4E8F0]">
-              <h1 className="border-b pb-2 mb-4 w-full text-xl font-bold ">
-                질문을 확인하고 준비가 완료되면 준비 완료 버튼을 눌러주세요!
-              </h1>
+      <div className="modal-overlay bg-black/90">
+        <div className="flex flex-col">
+          <div className="flex-1 p-6 flex">
+            <div className="flex-1 flex justify-center">
+              <div className="max-w-2xl w-full bg-white rounded-lg shadow-md p-8 flex flex-col items-center border border-[#E4E8F0]">
+                <h1 className="border-b pb-2 mb-4 w-full text-xl font-bold ">
+                  질문을 확인하고 준비가 완료되면 준비 완료 버튼을 눌러주세요!
+                </h1>
 
-              <div className="w-full px-7 bg-[#F8F9FC] border-l-4 border-l-primary rounded-lg py-3 mb-8 border border-[#E4E8F0] relative">
-                <div className="inline-block bg-[#F1F3F9] px-3 py-1 rounded-full text-xs font-medium text-[#6E7180] mb-3">
-                  질문 {currentQuestion.number}/{currentQuestion.total}
+                <div className="w-full px-7 bg-[#F8F9FC] border-l-4 border-l-primary rounded-lg py-3 mb-8 border border-[#E4E8F0] relative">
+                  <div className="inline-block bg-[#F1F3F9] px-3 py-1 rounded-full text-xs font-medium text-[#6E7180] mb-3">
+                    질문 {nowQuestionNumber + 1} / {questions.length}
+                  </div>
+
+                  <h3 className="text-xl font-semibold text-[#2A2C35] mb-4">
+                    {questions[nowQuestionNumber].question}
+                  </h3>
                 </div>
 
-                <h3 className="text-xl font-semibold text-[#2A2C35] mb-4">
-                  {currentQuestion.question}
-                </h3>
-              </div>
-
-              {/* 원형 타이머 */}
-              <div className="relative w-40 h-40 mb-10">
-                <svg className="w-full h-full" viewBox="0 0 140 140">
-                  <circle cx="70" cy="70" r="60" fill="#F1F3F9" />
-                  <circle
-                    cx="70"
-                    cy="70"
-                    r="60"
-                    fill="none"
-                    stroke={getColorByTime()}
-                    strokeWidth="8"
-                    strokeDasharray={circumference}
-                    strokeDashoffset={dashoffset}
-                    transform="rotate(-90 70 70)"
-                    className="timer-animation"
-                  />
-                  <text
-                    x="70"
-                    y="65"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className={`text-4xl font-bold ${
-                      timeLeft <= 10 ? "countdown-animate" : ""
-                    }`}
-                    style={{ fill: getColorByTime() }}
-                  >
-                    {timeLeft}
-                  </text>
-                  <text
-                    x="70"
-                    y="95"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="text-sm text-[#6E7180]"
-                  >
-                    남은 준비시간
-                  </text>
-                </svg>
-              </div>
-              <div className="bg-background flex flex-col justify-center p-5 w-full rounded-xl mb-4">
-                <div className="text-accent font-bold">TIP!</div>
-                <div className="text-sm">
-                  생각을 정리하고 구체적인 사례를 준비하세요.
+                {/* 원형 타이머 */}
+                <div className="relative w-40 h-40 mb-10">
+                  <svg className="w-full h-full" viewBox="0 0 140 140">
+                    <circle cx="70" cy="70" r="60" fill="#F1F3F9" />
+                    <circle
+                      cx="70"
+                      cy="70"
+                      r="60"
+                      fill="none"
+                      stroke={getColorByTime()}
+                      strokeWidth="8"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={dashoffset}
+                      transform="rotate(-90 70 70)"
+                      className="timer-animation"
+                    />
+                    <text
+                      x="70"
+                      y="65"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className={`text-4xl font-bold ${
+                        timeLeft <= 10 ? "countdown-animate" : ""
+                      }`}
+                      style={{ fill: getColorByTime() }}
+                    >
+                      {timeLeft}
+                    </text>
+                    <text
+                      x="70"
+                      y="95"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="text-sm text-[#6E7180]"
+                    >
+                      남은 준비시간
+                    </text>
+                  </svg>
                 </div>
-                <div className="text-sm">
-                  답변이 준비되면 언제든지 준비 완료 버튼을 눌러 시작할 수
-                  있습니다.
+                <div className="bg-background flex flex-col justify-center p-5 w-full rounded-xl mb-4">
+                  <div className="text-accent font-bold">TIP!</div>
+                  <div className="text-sm">
+                    생각을 정리하고 구체적인 사례를 준비하세요.
+                  </div>
+                  <div className="text-sm">
+                    답변이 준비되면 언제든지 준비 완료 버튼을 눌러 시작할 수
+                    있습니다.
+                  </div>
                 </div>
-              </div>
-              {/* 질문 카드 */}
+                {/* 질문 카드 */}
 
-              {/* 가이드 */}
-              {/* <div className="w-full mb-10 bg-[#F8F9FC] p-5 rounded-lg border border-[#E4E8F0]">
+                {/* 가이드 */}
+                {/* <div className="w-full mb-10 bg-[#F8F9FC] p-5 rounded-lg border border-[#E4E8F0]">
                 <h3 className="text-base font-medium text-[#6E7180] mb-3 text-center">
                   답변 준비를 위한 가이드
                 </h3>
@@ -232,10 +234,11 @@ const InterviewPreparationPage = () => {
                 </ul>
               </div> */}
 
-              {/* 버튼 */}
-              <Button onClick={handleProceed} className="w-33 h-15 text-lg">
-                준비 완료
-              </Button>
+                {/* 버튼 */}
+                <Button onClick={handleProceed} className="w-33 h-15 text-lg">
+                  준비 완료
+                </Button>
+              </div>
             </div>
           </div>
         </div>
