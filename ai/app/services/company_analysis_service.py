@@ -435,14 +435,36 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         # 모든 작업 완료 대기
         dart_result = await dart_result_task
         news_result = await news_result_task
-        swot_result = await swot_result_task if swot else None
+        if swot:
+            swot_result = await swot_result_task
+        else:
+            swot_result = {
+                "strengths": {
+                    "contents": [],
+                    "tags": []
+                },
+                "weaknesses": {
+                    "contents": [],
+                    "tags": []
+                },
+                "opportunities": {
+                    "contents": [],
+                    "tags": []
+                },
+                "threats": {
+                    "contents": [],
+                    "tags": []
+                },
+                "swot_summary": ""
+            }
         
+            
         # 4. 결과 합치기
         response = {
             **dart_result,
             "news_summary": news_result["summary"],
             "news_urls": news_result["urls"],
-            "swot": swot_result if swot else None
+            "swot": swot_result
         }
         
         return response
