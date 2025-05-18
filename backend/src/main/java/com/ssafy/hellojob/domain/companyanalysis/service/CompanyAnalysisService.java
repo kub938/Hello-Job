@@ -112,11 +112,21 @@ public class CompanyAnalysisService {
                     CompanyAnalysisSseResponseDto responseDto = saveCompanyAnalysis(user, company, fastApiResponseDto, requestDto);
                     return responseDto;
                 })
-                .thenAccept(companyAnalysisId ->
-                        sseService.sendToUser(user.getUserId(), "company-analysis-completed", companyAnalysisId))
+                .thenAccept(data -> {
+                    try {
+                        sseService.sendToUser(user.getUserId(), "company-analysis-completed", data);
+                    } catch (Exception sseException) {
+                        // 알림만 실패 토큰 복구 없음
+                        log.warn("❗기업 분석 완료 알림 실패 - userId={}, reason={}", user.getUserId(), sseException.getMessage());
+                    }
+                })
                 .exceptionally(e -> {
                     log.error("❌ 기업 분석 실패", e.getMessage());
-                    sseService.sendToUser(user.getUserId(), "company-analysis-failed", "기업 분석 실패");
+                    try {
+                        sseService.sendToUser(user.getUserId(), "company-analysis-failed", company.getCompanyId());
+                    } catch (Exception sseError) {
+                        log.warn("❗기업 분석 실패 알림 실패: {}", sseError.getMessage());
+                    }
                     user.increaseToken(1);
                     userRepository.save(user);
                     return null;
@@ -232,7 +242,7 @@ public class CompanyAnalysisService {
         // 기업 테이블 업데이트
         company.setUpdatedAt(LocalDateTime.now());
 
-        return  CompanyAnalysisSseResponseDto.builder()
+        return CompanyAnalysisSseResponseDto.builder()
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
                 .companyId(companyAnalysis.getCompany().getCompanyId())
                 .build();

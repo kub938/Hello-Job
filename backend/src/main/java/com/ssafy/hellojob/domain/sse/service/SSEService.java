@@ -80,16 +80,20 @@ public class SSEService {
     // 클라이언트 재접속 시 큐에 저장한 event 재실행
     public void replayQueuedEvents(Integer userId, SseEmitter emitter) {
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
-        if (queue != null) {
+        log.debug("▶️ replayQueuedEvents 시작 - userId={}, 큐 크기={}", userId, queue.size());
+
+        if (!queue.isEmpty()) {
             while (!queue.isEmpty()) {
-                SseEventWrapper event = queue.poll();
+                SseEventWrapper event = queue.peek();
                 try {
                     emitter.send(SseEmitter.event()
                             .name(event.eventName())
                             .data(event.data()));
+                    queue.poll(); // 전송 성공 시에만 꺼냄
                 } catch (IOException e) {
                     log.warn("❌ SSE 연결 재실패 - 중단");
                     emitter.completeWithError(e);
+                    emitters.remove(userId);
                     break;
                 }
             }
@@ -107,6 +111,7 @@ public class SSEService {
             } catch (IOException e) {
                 log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
                 emitter.completeWithError(e);
+                emitters.remove(userId);
             }
         });
     }
