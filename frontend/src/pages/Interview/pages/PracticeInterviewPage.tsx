@@ -1,4 +1,3 @@
-import { Volume2 } from "lucide-react";
 import Interviewer from "../../../assets/interview/Interviewer.webp";
 import VideoDisplay from "../components/VideoDisplay";
 import { useCameraDeviceStore, useAudioDeviceStore } from "@/store/deviceStore";
@@ -8,12 +7,23 @@ import { useAudioStream } from "../hooks/useAudioStream";
 import { Button } from "@/components/Button";
 import { toast } from "sonner";
 import { useCompleteQuestion } from "@/hooks/interviewHooks";
+import { useLocation } from "react-router";
+import { StartInterviewResponse } from "@/types/interviewApiTypes";
+import Timer from "../components/Timer";
+import InterviewPreparationModal from "../components/InterviewPreparationModal";
+import InterviewCompleteModal from "../components/InterviewCompleteModal";
+import { useInterviewStore } from "@/store/interviewStore";
 
 function PracticeInterviewPage() {
-  const [isAnswerStarted, setIsAnswerStarted] = useState<boolean>(false);
+  const [isAnswerStarted, setIsAnswerStarted] = useState(false);
   const [_, setRecordedBlob] = useState<Blob | null>(null);
-  // API 제출 상태 추가
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [nowQuestionNumber, setNowQuestionNumber] = useState(0);
+  const [isOpenCompleteModal, setIsOpenCompleteModal] = useState(false);
+  const { selectInterviewType } = useInterviewStore();
+  const location = useLocation();
+  //interview Data
+  const interviewData: StartInterviewResponse = location.state;
+  const questions = interviewData.questionList;
 
   // 비디오 녹화 관련 상태 및 참조 추가
   const [isRecording, setIsRecording] = useState<boolean>(false);
@@ -42,7 +52,6 @@ function PracticeInterviewPage() {
   // useAudioStream 훅 사용
   const {
     audioStream,
-    audioLevel,
     startStream: startAudioStream,
     isRecording: isAudioRecording,
     startRecording: startAudioRecording,
@@ -160,9 +169,7 @@ function PracticeInterviewPage() {
     if (!isAnswerStarted) {
       return; // 답변 중이 아니면 무시
     }
-
     try {
-      setIsSubmitting(true);
       let audioBlob: Blob | null = null;
       let videoBlob: Blob | null = null;
 
@@ -184,13 +191,20 @@ function PracticeInterviewPage() {
         toast.error("녹음 또는 녹화 파일이 생성되지 않았습니다.");
       }
 
+      if (nowQuestionNumber + 1 === questions.length) {
+        //전체완료 훅 구현 후 연동
+
+        setIsOpenCompleteModal(true);
+
+        return;
+      }
+
       setIsAnswerStarted(false);
-      setIsSubmitting(false);
       console.log("답변 녹음 및 녹화가 완료되었습니다.");
+      setNowQuestionNumber((prev) => prev + 1);
     } catch (err) {
       console.error("답변 완료 중 오류 발생:", err);
       toast.error("답변 완료 중 오류가 발생했습니다.");
-      setIsSubmitting(false);
     }
   };
 
@@ -213,7 +227,8 @@ function PracticeInterviewPage() {
       );
 
       completeQuestionMutation.mutate({
-        interviewAnswerId: 1, // 실제 인터뷰 정보 ID로 변경 필요
+        interviewAnswerId:
+          interviewData.questionList[nowQuestionNumber].interviewAnswerId, // 실제 인터뷰 정보 ID로 변경 필요
         videoFile,
         audioFile,
       });
@@ -225,21 +240,84 @@ function PracticeInterviewPage() {
   };
 
   return (
-    <div className="relative h-full w-full">
-      {/* 면접 화면 영역 */}
-      <div className="flex gap-2 h-full w-full">
-        {/* 메인 면접관 이미지 */}
-        <img src={Interviewer} className="h-[65vh]" alt="면접관" />
-        <div className="flex-1 w-full flex flex-col items-center justify-center">
-          <VideoDisplay
-            cameraStream={cameraStream}
-            videoRef={videoRef}
-            onVideoLoadedData={handleVideoLoadedData}
-            height={260}
-          />
-          {audioStream && (
-            <div className="mt-4 w-[80%] flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-lg">
-              <Volume2 className="h-4 w-4 text-gray-500" />
+    <>
+      {isOpenCompleteModal && (
+        <InterviewCompleteModal
+          interviewVideoId={interviewData.interviewVideoId}
+        />
+      )}
+      {!isAnswerStarted && !isOpenCompleteModal && (
+        <InterviewPreparationModal
+          onStart={handleAnswerStarted}
+          questions={questions}
+          nowQuestionNumber={nowQuestionNumber}
+          type={selectInterviewType}
+        />
+      )}
+      <div className="relative h-full w-full">
+        {/* 문항 및 버튼 헤더 */}
+        <div className="border border-l-4 mb-1 border-l-primary rounded w-full flex px-5 py-4 items-center justify-between">
+          <div className="mb-2 md:mb-0">
+            <div className="text-sm">
+              문항 {nowQuestionNumber + 1} / {questions.length}
+            </div>
+            <div className="w-full text-xl font-semibold pr-50">
+              {questions[nowQuestionNumber].question}
+            </div>
+          </div>
+          <Button onClick={handleAnswerCompleted} className="w-50 h-15 text-lg">
+            답변 완료
+          </Button>
+        </div>
+
+        {/* 면접 화면 영역 - 상대적 컨테이너 */}
+        <div className="relative flex h-[70vh] md:h-[80vh] lg:h-[85vh] w-full bg-gray-100 overflow-hidden">
+          {/* 메인 면접관 이미지 - 이미지를 컨테이너 크기에 맞게 조절 */}
+          <div className="absolute left-0 top-0 w-full h-full flex items-center justify-center">
+            <img
+              src={Interviewer}
+              className="max-w-full max-h-full object-cover h-full w-full rounded"
+              alt="면접관"
+            />
+          </div>
+
+          {/* 오른쪽 컨트롤 영역 - 데스크톱에서는 오른쪽에, 바일에서는 하단에 배치 */}
+          <div className="absolute lg:top-0 lg:right-0 lg:w-[30%] lg:h-full bottom-0 lg:bottom-auto w-full lg:bg-opacity-20  rounded-t-lg lg:rounded-none p-4 flex flex-col  lg:items-end justify-between z-10">
+            <div className="flex size-60  mb-4">
+              <Timer
+                isComplete={questions.length + 1 === nowQuestionNumber}
+                time={120}
+                prepareState={isAnswerStarted}
+                onAnswerCompleted={handleAnswerCompleted}
+              />
+            </div>
+
+            {/* 비디오 디스플레이 - 반응형으로 조정 */}
+            <div className="w-70 h-60">
+              <VideoDisplay
+                cameraStream={cameraStream}
+                videoRef={videoRef}
+                onVideoLoadedData={handleVideoLoadedData}
+              />
+            </div>
+
+            {/* 오디오 레벨 인디케이터 */}
+            {/* {audioStream && (
+            <div className="mt-2 lg:mt-4 w-[90%] lg:w-[80%] flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-lg mb-4">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4 text-gray-500"
+              >
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+              </svg>
               <div className="h-2 w-full rounded-full bg-gray-200">
                 <div
                   className="h-full rounded-full bg-blue-600 transition-all duration-100"
@@ -247,37 +325,19 @@ function PracticeInterviewPage() {
                 />
               </div>
             </div>
-          )}
+          )} */}
 
-          <div className="mt-6 flex gap-3">
-            {!isAnswerStarted ? (
-              <Button
-                onClick={handleAnswerStarted}
-                className={isAnswerStarted ? "bg-gray-400" : ""}
-                disabled={isAnswerStarted}
-              >
-                답변 시작
-              </Button>
-            ) : (
-              <Button
-                onClick={handleAnswerCompleted}
-                className="bg-red-500 hover:bg-red-600"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? "제출 중..." : "답변 완료"}
-              </Button>
-            )}
-          </div>
-
-          {isAnswerStarted && isRecording && (
-            <div className="mt-4 text-red-500 flex items-center gap-2">
+            {/* 녹화 표시기 */}
+            {/* {isAnswerStarted && isRecording && (
+            <div className="mt-2 lg:mt-4 text-red-500 flex items-center gap-2 mb-2">
               <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse"></div>
               <span className="text-sm">녹화 중...</span>
             </div>
-          )}
+          )} */}
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
 
