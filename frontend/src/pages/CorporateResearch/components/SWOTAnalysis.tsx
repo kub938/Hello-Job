@@ -18,6 +18,13 @@ function SWOTAnalysis({
   const swotOpportunityTag = reportDetail.swotOpportunityTag;
   const swotThreatTag = reportDetail.swotThreatTag;
 
+  // SWOT 관련 내용이 모두 없는 경우 체크
+  const hasNoSWOTContent =
+    !swotStrengthContent?.length &&
+    !swotWeaknessContent?.length &&
+    !swotOpportunityContent?.length &&
+    !swotThreatContent?.length;
+
   return (
     <div className="space-y-10 pb-12">
       <section>
@@ -27,56 +34,63 @@ function SWOTAnalysis({
           </span>
           SWOT 분석
         </h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {/* Strength */}
-          <SWOTCard
-            title="Strength (강점)"
-            items={swotStrengthContent}
-            tags={swotStrengthTag}
-            color="bg-green-50"
-            accent="text-green-700"
-            tagColor="bg-green-200"
-          />
-          <SWOTCard
-            title="Weakness (약점)"
-            items={swotWeaknessContent}
-            tags={swotWeaknessTag}
-            color="bg-red-50"
-            accent="text-red-700"
-            tagColor="bg-red-200"
-          />
-          <SWOTCard
-            title="Opportunity (기회)"
-            items={swotOpportunityContent}
-            tags={swotOpportunityTag}
-            color="bg-indigo-50"
-            accent="text-indigo-700"
-            tagColor="bg-indigo-200"
-          />
-          <SWOTCard
-            title="Threat (위협)"
-            items={swotThreatContent}
-            tags={swotThreatTag}
-            color="bg-yellow-50"
-            accent="text-yellow-700"
-            tagColor="bg-yellow-200"
-          />
-        </div>
-        {/* 종합 분석 */}
-        <div className="mt-6">
-          <h2 className="font-bold text-xl text-[#2A2C35] flex items-center">
-            <span className="text-[#886BFB] px-1 mr-1">
-              <FaBookReader className="w-5 h-5" />
-            </span>
-            종합 분석
-          </h2>
-          <div className="mt-4 p-5 rounded-xl shadow-sm bg-stone-100 transition-all">
-            <p className="text-sm whitespace-pre-wrap text-[#2A2C35]">
-              {reportDetail.swotSummary}
-            </p>
+        {hasNoSWOTContent ? (
+          <div className="p-6 text-center text-gray-600 bg-gray-50 rounded-lg">
+            SWOT 분석을 포함하지 않는 기업 분석입니다.
           </div>
-        </div>
+        ) : (
+          <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {/* Strength */}
+              <SWOTCard
+                title="Strength (강점)"
+                items={swotStrengthContent}
+                tags={swotStrengthTag}
+                color="bg-green-50"
+                accent="text-green-700"
+                tagColor="bg-green-200"
+              />
+              <SWOTCard
+                title="Weakness (약점)"
+                items={swotWeaknessContent}
+                tags={swotWeaknessTag}
+                color="bg-red-50"
+                accent="text-red-700"
+                tagColor="bg-red-200"
+              />
+              <SWOTCard
+                title="Opportunity (기회)"
+                items={swotOpportunityContent}
+                tags={swotOpportunityTag}
+                color="bg-indigo-50"
+                accent="text-indigo-700"
+                tagColor="bg-indigo-200"
+              />
+              <SWOTCard
+                title="Threat (위협)"
+                items={swotThreatContent}
+                tags={swotThreatTag}
+                color="bg-yellow-50"
+                accent="text-yellow-700"
+                tagColor="bg-yellow-200"
+              />
+            </div>
+            {/* 종합 분석 */}
+            <div className="mt-6">
+              <h2 className="font-bold text-xl text-[#2A2C35] flex items-center">
+                <span className="text-[#886BFB] px-1 mr-2">
+                  <FaBookReader className="w-5 h-5" />
+                </span>
+                종합 분석
+              </h2>
+              <div className="mt-4 p-5 rounded-xl shadow-sm bg-stone-100 transition-all">
+                <p className="text-sm whitespace-pre-wrap text-[#2A2C35]">
+                  {reportDetail.swotSummary}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );
