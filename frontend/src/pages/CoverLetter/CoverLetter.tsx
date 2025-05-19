@@ -235,6 +235,12 @@ function CoverLetter() {
           CoverLetterData={coverLetter}
           onChangeContentDetail={onChangeContentDetail}
           nowContentLength={nowContentLength}
+          totalContentLength={statusData.totalContentQuestionCount}
+          nowSelectContentNumber={
+            statusData.contentQuestionStatuses[selectQuestionNumber]
+              .contentNumber
+          }
+          coverLetterId={coverLetterId}
         />
 
         <QuestionStep

@@ -2,7 +2,7 @@ import { Button } from "@/components/Button";
 import Loading from "@/components/Loading/Loading";
 import { useCompleteInterview } from "@/hooks/interviewHooks";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { replace, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 interface InterviewCompleteModalProps {
@@ -15,8 +15,11 @@ function InterviewCompleteModal({
 
   const [title, setTitle] = useState("");
   const navigate = useNavigate();
+  const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
 
   const handleCompleteInterview = () => {
+    setIsOpenInfoModal(true);
+
     completeInterviewMutation.mutate(
       {
         interviewVideoId: interviewVideoId,
@@ -24,8 +27,8 @@ function InterviewCompleteModal({
       },
       {
         onSuccess: () => {
-          toast.info("저장에 성공했습니다.");
-          navigate("/interview/result");
+          // toast.info("저장에 성공했습니다.");
+          // navigate("/interview/result");
         },
       }
     );
@@ -33,12 +36,31 @@ function InterviewCompleteModal({
   return (
     <div className="modal-overlay bg-black/90">
       <div className="bg-white rounded-lg p-6 w-11/12 max-w-md shadow-lg">
-        {completeInterviewMutation.isPending ? (
+        {isOpenInfoModal ? (
           <>
             <Loading></Loading>
-            <p className="text-sm mt-4 text-center">
-              AI가 피드백을 생성하는 중이에요! 잠시만 기다려 주세요!
+            <p className="mt-4 text-center">AI가 피드백을 생성하는 중이에요!</p>
+            <p className="mt-3 text-center">
+              생성이 완료되면 알람으로 알려드립니다
             </p>
+            <p className="text-sm text-center text-gray-400 mb-4">
+              생성까지 약 2~3분 정도 소요
+            </p>
+            <div className="w-full flex justify-end gap-3">
+              <Button
+                variant={"white"}
+                onClick={() => navigate("/", { replace: true })}
+              >
+                홈으로
+              </Button>
+              <Button
+                onClick={() =>
+                  navigate("/mypage/interviews-videos", { replace: true })
+                }
+              >
+                마이페이지로
+              </Button>
+            </div>
           </>
         ) : (
           <>
