@@ -53,8 +53,60 @@ export default function useSSE(isLoggedIn: boolean) {
       }
     );
 
-    eventSource.onerror = (err) => {
-      console.error("SSE 오류:", err);
+    // 기업 분석 완료 이벤트 수신
+    eventSource.addEventListener(
+      "company-analysis-completed",
+      (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        // console.log("기업 분석 완료 이벤트:", data);
+        const { companyId, companyAnalysisId } = data;
+        toast("기업 분석이 완료되었습니다!", {
+          description: "결과를 확인하려면 클릭하세요",
+          action: {
+            label: "보러가기",
+            onClick: () =>
+              navigate(
+                `/corporate-research/${companyId}?openId=${companyAnalysisId}`
+              ),
+          },
+        });
+      }
+    );
+
+    // 인터뷰 결과 분석 완료 이벤트 수신
+    eventSource.addEventListener(
+      "interview-feedback-completed",
+      (_e: MessageEvent) => {
+        // const interviewResultId = JSON.parse(e.data);
+        // console.log("인터뷰 결과 분석 완료 이벤트:", interviewResultId);
+        toast("인터뷰 결과 분석이 완료되었습니다!", {
+          description: "결과를 확인하려면 클릭하세요",
+          action: {
+            label: "보러가기",
+            onClick: () => navigate(`/mypage/interviews-videos`),
+          },
+        });
+      }
+    );
+
+    // 인터뷰 결과 분석 실패 이벤트 수신
+    eventSource.addEventListener(
+      "interview-feedback-failed",
+      (_e: MessageEvent) => {
+        // const interviewResultId = JSON.parse(e.data);
+        // console.log("인터뷰 결과 분석 실패 이벤트:", interviewResultId);
+        toast("인터뷰 결과 분석이 실패했습니다!", {
+          description: "잠시 후 다시 시도해주세요",
+          action: {
+            label: "다시 시도",
+            onClick: () => navigate(`/mypage/interviews-videos`),
+          },
+        });
+      }
+    );
+
+    eventSource.onerror = (_err) => {
+      // console.error("SSE 오류:", _err);
     };
 
     return () => {
