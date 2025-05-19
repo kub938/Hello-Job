@@ -702,7 +702,7 @@ public class InterviewService {
         int waited = 0;
         while (waited < MAX_WAIT_SECONDS * 1000) {
             entityManager.clear(); // 1차 캐시 제거
-            interviewAnswers = interviewAnswerRepository.findInterviewAnswerWithQuestionByInterviewVideo(interviewVideo); // DB 재조회
+            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo); // DB 재조회
 
             boolean hasPendingStt = interviewAnswers.stream()
                     .anyMatch(ans -> ans.getInterviewAnswer() == null);
@@ -717,7 +717,7 @@ public class InterviewService {
         // polling 탈출 후에도 1~2초 추가 대기 후 마지막 재조회
         Thread.sleep(1000);
         entityManager.clear();
-        interviewAnswers = interviewAnswerRepository.findInterviewAnswerWithQuestionByInterviewVideo(interviewVideo);
+        interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
         // <- DB에서 실제로 다시 조회
 
         log.debug("💬 [Polling 후 최종 인터뷰 답변 목록]");
