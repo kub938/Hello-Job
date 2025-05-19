@@ -97,16 +97,7 @@ public class ProjectService {
             throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
         }
 
-        project.updateProject(
-                projectRequestDto.getProjectName(),
-                projectRequestDto.getProjectIntro(),
-                projectRequestDto.getProjectRole(),
-                projectRequestDto.getProjectSkills(),
-                projectRequestDto.getProjectDetail(),
-                projectRequestDto.getProjectClient(),
-                projectRequestDto.getProjectStartDate(),
-                projectRequestDto.getProjectEndDate()
-        );
+        project.updateProject(projectRequestDto);
     }
 
     public void removeProject(Integer userId, Integer projectId) {

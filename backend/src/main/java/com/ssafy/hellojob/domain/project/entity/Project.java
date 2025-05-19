@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.project.entity;
 
+import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
 import jakarta.persistence.*;
@@ -69,21 +70,14 @@ public class Project extends BaseTimeEntity {
         this.projectEndDate = projectEndDate;
     }
 
-    public void updateProject(String projectName,
-                              String projectIntro,
-                              String projectRole,
-                              String projectSkills,
-                              String projectDetail,
-                              String projectClient,
-                              LocalDate projectStartDate,
-                              LocalDate projectEndDate) {
-        this.projectName = projectName;
-        this.projectIntro = projectIntro;
-        this.projectRole = projectRole;
-        this.projectSkills = projectSkills;
-        this.projectDetail = projectDetail;
-        this.projectClient = projectClient;
-        this.projectStartDate = projectStartDate;
-        this.projectEndDate = projectEndDate;
+    public void updateProject(ProjectRequestDto project) {
+        this.projectName = project.getProjectName();
+        this.projectIntro = project.getProjectIntro();
+        this.projectRole = project.getProjectRole();
+        this.projectSkills = project.getProjectSkills();
+        this.projectDetail = project.getProjectDetail();
+        this.projectClient = project.getProjectClient();
+        this.projectStartDate = project.getProjectStartDate();
+        this.projectEndDate = project.getProjectEndDate();
     }
 }
