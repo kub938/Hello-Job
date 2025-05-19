@@ -876,12 +876,17 @@ public class InterviewService {
             waited += POLL_INTERVAL_MS;
         }
 
-
         // ✅ 캐시 초기화 후 최신 상태로 강제 로드
-        entityManager.clear();  // <- 영속성 컨텍스트 초기화
-        interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);  // <- DB에서 실제로 다시 조회
+        // polling 탈출 후에도 1~2초 추가 대기 후 마지막 재조회
+        Thread.sleep(1000);
+        entityManager.clear();
+        interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+        // <- DB에서 실제로 다시 조회
 
-        log.debug("😎 대기 끝 !!");
+        log.debug("💬 [Polling 후 최종 인터뷰 답변 목록]");
+        for (InterviewAnswer a : interviewAnswers) {
+            log.debug("↪️ answerId: {}, result: {}", a.getInterviewAnswerId(), a.getInterviewAnswer());
+        }
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
         if (interviewVideo.getCoverLetterInterview() != null) {
