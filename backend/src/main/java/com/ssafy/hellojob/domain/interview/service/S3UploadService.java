@@ -59,7 +59,7 @@ public class S3UploadService {
             try {
                 s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-                log.debug("S3 업로드 성공");
+                log.debug("😎 S3 업로드 성공");
                 
                 // 업로드 성공 시 URL 반환
                 return s3Client.utilities()

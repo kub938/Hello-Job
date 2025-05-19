@@ -707,26 +707,22 @@ public class InterviewService {
     // 동영상에서 시간 뽑아내기
     // 영상 길이 추출 + .webm -> .mp4 자동 변환
     public String getVideoDurationWithFFprobe(File videoFile) throws IOException, InterruptedException {
+        
+        log.debug("😎 동영상 시간 추출 함수 들어옴");
+        
         long start = System.nanoTime();
-        log.debug("▶ getVideoDurationWithFFprobe 시작");
 
         // 확장자 추출
         String originalFilename = videoFile.getName();
         String extension = originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : ".webm";
-        log.debug("⏺️ 원본 파일명: {}, 추출된 확장자: {}", originalFilename, extension);
 
-        // 복사된 webm 파일 생성 (videoFile은 원본)
+        // 임시 파일 생성 및 복사
         File webmTempFile = File.createTempFile("upload", extension);
         Files.copy(videoFile.toPath(), webmTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        log.debug("📁 임시 webm 파일 생성 및 복사 완료: {}", webmTempFile.getAbsolutePath());
 
         File mp4TempFile = File.createTempFile("converted", ".mp4");
-        log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
-
-        log.debug("ffmpegPath: {}", ffmpegPath);
-        log.debug("ffprobePath: {}", ffprobePath);
 
         // ffmpeg 실행 (webm → mp4)
         ProcessBuilder ffmpegPb = new ProcessBuilder(
@@ -740,14 +736,10 @@ public class InterviewService {
         );
         ffmpegPb.redirectErrorStream(true);
         Process ffmpegProcess = ffmpegPb.start();
-        log.debug("⚙️ ffmpeg 프로세스 시작");
 
         new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(ffmpegProcess.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    log.debug("ffmpeg ▶ {}", line);
-                }
+                while (reader.readLine() != null); // 로그 무시
             } catch (IOException e) {
                 log.warn("⚠️ ffmpeg 로그 읽기 실패", e);
             }
@@ -759,7 +751,6 @@ public class InterviewService {
             log.error("❌ ffmpeg 시간 초과로 강제 종료됨");
             throw new IOException("ffmpeg 변환 시간 초과");
         }
-        log.debug("✅ ffmpeg 변환 완료 (파일 경로: {})", mp4TempFile.getAbsolutePath());
 
         // ffprobe 실행
         ProcessBuilder ffprobePb = new ProcessBuilder(
@@ -773,12 +764,10 @@ public class InterviewService {
         BufferedReader reader = new BufferedReader(new InputStreamReader(ffprobeProcess.getInputStream()));
         String durationStr = reader.readLine();
         ffprobeProcess.waitFor();
-        log.debug("🧪 ffprobe 결과: {}", durationStr);
 
         try {
             Files.deleteIfExists(webmTempFile.toPath());
             Files.deleteIfExists(mp4TempFile.toPath());
-            log.debug("🧹 임시 파일 삭제 완료");
         } catch (IOException e) {
             log.warn("⚠️ 임시 파일 삭제 실패", e);
         }
@@ -802,7 +791,7 @@ public class InterviewService {
 
         String result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
         long end = System.nanoTime();
-        log.debug("✅ 변환된 영상 길이: {}, 총 소요 시간: {} ms", result, (end - start) / 1_000_000);
+        log.info("🎥 영상 길이: {} (처리 시간: {} ms)", result, (end - start) / 1_000_000);
         return result;
     }
 
@@ -868,6 +857,8 @@ public class InterviewService {
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
+        log.debug("😎 endInterview 들어옴");
+        
         // Polling: 최대 MAX_WAIT_SECONDS까지 대기
         int waited = 0;
         while (waited < MAX_WAIT_SECONDS * 1000) {
@@ -926,6 +917,7 @@ public class InterviewService {
                 .cover_letter_contents(coverLetterContentFastAPIRequestDto)
                 .build();
 
+        log.debug("😎 sse 요청 보내기 직전");
         requestInterviewFeedbackAsync(user, fastAPIRequestDto, interviewAnswers, interviewVideo);
         return Map.of("message", "피드백 생성 요청이 정상적으로 처리되었습니다");
     }
@@ -934,6 +926,7 @@ public class InterviewService {
         CompletableFuture
                 .supplyAsync(() -> fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto))
                 .thenApply(fastAPIResponseDto -> {
+                    log.debug("😎 saveFeedback 들어가기 직전");
                     EndInterviewResponseDto responseDto = interviewFeedbackSaveService.saveFeedback(fastAPIResponseDto, interviewAnswers, interviewVideo);
                     return responseDto;
                 })
