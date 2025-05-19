@@ -45,7 +45,9 @@ public class CompanyAnalysisSaveService {
         log.debug("기업 분석 : {}", responseDto.getCompany_analysis());
 
         // dart 정보 저장
-        DartAnalysis dart = DartAnalysis.of(
+        DartAnalysis dart = null;
+
+        dart = DartAnalysis.of(
                 responseDto.getCompany_brand(),
                 responseDto.getCompany_analysis(),
                 responseDto.getCompany_vision(),
@@ -54,6 +56,18 @@ public class CompanyAnalysisSaveService {
                 requestDto.isPlus(),
                 requestDto.isFinancial()
         );
+
+        if (!company.isDart()) {
+            dart = DartAnalysis.of(
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    false,
+                    false,
+                    false
+            );
+        }
 
         dartAnalysisRepository.save(dart);
 
