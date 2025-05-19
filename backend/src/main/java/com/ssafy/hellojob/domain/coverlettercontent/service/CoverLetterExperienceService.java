@@ -13,6 +13,7 @@ import com.ssafy.hellojob.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,6 +26,7 @@ public class CoverLetterExperienceService {
     private final ProjectRepository projectRepository;
     private final CoverLetterExperienceRepository coverLetterExperienceRepository;
 
+    @Transactional
     public void saveCoverLetterExperience(List<Integer> experienceIds, User user, CoverLetterContent content) {
         for (Integer experienceId : experienceIds) {
 
@@ -45,6 +47,7 @@ public class CoverLetterExperienceService {
         }
     }
 
+    @Transactional
     public void saveCoverLetterProject(List<Integer> projectIds, User user, CoverLetterContent content) {
         for (Integer projectId : projectIds) {
 
@@ -65,10 +68,12 @@ public class CoverLetterExperienceService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Integer> getCoverLetterExperienceIds(Integer contentId) {
         return coverLetterExperienceRepository.findExperiencesByContentId(contentId);
     }
 
+    @Transactional(readOnly = true)
     public List<Integer> getCoverLetterProjectIds(Integer contentId) {
         return coverLetterExperienceRepository.findProjectsByContentId(contentId);
     }

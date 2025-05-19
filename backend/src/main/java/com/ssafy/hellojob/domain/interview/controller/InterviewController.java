@@ -12,6 +12,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -69,13 +71,6 @@ public class InterviewController {
     @PostMapping("/select/personality")
     public SelectInterviewStartResponseDto startPersonalitySelectInterview(@AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.startPersonalitySelectInterview(userPrincipal.getUserId());
-    }
-
-    // 구현 폐기(문항 카테고리 선택 자소서)
-    @PostMapping("/select/cover-letter")
-    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(@RequestBody StartCoverLetterInterviewRequestDto requestDto,
-                                                                           @AuthenticationPrincipal UserPrincipal userPrincipal){
-        return interviewService.startCoverLetterSelectInterview(requestDto.getCoverLetterId(), userPrincipal.getUserId());
     }
 
     // cs 모의 면접 시작
@@ -155,10 +150,25 @@ public class InterviewController {
     public void stopVoiceRecoding(@RequestPart("interviewAnswerId") String interviewAnswerId,
                                   @RequestPart("videoFile") MultipartFile videoFile,
                                   @RequestPart("audioFile") MultipartFile audioFile,
-                                  @AuthenticationPrincipal UserPrincipal userPrincipal) {
+                                  @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException {
         String url = s3UploadService.uploadVideo(videoFile);
-        String result = sttService.transcribeAudio(audioFile);
-        interviewService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), videoFile);
+        // Controller에서 미리 byte[] 로 복사
+        byte[] audioBytes = audioFile.getBytes();
+        String originalFilename = audioFile.getOriginalFilename();
+
+        File tempVideoFile = File.createTempFile("video", ".webm");  // 또는 확장자 추출해서 지정
+        videoFile.transferTo(tempVideoFile);
+
+        sttService.transcribeAudio(audioBytes, originalFilename)
+                .thenAccept(result -> {
+                    interviewService.saveInterviewAnswer(
+                            userPrincipal.getUserId(),
+                            url,
+                            result,
+                            Integer.parseInt(interviewAnswerId),
+                            tempVideoFile
+                    );
+                });
     }
 
     // fast API 자소서 기반 질문 생성

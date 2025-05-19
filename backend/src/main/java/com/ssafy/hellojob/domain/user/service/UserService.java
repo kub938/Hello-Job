@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -14,7 +15,7 @@ public class UserService {
     private final UserReadService userReadService;
     private final UserRepository userRepository;
 
-
+    @Transactional
     public ChangeNicknameResponseDto changeNickname(String newNickname, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         user.changeNickname(newNickname);
@@ -25,7 +26,8 @@ public class UserService {
                 .build();
     }
 
-    public CheckTokenResponseDto checkToken(Integer userId){
+    @Transactional(readOnly = true)
+    public CheckTokenResponseDto checkToken(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         return CheckTokenResponseDto.builder().token(user.getToken()).build();
     }
