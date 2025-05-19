@@ -32,7 +32,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,6 +47,7 @@ public class CoverLetterService {
     private final UserReadService userReadService;
     private final FastApiClientService fastApiClientService;
     private final CoverLetterReadService coverLetterReadService;
+    private final CoverLetterSwotService coverLetterSwotService;
 
     public CoverLetterCreateResponseDto createCoverLetter(Integer userId, CoverLetterRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
@@ -95,16 +95,10 @@ public class CoverLetterService {
         List<AICoverLetterResponseDto> responseDto;
 
         CoverLetter coverLetter = getFullDetail(coverLetterId, contents);
-
         log.debug("🎈 coverLetter : {}", coverLetter.getCoverLetterId());
-        log.debug("🎈 coverLetter content: {}", coverLetter.getContents());
-
-        log.debug("🌞 coverLetter의 content: {}", coverLetter.getContents().stream()
-                .map(c -> String.format("[id=%d, number=%d]", c.getContentId(), c.getContentNumber()))
-                .collect(Collectors.joining(", ")));
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
-                .companyAnalysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .companyAnalysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis(), coverLetterSwotService.getSWOTDto(coverLetter)))
                 .jobRoleAnalysis(
                         coverLetter.getJobRoleSnapshot() != null
                                 ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
@@ -134,7 +128,6 @@ public class CoverLetterService {
         responseDto = fastApiClientService.getCoverLetterContentDetail(requestDto);
         return responseDto;
     }
-
 
     public CoverLetter getFullDetail(Integer coverLetterId, List<CoverLetterContent> contents) {
         log.debug("🌞 coverLetterId : {} ", coverLetterId);
