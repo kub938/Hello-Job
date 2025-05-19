@@ -47,7 +47,7 @@ function ReadJob({ onClose, id, companyId }: ReadJobProps) {
         queryKey: ["jobResearchList", companyId],
       });
       // 마이 페이지 직무 목록도 갱싱해야 함
-      // queryClient.invalidateQueries({ queryKey: ["jobResearchList", companyId] });
+      queryClient.invalidateQueries({ queryKey: ["myJobList"] });
       onClose();
     },
   });
@@ -69,6 +69,7 @@ function ReadJob({ onClose, id, companyId }: ReadJobProps) {
         queryKey: ["jobRoleDetail", id],
       });
       queryClient.invalidateQueries({ queryKey: ["jobRoleList", companyId] });
+      queryClient.invalidateQueries({ queryKey: ["myJobList"] });
     },
   });
 

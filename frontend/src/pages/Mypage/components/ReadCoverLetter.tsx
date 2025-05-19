@@ -28,6 +28,7 @@ function ReadCoverLetter({ onClose, id, page }: ReadCoverLetterProps) {
     onSuccess: () => {
       // 삭제 성공 시, 게시글 목록 갱신
       queryClient.invalidateQueries({ queryKey: ["coverLetterList", page] });
+      queryClient.invalidateQueries({ queryKey: ["myCompanyList"] });
       onClose(); // 모달 닫기
     },
   });
