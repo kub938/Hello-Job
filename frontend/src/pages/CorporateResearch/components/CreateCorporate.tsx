@@ -191,7 +191,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           }
           description={
             isBasic
-              ? "사업 개요, 주요 제품 및 서비스, 주요계약 및 연구개발활동 등을 분석에 추가하지 않습니다."
+              ? "사업 개요, 주요 제품 및 서비스, 주요계약 및 연구개발활동 등을 분석에 추가합니다."
               : "기본 분석은 Dart 에서 제공되는 기업의 사업 보고서와 재무제표의 간단한 필수 정보를 기반으로 분석을 제공합니다."
           }
           isOn={isBasic}
