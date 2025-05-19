@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.sse.service;
 
+import com.ssafy.hellojob.domain.sse.dto.AckRequestDto;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,12 +59,9 @@ public class SSEService {
                 emitter.send(SseEmitter.event()
                         .name(eventName)
                         .data(data));
-                // 해당 이벤트 큐에서 제거
-                removeTargetEvent(userId, eventName, data);
             } catch (IOException e) {
                 // 연결이 끊긴 경우
                 log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
-                log.debug("실패한 sse 큐에 보관");
                 emitter.completeWithError(e);
                 emitters.remove(userId);
             }
@@ -118,15 +116,15 @@ public class SSEService {
         });
     }
 
-    public void removeTargetEvent(Integer userId, String eventName, Object data) {
-        SseEventWrapper target = new SseEventWrapper(eventName, data);
+    public void removeTargetEvent(Integer userId, AckRequestDto dto) {
+        SseEventWrapper target = new SseEventWrapper(dto.getEventName(), dto.getData());
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
         if (queue != null && !queue.isEmpty()) {
             boolean removed = queue.removeIf(e -> e.equals(target));
             if (removed) {
-                log.debug("✅ 큐에서 이벤트 제거됨 - userId={}, eventName={}", userId, eventName);
+                log.debug("✅ 큐에서 이벤트 제거됨 - userId={}, eventName={}", userId, dto.getEventName());
             } else {
-                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, eventName);
+                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, dto.getData());
             }
         }
     }
