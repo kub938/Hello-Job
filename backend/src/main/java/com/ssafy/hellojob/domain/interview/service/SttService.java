@@ -60,23 +60,23 @@ public class SttService {
             try {
                 RestTemplate restTemplate = new RestTemplate();
 
-                String prompt = "";
-                switch(interviewAnswer.getInterviewQuestionCategory().name()){
-                    case "인성면접":
-                        prompt = "인성 면접 답변임";
-                        break;
-                    case "자기소개서면접":
-                        prompt = "자기소개서면접 면접 답변임";
-                        break;
-                    default:
-                        prompt = interviewAnswer.getInterviewQuestionCategory().name() + "면접 답변임";
-                }
+//                String prompt = "";
+//                switch(interviewAnswer.getInterviewQuestionCategory().name()){
+//                    case "인성면접":
+//                        prompt = "인성 면접 답변임";
+//                        break;
+//                    case "자기소개서면접":
+//                        prompt = "자기소개서면접 면접 답변임";
+//                        break;
+//                    default:
+//                        prompt = interviewAnswer.getInterviewQuestionCategory().name() + "면접 답변임";
+//                }
 
                 MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
                 body.add("file", audioResource);
                 body.add("model", "gpt-4o-transcribe");
                 body.add("language", "ko");
-                body.add("prompt", prompt);
+//                body.add("prompt", prompt);
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -99,7 +99,7 @@ public class SttService {
 
                     return CompletableFuture.completedFuture(result);
                 } else {
-                    throw new RuntimeException("😎 Whisper STT 응답 실패: " + response.getStatusCode());
+                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
                 }
 
             } catch (Exception e) {

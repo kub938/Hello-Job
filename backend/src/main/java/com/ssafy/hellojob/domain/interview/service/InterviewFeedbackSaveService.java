@@ -32,6 +32,9 @@ public class InterviewFeedbackSaveService {
 
     @Transactional
     public EndInterviewResponseDto saveFeedback(InterviewFeedbackFastAPIResponseDto fastAPIResponseDto, List<InterviewAnswer> interviewAnswers, InterviewVideo interviewVideo){
+        
+        log.debug("😎 saveFeedback 함수 들어옴");
+        
         // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
 
