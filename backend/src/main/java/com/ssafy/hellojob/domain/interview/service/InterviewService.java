@@ -864,14 +864,18 @@ public class InterviewService {
         // Polling: 최대 MAX_WAIT_SECONDS까지 대기
         int waited = 0;
         while (waited < MAX_WAIT_SECONDS * 1000) {
+            entityManager.clear(); // 1차 캐시 제거
+            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo); // DB 재조회
+
             boolean hasPendingStt = interviewAnswers.stream()
                     .anyMatch(ans -> ans.getInterviewAnswer() == null);
 
-            if (!hasPendingStt) break;  // 모두 STT 완료됨
+            if (!hasPendingStt) break;
 
-            Thread.sleep(POLL_INTERVAL_MS);  // 0.5초 대기
+            Thread.sleep(POLL_INTERVAL_MS);
             waited += POLL_INTERVAL_MS;
         }
+
 
         // ✅ 캐시 초기화 후 최신 상태로 강제 로드
         entityManager.clear();  // <- 영속성 컨텍스트 초기화
