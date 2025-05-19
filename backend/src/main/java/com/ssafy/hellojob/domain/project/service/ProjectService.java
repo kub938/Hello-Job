@@ -58,14 +58,12 @@ public class ProjectService {
 
     public List<ProjectsResponseDto> getProjects(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
-        List<ProjectsResponseDto> projects = projectRepository.findByUserId(userId);
-        return projects;
+        return projectRepository.findByUserId(userId);
     }
 
     public Page<ProjectsResponseDto> getProjectsPage(Integer userId, Pageable pageable) {
         userReadService.findUserByIdOrElseThrow(userId);
-        Page<ProjectsResponseDto> projects = projectRepository.findPageByUserId(userId, pageable);
-        return projects;
+        return projectRepository.findPageByUserId(userId, pageable);
     }
 
     public ProjectResponseDto getProject(Integer userId, Integer projectId) {
