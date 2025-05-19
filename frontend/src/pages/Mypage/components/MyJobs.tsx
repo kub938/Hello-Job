@@ -35,7 +35,7 @@ function MyJobs() {
         내가 작성한 직무 분석을 모아 볼 수 있습니다.
       </h2>
 
-      <div className="flex flex-col gap-4 w-full items-center p-4 pr-[200px]">
+      <div className="flex flex-col gap-4 w-full items-center p-4">
         {isLoading ? (
           <div>로딩 중...</div>
         ) : myJobListData && myJobListData.length > 0 ? (

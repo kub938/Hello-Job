@@ -46,6 +46,9 @@ function CorporateReportCard({
       queryClient.invalidateQueries({
         queryKey: ["corporateReportDetail", reportId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkedCompanyList"],
+      });
       if (companyId) {
         queryClient.invalidateQueries({
           queryKey: ["corporateReportList", companyId],
@@ -71,6 +74,9 @@ function CorporateReportCard({
       console.log("북마크 삭제 성공");
       queryClient.invalidateQueries({
         queryKey: ["corporateReportDetail", reportId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkedCompanyList"],
       });
       if (companyId) {
         queryClient.invalidateQueries({
