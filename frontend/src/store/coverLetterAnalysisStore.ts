@@ -22,6 +22,17 @@ export const useSelectCompanyStore = create<SelectCompanyState>((set) => ({
       },
     });
   },
+
+  resetSelectCompany: () => {
+    set({
+      company: {
+        companyId: -1,
+        companyName: "",
+        companyLocation: "",
+        companySize: "",
+      },
+    });
+  },
 }));
 
 export type JobRole =
@@ -50,6 +61,7 @@ export type JobRole =
 export interface CompanyJobState {
   jobRoleCategory: JobRole;
   setJobRoleCategory: (category: JobRole) => void;
+  resetJobRoleCategory: () => void;
 }
 
 export const useSelectJobStore = create<CompanyJobState>((set) => ({
@@ -57,5 +69,9 @@ export const useSelectJobStore = create<CompanyJobState>((set) => ({
 
   setJobRoleCategory: (category: JobRole) => {
     set({ jobRoleCategory: category });
+  },
+
+  resetJobRoleCategory: () => {
+    set({ jobRoleCategory: "" });
   },
 }));

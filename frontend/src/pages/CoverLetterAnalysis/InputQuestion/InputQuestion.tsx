@@ -8,6 +8,10 @@ import { useCreateCoverLetter } from "@/hooks/coverLetterHooks";
 import FormInput from "@/components/Common/FormInput";
 import { useNavigate } from "react-router";
 import { Loader2 } from "lucide-react"; // Lucide 아이콘 사용
+import {
+  useSelectCompanyStore,
+  useSelectJobStore,
+} from "@/store/coverLetterAnalysisStore";
 
 interface InputQuestionProps {
   createModalOpen: boolean;
@@ -19,8 +23,15 @@ function InputQuestion({
   setCreateModalOpen,
 }: InputQuestionProps) {
   const mutation = useCreateCoverLetter();
-  const { addQuestion, inputData, setAllQuestions, setCoverLetterTitle } =
-    useCoverLetterInputStore();
+  const { resetSelectCompany } = useSelectCompanyStore();
+  const { resetJobRoleCategory } = useSelectJobStore();
+  const {
+    addQuestion,
+    inputData,
+    setAllQuestions,
+    setCoverLetterTitle,
+    resetAllInputs,
+  } = useCoverLetterInputStore();
   const [title, setTitle] = useState("");
   const [localContents, setLocalContents] = useState<
     CoverLetterRequestContent[]
@@ -98,7 +109,10 @@ function InputQuestion({
         onSuccess: (data) => {
           console.log("데이터 저장 성공", data);
           navigate(`${data.coverLetterId}`);
-          toast.success("저장되었습니다.");
+          resetAllInputs();
+          resetSelectCompany();
+          resetJobRoleCategory();
+          toast.success("자기소개서 초안이 생성 되었습니다.");
         },
         onError: (error) => {
           console.log("데이터 저장 실패", error);
