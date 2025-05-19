@@ -100,7 +100,7 @@ public class ChatLogService {
             newChats.add(userMessage);
             newChats.add(aiMessage);
 
-            existingLog.updateChatLog(jsonUtil.stringToJson(newChats));
+            existingLog.updateChatLog(jsonUtil.messageToJson(newChats));
         }
     }
 

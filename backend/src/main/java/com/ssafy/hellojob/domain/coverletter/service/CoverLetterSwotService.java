@@ -21,10 +21,10 @@ public class CoverLetterSwotService {
             return SWOTDto.from(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "");
 
         return SWOTDto.from(
-                jsonUtil.parseString(swotAnalysis.getStrengthsContent()),
-                jsonUtil.parseString(swotAnalysis.getWeaknessesContent()),
-                jsonUtil.parseString(swotAnalysis.getOpportunitiesContent()),
-                jsonUtil.parseString(swotAnalysis.getThreatsContent()),
+                jsonUtil.parseStringList(swotAnalysis.getStrengthsContent()),
+                jsonUtil.parseStringList(swotAnalysis.getWeaknessesContent()),
+                jsonUtil.parseStringList(swotAnalysis.getOpportunitiesContent()),
+                jsonUtil.parseStringList(swotAnalysis.getThreatsContent()),
                 swotAnalysis.getSwotSummary());
     }
 }
