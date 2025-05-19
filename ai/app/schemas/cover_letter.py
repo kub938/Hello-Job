@@ -1,8 +1,5 @@
 from pydantic import BaseModel
 from typing import List, Optional
-from datetime import date
-
-from app.schemas.company import CompanyAnalysisSwot
 
 class Swot(BaseModel):
     strengths: List[str]
