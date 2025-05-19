@@ -79,7 +79,7 @@ export default function Home() {
         onClose={() => setIsModalOpen(false)}
         title={modalTitle}
       >
-        <div>2차 배포를 기대해주세요!</div>
+        <div>3차 배포를 기대해주세요!</div>
       </Modal>
     </div>
   );
