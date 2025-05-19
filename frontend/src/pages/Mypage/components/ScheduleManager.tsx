@@ -160,15 +160,21 @@ function ScheduleManager() {
                     stepKey={stepKey}
                     onMoveSchedule={moveSchedule}
                   >
-                    <ScheduleCard
-                      scheduleList={scheduleList.filter(
-                        (item) => item.scheduleStatusStep === stepKey
-                      )}
-                      onMoveSchedule={(id, newStatusStep) =>
-                        moveSchedule(id, newStatusStep as ScheduleStatusStep)
-                      }
-                      onEdit={handleOpenModal}
-                    />
+                    {scheduleList.filter(
+                      (item) => item.scheduleStatusStep === stepKey
+                    ).length > 0 ? (
+                      <ScheduleCard
+                        scheduleList={scheduleList.filter(
+                          (item) => item.scheduleStatusStep === stepKey
+                        )}
+                        onMoveSchedule={(id, newStatusStep) =>
+                          moveSchedule(id, newStatusStep as ScheduleStatusStep)
+                        }
+                        onEdit={handleOpenModal}
+                      />
+                    ) : (
+                      <div>{stepValue.label}인 일정이 없습니다. </div>
+                    )}
                   </ScheduleStepCard>
                 </div>
               ))}
