@@ -161,7 +161,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         dart_agent = Agent(
             name=f"Company Dart Assistant: {company_name}",
             instructions=instructions,
-            model="gpt-4.1",
+            model="gpt-4.1-mini",
             output_type=CompanyAnalysisOutput,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
         )
@@ -283,7 +283,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         news_agent = Agent(
             name=f"Company News Analyzer: {company_name}",
             instructions=instructions,
-            model="gpt-4.1",
+            model="gpt-4.1-mini",
             output_type=company.CompanyNews,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
         )
