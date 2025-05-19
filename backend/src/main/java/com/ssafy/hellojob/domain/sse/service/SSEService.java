@@ -2,6 +2,7 @@ package com.ssafy.hellojob.domain.sse.service;
 
 import com.ssafy.hellojob.domain.sse.dto.AckRequestDto;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
+import com.ssafy.hellojob.global.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,11 +20,12 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @RequiredArgsConstructor
 public class SSEService {
 
-    public record SseEventWrapper(String eventName, Object data) {}
+    public record SseEventWrapper(String eventName, String dataJson) {}
     private final Map<Integer, SseEmitter> emitters = new ConcurrentHashMap<>();
     private final Map<Integer, Queue<SseEventWrapper>> retryQueue = new ConcurrentHashMap<>();
 
     private final UserReadService userReadService;
+    private final JsonUtil jsonUtil;
 
     public void addEmitter(Integer userId, SseEmitter emitter) {
         userReadService.findUserByIdOrElseThrow(userId);
@@ -73,7 +75,7 @@ public class SSEService {
     public void queueEvent(Integer userId, String eventName, Object data) {
         retryQueue
                 .computeIfAbsent(userId, k -> new ConcurrentLinkedDeque<>())
-                .add(new SseEventWrapper(eventName, data));
+                .add(new SseEventWrapper(eventName, jsonUtil.toJson(data))); // 문자열로 저장
     }
 
     // 클라이언트 재접속 시 큐에 저장한 event 재실행
@@ -88,7 +90,7 @@ public class SSEService {
                 try {
                     emitter.send(SseEmitter.event()
                             .name(event.eventName())
-                            .data(event.data()));
+                            .data(jsonUtil.parseJson(event.dataJson()))); // json 으로 전송
                     queue.poll(); // 전송 성공 시에만 꺼냄
                 } catch (IOException e) {
                     log.warn("❌ SSE 연결 재실패 - 중단");
@@ -117,14 +119,15 @@ public class SSEService {
     }
 
     public void removeTargetEvent(Integer userId, AckRequestDto dto) {
-        SseEventWrapper target = new SseEventWrapper(dto.getEventName(), dto.getData());
+        String dataJson = jsonUtil.toJson(dto.getData());
+        SseEventWrapper target = new SseEventWrapper(dto.getEventName(), dataJson);
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
         if (queue != null && !queue.isEmpty()) {
             boolean removed = queue.removeIf(e -> e.equals(target));
             if (removed) {
                 log.debug("✅ 큐에서 이벤트 제거됨 - userId={}, eventName={}", userId, dto.getEventName());
             } else {
-                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, dto.getData());
+                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, dto.getEventName());
             }
         }
     }
