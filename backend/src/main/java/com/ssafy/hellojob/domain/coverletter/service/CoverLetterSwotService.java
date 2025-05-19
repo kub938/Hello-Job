@@ -7,6 +7,8 @@ import com.ssafy.hellojob.global.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class CoverLetterSwotService {
@@ -15,6 +17,9 @@ public class CoverLetterSwotService {
 
     public SWOTDto getSWOTDto(CoverLetter coverLetter) {
         SwotAnalysis swotAnalysis = coverLetter.getCompanyAnalysis().getSwotAnalysis();
+        if (swotAnalysis == null)
+            return SWOTDto.from(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), "");
+
         return SWOTDto.from(
                 jsonUtil.parseString(swotAnalysis.getStrengthsContent()),
                 jsonUtil.parseString(swotAnalysis.getWeaknessesContent()),
