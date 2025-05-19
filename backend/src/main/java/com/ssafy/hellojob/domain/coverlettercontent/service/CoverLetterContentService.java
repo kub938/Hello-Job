@@ -8,10 +8,9 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterRespon
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
+import com.ssafy.hellojob.domain.coverletter.service.CoverLetterSwotService;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AICoverLetterContentDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.EditContentDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.ChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.request.CoverLetterUpdateRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.*;
@@ -44,6 +43,7 @@ public class CoverLetterContentService {
     private final ChatLogService chatLogService;
     private final UserReadService userReadService;
     private final CoverLetterContentReadService coverLetterContentReadService;
+    private final CoverLetterSwotService coverLetterSwotService;
 
     @Transactional
     public List<CoverLetterContent> createContents(User user, CoverLetter coverLetter, List<ContentsDto> contentsDto) {
@@ -179,45 +179,6 @@ public class CoverLetterContentService {
         return coverLetterContentRepository.findContentByCoverLetterId(coverLetterId);
     }
 
-    public ChatResponseDto getAIChatForEdit(Integer userId, Integer contentId, ChatRequestDto requestDto) {
-
-        AIChatForEditRequestDto aiChatForEditRequestDto = getAIChatForEditRequestDto(userId, contentId, requestDto);
-        CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        return chatLogService.sendChatForEdit(content, aiChatForEditRequestDto);
-    }
-
-    public AIChatForEditRequestDto getAIChatForEditRequestDto(Integer userId, Integer contentId, ChatRequestDto requestDto) {
-
-        userReadService.findUserByIdOrElseThrow(userId);
-        CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        coverLetterContentReadService.checkCoverLetterContentValidation(userId, content);
-
-        Integer coverLetterId = coverLetterContentRepository.findCoverLetterIdByContentId(contentId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
-
-        CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
-
-        return AIChatForEditRequestDto.builder()
-                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(coverLetter.getJobRoleSnapshot() != null
-                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
-                        : null)
-                .experiences(content.getExperiences().stream()
-                        .map(cle -> cle.getExperience())
-                        .filter(Objects::nonNull)
-                        .map(ExperienceDto::from)
-                        .toList()
-                )
-                .projects(content.getExperiences().stream()
-                        .map(cle -> cle.getProject())
-                        .filter(Objects::nonNull)
-                        .map(ProjectDto::from)
-                        .toList()
-                )
-                .edit_content(EditContentDto.from(content, requestDto))
-                .build();
-    }
-
     public ChatResponseDto sendChat(Integer userId, Integer contentId, ChatRequestDto requestDto) {
         AIChatRequestDto aiChatRequestDto = getAIChatRequestDto(userId, contentId, requestDto);
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
@@ -242,7 +203,7 @@ public class CoverLetterContentService {
         return AIChatRequestDto.builder()
                 .user_message(requestDto.getUserMessage())
                 .chat_history(chatRecentHistory)
-                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis(), coverLetterSwotService.getSWOTDto(coverLetter)))
                 .job_role_analysis(
                         coverLetter.getJobRoleSnapshot() != null
                                 ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
