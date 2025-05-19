@@ -26,4 +26,10 @@ public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer
 
     List<InterviewAnswer> findAllByInterviewVideo(InterviewVideo interviewVideo);
 
+    @Query("SELECT COUNT(v) FROM InterviewVideo v WHERE v.interviewVideoId = :interviewVideoId")
+    Long countByInterviewVideoId(@Param("interviewVideoId") Integer interviewVideoId);
+
+    @Query("SELECT COUNT(a) FROM InterviewAnswer a WHERE a.interviewVideo.interviewVideoId = :interviewVideoId AND a.interviewAnswer IS NOT NULL")
+    Long countCompletedAnswersByInterviewVideoId(@Param("interviewVideoId") Integer interviewVideoId);
+
 }

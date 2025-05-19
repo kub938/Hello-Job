@@ -59,11 +59,7 @@ public class InterviewService {
     private final S3UploadService s3UploadService;
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
-    private final EntityManager entityManager;
 
-    // polling 전 정의
-    private static final int MAX_WAIT_SECONDS = 120;
-    private static final int POLL_INTERVAL_MS = 500;
 
     private static final Integer QUESTION_SIZE = 5;
 
@@ -697,28 +693,9 @@ public class InterviewService {
         List<InterviewAnswer> interviewAnswers;
 
         log.debug("😎 endInterview 들어옴");
-        
-        // Polling: 최대 MAX_WAIT_SECONDS까지 대기
-        int waited = 0;
-        while (waited < MAX_WAIT_SECONDS * 1000) {
-            entityManager.clear(); // 1차 캐시 제거
-            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo); // DB 재조회
-
-            boolean hasPendingStt = interviewAnswers.stream()
-                    .anyMatch(ans -> ans.getInterviewAnswer() == null);
-
-            if (!hasPendingStt) break;
-
-            Thread.sleep(POLL_INTERVAL_MS);
-            waited += POLL_INTERVAL_MS;
-        }
 
         // ✅ 캐시 초기화 후 최신 상태로 강제 로드
-        // polling 탈출 후에도 1~2초 추가 대기 후 마지막 재조회
-        Thread.sleep(1000);
-        entityManager.clear();
         interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
-        // <- DB에서 실제로 다시 조회
 
         log.debug("💬 [Polling 후 최종 인터뷰 답변 목록]");
         for (InterviewAnswer a : interviewAnswers) {
