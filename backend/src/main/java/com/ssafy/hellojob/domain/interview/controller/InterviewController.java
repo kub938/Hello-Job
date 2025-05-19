@@ -151,6 +151,9 @@ public class InterviewController {
                                   @RequestPart("videoFile") MultipartFile videoFile,
                                   @RequestPart("audioFile") MultipartFile audioFile,
                                   @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException {
+
+        log.debug("😎 면접 한 문항 종료 요청 들어옴 : {}", interviewAnswerId);
+
         String url = s3UploadService.uploadVideo(videoFile);
         // Controller에서 미리 byte[] 로 복사
         byte[] audioBytes = audioFile.getBytes();
