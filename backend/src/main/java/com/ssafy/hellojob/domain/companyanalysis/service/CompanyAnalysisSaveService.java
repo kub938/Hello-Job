@@ -61,9 +61,9 @@ public class CompanyAnalysisSaveService {
 
         if (!company.isDart()) {
             dart = DartAnalysis.of(
+                    responseDto.getCompany_brand(),
                     "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
-                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
-                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    responseDto.getCompany_vision(),
                     "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
                     false,
                     false,
