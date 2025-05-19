@@ -1,9 +1,7 @@
 package com.ssafy.hellojob.domain.coverlettercontent.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatForEditResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatResponseDto;
@@ -46,37 +44,6 @@ public class ChatLogService {
         List<ChatMessageDto> chatLog = jsonUtil.parseMessage(chatLogString);
 
         return chatLog;
-    }
-
-    @Transactional
-    public ChatResponseDto sendChatForEdit(CoverLetterContent content, AIChatForEditRequestDto aiChatForEditRequestDto) {
-
-        // FastAPI 요청
-        AIChatForEditResponseDto response = fastApiClientService.sendChatForEditToFastApi(aiChatForEditRequestDto);
-
-        ChatMessageDto userMessage = ChatMessageDto.builder()
-                .sender("user")
-                .message(aiChatForEditRequestDto.getEdit_content().getUser_message())
-                .build();
-
-        ChatMessageDto aiMessage = ChatMessageDto.builder()
-                .sender("ai")
-                .message(response.getAi_message())
-                .build();
-
-        // 본문 내용 저장
-        String contentDetail = aiChatForEditRequestDto.getEdit_content().getCover_letter();
-        content.updateCoverLetterContentWithChat(contentDetail);
-
-        // 채팅 저장
-        saveNewChatLog(content, userMessage, aiMessage);
-
-        updateContentStatus(content);
-
-        return ChatResponseDto.builder()
-                .aiMessage(aiMessage.getMessage())
-                .contentStatus(content.getContentStatus())
-                .build();
     }
 
     @Transactional
