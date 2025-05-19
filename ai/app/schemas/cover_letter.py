@@ -2,6 +2,15 @@ from pydantic import BaseModel
 from typing import List, Optional
 from datetime import date
 
+from app.schemas.company import CompanyAnalysisSwot
+
+class Swot(BaseModel):
+    strengths: List[str]
+    weaknesses: List[str]
+    opportunities: List[str]
+    threats: List[str]
+    swot_summary: str
+    
 class CompanyAnalysis(BaseModel):
     """기업 분석 정보"""
     company_name: str
@@ -11,6 +20,7 @@ class CompanyAnalysis(BaseModel):
     company_finance: str
     created_at: str
     news_analysis_data: str
+    swot: CompanyAnalysisSwot
 
 class JobRoleAnalysis(BaseModel):
     """직무 분석 정보"""

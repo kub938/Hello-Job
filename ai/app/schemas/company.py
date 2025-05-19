@@ -52,22 +52,22 @@ class CompanyAnalysisFin(BaseModel):
 # SWOT 분석 강점
 class SwotStrengths(BaseModel):
     contents: List[str] = None
-    tags: List[str] = None
+    tags: Optional[List[str]] = None
 
 # SWOT 분석 약점
 class SwotWeaknesses(BaseModel):
     contents: List[str] = None
-    tags: List[str] = None
+    tags: Optional[List[str]] = None
 
 # SWOT 분석 기회
 class SwotOpportunities(BaseModel):
     contents: List[str] = None
-    tags: List[str] = None
+    tags: Optional[List[str]] = None
 
 # SWOT 분석 위협
 class SwotThreats(BaseModel):
     contents: List[str] = None
-    tags: List[str] = None
+    tags: Optional[List[str]] = None
     
 # SWOT: 기업 swot 분석
 class CompanyAnalysisSwot(BaseModel):
