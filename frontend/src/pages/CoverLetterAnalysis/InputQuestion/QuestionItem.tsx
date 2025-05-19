@@ -208,14 +208,16 @@ function QuestionItem({
         </div>
 
         {isOpen && (
-          <div className="mx-4 flex flex-col gap-3 py-3">
+          <div className="mx-4 flex flex-col gap-3 pb-3">
             <div className="flex gap-3 mt-3 ">
               <div className="w-full">
                 <FormInput
                   type="text"
                   name="contentQuestion"
                   className="border w-full"
-                  placeholder="문항을 입력해 주세요"
+                  require={true}
+                  label="문항"
+                  placeholder="문항을 입력해 주세요 (필수)"
                   value={inputTitle}
                   onChange={(e) => onChangeInputTitle(e)}
                 />
@@ -224,8 +226,10 @@ function QuestionItem({
                 <FormInput
                   type="number"
                   name="contentLength"
-                  placeholder="글자수"
+                  placeholder="글자수 (필수)"
+                  label="글자수"
                   className="w-30"
+                  require={true}
                   value={inputLimitNum}
                   onChange={(e) => onChangeInputLimitNum(e)}
                 />
