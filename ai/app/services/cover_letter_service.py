@@ -44,6 +44,25 @@ async def create_cover_letter(
         - 기간: {proj.project_start_date} ~ {proj.project_end_date}
         """
     
+    # SWOT 분석이 비어있는지 확인
+    is_swot_empty = False
+    if hasattr(company_analysis, 'swot') and company_analysis.swot:
+        # SWOT의 각 항목이 모두 빈 배열인지 확인
+        is_empty_strengths = True if not company_analysis.swot.strengths else False
+        
+        is_empty_weaknesses = True if not company_analysis.swot.weaknesses else False
+        
+        is_empty_opportunities = True if not company_analysis.swot.opportunities else False
+        
+        is_empty_threats = True if not company_analysis.swot.threats else False
+        
+        # 모든 항목이 빈 배열이면 SWOT가 비어있다고 판단
+        is_swot_empty = is_empty_strengths and is_empty_weaknesses and is_empty_opportunities and is_empty_threats
+    else:
+        is_swot_empty = True
+        
+    logger.info(f"is_swot_empty: {is_swot_empty}")
+    
     # 프롬프트 구성
     prompt = ""
     if job_role_analysis:
@@ -61,7 +80,19 @@ async def create_cover_letter(
     - 기업 분석: {company_analysis.company_analysis}
     - 비전: {company_analysis.company_vision}
     - 재무 상태: {company_analysis.company_finance}
-    - 뉴스 분석: {company_analysis.news_analysis_data}
+    - 뉴스 분석: {company_analysis.news_analysis_data}"""
+    
+        # SWOT가 비어있지 않은 경우에만 추가
+        if not is_swot_empty:
+            prompt += f"""
+    - SWOT 분석:
+        * 강점(Strengths): {', '.join(company_analysis.swot.strengths.contents) if company_analysis.swot.strengths and company_analysis.swot.strengths.contents else '정보 없음'}
+        * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses.contents) if company_analysis.swot.weaknesses and company_analysis.swot.weaknesses.contents else '정보 없음'}
+        * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities.contents) if company_analysis.swot.opportunities and company_analysis.swot.opportunities.contents else '정보 없음'}
+        * 위협(Threats): {', '.join(company_analysis.swot.threats.contents) if company_analysis.swot.threats and company_analysis.swot.threats.contents else '정보 없음'}
+        * 종합 분석: {company_analysis.swot.swot_summary if hasattr(company_analysis.swot, 'swot_summary') and company_analysis.swot.swot_summary else '정보 없음'}"""
+        
+        prompt += f"""
     
     ## 직무 분석
     - 직무명: {job_role_analysis.job_role_name}
@@ -103,7 +134,19 @@ async def create_cover_letter(
     - 기업 분석: {company_analysis.company_analysis}
     - 비전: {company_analysis.company_vision}
     - 재무 상태: {company_analysis.company_finance}
-    - 뉴스 분석: {company_analysis.news_analysis_data}
+    - 뉴스 분석: {company_analysis.news_analysis_data}"""
+    
+        # SWOT가 비어있지 않은 경우에만 추가
+        if not is_swot_empty:
+            prompt += f"""
+    - SWOT 분석:
+        * 강점(Strengths): {', '.join(company_analysis.swot.strengths.contents) if company_analysis.swot.strengths and company_analysis.swot.strengths.contents else '정보 없음'}
+        * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses.contents) if company_analysis.swot.weaknesses and company_analysis.swot.weaknesses.contents else '정보 없음'}
+        * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities.contents) if company_analysis.swot.opportunities and company_analysis.swot.opportunities.contents else '정보 없음'}
+        * 위협(Threats): {', '.join(company_analysis.swot.threats.contents) if company_analysis.swot.threats and company_analysis.swot.threats.contents else '정보 없음'}
+        * 종합 분석: {company_analysis.swot.swot_summary if hasattr(company_analysis.swot, 'swot_summary') and company_analysis.swot.swot_summary else '정보 없음'}"""
+            
+        prompt += f"""
     
     ## 지원자 경험 정보
     {experiences_text}
@@ -468,6 +511,7 @@ async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest
 
     else:
         return base_prompt
+    
     
 async def get_chat_type(user_message: str) -> str:
     """
