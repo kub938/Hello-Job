@@ -648,6 +648,9 @@ public class InterviewService {
     // 한 문항 종료(면접 답변 저장)
     @Transactional
     public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, Integer interviewAnswerId, File tempVideoFile) {
+
+        log.debug("😎 면접 답변 저장 함수 들어옴 : {}", interviewAnswerId);
+
         userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);

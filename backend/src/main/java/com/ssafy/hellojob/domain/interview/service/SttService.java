@@ -38,6 +38,8 @@ public class SttService {
             throw new BaseException(VIDEO_TOO_LARGE);
         }
 
+        log.debug("😎 면접 stt 함수 들어옴");
+
         Resource audioResource = new ByteArrayResource(fileBytes) {
             @Override
             public String getFilename() {
@@ -55,6 +57,7 @@ public class SttService {
                 MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
                 body.add("file", audioResource);
                 body.add("model", "whisper-1");
+                body.add("language", "ko");
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
@@ -71,11 +74,13 @@ public class SttService {
 
                 if (response.getStatusCode().is2xxSuccessful()) {
                     ObjectMapper objectMapper = new ObjectMapper();
-                    log.debug("stt 변환 성공");
+                    log.debug("😎 stt 변환 성공");
                     String result = objectMapper.readTree(response.getBody()).get("text").asText();
+                    log.debug("😎 stt 변환 결과값 : {}", result);
+
                     return CompletableFuture.completedFuture(result);
                 } else {
-                    throw new RuntimeException("Whisper STT 응답 실패: " + response.getStatusCode());
+                    throw new RuntimeException("😎 Whisper STT 응답 실패: " + response.getStatusCode());
                 }
 
             } catch (Exception e) {
