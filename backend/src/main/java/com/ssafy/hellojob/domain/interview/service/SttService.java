@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.hellojob.domain.interview.entity.InterviewAnswer;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,9 @@ import static com.ssafy.hellojob.global.exception.ErrorCode.VIDEO_TOO_LARGE;
 @RequiredArgsConstructor
 public class SttService {
 
+    private final InterviewReadService interviewReadService;
+
+
     @Value("${OPENAI_API_URL}")
     private String openAiUrl;
 
@@ -32,13 +36,15 @@ public class SttService {
 
     // stt
     @Async("taskExecutor")
-    public CompletableFuture<String> transcribeAudio(byte[] fileBytes, String originalFilename) {
+    public CompletableFuture<String> transcribeAudio(Integer interviewAnswerId, byte[] fileBytes, String originalFilename) {
 
         if (fileBytes.length > 25 * 1024 * 1024) {
             throw new BaseException(VIDEO_TOO_LARGE);
         }
 
         log.debug("😎 면접 stt 함수 들어옴");
+
+        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
         Resource audioResource = new ByteArrayResource(fileBytes) {
             @Override
@@ -54,10 +60,23 @@ public class SttService {
             try {
                 RestTemplate restTemplate = new RestTemplate();
 
+                String prompt = "";
+                switch(interviewAnswer.getInterviewQuestionCategory().name()){
+                    case "인성면접":
+                        prompt = "인성 면접 답변임";
+                        break;
+                    case "자기소개서면접":
+                        prompt = "자기소개서면접 면접 답변임";
+                        break;
+                    default:
+                        prompt = interviewAnswer.getInterviewQuestionCategory().name() + "면접 답변임";
+                }
+
                 MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
                 body.add("file", audioResource);
-                body.add("model", "whisper-1");
+                body.add("model", "gpt-4o-transcribe");
                 body.add("language", "ko");
+                body.add("prompt", prompt);
 
                 HttpHeaders headers = new HttpHeaders();
                 headers.setContentType(MediaType.MULTIPART_FORM_DATA);
