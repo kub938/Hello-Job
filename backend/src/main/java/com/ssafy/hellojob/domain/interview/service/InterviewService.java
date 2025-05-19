@@ -23,6 +23,7 @@ import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +69,7 @@ public class InterviewService {
     private final S3UploadService s3UploadService;
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
+    private final EntityManager entityManager;
 
     // polling 전 정의
     private static final int MAX_WAIT_SECONDS = 120;
@@ -862,19 +864,29 @@ public class InterviewService {
         // Polling: 최대 MAX_WAIT_SECONDS까지 대기
         int waited = 0;
         while (waited < MAX_WAIT_SECONDS * 1000) {
+            entityManager.clear(); // 1차 캐시 제거
+            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo); // DB 재조회
+
             boolean hasPendingStt = interviewAnswers.stream()
                     .anyMatch(ans -> ans.getInterviewAnswer() == null);
 
-            if (!hasPendingStt) break;  // 모두 STT 완료됨
+            if (!hasPendingStt) break;
 
-            Thread.sleep(POLL_INTERVAL_MS);  // 0.5초 대기
+            Thread.sleep(POLL_INTERVAL_MS);
             waited += POLL_INTERVAL_MS;
-
-            // 최신 상태로 다시 로드
-            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
         }
-        
-        log.debug("😎 대기 끝 !!");
+
+        // ✅ 캐시 초기화 후 최신 상태로 강제 로드
+        // polling 탈출 후에도 1~2초 추가 대기 후 마지막 재조회
+        Thread.sleep(1000);
+        entityManager.clear();
+        interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
+        // <- DB에서 실제로 다시 조회
+
+        log.debug("💬 [Polling 후 최종 인터뷰 답변 목록]");
+        for (InterviewAnswer a : interviewAnswers) {
+            log.debug("↪️ answerId: {}, result: {}", a.getInterviewAnswerId(), a.getInterviewAnswer());
+        }
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
         if (interviewVideo.getCoverLetterInterview() != null) {
@@ -898,7 +910,6 @@ public class InterviewService {
                 searchInterviewQuestionAndAnswer(interviewAnswers).stream()
                         .peek(dto -> log.debug("🎯 전체 STT 변환 결과: {}", dto.getInterview_answer()))
                         .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
-                        .peek(dto -> log.debug("✅ 필터 통과된 STT: {}", dto.getInterview_answer()))
                         .toList();
 
 
