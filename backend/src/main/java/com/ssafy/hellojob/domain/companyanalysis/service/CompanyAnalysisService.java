@@ -3,7 +3,6 @@ package com.ssafy.hellojob.domain.companyanalysis.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
-import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.company.service.CompanyReadService;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisBookmarkSaveRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisFastApiRequestDto;
@@ -34,7 +33,6 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class CompanyAnalysisService {
 
-    private final CompanyRepository companyRepository;
     private final CompanyAnalysisRepository companyAnalysisRepository;
     private final CompanyAnalysisBookmarkRepository companyAnalysisBookmarkRepository;
     private final UserReadService userReadService;
@@ -82,7 +80,7 @@ public class CompanyAnalysisService {
                 .base(!company.isDart() ? false : requestDto.isBasic())
                 .plus(!company.isDart() ? false : requestDto.isPlus())
                 .fin(!company.isDart() ? false : requestDto.isFinancial())
-                .swot(!company.isDart() ? false : requestDto.isSwot())
+                .swot(requestDto.isSwot())
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 

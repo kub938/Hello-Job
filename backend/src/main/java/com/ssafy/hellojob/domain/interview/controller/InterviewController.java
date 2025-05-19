@@ -27,7 +27,7 @@ public class InterviewController {
 
     // cs 질문 목록 조회
     @GetMapping("/question/cs")
-    public List<QuestionListResponseDto> csQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
+    public List<CsQuestionListResponseDto> csQuestionList(@AuthenticationPrincipal UserPrincipal userPrincipal){
         return interviewService.getCsQuestionList(userPrincipal.getUserId());
     }
 

@@ -79,14 +79,15 @@ public class InterviewService {
 
 
     // cs 질문 목록 조회
-    public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
+    public List<CsQuestionListResponseDto> getCsQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
         List<CsQuestionBank> questionList = csQuestionBankRepository.findAll();
 
         return questionList.stream()
-                .map(q -> QuestionListResponseDto.builder()
+                .map(q -> CsQuestionListResponseDto.builder()
                         .questionBankId(q.getCsQuestionBankId())
                         .question(q.getCsQuestion())
+                        .category(q.getCsCategory().name())
                         .build())
                 .toList();
     }
@@ -109,7 +110,7 @@ public class InterviewService {
     // 인성 질문 목록 조회
     public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
-        List<PersonalityQuestionBank> questionList = personalityQuestionBankRepository.findAll();
+        List<PersonalityQuestionBank> questionList = personalityQuestionBankRepository.findTop100ByOrderByPersonalityQuestionBankId();
 
         return questionList.stream()
                 .map(q -> QuestionListResponseDto.builder()
