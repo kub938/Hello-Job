@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 public class AckRequestDto {
     private String eventName;
-    private Object data;
+    private String dataJson;
 }
