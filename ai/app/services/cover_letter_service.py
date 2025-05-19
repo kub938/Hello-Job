@@ -86,11 +86,11 @@ async def create_cover_letter(
         if not is_swot_empty:
             prompt += f"""
     - SWOT 분석:
-        * 강점(Strengths): {', '.join(company_analysis.swot.strengths.contents) if company_analysis.swot.strengths and company_analysis.swot.strengths.contents else '정보 없음'}
-        * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses.contents) if company_analysis.swot.weaknesses and company_analysis.swot.weaknesses.contents else '정보 없음'}
-        * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities.contents) if company_analysis.swot.opportunities and company_analysis.swot.opportunities.contents else '정보 없음'}
-        * 위협(Threats): {', '.join(company_analysis.swot.threats.contents) if company_analysis.swot.threats and company_analysis.swot.threats.contents else '정보 없음'}
-        * 종합 분석: {company_analysis.swot.swot_summary if hasattr(company_analysis.swot, 'swot_summary') and company_analysis.swot.swot_summary else '정보 없음'}"""
+        * 강점(Strengths): {', '.join(company_analysis.swot.strengths) if company_analysis.swot.strengths else '정보 없음'}
+        * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses) if company_analysis.swot.weaknesses else '정보 없음'}
+        * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities) if company_analysis.swot.opportunities else '정보 없음'}
+        * 위협(Threats): {', '.join(company_analysis.swot.threats) if company_analysis.swot.threats else '정보 없음'}
+        * 종합 분석: {company_analysis.swot.swot_summary if company_analysis.swot.swot_summary else '정보 없음'}"""
         
         prompt += f"""
     
@@ -140,11 +140,11 @@ async def create_cover_letter(
         if not is_swot_empty:
             prompt += f"""
     - SWOT 분석:
-        * 강점(Strengths): {', '.join(company_analysis.swot.strengths.contents) if company_analysis.swot.strengths and company_analysis.swot.strengths.contents else '정보 없음'}
-        * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses.contents) if company_analysis.swot.weaknesses and company_analysis.swot.weaknesses.contents else '정보 없음'}
-        * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities.contents) if company_analysis.swot.opportunities and company_analysis.swot.opportunities.contents else '정보 없음'}
-        * 위협(Threats): {', '.join(company_analysis.swot.threats.contents) if company_analysis.swot.threats and company_analysis.swot.threats.contents else '정보 없음'}
-        * 종합 분석: {company_analysis.swot.swot_summary if hasattr(company_analysis.swot, 'swot_summary') and company_analysis.swot.swot_summary else '정보 없음'}"""
+        * 강점(Strengths): {', '.join(company_analysis.swot.strengths) if company_analysis.swot.strengths else '정보 없음'}
+        * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses) if company_analysis.swot.weaknesses else '정보 없음'}
+        * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities) if company_analysis.swot.opportunities else '정보 없음'}
+        * 위협(Threats): {', '.join(company_analysis.swot.threats) if company_analysis.swot.threats else '정보 없음'}
+        * 종합 분석: {company_analysis.swot.swot_summary if company_analysis.swot.swot_summary else '정보 없음'}"""
             
         prompt += f"""
     

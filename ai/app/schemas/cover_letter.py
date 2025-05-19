@@ -20,7 +20,7 @@ class CompanyAnalysis(BaseModel):
     company_finance: str
     created_at: str
     news_analysis_data: str
-    swot: CompanyAnalysisSwot
+    swot: Swot
 
 class JobRoleAnalysis(BaseModel):
     """직무 분석 정보"""
