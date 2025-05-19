@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -116,11 +115,6 @@ public class CompanyAnalysisService {
                 .supplyAsync(() -> fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto))
                 .thenApply(fastApiResponseDto -> {
                     CompanyAnalysisSseResponseDto responseDto = companyAnalysisSaveService.saveCompanyAnalysis(user, company, fastApiResponseDto, requestDto);
-
-                    // ✅ updatedAt을 현재 시간으로 갱신
-                    company.setUpdatedAt(LocalDateTime.now());
-                    companyRepository.save(company);
-
                     return responseDto;
                 })
                 .thenAccept(data -> {
