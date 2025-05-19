@@ -14,6 +14,10 @@ import java.util.Map;
 public interface InterviewAnswerRepository extends JpaRepository<InterviewAnswer, Integer> {
 
     List<InterviewAnswer> findInterviewAnswerByInterviewVideo(InterviewVideo interviewVideo);
+
+    @Query("SELECT a FROM InterviewAnswer a JOIN FETCH a.interviewQuestion WHERE a.interviewVideo = :video")
+    List<InterviewAnswer> findInterviewAnswerWithQuestionByInterviewVideo(@Param("video") InterviewVideo video);
+
     List<InterviewAnswer> findByInterviewVideoOrderByCreatedAtAsc(InterviewVideo interviewVideo);
 
     @Query("SELECT new map(ia.interviewVideo.interviewVideoId as videoId, ia.interviewQuestion as firstQuestion) " +
