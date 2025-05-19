@@ -70,7 +70,7 @@ public class InterviewService {
     private final SSEService sseService;
 
     // polling 전 정의
-    private static final int MAX_WAIT_SECONDS = 60;
+    private static final int MAX_WAIT_SECONDS = 120;
     private static final int POLL_INTERVAL_MS = 500;
 
     private static final Integer QUESTION_SIZE = 5;
@@ -862,8 +862,7 @@ public class InterviewService {
 
     // 면접 종료
     @Transactional
-    public EndInterviewResponseDto endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
-//    public Map<String, String> endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
+    public Map<String, String> endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
@@ -909,9 +908,7 @@ public class InterviewService {
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if (interviewQuestionAndAnswerRequestDto.isEmpty()) {
-            return EndInterviewResponseDto.builder()
-                    .interviewVideoId(interviewVideo.getInterviewVideoId())
-                    .build();
+            interviewFeedbackSaveService.saveTitle(interviewVideo);
         }
 
         // 자소서 조회
@@ -929,12 +926,8 @@ public class InterviewService {
                 .cover_letter_contents(coverLetterContentFastAPIRequestDto)
                 .build();
 
-        // fast API 호출
-        InterviewFeedbackFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto);
-
-//        requestInterviewFeedbackAsync(user, fastAPIRequestDto, interviewAnswers, interviewVideo);
-        return interviewFeedbackSaveService.saveFeedback(fastAPIResponseDto, interviewAnswers, interviewVideo);
-//        return Map<"message", "피드백 생성 요청이 정상적으로 처리되었습니다">;
+        requestInterviewFeedbackAsync(user, fastAPIRequestDto, interviewAnswers, interviewVideo);
+        return Map.of("message", "피드백 생성 요청이 정상적으로 처리되었습니다");
     }
 
     public void requestInterviewFeedbackAsync(User user, InterviewFeedbackFastAPIRequestDto fastAPIRequestDto, List<InterviewAnswer> interviewAnswers, InterviewVideo interviewVideo) {
@@ -954,7 +947,6 @@ public class InterviewService {
                     return null;
                 });
     }
-
 
     // 면접 질문 + 답변 객체 조회
     @Transactional(readOnly = true)

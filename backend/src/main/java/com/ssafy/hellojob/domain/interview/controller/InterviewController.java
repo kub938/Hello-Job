@@ -162,7 +162,7 @@ public class InterviewController {
         File tempVideoFile = File.createTempFile("video", ".webm");  // 또는 확장자 추출해서 지정
         videoFile.transferTo(tempVideoFile);
 
-        sttService.transcribeAudio(audioBytes, originalFilename)
+        sttService.transcribeAudio(Integer.valueOf(interviewAnswerId), audioBytes, originalFilename)
                 .thenAccept(result -> {
                     interviewService.saveInterviewAnswer(
                             userPrincipal.getUserId(),
@@ -183,7 +183,7 @@ public class InterviewController {
 
     // 면접 종료
     @PostMapping("/practice/end")
-    public EndInterviewResponseDto endInterview(@RequestBody EndInterviewRequestDto videoInfo,
+    public Map<String, String> endInterview(@RequestBody EndInterviewRequestDto videoInfo,
                                                 @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
 
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);

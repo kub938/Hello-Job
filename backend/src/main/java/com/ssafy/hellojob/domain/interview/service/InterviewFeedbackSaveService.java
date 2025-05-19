@@ -22,6 +22,12 @@ import static com.ssafy.hellojob.global.exception.ErrorCode.SERIALIZATION_FAIL;
 @RequiredArgsConstructor
 public class InterviewFeedbackSaveService {
 
+    @Transactional
+    public EndInterviewResponseDto saveTitle(InterviewVideo interviewVideo){
+        return EndInterviewResponseDto.builder()
+                .interviewVideoId(interviewVideo.getInterviewVideoId())
+                .build();
+    }
 
 
     @Transactional
