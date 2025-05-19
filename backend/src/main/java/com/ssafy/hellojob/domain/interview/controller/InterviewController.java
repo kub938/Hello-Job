@@ -188,22 +188,22 @@ public class InterviewController {
     public Map<String, String> endInterview(@RequestBody EndInterviewRequestDto videoInfo,
                                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
 
-            int waited = 0;
-
-            while (waited < MAX_WAIT_SECONDS) {
-                long total = interviewAnswerRepository.countByInterviewVideoId(videoInfo.getInterviewVideoId());
-                long completed = interviewAnswerRepository.countCompletedAnswersByInterviewVideoId(videoInfo.getInterviewVideoId());
-
-                if (total > 0 && total == completed) {
-                    break;
-                }
-
-                Thread.sleep(POLL_INTERVAL_MS);
-                waited += POLL_INTERVAL_MS;
-            }
+//            int waited = 0;
+//
+//            while (waited < MAX_WAIT_SECONDS) {
+//                long total = interviewAnswerRepository.countByInterviewVideoId(videoInfo.getInterviewVideoId());
+//                long completed = interviewAnswerRepository.countCompletedAnswersByInterviewVideoId(videoInfo.getInterviewVideoId());
+//
+//                if (total > 0 && total == completed) {
+//                    break;
+//                }
+//
+//                Thread.sleep(POLL_INTERVAL_MS);
+//                waited += POLL_INTERVAL_MS;
+//            }
 
             // 마지막 polling 후 1초 여유
-            Thread.sleep(1000);
+            Thread.sleep(60 * 1000);
 
 
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
