@@ -1,7 +1,5 @@
 package com.ssafy.hellojob.domain.coverlettercontent.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
@@ -16,6 +14,7 @@ import com.ssafy.hellojob.domain.coverlettercontent.repository.ChatLogRepository
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
+import com.ssafy.hellojob.global.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -32,6 +31,7 @@ public class ChatLogService {
 
     private final ChatLogRepository chatLogRepository;
     private final FastApiClientService fastApiClientService;
+    private final JsonUtil jsonUtil;
 
     // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌
     private final ObjectMapper mapper = new ObjectMapper();
@@ -43,7 +43,7 @@ public class ChatLogService {
 
         if (chatLogString == null || chatLogString.isBlank()) return new ArrayList<>();
 
-        List<ChatMessageDto> chatLog = parseJson(chatLogString);
+        List<ChatMessageDto> chatLog = jsonUtil.parseMessage(chatLogString);
 
         return chatLog;
     }
@@ -125,7 +125,7 @@ public class ChatLogService {
 
             ChatLog newChat = ChatLog.builder()
                     .coverLetterContent(content)
-                    .chatLogContent(toJson(newChats))
+                    .chatLogContent(jsonUtil.messageToJson(newChats))
                     .updatedCount(1)
                     .build();
 
@@ -134,12 +134,12 @@ public class ChatLogService {
             // 있으면 기존 로그를 String으로 바꿔서 추가한 후 다시 JSON형태로 변경
             ChatLog existingLog = chatLogOpt.get();
 
-            newChats = parseJson(existingLog.getChatLogContent());
+            newChats = jsonUtil.parseMessage(existingLog.getChatLogContent());
 
             newChats.add(userMessage);
             newChats.add(aiMessage);
 
-            existingLog.updateChatLog(toJson(newChats));
+            existingLog.updateChatLog(jsonUtil.stringToJson(newChats));
         }
     }
 
@@ -149,26 +149,4 @@ public class ChatLogService {
             content.updateContentStatus(CoverLetterContentStatus.IN_PROGRESS);
         }
     }
-
-    // JSON 형태로 파싱
-    private List<ChatMessageDto> parseJson(String json) {
-        if (json == null || json.isBlank()) return new ArrayList<>();
-        try {
-            return mapper.readValue(json, new TypeReference<>() {
-            });
-        } catch (JsonProcessingException e) {
-            throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
-        }
-    }
-
-    // String 형태로 직렬화
-    private String toJson(List<ChatMessageDto> messages) {
-        try {
-            return mapper.writeValueAsString(messages);
-        } catch (JsonProcessingException e) {
-            throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
-        }
-    }
-
-
 }
