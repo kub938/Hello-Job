@@ -38,16 +38,6 @@ public class CoverLetterContentController {
         return coverLetterContentService.updateCoverLetterContent(userId, contentId, requestDto);
     }
 
-    @PostMapping("/{contentId}/edit")
-    public ChatResponseDto sendChatFotEdit(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable Integer contentId,
-            @Valid @RequestBody ChatRequestDto requestDto
-            ) {
-        Integer userId = principal.getUserId();
-        return coverLetterContentService.getAIChatForEdit(userId, contentId, requestDto);
-    }
-
     @PostMapping("/{contentId}/chat")
     public ChatResponseDto sendChat(
             @AuthenticationPrincipal UserPrincipal principal,
