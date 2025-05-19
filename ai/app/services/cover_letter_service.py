@@ -1,8 +1,11 @@
 import json
 import hashlib
+from agents import Agent
 from app.schemas.cover_letter import *
 from app.core.openai_utils import get_rate_limiter
+from app.core.agent_utils import RateLimitedRunner
 from app.core.request_queue import get_request_queue
+from app.core.mcp_core import get_mcp_servers
 import logging
 
 logger = logging.getLogger(__name__)
@@ -14,6 +17,9 @@ async def create_cover_letter(
     
     # 요청 큐 가져오기
     request_queue = get_request_queue()
+    
+    # mcp 서버 가져오기
+    mcp_servers = get_mcp_servers()
     
     # 캐시 키 생성
     cache_key = f"cover_letter_{content.content_number}_{hashlib.md5(content.content_question.encode()).hexdigest()}"
@@ -147,9 +153,7 @@ async def create_cover_letter(
 """
     
     # 시스템 프롬프트
-    system_prompt = """당신은 '제트'라는 이름의 AI로, 전문적인 자기소개서 작성 도우미입니다. 기업과 직무 분석을 바탕으로 지원자의 경험과 프로젝트를 잘 활용하여 맞춤형 자기소개서를 작성해주세요.
-
-당신은 한국 채용 시장에 특화된 자기소개서 작성 및 개선 전문 AI 어시스턴트입니다. 사용자가 제공하는 정보(경험, 역량, 지원 회사/직무 등)를 바탕으로 자기소개서 초안을 작성하거나 기존 내용을 개선하는 것을 주된 기능으로 합니다.
+    system_prompt = """당신은 한국 채용 시장에 특화된 자기소개서 작성 및 개선 전문 AI 어시스턴트입니다. 사용자가 제공하는 정보(경험, 역량, 지원 회사/직무 등)를 바탕으로 자기소개서 초안을 작성하거나 기존 내용을 개선하는 것을 주된 기능으로 합니다.
 
 **당신의 주요 목표:**
 
@@ -219,26 +223,45 @@ async def create_cover_letter(
     
 이 모든 지침을 따라 당신은 채용 시장에서 합격 가능성을 높이는 맞춤형이고 전략적인 자기소개서를 작성합니다.
 
+자기소개서 작성을 위해 반드시 **전략(sequential-thinking 사용)**을 세우고, 자기소개서 작성 결과를 반환합니다.
+
 답변은 반드시 자기소개서만 작성합니다. 자기소개서 이외 내용은 포함하면 안됩니다."""
 
     
     # 실제 OpenAI API 호출을 수행하는 함수
     async def perform_api_call():
-        rate_limiter = get_rate_limiter()
-        response = await rate_limiter.chat_completion(
-            model="gpt-4.1", 
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=1500,
-            response_format=CoverLetterItem
+        
+        
+        cover_letter_agent = Agent(
+            name="CoverLetter Draft Assistant",
+            instructions=system_prompt,
+            model="gpt-4.1",
+            mcp_servers=mcp_servers,
+            output_type=CoverLetterItem
         )
         
-        # API 응답에서 자기소개서 내용 추출
-        cover_letter = response.choices[0].message.parsed
-        return cover_letter
+        # rate_limiter = get_rate_limiter()
+        # response = await rate_limiter.chat_completion(
+        #     model="gpt-4.1", 
+        #     messages=[
+        #         {"role": "system", "content": system_prompt},
+        #         {"role": "user", "content": prompt}
+        #     ],
+        #     temperature=0.7,
+        #     max_tokens=1500,
+        #     response_format=CoverLetterItem
+        # )
+        
+        # # API 응답에서 자기소개서 내용 추출
+        # cover_letter = response.choices[0].message.parsed
+        
+        response = await RateLimitedRunner.run(
+            starting_agent=cover_letter_agent,
+            input=prompt,
+            max_turns=30
+        )
+        
+        return response.final_output
     
     # 요청 큐에 넣고 실행 (캐싱 적용)
     cover_letter = await request_queue.enqueue(
@@ -248,6 +271,7 @@ async def create_cover_letter(
         cache_key=cache_key
     )
     
+    logger.info(f"자기소개서 초안 작성 완료: {cover_letter}")
     return cover_letter
 
 
