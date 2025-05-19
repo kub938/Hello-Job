@@ -62,17 +62,17 @@ function SWOTAnalysis({
                 title="Opportunity (기회)"
                 items={swotOpportunityContent}
                 tags={swotOpportunityTag}
-                color="bg-indigo-50"
-                accent="text-indigo-700"
-                tagColor="bg-indigo-200"
+                color="bg-yellow-50"
+                accent="text-yellow-700"
+                tagColor="bg-yellow-200"
               />
               <SWOTCard
                 title="Threat (위협)"
                 items={swotThreatContent}
                 tags={swotThreatTag}
-                color="bg-yellow-50"
-                accent="text-yellow-700"
-                tagColor="bg-yellow-200"
+                color="bg-indigo-50"
+                accent="text-indigo-700"
+                tagColor="bg-indigo-200"
               />
             </div>
             {/* 종합 분석 */}
