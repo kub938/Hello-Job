@@ -112,8 +112,7 @@ public class CoverLetterContentService {
     }
 
     public List<ContentQuestionStatusDto> getCoverLetterContentQuestionStatues(Integer coverLetterId) {
-        List<ContentQuestionStatusDto> statuses = coverLetterContentRepository.getCoverLetterContentStatuses(coverLetterId);
-        return statuses;
+        return coverLetterContentRepository.getCoverLetterContentStatuses(coverLetterId);
     }
 
     public boolean isWholeContentCompleted(List<ContentQuestionStatusDto> statuses) {

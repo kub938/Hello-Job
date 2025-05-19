@@ -1,6 +1,5 @@
 package com.ssafy.hellojob.domain.coverlettercontent.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.response.ChatMessageDto;
@@ -31,9 +30,6 @@ public class ChatLogService {
     private final FastApiClientService fastApiClientService;
     private final JsonUtil jsonUtil;
 
-    // JSON을 자바 객체로 바꾸거나 자바 객체를 JSON으로 바꿔줌
-    private final ObjectMapper mapper = new ObjectMapper();
-
     public List<ChatMessageDto> getContentChatLog(Integer contentId) {
         log.debug("🌞 지금 GetContentChatLog 들어옴");
         String chatLogString = chatLogRepository.findChatLogContentById(contentId);
@@ -41,9 +37,7 @@ public class ChatLogService {
 
         if (chatLogString == null || chatLogString.isBlank()) return new ArrayList<>();
 
-        List<ChatMessageDto> chatLog = jsonUtil.parseMessage(chatLogString);
-
-        return chatLog;
+        return jsonUtil.parseMessage(chatLogString);
     }
 
     @Transactional
