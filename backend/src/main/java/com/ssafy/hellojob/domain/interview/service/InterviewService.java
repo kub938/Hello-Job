@@ -23,6 +23,7 @@ import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -68,6 +69,7 @@ public class InterviewService {
     private final S3UploadService s3UploadService;
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
+    private final EntityManager entityManager;
 
     // polling 전 정의
     private static final int MAX_WAIT_SECONDS = 120;
@@ -869,11 +871,12 @@ public class InterviewService {
 
             Thread.sleep(POLL_INTERVAL_MS);  // 0.5초 대기
             waited += POLL_INTERVAL_MS;
-
-            // 최신 상태로 다시 로드
-            interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
         }
-        
+
+        // ✅ 캐시 초기화 후 최신 상태로 강제 로드
+        entityManager.clear();  // <- 영속성 컨텍스트 초기화
+        interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);  // <- DB에서 실제로 다시 조회
+
         log.debug("😎 대기 끝 !!");
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
@@ -898,7 +901,6 @@ public class InterviewService {
                 searchInterviewQuestionAndAnswer(interviewAnswers).stream()
                         .peek(dto -> log.debug("🎯 전체 STT 변환 결과: {}", dto.getInterview_answer()))
                         .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
-                        .peek(dto -> log.debug("✅ 필터 통과된 STT: {}", dto.getInterview_answer()))
                         .toList();
 
 

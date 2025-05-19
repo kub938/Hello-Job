@@ -8,6 +8,7 @@ import com.ssafy.hellojob.domain.interview.dto.response.SingleInterviewFeedbackF
 import com.ssafy.hellojob.domain.interview.entity.InterviewAnswer;
 import com.ssafy.hellojob.domain.interview.entity.InterviewVideo;
 import com.ssafy.hellojob.domain.interview.repository.InterviewAnswerRepository;
+import com.ssafy.hellojob.domain.interview.repository.InterviewVideoRepository;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +25,7 @@ import static com.ssafy.hellojob.global.exception.ErrorCode.SERIALIZATION_FAIL;
 public class InterviewFeedbackSaveService {
 
     private final InterviewAnswerRepository interviewAnswerRepository;
+    private final InterviewVideoRepository interviewVideoRepository;
 
     @Transactional
     public EndInterviewResponseDto saveTitle(InterviewVideo interviewVideo){
@@ -41,6 +43,7 @@ public class InterviewFeedbackSaveService {
 
         // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
+        interviewVideoRepository.save(interviewVideo);
 
         for (SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback : fastAPIResponseDto.getSingle_feedbacks()) {
 
@@ -57,6 +60,8 @@ public class InterviewFeedbackSaveService {
             }
 
             log.debug("jsonFeedbacks: {}", jsonFeedbacks);
+
+
 
             targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
             targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
