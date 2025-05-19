@@ -10,7 +10,7 @@ import CreateCorporate from "./components/CreateCorporate";
 import ReadCorporate from "./components/ReadCorporate";
 
 import CorporateReportCard from "./components/CorporateReportCard";
-import { getCompanyDetail } from "@/api/companyApi";
+import { companyApi } from "@/api/companyApi";
 
 interface CorporateReport {
   companyAnalysisId: number;
@@ -69,7 +69,7 @@ function CorporateResearch({
       } else {
         id = 1;
       }
-      const response = await getCompanyDetail(id);
+      const response = await companyApi.getCompanyDetail(id);
       return response.data;
     },
   });
