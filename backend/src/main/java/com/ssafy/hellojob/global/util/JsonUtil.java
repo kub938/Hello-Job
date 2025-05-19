@@ -18,7 +18,8 @@ public class JsonUtil {
 
     private final ObjectMapper mapper;
 
-    public List<String> parseString(String str) {
+    // String -> listJson
+    public List<String> parseStringList(String str) {
         if (str == null || str.isBlank()) return new ArrayList<>();
         try {
             return mapper.readValue(str, new TypeReference<>() {
@@ -28,9 +29,10 @@ public class JsonUtil {
         }
     }
 
-    public String stringToJson(List<ChatMessageDto> messages) {
+    // List Json -> String
+    public String stringListToJson(List<String> list) {
         try {
-            return mapper.writeValueAsString(messages);
+            return mapper.writeValueAsString(list);
         } catch (JsonProcessingException e) {
             throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
         }
@@ -53,6 +55,22 @@ public class JsonUtil {
             return mapper.writeValueAsString(messages);
         } catch (JsonProcessingException e) {
             throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
+        }
+    }
+
+    public String toJson(Object data) {
+        try {
+            return mapper.writeValueAsString(data);
+        } catch (JsonProcessingException e) {
+            throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
+        }
+    }
+
+    public String parseJson(String strData) {
+        try {
+            return mapper.readValue(strData, String.class);
+        }  catch (JsonProcessingException e) {
+            throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
         }
     }
 }
