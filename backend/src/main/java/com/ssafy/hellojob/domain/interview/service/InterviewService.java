@@ -873,6 +873,8 @@ public class InterviewService {
             // 최신 상태로 다시 로드
             interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
         }
+        
+        log.debug("😎 대기 끝 !!");
 
         // 인터뷰 유저와 요청한 유저 유효성 검사
         if (interviewVideo.getCoverLetterInterview() != null) {
@@ -894,8 +896,11 @@ public class InterviewService {
         // 답변 객체 조회(stt 변환에 성공한 경우만)
         List<InterviewQuestionAndAnswerRequestDto> interviewQuestionAndAnswerRequestDto =
                 searchInterviewQuestionAndAnswer(interviewAnswers).stream()
+                        .peek(dto -> log.debug("🎯 전체 STT 변환 결과: {}", dto.getInterview_answer()))
                         .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
+                        .peek(dto -> log.debug("✅ 필터 통과된 STT: {}", dto.getInterview_answer()))
                         .toList();
+
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if (interviewQuestionAndAnswerRequestDto.isEmpty()) {
