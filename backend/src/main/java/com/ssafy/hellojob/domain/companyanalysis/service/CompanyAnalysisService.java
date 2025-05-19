@@ -132,7 +132,7 @@ public class CompanyAnalysisService {
                         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
                         if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null)
-                            dartCategory.add("swot");
+                            dartCategory.add("SWOT");
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
@@ -168,7 +168,7 @@ public class CompanyAnalysisService {
                         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
                         if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null)
-                            dartCategory.add("swot");
+                            dartCategory.add("SWOT");
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
@@ -219,7 +219,7 @@ public class CompanyAnalysisService {
         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
         if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null)
-            dartCategory.add("swot");
+            dartCategory.add("SWOT");
 
 
         // 해당 기업 분석에 활용된 뉴스 분석 정보 불러오기
@@ -338,7 +338,7 @@ public class CompanyAnalysisService {
                         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
                         if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null)
-                            dartCategory.add("swot");
+                            dartCategory.add("SWOT");
 
                     }
 
@@ -459,7 +459,7 @@ public class CompanyAnalysisService {
                 if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                 if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
                 if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null)
-                    dartCategory.add("swot");
+                    dartCategory.add("SWOT");
             }
 
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()

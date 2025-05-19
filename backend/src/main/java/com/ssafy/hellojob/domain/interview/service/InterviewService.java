@@ -17,6 +17,7 @@ import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.*;
 import com.ssafy.hellojob.domain.project.entity.Project;
 import com.ssafy.hellojob.domain.project.service.ProjectReadService;
+import com.ssafy.hellojob.domain.sse.service.SSEService;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
@@ -36,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -64,6 +66,8 @@ public class InterviewService {
     private final CoverLetterContentService coverLetterContentService;
     private final FastApiClientService fastApiClientService;
     private final S3UploadService s3UploadService;
+    private final InterviewFeedbackSaveService interviewFeedbackSaveService;
+    private final SSEService sseService;
 
     // polling 전 정의
     private static final int MAX_WAIT_SECONDS = 60;
@@ -859,8 +863,9 @@ public class InterviewService {
     // 면접 종료
     @Transactional
     public EndInterviewResponseDto endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
+//    public Map<String, String> endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
-        userReadService.findUserByIdOrElseThrow(userId);
+        User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
         List<InterviewAnswer> interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
@@ -927,32 +932,29 @@ public class InterviewService {
         // fast API 호출
         InterviewFeedbackFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto);
 
-        // 꼬리 질문 json 직렬화
-        interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
-
-        for (SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback : fastAPIResponseDto.getSingle_feedbacks()) {
-
-            InterviewAnswer targetAnswer = interviewAnswers.stream()
-                    .filter(ans -> ans.getInterviewAnswerId().equals(singleInterviewFeedback.getInterview_answer_id()))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("해당 interview_answer_id를 찾을 수 없습니다: " + singleInterviewFeedback.getInterview_answer_id()));
-
-            String jsonFeedbacks;
-            try {
-                jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
-            } catch (JsonProcessingException e) {
-                throw new BaseException(SERIALIZATION_FAIL);
-            }
-
-            targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
-            targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
-
-        }
-
-        return EndInterviewResponseDto.builder()
-                .interviewVideoId(interviewVideo.getInterviewVideoId())
-                .build();
+//        requestInterviewFeedbackAsync(user, fastAPIRequestDto, interviewAnswers, interviewVideo);
+        return interviewFeedbackSaveService.saveFeedback(fastAPIResponseDto, interviewAnswers, interviewVideo);
+//        return Map<"message", "피드백 생성 요청이 정상적으로 처리되었습니다">;
     }
+
+    public void requestInterviewFeedbackAsync(User user, InterviewFeedbackFastAPIRequestDto fastAPIRequestDto, List<InterviewAnswer> interviewAnswers, InterviewVideo interviewVideo) {
+        CompletableFuture
+                .supplyAsync(() -> fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto))
+                .thenApply(fastAPIResponseDto -> {
+                    EndInterviewResponseDto responseDto = interviewFeedbackSaveService.saveFeedback(fastAPIResponseDto, interviewAnswers, interviewVideo);
+                    return responseDto;
+                })
+                .thenAccept(data -> {
+                    log.debug("피드백 생성 완료됨. sse 송신 시도");
+                    sseService.sendToUser(user.getUserId(), "interview-feedback-completed", data);
+                })
+                .exceptionally(e -> {
+                    log.error("❌ 면접 피드백 생성 실패", e.getMessage());
+                    sseService.sendToUser(user.getUserId(), "interview-feedback-failed", interviewVideo.getInterviewVideoId());
+                    return null;
+                });
+    }
+
 
     // 면접 질문 + 답변 객체 조회
     @Transactional(readOnly = true)
