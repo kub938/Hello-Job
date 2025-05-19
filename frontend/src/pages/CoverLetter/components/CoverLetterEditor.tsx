@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/Button";
 import { getCoverLetterResponse } from "@/types/coverLetterApiType";
+import Modal from "@/components/Modal";
+import { useCompleteCoverLetter } from "@/hooks/coverLetterHooks";
+import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 export interface CoverLetterEditorProps {
   onSaveContent: (type: "changeStep" | "draft" | "save") => void;
   CoverLetterData: getCoverLetterResponse;
   onChangeContentDetail: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   nowContentLength: number;
+  totalContentLength: number;
+  nowSelectContentNumber: number;
+  coverLetterId: number;
 }
 
 function CoverLetterEditor({
@@ -14,9 +21,14 @@ function CoverLetterEditor({
   CoverLetterData,
   onChangeContentDetail,
   nowContentLength,
+  totalContentLength,
+  nowSelectContentNumber,
+  coverLetterId,
 }: CoverLetterEditorProps) {
   const [localContent, setLocalContent] = useState("");
-
+  const [isOpenCompleteModal, setIsOpenCompleteModal] = useState(false);
+  const completeCoverLetterMutation = useCompleteCoverLetter();
+  const navigate = useNavigate();
   useEffect(() => {
     if (CoverLetterData?.contentDetail) {
       setLocalContent(CoverLetterData.contentDetail);
@@ -29,50 +41,85 @@ function CoverLetterEditor({
 
   const { contentNumber, contentQuestion, contentLength } = CoverLetterData;
 
-  // 로컬 핸들러
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setLocalContent(e.target.value);
     onChangeContentDetail(e); // 부모에게도 변경 사항 전달
   };
 
+  const handleCloseCompleteModal = () => {
+    setIsOpenCompleteModal(false);
+  };
+
+  const handleOpenCompleteModal = () => {
+    setIsOpenCompleteModal(true);
+  };
+
+  const onCompleteCreateCoverLetter = (coverLetterId: number) => {
+    completeCoverLetterMutation.mutate(coverLetterId, {
+      onSuccess: () => {
+        toast.info("자기소개서 작성이 완료되었습니다");
+        navigate("/mypage/cover-letter-list");
+      },
+    });
+  };
   return (
-    <div className="bg-white border w-[50rem] rounded-xl px-4 py-4">
-      <div className="text-sm text-muted-foreground pb-1">
-        원하시는 부분을 수정하며 자소서를 완성해보세요!
-      </div>
-      <div className="text-lg font-semibold pb-2 ">
-        {contentNumber}. {contentQuestion}
-      </div>
+    <>
+      <Modal
+        title="자기소개서 작성 완료"
+        isOpen={isOpenCompleteModal}
+        onConfirm={() => onCompleteCreateCoverLetter(coverLetterId)}
+        onClose={handleCloseCompleteModal}
+      >
+        <div className="ml-7 mt-1">
+          <p>더 이상 수정하실 부분이 없으시면 </p>
+          <p>확인 버튼을 눌러주세요</p>
+        </div>
+      </Modal>
+      <div className="bg-white border w-[50rem] rounded-xl px-4 py-4">
+        <div className="text-sm text-muted-foreground pb-1">
+          원하시는 부분을 수정하며 자소서를 완성해보세요!
+        </div>
+        <div className="text-lg font-semibold pb-2 ">
+          {contentNumber}. {contentQuestion}
+        </div>
 
-      <label htmlFor="자기소개서 수정화면" />
-      <textarea
-        name="contentDetail"
-        id="contentDetail"
-        className="break-all w-full p-3 h-[68vh] border resize-none"
-        onChange={handleChange}
-        placeholder="자기소개서를 작성 해 주세요"
-        value={localContent}
-      />
-      <div className="text-right text-muted-foreground">
-        <span className={nowContentLength > contentLength ? "text-error" : ""}>
-          {nowContentLength}
-        </span>
-        <span> / {contentLength}</span>
-      </div>
+        <label htmlFor="자기소개서 수정화면" />
+        <textarea
+          name="contentDetail"
+          id="contentDetail"
+          className="break-all w-full p-3 h-[68vh] border resize-none"
+          onChange={handleChange}
+          placeholder="자기소개서를 작성 해 주세요"
+          value={localContent}
+        />
+        <div className="text-right text-muted-foreground">
+          <span
+            className={nowContentLength > contentLength ? "text-error" : ""}
+          >
+            {nowContentLength}
+          </span>
+          <span> / {contentLength}</span>
+        </div>
 
-      <div className="mt-4 flex justify-end gap-3">
-        <Button
-          onClick={() => onSaveContent("draft")}
-          variant={"white"}
-          className="w-20"
-        >
-          임시저장
-        </Button>
-        <Button onClick={() => onSaveContent("save")} className="w-20">
-          저장
-        </Button>
+        <div className="mt-4 flex justify-end gap-3">
+          <Button
+            onClick={() => onSaveContent("draft")}
+            variant={"white"}
+            className="w-20"
+          >
+            임시저장
+          </Button>
+
+          {totalContentLength === nowSelectContentNumber ? (
+            <Button onClick={handleOpenCompleteModal}>자기소개서 완성</Button>
+          ) : (
+            <Button onClick={() => onSaveContent("save")} className="w-20">
+              저장
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 
