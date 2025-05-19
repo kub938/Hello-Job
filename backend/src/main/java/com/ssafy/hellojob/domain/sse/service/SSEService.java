@@ -38,7 +38,7 @@ public class SSEService {
             log.debug("SSE 타임아웃으로 연결 종료");
             emitters.remove(userId);
         });
-        emitter.onError((e) -> {
+        emitter.onError(e -> {
             log.warn("SSE 연결 중 에러 발생", e);
             emitters.remove(userId);
         });

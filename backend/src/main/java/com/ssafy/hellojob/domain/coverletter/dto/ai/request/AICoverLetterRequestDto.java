@@ -14,9 +14,9 @@ public class AICoverLetterRequestDto {
     private List<ContentDto> contents;
 
     @Builder
-    public AICoverLetterRequestDto(CompanyAnalysisDto company_analysis, JobRoleAnalysisDto job_role_analysis, List<ContentDto> contents) {
-        this.company_analysis = company_analysis;
-        this.job_role_analysis = job_role_analysis;
+    public AICoverLetterRequestDto(CompanyAnalysisDto companyAnalysis, JobRoleAnalysisDto jobRoleAnalysis, List<ContentDto> contents) {
+        this.company_analysis = companyAnalysis;
+        this.job_role_analysis = jobRoleAnalysis;
         this.contents = contents;
     }
 }
