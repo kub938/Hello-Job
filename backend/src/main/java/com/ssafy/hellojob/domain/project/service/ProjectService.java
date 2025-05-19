@@ -58,14 +58,12 @@ public class ProjectService {
 
     public List<ProjectsResponseDto> getProjects(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
-        List<ProjectsResponseDto> projects = projectRepository.findByUserId(userId);
-        return projects;
+        return projectRepository.findByUserId(userId);
     }
 
     public Page<ProjectsResponseDto> getProjectsPage(Integer userId, Pageable pageable) {
         userReadService.findUserByIdOrElseThrow(userId);
-        Page<ProjectsResponseDto> projects = projectRepository.findPageByUserId(userId, pageable);
-        return projects;
+        return projectRepository.findPageByUserId(userId, pageable);
     }
 
     public ProjectResponseDto getProject(Integer userId, Integer projectId) {
@@ -97,16 +95,7 @@ public class ProjectService {
             throw new BaseException(ErrorCode.EXPERIENCE_DATE_NOT_VALID);
         }
 
-        project.updateProject(
-                projectRequestDto.getProjectName(),
-                projectRequestDto.getProjectIntro(),
-                projectRequestDto.getProjectRole(),
-                projectRequestDto.getProjectSkills(),
-                projectRequestDto.getProjectDetail(),
-                projectRequestDto.getProjectClient(),
-                projectRequestDto.getProjectStartDate(),
-                projectRequestDto.getProjectEndDate()
-        );
+        project.updateProject(projectRequestDto);
     }
 
     public void removeProject(Integer userId, Integer projectId) {

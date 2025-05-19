@@ -39,6 +39,7 @@ public class CompanyService {
                 .companyLocation(company.getCompanyLocation())
                 .companySize(company.getCompanySize())
                 .updatedAt(company.getUpdatedAt())
+                .dart(company.isDart())
                 .build();
     }
 

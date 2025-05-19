@@ -82,8 +82,8 @@ public class CoverLetterService {
         log.debug("🌞 coverLetterId : {}", newCoverLetterId);
 
         List<CoverLetterContent> contents = coverLetterContentService.createContents(user, newCoverLetter, requestDto.getContents());
-        List<AICoverLetterResponseDto> AIResponses = getAIResponses(newCoverLetterId, contents);
-        coverLetterContentService.appendDetail(contents, AIResponses);
+        List<AICoverLetterResponseDto> aiResponse = getAIResponses(newCoverLetterId, contents);
+        coverLetterContentService.appendDetail(contents, aiResponse);
 
         return CoverLetterCreateResponseDto.builder()
                 .coverLetterId(newCoverLetterId)
@@ -104,11 +104,11 @@ public class CoverLetterService {
                 .collect(Collectors.joining(", ")));
 
         AICoverLetterRequestDto requestDto = AICoverLetterRequestDto.builder()
-                .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
-                .job_role_analysis(
+                .companyAnalysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
+                .jobRoleAnalysis(
                         coverLetter.getJobRoleSnapshot() != null
-                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
-                        : null)
+                                ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                                : null)
                 .contents(coverLetter.getContents().stream()
                         .map(content -> ContentDto.builder()
                                 .content_number(content.getContentNumber())
@@ -140,9 +140,9 @@ public class CoverLetterService {
         log.debug("🌞 coverLetterId : {} ", coverLetterId);
         CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
 
-        contents.forEach(c -> {
-            log.debug("🧩 contentId={}, expSize={}", c.getContentId(), c.getExperiences().size());
-        });
+        contents.forEach(c ->
+                log.debug("🧩 contentId={}, expSize={}", c.getContentId(), c.getExperiences().size())
+        );
 
         coverLetter.assignContents(contents);
 
@@ -159,14 +159,12 @@ public class CoverLetterService {
         List<ContentQuestionStatusDto> contentQuestionStatuses = coverLetterContentService.getCoverLetterContentQuestionStatues(coverLetterId);
         int totalContentQuestionCount = contentQuestionStatuses.size();
 
-        CoverLetterStatusesDto coverLetterStatusesDto = CoverLetterStatusesDto.builder()
+        return CoverLetterStatusesDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
                 .totalContentQuestionCount(totalContentQuestionCount)
                 .contentQuestionStatuses(contentQuestionStatuses)
                 .updatedAt(coverLetter.getUpdatedAt())
                 .build();
-
-        return coverLetterStatusesDto;
     }
 
     // 자기소개서 요약 조회
@@ -217,8 +215,7 @@ public class CoverLetterService {
     public Page<MyPageCoverLetterDto> getCoverLettersForMaPage(Integer userId, Pageable pageable) {
         userReadService.findUserByIdOrElseThrow(userId);
 
-        Page<MyPageCoverLetterDto> list = coverLetterRepository.getCoverLettersByUser(userId, pageable);
-        return list;
+        return coverLetterRepository.getCoverLettersByUser(userId, pageable);
     }
 
     public WholeCoverLetterContentDto getWholeContentDetail(Integer userId, Integer coverLetterId) {
@@ -229,14 +226,12 @@ public class CoverLetterService {
 
         List<CoverLetterOnlyContentDto> contents = coverLetterContentService.getWholeContentDetail(coverLetterId);
 
-        WholeCoverLetterContentDto response = WholeCoverLetterContentDto.builder()
+        return WholeCoverLetterContentDto.builder()
                 .coverLetterId(coverLetterId)
                 .contents(contents)
                 .finish(coverLetter.isFinish())
                 .updatedAt(coverLetter.getUpdatedAt())
                 .build();
-
-        return response;
     }
 
     // 일정 자기소개서 목록 조회

@@ -45,8 +45,6 @@ public class ChatLogService {
 
         List<ChatMessageDto> chatLog = parseJson(chatLogString);
 
-        log.debug("🌞 chatLog {}", chatLog.toArray().toString());
-
         return chatLog;
     }
 
@@ -159,7 +157,7 @@ public class ChatLogService {
             return mapper.readValue(json, new TypeReference<>() {
             });
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("채팅 로그 파싱 실패", e);
+            throw new BaseException(ErrorCode.DESERIALIZATION_FAIL);
         }
     }
 
@@ -168,7 +166,7 @@ public class ChatLogService {
         try {
             return mapper.writeValueAsString(messages);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("채팅 JSON 직렬화 실패", e);
+            throw new BaseException(ErrorCode.SERIALIZATION_FAIL);
         }
     }
 

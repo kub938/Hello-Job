@@ -52,6 +52,7 @@ public class ScheduleService {
 
 
     // 일정 추가
+    @Transactional
     public ScheduleIdResponseDto addSchedule(ScheduleAddRequestDto requestDto, Integer userId) {
 
         // 유저 정보 조회
@@ -85,6 +86,7 @@ public class ScheduleService {
     }
 
     // 일정 삭제
+    @Transactional
     public void deleteSchedule(Integer scheduleId, Integer userId) {
 
         // 유저 정보 조회
@@ -104,6 +106,7 @@ public class ScheduleService {
     }
 
     // 일정 상태 수정
+    @Transactional
     public ScheduleIdResponseDto updateScheduleStatus(ScheduleUpdateScheduleStatusRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
         userReadService.findUserByIdOrElseThrow(userId);
@@ -134,6 +137,7 @@ public class ScheduleService {
     }
 
     // 일정 자기소개서 수정
+    @Transactional
     public ScheduleIdResponseDto updateScheduleCoverLetter(ScheduleUpdateScheduleCoverLetterRequestDto requestDto, Integer scheduleId, Integer userId) {
         // 유저 정보 조회
         userReadService.findUserByIdOrElseThrow(userId);
@@ -209,6 +213,7 @@ public class ScheduleService {
     }
 
     // 일정 전체 조회
+    @Transactional(readOnly = true)
     public List<ScheduleListResponseDto> allSchedule(Integer userId) {
 
         User user = userReadService.findUserByIdOrElseThrow(userId);
@@ -237,6 +242,7 @@ public class ScheduleService {
     }
 
     // 일정 상세 조회
+    @Transactional(readOnly = true)
     public ScheduleDetailResponseDto detailSchedule(Integer scheduleId, Integer userId) {
 
         userReadService.findUserByIdOrElseThrow(userId);

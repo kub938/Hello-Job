@@ -38,6 +38,7 @@ public class JobRoleAnalysisService {
     private final JobRoleAnalysisReadService jobRoleAnalysisReadService;
 
     // 직무 분석 데이터 저장
+    @Transactional
     public JobRoleAnalysisSaveResponseDto createJobRoleAnalysis(Integer userId, JobRoleAnalysisSaveRequestDto requestDto){
 
         // 유저 정보 조회
@@ -119,6 +120,7 @@ public class JobRoleAnalysisService {
 
 
     // 북마크 추가
+    @Transactional
     public JobRoleAnalysisBookmarkSaveResponseDto addJobRoleBookmark(Integer userId, JobRoleAnalysisBookmarkSaveRequestDto requestDto) {
         
         // 유저 정보 조회
@@ -373,6 +375,7 @@ public class JobRoleAnalysisService {
     }
 
     // 직무 분석 데이터 삭제
+    @Transactional
     public void deleteJobRoleAnalysis(Integer userId, Integer jobRoleAnalysisId){
 
         // 유저 조회

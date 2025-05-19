@@ -45,6 +45,7 @@ public class CoverLetterContentService {
     private final UserReadService userReadService;
     private final CoverLetterContentReadService coverLetterContentReadService;
 
+    @Transactional
     public List<CoverLetterContent> createContents(User user, CoverLetter coverLetter, List<ContentsDto> contentsDto) {
         List<CoverLetterContent> contents = new ArrayList<>();
 
@@ -69,11 +70,12 @@ public class CoverLetterContentService {
     }
 
     // ai 자기소개서 초안 응답 저장
+    @Transactional
     public void appendDetail(List<CoverLetterContent> contents, List<AICoverLetterResponseDto> aiResponses) {
         Map<Integer, String> aiMap = aiResponses.stream()
                 .collect(Collectors.toMap(AICoverLetterResponseDto::getContent_number, AICoverLetterResponseDto::getCover_letter));
 
-        for(CoverLetterContent content : contents) {
+        for (CoverLetterContent content : contents) {
             String contentDetail = aiMap.get(content.getContentNumber());
             content.updateContentDetail(contentDetail);
         }
@@ -95,7 +97,7 @@ public class CoverLetterContentService {
 
         List<ChatMessageDto> contentChatLog = chatLogService.getContentChatLog(coverLetterContent.getContentId());
 
-        CoverLetterContentDto coverLetterContentDto = CoverLetterContentDto.builder()
+        return CoverLetterContentDto.builder()
                 .contentId(coverLetterContent.getContentId())
                 .contentQuestion(coverLetterContent.getContentQuestion())
                 .contentNumber(coverLetterContent.getContentNumber())
@@ -107,8 +109,6 @@ public class CoverLetterContentService {
                 .contentUpdatedAt(coverLetterContent.getUpdatedAt())
                 .contentChatLog(contentChatLog)
                 .build();
-
-        return coverLetterContentDto;
     }
 
     public List<ContentQuestionStatusDto> getCoverLetterContentQuestionStatues(Integer coverLetterId) {
@@ -127,6 +127,7 @@ public class CoverLetterContentService {
         return result;
     }
 
+    @Transactional
     public void saveAllContents(CoverLetter coverLetter) {
         List<CoverLetterContent> contents = coverLetterContentRepository.findByCoverLetter(coverLetter);
         for (CoverLetterContent content : contents) {
@@ -136,10 +137,8 @@ public class CoverLetterContentService {
 
     // 자기소개서 id에 해당하는 contentId 리스트 반환
     public List<Integer> getContentIdsByCoverLetterId(Integer coverLetterId) {
-        List<Integer> contentIds = coverLetterContentRepository
+        return coverLetterContentRepository
                 .findContentIdByCoverLetterId(coverLetterId);
-
-        return contentIds;
     }
 
     @Transactional
@@ -177,17 +176,14 @@ public class CoverLetterContentService {
     }
 
     public List<CoverLetterOnlyContentDto> getWholeContentDetail(Integer coverLetterId) {
-        List<CoverLetterOnlyContentDto> list = coverLetterContentRepository.findContentByCoverLetterId(coverLetterId);
-        return list;
+        return coverLetterContentRepository.findContentByCoverLetterId(coverLetterId);
     }
 
     public ChatResponseDto getAIChatForEdit(Integer userId, Integer contentId, ChatRequestDto requestDto) {
 
         AIChatForEditRequestDto aiChatForEditRequestDto = getAIChatForEditRequestDto(userId, contentId, requestDto);
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        ChatResponseDto response = chatLogService.sendChatForEdit(content, aiChatForEditRequestDto);
-
-        return response;
+        return chatLogService.sendChatForEdit(content, aiChatForEditRequestDto);
     }
 
     public AIChatForEditRequestDto getAIChatForEditRequestDto(Integer userId, Integer contentId, ChatRequestDto requestDto) {
@@ -201,7 +197,7 @@ public class CoverLetterContentService {
 
         CoverLetter coverLetter = coverLetterRepository.findFullCoverLetterDetail(coverLetterId);
 
-        AIChatForEditRequestDto aiChatForEditRequestDto = AIChatForEditRequestDto.builder()
+        return AIChatForEditRequestDto.builder()
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
                 .job_role_analysis(coverLetter.getJobRoleSnapshot() != null
                         ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
@@ -220,16 +216,12 @@ public class CoverLetterContentService {
                 )
                 .edit_content(EditContentDto.from(content, requestDto))
                 .build();
-
-        return aiChatForEditRequestDto;
     }
 
     public ChatResponseDto sendChat(Integer userId, Integer contentId, ChatRequestDto requestDto) {
         AIChatRequestDto aiChatRequestDto = getAIChatRequestDto(userId, contentId, requestDto);
         CoverLetterContent content = coverLetterContentReadService.findCoverLetterContentByIdOrElseThrow(contentId);
-        ChatResponseDto response = chatLogService.sendChat(content, aiChatRequestDto);
-
-        return response;
+        return chatLogService.sendChat(content, aiChatRequestDto);
     }
 
     public AIChatRequestDto getAIChatRequestDto(Integer userId, Integer contentId, ChatRequestDto requestDto) {
@@ -245,16 +237,16 @@ public class CoverLetterContentService {
 
         List<ChatMessageDto> chatLog = chatLogService.getContentChatLog(contentId);
         log.debug("🌞 chatLog size : {}", chatLog.size());
-        List<ChatMessageDto> chatRecentHistory = chatLog.subList(Math.max(chatLog.size()-10, 0), chatLog.size());
+        List<ChatMessageDto> chatRecentHistory = chatLog.subList(Math.max(chatLog.size() - 10, 0), chatLog.size());
 
-        AIChatRequestDto aiChatRequestDto = AIChatRequestDto.builder()
+        return AIChatRequestDto.builder()
                 .user_message(requestDto.getUserMessage())
                 .chat_history(chatRecentHistory)
                 .company_analysis(CompanyAnalysisDto.from(coverLetter.getCompanyAnalysis()))
                 .job_role_analysis(
                         coverLetter.getJobRoleSnapshot() != null
-                        ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
-                        : null)
+                                ? JobRoleAnalysisDto.from(coverLetter.getJobRoleSnapshot())
+                                : null)
                 .experiences(content.getExperiences().stream()
                         .map(cle -> cle.getExperience())
                         .filter(Objects::nonNull)
@@ -269,7 +261,5 @@ public class CoverLetterContentService {
                 )
                 .cover_letter(AICoverLetterContentDto.from(content))
                 .build();
-
-        return aiChatRequestDto;
     }
 }

@@ -34,7 +34,7 @@ public class ExperienceController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getExperiences(
+    public ResponseEntity<List<ExperiencesResponseDto>> getExperiences(
             @AuthenticationPrincipal UserPrincipal principal) {
         Integer userId = principal.getUserId();
 

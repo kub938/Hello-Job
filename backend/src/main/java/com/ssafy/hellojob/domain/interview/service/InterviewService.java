@@ -27,13 +27,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -79,18 +79,21 @@ public class InterviewService {
 
 
     // cs 질문 목록 조회
-    public List<QuestionListResponseDto> getCsQuestionList(Integer userId) {
+    @Transactional(readOnly = true)
+    public List<CsQuestionListResponseDto> getCsQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
         List<CsQuestionBank> questionList = csQuestionBankRepository.findAll();
 
         return questionList.stream()
-                .map(q -> QuestionListResponseDto.builder()
+                .map(q -> CsQuestionListResponseDto.builder()
                         .questionBankId(q.getCsQuestionBankId())
                         .question(q.getCsQuestion())
+                        .category(q.getCsCategory().name())
                         .build())
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public QuestionDetailResponseDto findCsQuestionDetail(Integer questionId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CsQuestionBank questionBank = csQuestionBankRepository.findById(questionId)
@@ -107,9 +110,10 @@ public class InterviewService {
     }
 
     // 인성 질문 목록 조회
+    @Transactional(readOnly = true)
     public List<QuestionListResponseDto> getPersonalityQuestionList(Integer userId) {
         userReadService.findUserByIdOrElseThrow(userId);
-        List<PersonalityQuestionBank> questionList = personalityQuestionBankRepository.findAll();
+        List<PersonalityQuestionBank> questionList = personalityQuestionBankRepository.findTop100ByOrderByPersonalityQuestionBankId();
 
         return questionList.stream()
                 .map(q -> QuestionListResponseDto.builder()
@@ -119,6 +123,7 @@ public class InterviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public QuestionDetailResponseDto findPersonalityQuestionDetail(Integer questionId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         PersonalityQuestionBank questionBank = personalityQuestionBankRepository.findById(questionId)
@@ -135,6 +140,7 @@ public class InterviewService {
     }
 
     // 자소서 기반 질문 목록 조회
+    @Transactional(readOnly = true)
     public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
@@ -161,6 +167,7 @@ public class InterviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public QuestionDetailResponseDto findCoverLetterQuestionDetail(Integer questionId, Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -185,6 +192,7 @@ public class InterviewService {
     }
 
     // 문항 카테고리 선택 cs
+    @Transactional
     public SelectInterviewStartResponseDto startCsSelectInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -207,6 +215,7 @@ public class InterviewService {
     }
 
     // 문항 카테고리 선택 인성
+    @Transactional
     public SelectInterviewStartResponseDto startPersonalitySelectInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -228,31 +237,8 @@ public class InterviewService {
 
     }
 
-    // 구현 폐기
-    public SelectInterviewStartResponseDto startCoverLetterSelectInterview(Integer coverLetterId, Integer userId) {
-        User user = userReadService.findUserByIdOrElseThrow(userId);
-
-        CoverLetter coverLetter = coverLetterRepository.findById(coverLetterId)
-                .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_NOT_FOUND));
-
-        CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
-                .orElseGet(() -> {
-                    CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); // 팩토리 메서드 예시
-                    return coverLetterInterviewRepository.save(newInterview);
-                });
-
-
-        InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
-        interviewVideoRepository.save(video);
-
-        return SelectInterviewStartResponseDto.builder()
-                .interviewId(interview.getCoverLetterInterviewId())
-                .interviewVideoId(video.getInterviewVideoId())
-                .build();
-
-    }
-
     // cs 모의 면접 시작
+    @Transactional
     public InterviewStartResponseDto startCsRandomInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -296,6 +282,7 @@ public class InterviewService {
     }
 
     // 인성 모의 면접 시작
+    @Transactional
     public InterviewStartResponseDto startPersonalityRandomInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -339,6 +326,7 @@ public class InterviewService {
     }
 
     // 자소서 모의 면접 시작
+    @Transactional
     public InterviewStartResponseDto startCoverLetterRandomInterview(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
@@ -387,6 +375,7 @@ public class InterviewService {
     }
 
     // 문항 선택 면접 cs 질문 선택
+    @Transactional
     public InterviewStartResponseDto saveCsQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
         userReadService.findUserByIdOrElseThrow(userId);
 
@@ -429,6 +418,7 @@ public class InterviewService {
     }
 
     // 문항 선택 면접 인성 질문 선택
+    @Transactional
     public InterviewStartResponseDto savePersonalityQuestions(Integer userId, SelectQuestionRequestDto requestDto) {
         userReadService.findUserByIdOrElseThrow(userId);
 
@@ -472,6 +462,7 @@ public class InterviewService {
     }
 
     // 문항 선택 면접 자소서 질문 선택
+    @Transactional
     public InterviewStartResponseDto saveCoverLetterQuestions(Integer userId, SelectCoverLetterQuestionRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
@@ -519,6 +510,7 @@ public class InterviewService {
     }
 
     // 자소서 기반으로 생성된 질문 저장
+    @Transactional
     public Map<String, String> saveNewCoverLetterQuestion(Integer userId, CoverLetterQuestionSaveRequestDto requestDto) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(requestDto.getCoverLetterId());
@@ -548,6 +540,7 @@ public class InterviewService {
         return Map.of("message", "성공적으로 저장되었습니다.");
     }
 
+    @Transactional
     public WriteMemoResponseDto createCsMemo(WriteMemoRequestDto requestDto, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CsQuestionBank csQuestionBank = interviewReadService.findCsQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
@@ -571,6 +564,7 @@ public class InterviewService {
 
     }
 
+    @Transactional
     public WriteMemoResponseDto createPersonalityMemo(WriteMemoRequestDto requestDto, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         PersonalityQuestionBank personalityQuestionBank = interviewReadService.findPersonalityQuestionByIdOrElseThrow(requestDto.getQuestionBankId());
@@ -593,6 +587,7 @@ public class InterviewService {
         return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
     }
 
+    @Transactional
     public WriteMemoResponseDto createCoverLetterMemo(WriteMemoRequestDto requestDto, Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetterQuestionBank coverLetterQuestionBank = interviewReadService.findCoverLetterQuestionByIdWithCoverLetterOrElseThrow(requestDto.getQuestionBankId());
@@ -622,6 +617,7 @@ public class InterviewService {
         return WriteMemoResponseDto.from(memo.getInterviewQuestionMemoId());
     }
 
+    @Transactional
     public Map<String, String> updateMemo(String newMemo, Integer memoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
@@ -635,6 +631,7 @@ public class InterviewService {
         return Map.of("message", "성공적으로 수정되었습니다.");
     }
 
+    @Transactional
     public Map<String, String> deleteMemo(Integer memoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewQuestionMemo memo = interviewReadService.findInterviewQuestionMemoWithUserByIdOrElseThrow(memoId);
@@ -650,7 +647,7 @@ public class InterviewService {
 
     // 한 문항 종료(면접 답변 저장)
     @Transactional
-    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, Integer interviewAnswerId, MultipartFile videoFile) {
+    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, Integer interviewAnswerId, File tempVideoFile) {
         userReadService.findUserByIdOrElseThrow(userId);
 
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
@@ -680,7 +677,7 @@ public class InterviewService {
 
         String videoLength = "";
         try {
-            videoLength = getVideoDurationWithFFprobe(videoFile);
+            videoLength = getVideoDurationWithFFprobe(tempVideoFile);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt(); // interrupt 상태 복원
             log.debug("영상 길이 추출 실패 - interrupt: {}", e);
@@ -702,19 +699,21 @@ public class InterviewService {
 
     // 동영상에서 시간 뽑아내기
     // 영상 길이 추출 + .webm -> .mp4 자동 변환
-    public String getVideoDurationWithFFprobe(MultipartFile videoFile) throws IOException, InterruptedException {
+    public String getVideoDurationWithFFprobe(File videoFile) throws IOException, InterruptedException {
         long start = System.nanoTime();
         log.debug("▶ getVideoDurationWithFFprobe 시작");
 
-        String originalFilename = videoFile.getOriginalFilename();
-        String extension = originalFilename != null && originalFilename.contains(".")
+        // 확장자 추출
+        String originalFilename = videoFile.getName();
+        String extension = originalFilename.contains(".")
                 ? originalFilename.substring(originalFilename.lastIndexOf("."))
                 : ".webm";
         log.debug("⏺️ 원본 파일명: {}, 추출된 확장자: {}", originalFilename, extension);
 
+        // 복사된 webm 파일 생성 (videoFile은 원본)
         File webmTempFile = File.createTempFile("upload", extension);
-        videoFile.transferTo(webmTempFile);
-        log.debug("📁 임시 webm 파일 생성 및 저장 완료: {}", webmTempFile.getAbsolutePath());
+        Files.copy(videoFile.toPath(), webmTempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        log.debug("📁 임시 webm 파일 생성 및 복사 완료: {}", webmTempFile.getAbsolutePath());
 
         File mp4TempFile = File.createTempFile("converted", ".mp4");
         log.debug("📁 임시 mp4 파일 생성: {}", mp4TempFile.getAbsolutePath());
@@ -722,7 +721,7 @@ public class InterviewService {
         log.debug("ffmpegPath: {}", ffmpegPath);
         log.debug("ffprobePath: {}", ffprobePath);
 
-        // ffmpeg 실행
+        // ffmpeg 실행 (webm → mp4)
         ProcessBuilder ffmpegPb = new ProcessBuilder(
                 ffmpegPath, "-y",
                 "-i", webmTempFile.getAbsolutePath(),
@@ -736,7 +735,6 @@ public class InterviewService {
         Process ffmpegProcess = ffmpegPb.start();
         log.debug("⚙️ ffmpeg 프로세스 시작");
 
-        // 출력 스트림 소비 (중단 방지)
         new Thread(() -> {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(ffmpegProcess.getInputStream()))) {
                 String line;
@@ -800,6 +798,7 @@ public class InterviewService {
         log.debug("✅ 변환된 영상 길이: {}, 총 소요 시간: {} ms", result, (end - start) / 1_000_000);
         return result;
     }
+
 
     // Fast API 자소서 기반 질문 생성
     @Transactional
@@ -953,6 +952,7 @@ public class InterviewService {
     }
 
     // 면접 질문 + 답변 객체 조회
+    @Transactional(readOnly = true)
     public List<InterviewQuestionAndAnswerRequestDto> searchInterviewQuestionAndAnswer(List<InterviewAnswer> interviewAnswers) {
         List<InterviewQuestionAndAnswerRequestDto> result = new ArrayList<>();
         for (InterviewAnswer answer : interviewAnswers) {
@@ -969,6 +969,7 @@ public class InterviewService {
     }
 
     // fast API 요청 보낼 때 자소서 전문 조회 함수
+    @Transactional(readOnly = true)
     public List<CoverLetterContentFastAPIRequestDto> searchCoverLetterContents(List<CoverLetterOnlyContentDto> coverLetterContents) {
         List<CoverLetterContentFastAPIRequestDto> coverLetterContentFastAPIRequestDto = new ArrayList<>();
         for (CoverLetterOnlyContentDto content : coverLetterContents) {
@@ -984,6 +985,7 @@ public class InterviewService {
     }
 
     // 자소서 기반 경험 조회
+    @Transactional(readOnly = true)
     public List<ExperienceFastAPIRequestDto> searchExperiencesByCoverLetterContentId(List<Integer> experienceIds) {
         List<ExperienceFastAPIRequestDto> experiences = new ArrayList<>();
         if (!experienceIds.isEmpty()) {
@@ -1005,6 +1007,7 @@ public class InterviewService {
     }
 
     // 자소서 기반 경험 조회
+    @Transactional(readOnly = true)
     public List<ProjectFastAPIRequestDto> searchProjectsByCoverLetterContentId(List<Integer> projectIds) {
         List<ProjectFastAPIRequestDto> projects = new ArrayList<>();
         for (Integer projectId : projectIds) {
@@ -1026,6 +1029,7 @@ public class InterviewService {
     }
 
     // 면접 피드백 상세 조회
+    @Transactional(readOnly = true)
     public InterviewFeedbackResponseDto findInterviewFeedbackDetail(Integer interviewVideoId, Integer userId) {
 
         userReadService.findUserByIdOrElseThrow(userId);
@@ -1087,6 +1091,7 @@ public class InterviewService {
 
     }
 
+    @Transactional(readOnly = true)
     public List<InterviewThumbNailResponseDto> findAllInterview(Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
 
@@ -1122,6 +1127,7 @@ public class InterviewService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public InterviewDetailResponseDto findInterviewDetail(Integer interviewVideoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo video = interviewReadService.findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(interviewVideoId);
@@ -1155,6 +1161,7 @@ public class InterviewService {
                 .build();
     }
 
+    @Transactional
     public Map<String, String> deleteInterviewVideo(Integer interviewVideoId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo video = interviewReadService.findInterviewVideoByIdWithInterviewAndCoverLetterInterviewOrElseThrow(interviewVideoId);
