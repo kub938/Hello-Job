@@ -77,24 +77,13 @@ public class CompanyAnalysisService {
 
         CompanyAnalysisFastApiRequestDto fastApiRequestDto = null;
 
-        if (!company.isDart()) {
-            fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
-                    .company_name(companyName)
-                    .base(false)
-                    .plus(false)
-                    .fin(false)
-                    .swot(requestDto.isSwot())
-                    .user_prompt(requestDto.getUserPrompt())
-                    .build();
-        }
-
         // FastAPI 요청 객체 생성
         fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
                 .company_name(companyName)
-                .base(requestDto.isBasic())
-                .plus(requestDto.isPlus())
-                .fin(requestDto.isFinancial())
-                .swot(requestDto.isSwot())
+                .base(!company.isDart() ? false : requestDto.isBasic())
+                .plus(!company.isDart() ? false : requestDto.isPlus())
+                .fin(!company.isDart() ? false : requestDto.isFinancial())
+                .swot(!company.isDart() ? false : requestDto.isSwot())
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 
