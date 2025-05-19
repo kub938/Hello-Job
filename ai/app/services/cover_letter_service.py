@@ -476,10 +476,10 @@ async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest
             # SWOT 분석 추가
             if hasattr(company_analysis, 'swot') and company_analysis.swot:
                 # SWOT의 각 항목이 모두 빈 배열인지 확인
-                is_empty_strengths = True if not company_analysis.swot.strengths.contents else False
-                is_empty_weaknesses = True if not company_analysis.swot.weaknesses.contents else False
-                is_empty_opportunities = True if not company_analysis.swot.opportunities.contents else False
-                is_empty_threats = True if not company_analysis.swot.threats.contents else False
+                is_empty_strengths = True if not company_analysis.swot.strengths else False
+                is_empty_weaknesses = True if not company_analysis.swot.weaknesses else False
+                is_empty_opportunities = True if not company_analysis.swot.opportunities else False
+                is_empty_threats = True if not company_analysis.swot.threats else False
                 
                 # 모든 항목이 빈 배열이면 SWOT가 비어있다고 판단
                 is_swot_empty = is_empty_strengths and is_empty_weaknesses and is_empty_opportunities and is_empty_threats
@@ -488,11 +488,11 @@ async def get_chat_system_prompt(chat_type: str, request: ChatCoverLetterRequest
                 if not is_swot_empty:
                     additional_info_prompt += f"""
         - SWOT 분석:
-            * 강점(Strengths): {', '.join(company_analysis.swot.strengths.contents) if company_analysis.swot.strengths and company_analysis.swot.strengths.contents else '정보 없음'}
-            * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses.contents) if company_analysis.swot.weaknesses and company_analysis.swot.weaknesses.contents else '정보 없음'}
-            * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities.contents) if company_analysis.swot.opportunities and company_analysis.swot.opportunities.contents else '정보 없음'}
-            * 위협(Threats): {', '.join(company_analysis.swot.threats.contents) if company_analysis.swot.threats and company_analysis.swot.threats.contents else '정보 없음'}
-            * 종합 분석: {company_analysis.swot.swot_summary if hasattr(company_analysis.swot, 'swot_summary') and company_analysis.swot.swot_summary else '정보 없음'}"""
+            * 강점(Strengths): {', '.join(company_analysis.swot.strengths) if company_analysis.swot.strengths else '정보 없음'}
+            * 약점(Weaknesses): {', '.join(company_analysis.swot.weaknesses) if company_analysis.swot.weaknesses else '정보 없음'}
+            * 기회(Opportunities): {', '.join(company_analysis.swot.opportunities) if company_analysis.swot.opportunities else '정보 없음'}
+            * 위협(Threats): {', '.join(company_analysis.swot.threats) if company_analysis.swot.threats else '정보 없음'}
+            * 종합 분석: {company_analysis.swot.swot_summary if company_analysis.swot.swot_summary else '정보 없음'}"""
         else:
             additional_info_prompt += "### 기업 분석 정보 없음\\n"
             
