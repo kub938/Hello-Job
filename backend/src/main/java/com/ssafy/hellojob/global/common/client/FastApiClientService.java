@@ -6,9 +6,7 @@ import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisFas
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.AICoverLetterRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseWrapperDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatForEditRequestDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.request.AIChatRequestDto;
-import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatForEditResponseDto;
 import com.ssafy.hellojob.domain.coverlettercontent.dto.ai.response.AIChatResponseDto;
 import com.ssafy.hellojob.domain.interview.dto.request.CreateCoverLetterFastAPIRequestDto;
 import com.ssafy.hellojob.domain.interview.dto.request.InterviewFeedbackFastAPIRequestDto;
@@ -64,24 +62,6 @@ public class FastApiClientService {
         List<AICoverLetterResponseDto> response = responseWrapper.getCover_letters();
 
         response.forEach(r -> log.debug("🌞 number: {}, detail: {}", r.getContent_number(), r.getCover_letter()));
-
-        return response;
-    }
-
-    public AIChatForEditResponseDto sendChatForEditToFastApi(AIChatForEditRequestDto requestDto) {
-        logJsonToString(requestDto);
-        AIChatForEditResponseDto response = fastApiWebClient.post()
-                .uri("/api/v1/ai/cover-letter/edit")
-                .bodyValue(requestDto)
-                .retrieve()
-                .bodyToMono(AIChatForEditResponseDto.class)
-                .block();
-
-        if (response == null) {
-            throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
-        }
-
-        log.debug("🌞 AI 메시지: {}, 유저 메시지 {}", response.getAi_message(), response.getUser_message());
 
         return response;
     }
