@@ -20,6 +20,7 @@ public class JobRoleSnapshotService {
     private final JobRoleSnapshotRepository jobRoleSnapshotRepository;
     private final UserReadService userReadService;
 
+    @Transactional
     public JobRoleSnapshot copyJobRoleAnalysis(String companyName, JobRoleAnalysis jobRoleAnalysis) {
 
         JobRoleSnapshot jobRoleSnapshot = JobRoleSnapshot.builder()
@@ -39,7 +40,7 @@ public class JobRoleSnapshotService {
         return jobRoleSnapshot;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public JobRoleSnapshotResponseDto getJobRoleSnapshot(Integer userId, Integer jobRoleSnapshotId) {
         userReadService.findUserByIdOrElseThrow(userId);
         return jobRoleSnapshotRepository.findByJobRoleSnapshotId(jobRoleSnapshotId)

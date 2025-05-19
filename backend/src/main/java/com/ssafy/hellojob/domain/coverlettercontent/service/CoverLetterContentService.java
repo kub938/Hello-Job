@@ -45,6 +45,7 @@ public class CoverLetterContentService {
     private final UserReadService userReadService;
     private final CoverLetterContentReadService coverLetterContentReadService;
 
+    @Transactional
     public List<CoverLetterContent> createContents(User user, CoverLetter coverLetter, List<ContentsDto> contentsDto) {
         List<CoverLetterContent> contents = new ArrayList<>();
 
@@ -69,6 +70,7 @@ public class CoverLetterContentService {
     }
 
     // ai 자기소개서 초안 응답 저장
+    @Transactional
     public void appendDetail(List<CoverLetterContent> contents, List<AICoverLetterResponseDto> aiResponses) {
         Map<Integer, String> aiMap = aiResponses.stream()
                 .collect(Collectors.toMap(AICoverLetterResponseDto::getContent_number, AICoverLetterResponseDto::getCover_letter));
@@ -125,6 +127,7 @@ public class CoverLetterContentService {
         return result;
     }
 
+    @Transactional
     public void saveAllContents(CoverLetter coverLetter) {
         List<CoverLetterContent> contents = coverLetterContentRepository.findByCoverLetter(coverLetter);
         for (CoverLetterContent content : contents) {
