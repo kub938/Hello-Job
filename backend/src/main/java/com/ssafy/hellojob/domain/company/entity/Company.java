@@ -38,6 +38,9 @@ public class Company {
     @Column(name = "search_keyword")
     private String searchKeyword;
 
+    @Column(name = "dart")
+    private boolean dart;
+
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
