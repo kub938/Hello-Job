@@ -88,7 +88,7 @@
 
   --color-pending: var(--pending);
   --color-in-progress: var(--in-progress);
-  --color-finish: var(--finish);
+  --color-completed: var(--completed);
 
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
