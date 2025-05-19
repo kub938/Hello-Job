@@ -119,14 +119,15 @@ public class SSEService {
     }
 
     public void removeTargetEvent(Integer userId, AckRequestDto dto) {
-        SseEventWrapper target = new SseEventWrapper(dto.getEventName(), dto.getDataJson());
+        String dataJson = jsonUtil.toJson(dto.getData());
+        SseEventWrapper target = new SseEventWrapper(dto.getEventName(), dataJson);
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
         if (queue != null && !queue.isEmpty()) {
             boolean removed = queue.removeIf(e -> e.equals(target));
             if (removed) {
                 log.debug("✅ 큐에서 이벤트 제거됨 - userId={}, eventName={}", userId, dto.getEventName());
             } else {
-                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, dto.getDataJson());
+                log.debug("⚠️ 큐에 해당 이벤트 없음 - userId={}, eventName={}", userId, dto.getEventName());
             }
         }
     }
