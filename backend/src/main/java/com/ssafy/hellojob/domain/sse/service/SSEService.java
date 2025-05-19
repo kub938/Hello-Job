@@ -90,7 +90,7 @@ public class SSEService {
                 try {
                     emitter.send(SseEmitter.event()
                             .name(event.eventName())
-                            .data(jsonUtil.parseJson(event.dataJson()))); // json 으로 전송
+                            .data(event.dataJson()));
                     queue.poll(); // 전송 성공 시에만 꺼냄
                 } catch (IOException e) {
                     log.warn("❌ SSE 연결 재실패 - 중단");
