@@ -2,8 +2,7 @@ import { Button } from "@/components/Button";
 import Loading from "@/components/Loading/Loading";
 import { useCompleteInterview } from "@/hooks/interviewHooks";
 import { useState } from "react";
-import { replace, useNavigate } from "react-router";
-import { toast } from "sonner";
+import { useNavigate } from "react-router";
 
 interface InterviewCompleteModalProps {
   interviewVideoId: number;
