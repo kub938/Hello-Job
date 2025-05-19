@@ -2,6 +2,7 @@ import { PostExperienceRequest } from "@/api/experienceApi";
 import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
 import { usePostExperience } from "@/hooks/experienceHooks";
+import { X } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 interface ExperienceFormProps {
@@ -20,7 +21,7 @@ function ExperienceForm({ onClose }: ExperienceFormProps) {
 
   const mutation = usePostExperience();
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClickCloseButton = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -48,8 +49,12 @@ function ExperienceForm({ onClose }: ExperienceFormProps) {
 
   return (
     <>
-      <div className="modal-overlay" onClick={handleOverlayClick}>
+      <div className="modal-overlay">
         <div className="modal-container h-[80%]">
+          <X
+            className="cursor-pointer absolute right-7 top-7"
+            onClick={handleClickCloseButton}
+          ></X>
           <div className="border-b pb-3 mb-5">
             <div className="text-2xl font-bold pb-1">경험 추가</div>
             <div className="text-muted-foreground text-sm">
