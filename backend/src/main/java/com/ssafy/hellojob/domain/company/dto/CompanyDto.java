@@ -11,15 +11,11 @@ import java.time.LocalDateTime;
 public class CompanyDto {
 
     private Integer id;
-
     private String companyName;
-
     private String companyLocation;
-
     private CompanySize companySize;
-
     private String companyIndustry;
-
     private LocalDateTime updatedAt;
+    private boolean dart;
 
 }
