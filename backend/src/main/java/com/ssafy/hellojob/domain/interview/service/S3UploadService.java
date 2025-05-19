@@ -41,6 +41,8 @@ public class S3UploadService {
             throw new BaseException(VIDEO_TOO_LARGE);
         }
 
+        log.debug("😎 면접 S3 upload 함수 들어옴 : {}", file.getOriginalFilename());
+
         String originalFileName = file.getOriginalFilename();
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 
