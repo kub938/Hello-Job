@@ -208,6 +208,7 @@ function CorporateResearch({
             <CreateCorporate
               onClose={closeModal}
               corporateId={parseInt(id ? id : "1")}
+              dart={companyDetail?.dart ? companyDetail?.dart : false}
             />
           ) : (
             <ReadCorporate

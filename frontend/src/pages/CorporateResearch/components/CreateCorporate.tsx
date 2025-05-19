@@ -13,6 +13,7 @@ import { FaQuestionCircle } from "react-icons/fa";
 interface CreateCorporateProps {
   onClose: () => void;
   corporateId: number;
+  dart: boolean;
 }
 
 interface IForm {
@@ -25,12 +26,12 @@ interface IForm {
   companyAnalysisTitle: string;
 }
 
-function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
+function CreateCorporate({ onClose, corporateId, dart }: CreateCorporateProps) {
   const [isPublic, setIsPublic] = useState(true);
-  const [isBasic, setIsBasic] = useState(true);
+  const [isBasic, setIsBasic] = useState(dart ? true : false);
   const [isPlus, setIsPlus] = useState(false);
   const [isFinancial, setIsFinancial] = useState(false);
-  const [isSWOT, setIsSWOT] = useState(false);
+  const [isSWOT, setIsSWOT] = useState(dart ? false : true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [token, setToken] = useState<number | undefined>();
 
@@ -185,6 +186,21 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           name="isPublic"
           requiredMessage="공개 여부는 필수 입력 항목입니다."
         />
+        {!dart && (
+          <ToggleInput
+            label={isSWOT ? "SWOT 분석" : "SWOT 분석 사용하지 않음"}
+            description={
+              isSWOT
+                ? "기업의 강점, 약점, 기회, 위협 정보를 분석에 추가합니다."
+                : "SWOT 분석은 Dart 공시 정보 외에도 기업의 강점, 약점, 기회, 위협을 기반으로 분석을 제공합니다."
+            }
+            isOn={isSWOT}
+            onChange={setIsSWOT}
+            register={register}
+            name="swot"
+            requiredMessage="SWOT 분석 여부는 필수 입력 항목입니다."
+          />
+        )}
         <ToggleInput
           label={
             isBasic ? "기본 공시 데이터 분석" : "기본 공시 데이터 사용하지 않음"
@@ -199,6 +215,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           register={register}
           name="basic"
           requiredMessage="기본 분석 여부는 필수 입력 항목입니다."
+          disabled={!dart}
         />
         <ToggleInput
           label={
@@ -214,6 +231,7 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           register={register}
           name="plus"
           requiredMessage="심화 분석 여부는 필수 입력 항목입니다."
+          disabled={!dart}
         />
         <ToggleInput
           label={isFinancial ? "재무 데이터 분석" : "재무 데이터 사용하지 않음"}
@@ -227,20 +245,23 @@ function CreateCorporate({ onClose, corporateId }: CreateCorporateProps) {
           register={register}
           name="financial"
           requiredMessage="재무 분석 여부는 필수 입력 항목입니다."
+          disabled={!dart}
         />
-        <ToggleInput
-          label={isSWOT ? "SWOT 분석" : "SWOT 분석 사용하지 않음"}
-          description={
-            isSWOT
-              ? "기업의 강점, 약점, 기회, 위협 정보를 분석에 추가합니다."
-              : "SWOT 분석은 Dart 공시 정보 외에도 기업의 강점, 약점, 기회, 위협을 기반으로 분석을 제공합니다."
-          }
-          isOn={isSWOT}
-          onChange={setIsSWOT}
-          register={register}
-          name="swot"
-          requiredMessage="SWOT 분석 여부는 필수 입력 항목입니다."
-        />
+        {dart && (
+          <ToggleInput
+            label={isSWOT ? "SWOT 분석" : "SWOT 분석 사용하지 않음"}
+            description={
+              isSWOT
+                ? "기업의 강점, 약점, 기회, 위협 정보를 분석에 추가합니다."
+                : "SWOT 분석은 Dart 공시 정보 외에도 기업의 강점, 약점, 기회, 위협을 기반으로 분석을 제공합니다."
+            }
+            isOn={isSWOT}
+            onChange={setIsSWOT}
+            register={register}
+            name="swot"
+            requiredMessage="SWOT 분석 여부는 필수 입력 항목입니다."
+          />
+        )}
 
         <div className="space-y-2 mt-4">
           <label
