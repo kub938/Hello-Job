@@ -46,6 +46,9 @@ function JobResearchCard({
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", jobId],
       });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkedJobList"],
+      });
       if (companyId) {
         queryClient.invalidateQueries({
           queryKey: ["jobResearchList", companyId],
@@ -70,6 +73,9 @@ function JobResearchCard({
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["jobRoleDetail", jobId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["bookmarkedJobList"],
       });
       if (companyId) {
         queryClient.invalidateQueries({

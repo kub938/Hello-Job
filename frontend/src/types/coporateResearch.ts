@@ -15,6 +15,7 @@ export interface getCompanyDetailResponse {
   companySize: string;
   companyIndustry: string;
   updatedAt: string;
+  dart: boolean;
 }
 
 //북마크 추가 API

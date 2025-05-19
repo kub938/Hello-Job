@@ -43,7 +43,6 @@ import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
 import MyCompanies from "@/pages/Mypage/components/MyCompanies";
 import MyJobs from "@/pages/Mypage/components/MyJobs";
-import MyInterviewList from "@/pages/Mypage/components/MyInterviewList";
 import MyInterviewDetail from "@/pages/Mypage/components/MyInterviewDetail";
 
 import ResultPage from "@/pages/Interview/pages/ResultPage";
@@ -202,11 +201,7 @@ const router = createBrowserRouter([
               },
               {
                 path: "my-project",
-                element: <LazyComponent component={MyProject} />,
-              },
-              {
-                path: "interview-list",
-                element: <MyInterviewList />,
+                element: <MyProject />,
               },
               {
                 path: "interview-detail",
