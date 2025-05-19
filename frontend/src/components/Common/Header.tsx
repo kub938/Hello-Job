@@ -88,7 +88,12 @@ function Header({ isMinimize = false }: HeaderProps) {
                 <Link to="/corporate-search">기업/직무분석</Link>
               </li>
 
-              <li className={`${nowPath === pathName[1] && "text-accent "}`}>
+              <li
+                className={`${
+                  nowPath === pathName[1] ||
+                  (nowPath.includes("cover-letter") && "text-accent ")
+                }`}
+              >
                 <Link to="/cover-letter">자기소개서</Link>
               </li>
               <li
@@ -107,7 +112,7 @@ function Header({ isMinimize = false }: HeaderProps) {
                   className="shadow-xs border  rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
                   to="/mypage"
                 >
-                  {userName}님
+                  {userName}님 정보
                 </Link>
               ) : (
                 <Link
