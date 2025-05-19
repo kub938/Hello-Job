@@ -3,6 +3,7 @@ package com.ssafy.hellojob.domain.companyanalysis.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.domain.company.entity.Company;
+import com.ssafy.hellojob.domain.company.repository.CompanyRepository;
 import com.ssafy.hellojob.domain.companyanalysis.dto.request.CompanyAnalysisRequestDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisFastApiResponseDto;
 import com.ssafy.hellojob.domain.companyanalysis.dto.response.CompanyAnalysisSseResponseDto;
@@ -34,6 +35,7 @@ public class CompanyAnalysisSaveService {
     private final NewsAnalysisRepository newsAnalysisRepository;
     private final SwotAnalysisRepository swotAnalysisRepository;
     private final CompanyAnalysisRepository companyAnalysisRepository;
+    private final CompanyRepository companyRepository;
 
     @Transactional
     public CompanyAnalysisSseResponseDto saveCompanyAnalysis(
@@ -157,6 +159,7 @@ public class CompanyAnalysisSaveService {
 
         // 기업 테이블 업데이트
         company.setUpdatedAt(LocalDateTime.now());
+        companyRepository.save(company);
 
         return CompanyAnalysisSseResponseDto.builder()
                 .companyAnalysisId(companyAnalysis.getCompanyAnalysisId())
