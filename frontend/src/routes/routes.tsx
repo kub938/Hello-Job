@@ -1,51 +1,71 @@
+import { ComponentType, lazy, Suspense } from "react";
 import { createBrowserRouter } from "react-router";
-import { lazy, ReactNode, Suspense } from "react";
-
-import App from "@/App";
-import Home from "@/pages/Home/Home";
-import Login from "@/pages/Login/Login";
-import CorporateSearch from "@/pages/CorporateSearch/CorporateSearch";
-import Mypage from "@/pages/Mypage/Mypage";
-import JobResearch from "@/pages/JobResearch/JobResearch";
 import Loading from "@/components/Loading/Loading";
 import RouterErrorHandler from "@/components/Error/RouterErrorHandler";
 import RenderErrorFallback from "@/components/Error/RenderErrorHandler";
 import { ErrorBoundary } from "react-error-boundary";
+
+import App from "@/App";
 import DefaultLayout from "@/components/layouts/DefaultLayout";
 import BlankLayout from "@/components/layouts/BlankLayout";
-import CoverLetter from "@/pages/CoverLetter/CoverLetter";
+import StandardLayout from "@/components/layouts/StandardLayout";
+import Home from "@/pages/Home/Home";
+import Login from "@/pages/Login/Login";
 
-// 마이페이지 서브 컴포넌트들
+const CoverLetter = lazy(() => import("@/pages/CoverLetter/CoverLetter"));
+const CoverLetterAnalysis = lazy(
+  () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
+);
+const JobResearch = lazy(() => import("@/pages/JobResearch/JobResearch"));
+const CorporateSearch = lazy(
+  () => import("@/pages/CorporateSearch/CorporateSearch")
+);
+const CorporateResearch = lazy(
+  () => import("@/pages/CorporateResearch/CorporateResearch")
+);
+const Mypage = lazy(() => import("@/pages/Mypage/Mypage"));
+const InterviewPage = lazy(
+  () => import("@/pages/Interview/pages/InterviewLayoutPage")
+);
+
+const MyExperience = lazy(
+  () => import("@/pages/Mypage/components/MyExperience/MyExperience")
+);
+const MyProject = lazy(
+  () => import("@/pages/Mypage/components/MyProject/MyProject")
+);
+
 import Schedule from "@/pages/Mypage/components/ScheduleManager";
 import BookmarkedCompanies from "@/pages/Mypage/components/BookmarkedCompanies";
 import BookmarkedJobs from "@/pages/Mypage/components/BookmarkedJobs";
 import InterviewVideos from "@/pages/Mypage/components/InterviewVideos";
 import Account from "@/pages/Mypage/components/Account";
 import CoverLetterList from "@/pages/Mypage/components/CoverLetterList";
-import CorporateResearch from "@/pages/CorporateResearch/CorporateResearch";
-import MyExperience from "@/pages/Mypage/components/MyExperience/MyExperience";
-import MyProject from "@/pages/Mypage/components/MyProject/MyProject";
-import StandardLayout from "@/components/layouts/StandardLayout";
-import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
-import InterviewPage from "@/pages/Interview/pages/InterviewLayoutPage";
-import ResultPage from "@/pages/Interview/pages/ResultPage";
-import PreparePage from "@/pages/Interview/pages/PreparePage";
-import SelectQuestionPage from "@/pages/Interview/pages/SelectQuestionPage";
-import PracticeInterviewPage from "@/pages/Interview/pages/PracticeInterviewPage";
-import { categoryValidator } from "@/pages/Interview/util/validRouteCategory";
 import MyCompanies from "@/pages/Mypage/components/MyCompanies";
 import MyJobs from "@/pages/Mypage/components/MyJobs";
-import CoverLetterQuestionPage from "@/pages/Interview/pages/CoverLetterQuestionPage";
-import ResultList from "@/pages/Interview/pages/ResultList";
 import MyInterviewList from "@/pages/Mypage/components/MyInterviewList";
 import MyInterviewDetail from "@/pages/Mypage/components/MyInterviewDetail";
 
-const CoverLetterAnalysis = lazy(
-  () => import("@/pages/CoverLetterAnalysis/CoverLetterAnalysis")
-);
+import ResultPage from "@/pages/Interview/pages/ResultPage";
+import ResultList from "@/pages/Interview/pages/ResultList";
+import PreparePage from "@/pages/Interview/pages/PreparePage";
+import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
+import CoverLetterQuestionPage from "@/pages/Interview/pages/CoverLetterQuestionPage";
+import SelectQuestionPage from "@/pages/Interview/pages/SelectQuestionPage";
+import PracticeInterviewPage from "@/pages/Interview/pages/PracticeInterviewPage";
+import { categoryValidator } from "@/pages/Interview/util/validRouteCategory";
 
-function SuspenseWrapper({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<Loading />}>{children}</Suspense>;
+interface LazyComponentProps {
+  component: ComponentType<any>;
+}
+function LazyComponent({ component: Component }: LazyComponentProps) {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ErrorBoundary FallbackComponent={RenderErrorFallback}>
+        <Component />
+      </ErrorBoundary>
+    </Suspense>
+  );
 }
 
 const router = createBrowserRouter([
@@ -59,13 +79,7 @@ const router = createBrowserRouter([
         children: [
           {
             path: "cover-letter/:id",
-            element: (
-              <SuspenseWrapper>
-                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <CoverLetter />,
-                </ErrorBoundary>
-              </SuspenseWrapper>
-            ),
+            element: <LazyComponent component={CoverLetter} />,
           },
         ],
       },
@@ -74,132 +88,58 @@ const router = createBrowserRouter([
         children: [
           {
             path: "cover-letter",
-            element: (
-              <SuspenseWrapper>
-                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <CoverLetterAnalysis />
-                </ErrorBoundary>
-              </SuspenseWrapper>
-            ),
+            element: <LazyComponent component={CoverLetterAnalysis} />,
             children: [
-              {
-                path: "select-job",
-              },
-              {
-                path: "select-company",
-              },
-              {
-                path: "input-question",
-              },
+              { path: "select-job" },
+              { path: "select-company" },
+              { path: "input-question" },
             ],
           },
-
           {
             path: "corporate-search",
-            element: <CorporateSearch />,
+            element: <LazyComponent component={CorporateSearch} />,
           },
           {
             path: "job-research/:id",
-            element: (
-              <SuspenseWrapper>
-                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <JobResearch />
-                </ErrorBoundary>
-              </SuspenseWrapper>
-            ),
+            element: <LazyComponent component={JobResearch} />,
           },
           {
             path: "corporate-research/:id",
-            element: (
-              <SuspenseWrapper>
-                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <CorporateResearch />
-                </ErrorBoundary>
-              </SuspenseWrapper>
-            ),
+            element: <LazyComponent component={CorporateResearch} />,
           },
           {
             path: "interview",
-            element: (
-              <SuspenseWrapper>
-                <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                  <InterviewPage />
-                </ErrorBoundary>
-              </SuspenseWrapper>
-            ),
+            element: <LazyComponent component={InterviewPage} />,
             children: [
               {
                 path: "result",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <ResultPage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <ResultPage />,
               },
               {
                 path: "result-list",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <ResultList />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <ResultList />,
               },
               {
                 path: "prepare",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <PreparePage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <PreparePage />,
               },
               {
                 path: "select",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <TypeSelectPage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <TypeSelectPage />,
               },
               {
                 path: "cover-letter",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <CoverLetterQuestionPage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <CoverLetterQuestionPage />,
               },
               {
                 path: ":category",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <SelectQuestionPage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <SelectQuestionPage />,
                 loader: categoryValidator,
               },
               {
                 path: "practice",
-                element: (
-                  <SuspenseWrapper>
-                    <ErrorBoundary FallbackComponent={RenderErrorFallback}>
-                      <PracticeInterviewPage />
-                    </ErrorBoundary>
-                  </SuspenseWrapper>
-                ),
+                element: <PracticeInterviewPage />,
               },
-              {},
             ],
           },
         ],
@@ -210,15 +150,15 @@ const router = createBrowserRouter([
         children: [
           {
             path: "",
-            element: <Home />,
+            element: <LazyComponent component={Home} />,
           },
           {
             path: "login",
-            element: <Login />,
+            element: <LazyComponent component={Login} />,
           },
           {
             path: "mypage",
-            element: <Mypage />,
+            element: <LazyComponent component={Mypage} />,
             children: [
               {
                 path: "",
@@ -258,11 +198,11 @@ const router = createBrowserRouter([
               },
               {
                 path: "my-experience",
-                element: <MyExperience />,
+                element: <LazyComponent component={MyExperience} />,
               },
               {
                 path: "my-project",
-                element: <MyProject />,
+                element: <LazyComponent component={MyProject} />,
               },
               {
                 path: "interview-list",
@@ -274,7 +214,6 @@ const router = createBrowserRouter([
               },
             ],
           },
-          // 헤더가 없는 다른 페이지들을 여기에 추가할 수 있습니다
         ],
       },
     ],

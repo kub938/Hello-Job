@@ -10,7 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 import { jobRoleAnalysis } from "@/api/jobRoleAnalysisApi";
 import { getAllJobList } from "@/types/jobResearch";
 import JobResearchCard from "./components/JobResearchCard";
-import { getCompanyDetail } from "@/api/companyApi";
+import { companyApi } from "@/api/companyApi";
 import { useSelectJobStore } from "@/store/coverLetterAnalysisStore";
 
 export interface JobResearchProps {
@@ -59,7 +59,7 @@ function JobResearch({ modalClose, type, companyId }: JobResearchProps) {
       } else {
         id = 1;
       }
-      const response = await getCompanyDetail(id);
+      const response = await companyApi.getCompanyDetail(id);
       return response.data;
     },
   });
