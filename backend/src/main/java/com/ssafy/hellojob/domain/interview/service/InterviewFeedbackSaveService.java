@@ -34,7 +34,8 @@ public class InterviewFeedbackSaveService {
     public EndInterviewResponseDto saveFeedback(InterviewFeedbackFastAPIResponseDto fastAPIResponseDto, List<InterviewAnswer> interviewAnswers, InterviewVideo interviewVideo){
         
         log.debug("😎 saveFeedback 함수 들어옴");
-        
+        log.debug("😎 fastAPIResponseDto.getOverall_feedback() : {}", fastAPIResponseDto.getOverall_feedback());
+
         // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
 
@@ -51,6 +52,8 @@ public class InterviewFeedbackSaveService {
             } catch (JsonProcessingException e) {
                 throw new BaseException(SERIALIZATION_FAIL);
             }
+
+            log.debug("jsonFeedbacks: {}", jsonFeedbacks);
 
             targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
             targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
