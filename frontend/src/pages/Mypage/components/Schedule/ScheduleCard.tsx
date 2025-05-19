@@ -45,10 +45,11 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
   return (
     <li
       ref={ref}
-      className={`flex flex-row items-center justify-between relative pl-1 p-1 px-2 w-full border border-gray-200 ${borderColor} border-l-4 rounded-r-sm shadow-xs cursor-move ${
+      className={`flex flex-row items-center justify-between relative pl-1 p-1 px-2 w-full border border-gray-200 ${borderColor} border-l-4 rounded-r-sm shadow-xs cursor-move hover:bg-gray-50 hover:shadow-sm ${
         isDragging ? "opacity-50" : ""
       }`}
       title={schedule.scheduleTitle}
+      onClick={() => onEdit(schedule)}
     >
       <div className="px-2">
         <div className="text-sm font-semibold text-gray-900">
@@ -66,14 +67,13 @@ const ScheduleItem = ({ schedule, onEdit }: ScheduleItemProps) => {
           </div>
         </div>
       </div>
-      <button
-        onClick={() => onEdit(schedule)}
-        className={`flex h-6 items-center ${bgColor} rounded-xl px-2 py-1 text-xs cursor-pointer`}
+      <div
+        className={`flex h-6 items-center ${bgColor} rounded-xl px-2 py-1 text-xs`}
       >
         <span className="truncate max-w-[52px]">
           {schedule.scheduleStatusName}
         </span>
-      </button>
+      </div>
     </li>
   );
 };
