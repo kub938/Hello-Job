@@ -77,14 +77,22 @@ public class CompanyAnalysisService {
 
         log.debug("프론트에서 기업 분석 요청 들어옴");
         log.debug("기업명: {}", companyName);
-        log.debug("기업ID: {}", requestDto.getCompanyId());
-        log.debug("isPublic: {}", requestDto.isPublic());
-        log.debug("isBasic: {}", requestDto.isBasic());
-        log.debug("isPlus: {}", requestDto.isPlus());
-        log.debug("isFinancial: {}", requestDto.isFinancial());
+
+        CompanyAnalysisFastApiRequestDto fastApiRequestDto = null;
+
+        if (!company.isDart()) {
+            fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
+                    .company_name(companyName)
+                    .base(false)
+                    .plus(false)
+                    .fin(false)
+                    .swot(requestDto.isSwot())
+                    .user_prompt(requestDto.getUserPrompt())
+                    .build();
+        }
 
         // FastAPI 요청 객체 생성
-        CompanyAnalysisFastApiRequestDto fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
+        fastApiRequestDto = CompanyAnalysisFastApiRequestDto.builder()
                 .company_name(companyName)
                 .base(requestDto.isBasic())
                 .plus(requestDto.isPlus())
@@ -93,7 +101,6 @@ public class CompanyAnalysisService {
                 .user_prompt(requestDto.getUserPrompt())
                 .build();
 
-        log.debug("isSwot: {}", requestDto.isSwot());
         log.debug("fast API로 요청 보냄 !!!");
 
         // FastAPI 호출
@@ -142,7 +149,10 @@ public class CompanyAnalysisService {
         log.debug("기업 분석 : {}", responseDto.getCompany_analysis());
 
         // dart 정보 저장
-        DartAnalysis dart = DartAnalysis.of(
+        DartAnalysis dart = null;
+
+
+        dart = DartAnalysis.of(
                 responseDto.getCompany_brand(),
                 responseDto.getCompany_analysis(),
                 responseDto.getCompany_vision(),
@@ -151,6 +161,18 @@ public class CompanyAnalysisService {
                 requestDto.isPlus(),
                 requestDto.isFinancial()
         );
+
+        if (!company.isDart()) {
+            dart = DartAnalysis.of(
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    "해당 기업은 dart 공시 정보를 제공하지 않는 기업입니다.",
+                    false,
+                    false,
+                    false
+            );
+        }
 
         dartAnalysisRepository.save(dart);
 
@@ -261,7 +283,8 @@ public class CompanyAnalysisService {
                         if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
                         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
-                        if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null) dartCategory.add("swot");
+                        if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null)
+                            dartCategory.add("swot");
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
@@ -296,7 +319,8 @@ public class CompanyAnalysisService {
                         if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
                         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
-                        if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null) dartCategory.add("swot");
+                        if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null)
+                            dartCategory.add("swot");
                     }
 
                     return CompanyAnalysisListResponseDto.builder()
@@ -347,7 +371,8 @@ public class CompanyAnalysisService {
         if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
-        if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null) dartCategory.add("swot");
+        if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null)
+            dartCategory.add("swot");
 
 
         // 해당 기업 분석에 활용된 뉴스 분석 정보 불러오기
@@ -466,7 +491,8 @@ public class CompanyAnalysisService {
                         if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
                         if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                         if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
-                        if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null) dartCategory.add("swot");
+                        if (analysis.getSwotAnalysis() != null && !analysis.getSwotAnalysis().getSwotSummary().equals("") && analysis.getSwotAnalysis().getSwotSummary() != null)
+                            dartCategory.add("swot");
 
                     }
 
@@ -586,7 +612,8 @@ public class CompanyAnalysisService {
                 if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
                 if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                 if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
-                if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null) dartCategory.add("swot");
+                if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null)
+                    dartCategory.add("swot");
             }
 
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()
@@ -638,7 +665,8 @@ public class CompanyAnalysisService {
                 if (dart.isDartCompanyAnalysisBasic()) dartCategory.add("사업보고서 기본");
                 if (dart.isDartCompanyAnalysisPlus()) dartCategory.add("사업보고서 상세");
                 if (dart.isDartCompanyAnalysisFinancialData()) dartCategory.add("재무 정보");
-                if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null) dartCategory.add("swot");
+                if (companyAnalysis.getSwotAnalysis() != null && !companyAnalysis.getSwotAnalysis().getSwotSummary().equals("") && companyAnalysis.getSwotAnalysis().getSwotSummary() != null)
+                    dartCategory.add("swot");
             }
 
             result.add(CompanyAnalysisBookmarkListResponseDto.builder()

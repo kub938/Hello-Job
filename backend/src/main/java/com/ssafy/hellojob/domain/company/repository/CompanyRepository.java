@@ -13,12 +13,12 @@ import java.util.Optional;
 @Repository
 public interface CompanyRepository extends JpaRepository<Company, Integer> {
 
-    @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(c.companyId, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt) " +
+    @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(c.companyId, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt, c.dart) " +
             "FROM Company c WHERE c.companyVisible IS TRUE ORDER BY c.updatedAt DESC LIMIT 8")
     List<CompanyListDto> getAllCompany();
 
     @Query("SELECT new com.ssafy.hellojob.domain.company.dto.CompanyListDto(" +
-            "c.companyId, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt) " +
+            "c.companyId, c.companyName, c.companyLocation, c.companySize, c.companyIndustry, c.updatedAt, c.dart) " +
             "FROM Company c " +
             "WHERE (c.companyName LIKE CONCAT('%', :companyName, '%') " +
             "   OR c.searchKeyword LIKE CONCAT('%', :companyName, '%')) " +
