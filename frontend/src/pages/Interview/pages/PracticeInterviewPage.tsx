@@ -1,7 +1,7 @@
 import Interviewer from "../../../assets/interview/Interviewer.webp";
 import VideoDisplay from "../components/VideoDisplay";
 import { useCameraDeviceStore, useAudioDeviceStore } from "@/store/deviceStore";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useCameraStream } from "../hooks/cameraStream";
 import { useAudioStream } from "../hooks/useAudioStream";
 import { Button } from "@/components/Button";
@@ -238,6 +238,10 @@ function PracticeInterviewPage() {
       throw error; // 상위 함수에서 처리할 수 있도록 에러 전파
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <>
