@@ -318,6 +318,8 @@ public class InterviewService {
             throw new BaseException(INVALID_USER);
         }
 
+        log.debug("😎 자소서 기반 모의 면접 시작 함수 들어옴 !!!");
+
         // 면접이 없을 경우(처음 시도하는 유저)
         CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
@@ -329,6 +331,7 @@ public class InterviewService {
         InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
+        // fast API에 자소서 기반 질문 생성 요청
         CoverLetterIdRequestDto requestDto = CoverLetterIdRequestDto.builder()
                 .coverLetterId(coverLetterId)
                 .build();
@@ -338,6 +341,7 @@ public class InterviewService {
 
         for(String s:responseDto.getCoverLetterQuestion()){
             CoverLetterQuestionBank qs = CoverLetterQuestionBank.of(interview, s);
+            coverLetterQuestionBankRepository.save(qs);
             newQuestions.add(qs);
         }
 
@@ -677,8 +681,12 @@ public class InterviewService {
                 .projects(projects)
                 .build();
 
+        log.debug("😎 fast API에 자소서 기반 질문 생성 요청 보냄 !!!");
+        
         // fast API 요청 전송
         CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
+
+        log.debug("😎 fast API에서 자소서 기반 질문 날아옴 !!!");
 
         return CreateCoverLetterQuestionResponseDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
@@ -920,9 +928,8 @@ public class InterviewService {
         // 한 번의 쿼리로 모든 InterviewVideo 조회 (Join 활용, 날짜 기준 내림차순 정렬)
         List<InterviewVideo> interviewVideos = interviewVideoRepository.findAllByUser(user);
 
-        // 모든 InterviewVideo ID를 수집(단, title이 null인 값은 제외)
+        // 모든 InterviewVideo ID를 수집
         List<Integer> videoIds = interviewVideos.stream()
-                .filter(video -> video.getInterviewTitle() != null)
                 .map(InterviewVideo::getInterviewVideoId)
                 .toList();
 
@@ -939,6 +946,7 @@ public class InterviewService {
 
         // DTO 구성
         return interviewVideos.stream()
+                .filter(video -> video.getInterviewTitle() != null)
                 .map(video -> InterviewThumbNailResponseDto.builder()
                         .interviewVideoId(video.getInterviewVideoId())
                         .feedbackEnd(video.isFeedback())
