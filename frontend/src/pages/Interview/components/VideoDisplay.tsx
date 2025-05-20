@@ -102,6 +102,7 @@ function VideoDisplay({
           autoPlay
           playsInline
           muted
+          style={{ transform: "scaleX(-1)" }}
           className="w-full h-full object-cover"
           onLoadedData={onVideoLoadedData}
         />
