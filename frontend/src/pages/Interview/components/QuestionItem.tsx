@@ -1,4 +1,4 @@
-import { CheckCircle, StickyNote } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 
 function QuestionItem({
   question,
