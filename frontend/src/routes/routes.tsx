@@ -46,7 +46,6 @@ import MyJobs from "@/pages/Mypage/components/MyJobs";
 import MyInterviewDetail from "@/pages/Mypage/components/MyInterviewDetail";
 
 import ResultPage from "@/pages/Interview/pages/ResultPage";
-import ResultList from "@/pages/Interview/pages/ResultList";
 import PreparePage from "@/pages/Interview/pages/PreparePage";
 import TypeSelectPage from "@/pages/Interview/pages/TypeSelectPage";
 import CoverLetterQuestionPage from "@/pages/Interview/pages/CoverLetterQuestionPage";
@@ -114,10 +113,7 @@ const router = createBrowserRouter([
                 path: "result/:id",
                 element: <ResultPage />,
               },
-              {
-                path: "result-list",
-                element: <ResultList />,
-              },
+
               {
                 path: "prepare",
                 element: <PreparePage />,
