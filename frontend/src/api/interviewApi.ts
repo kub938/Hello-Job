@@ -1,7 +1,7 @@
 import {
   DeleteInterviewResultResponse,
+  InterviewResult,
   InterviewResultDetailResponse,
-  InterviewResultListResponse,
 } from "@/types/interviewResult";
 import { authApi } from "./instance";
 import {
@@ -183,11 +183,11 @@ export const interviewApi = {
 
 export const interviewResultApi = {
   getInterviewList: () => {
-    return authApi.get<InterviewResultListResponse>(`/api/v1/interview`);
+    return authApi.get<InterviewResult[]>(`/api/v1/interview`);
   },
   getInterviewDetail: (interviewVideoId: number) => {
     return authApi.get<InterviewResultDetailResponse>(
-      `/api/v1/interview/${interviewVideoId}`
+      `/api/v1/interview/feedback/${interviewVideoId}`
     );
   },
   deleteInterviewResult: (interviewVideoId: number) => {
