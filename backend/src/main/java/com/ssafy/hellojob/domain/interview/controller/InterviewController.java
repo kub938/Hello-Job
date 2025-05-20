@@ -2,10 +2,7 @@ package com.ssafy.hellojob.domain.interview.controller;
 
 import com.ssafy.hellojob.domain.interview.dto.request.*;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
-import com.ssafy.hellojob.domain.interview.service.InterviewAnswerSaveService;
-import com.ssafy.hellojob.domain.interview.service.InterviewService;
-import com.ssafy.hellojob.domain.interview.service.S3UploadService;
-import com.ssafy.hellojob.domain.interview.service.SttService;
+import com.ssafy.hellojob.domain.interview.service.*;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +25,7 @@ public class InterviewController {
     private final S3UploadService s3UploadService;
     private final SttService sttService;
     private final InterviewAnswerSaveService interviewAnswerSaveService;
+    private final InterviewFeedbackSaveService interviewFeedbackSaveService;
 
     // cs 질문 목록 조회
     @GetMapping("/question/cs")
@@ -195,6 +193,8 @@ public class InterviewController {
     @PostMapping("/practice/end")
     public Map<String, String> endInterview(@RequestBody EndInterviewRequestDto videoInfo,
                                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
+
+        interviewFeedbackSaveService.saveTitle(videoInfo.getInterviewVideoId(), videoInfo.getInterviewTitle());
         Thread.sleep(60 * 1000);
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
