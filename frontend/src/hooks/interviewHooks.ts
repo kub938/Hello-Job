@@ -149,7 +149,7 @@ export const useCompleteQuestion = () => {
         videoFile,
         audioFile
       );
-      return response.data;
+      return response?.data;
     },
     onSuccess: () => {
       toast.success("답변이 성공적으로 제출되었습니다!");
