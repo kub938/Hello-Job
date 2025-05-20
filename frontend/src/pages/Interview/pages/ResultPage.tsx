@@ -110,7 +110,11 @@ function ResultPage() {
                 <div>
                   <p className="text-base text-gray-500">면접 카테고리</p>
                   <p className="text-lg font-medium">
-                    {interviewDetail.interviewCategory}
+                    {(interviewDetail.interviewCategory === "cover-letter" &&
+                      "자기소개서") ||
+                      (interviewDetail.interviewCategory === "cs" && "CS") ||
+                      (interviewDetail.interviewCategory === "personality" &&
+                        "인성")}
                   </p>
                 </div>
                 <div>
