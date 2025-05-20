@@ -24,9 +24,17 @@ public class InterviewAnswerContentSaveService {
             answer = "stt 변환에 실패했습니다";
         }
 
-        interviewAnswer.addInterviewAnswer(answer);
-        interviewAnswerRepository.save(interviewAnswer);
-        log.debug("😎 답변 저장 완");
+        try{
+            interviewAnswer.addInterviewAnswer(answer);
+            interviewAnswerRepository.save(interviewAnswer);
+            interviewAnswerRepository.flush();  // 💥 강제로 즉시 반영 시도
+
+
+            log.debug("😎 답변 저장 완");
+        } catch(Exception e){
+            log.debug("😱 삐상 !!!!!!!!!!! 답변 db에 저장 중 에러 발생 !!!!!!!!!!!!!!!!!!!!!!!");
+        }
+
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
