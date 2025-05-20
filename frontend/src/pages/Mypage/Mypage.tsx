@@ -31,8 +31,8 @@ function Mypage() {
   const navItems = [
     { path: "schedule", label: "일정 관리" },
     { path: "cover-letter-list", label: "자기소개서 목록" },
-    { path: "bookmarks/companies", label: "기업 분석 즐겨찾기" },
-    { path: "bookmarks/jobs", label: "직무 분석 즐겨찾기" },
+    { path: "bookmarks/companies", label: "기업 분석 북마크" },
+    { path: "bookmarks/jobs", label: "직무 분석 북마크" },
     { path: "my-companies", label: "나의 기업 분석" },
     { path: "my-jobs", label: "나의 직무 분석" },
     { path: "my-project", label: "나의 프로젝트" },
