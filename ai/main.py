@@ -13,7 +13,7 @@ ENV = os.getenv("ENV", "PROD")
 if ENV.upper() == "DEV":
     app = FastAPI()
 else:
-    app = FastAPI(docs_url=None, redoc_url=None)
+    app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
 
 API_V1_STR = "/api/v1/ai"
 
