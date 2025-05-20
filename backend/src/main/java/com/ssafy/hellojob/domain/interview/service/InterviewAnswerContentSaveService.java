@@ -18,7 +18,7 @@ public class InterviewAnswerContentSaveService {
     // 저장 함수
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveAnswer(String answer, InterviewAnswer interviewAnswer){
-        log.debug("😎 saveAnswer에 들어온 값: {}", answer);
+        log.debug("😎 id: {}, saveAnswer에 들어온 값: {}", interviewAnswer.getInterviewAnswerId(), answer);
 
         if(answer == null){
             answer = "stt 변환에 실패했습니다";
