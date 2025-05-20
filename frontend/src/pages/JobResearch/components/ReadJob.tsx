@@ -217,7 +217,7 @@ function ReadJob({ onClose, id, companyId }: ReadJobProps) {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="프로젝트 삭제"
+        title="직무분석 삭제"
         warning={true}
       >
         <p>정말 삭제하시겠습니까?</p>
