@@ -90,20 +90,21 @@ function Header({ isMinimize = false }: HeaderProps) {
 
               <li
                 className={`${
-                  nowPath === pathName[1] ||
-                  (nowPath.includes("cover-letter") && "text-accent ")
+                  nowPath === pathName[1] || nowPath.includes("/cover-letter")
+                    ? "text-accent"
+                    : ""
                 }`}
               >
                 <Link to="/cover-letter">자기소개서</Link>
               </li>
               <li
-                onClick={() => {
-                  alert("ai 모의면접은 2차 배포때 오픈됩니다!");
-                }}
-                className={`${nowPath === pathName[2] && "text-accent "}`}
+                className={`${
+                  nowPath === pathName[2] || nowPath.includes("/interview")
+                    ? "text-accent"
+                    : ""
+                }`}
               >
-                <button>면접</button>
-                {/* <Link to="/interview/select">면접</Link> */}
+                <Link to="/interview/select">모의 면접</Link>
               </li>
             </ul>
             <span>

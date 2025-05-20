@@ -63,15 +63,12 @@ export default function Home() {
             title="자기소개서 작성"
             description="AI를 활용해 자기소개서 초안을 작성하거나 첨삭을 받아보세요!"
           />
-          <div onClick={() => openModal({ title: "모의 면접 기능 준비 중!" })}>
-            <LocateBtn
-              to="/"
-              iconComponent={<MdPeopleAlt className="w-10 h-10" />}
-              title="모의 면접"
-              description="예상 질문을 확인하고 모의 면접을 통해 자신감을 키워보세요!"
-              disabled={true}
-            />
-          </div>
+          <LocateBtn
+            to="/interview/select"
+            iconComponent={<MdPeopleAlt className="w-10 h-10" />}
+            title="모의 면접"
+            description="예상 질문을 확인하고 모의 면접을 통해 자신감을 키워보세요!"
+          />
         </div>
       </main>
       <Modal

@@ -161,7 +161,7 @@ const InterviewPreparationPage = ({
                   <h3 className="text-xl font-semibold text-[#2A2C35]">
                     {type === "question"
                       ? `${questions[nowQuestionNumber].question}`
-                      : `랜덤 문항 면접에서는 질문 미리보기가 제공되지 않습니다.`}
+                      : `실전 모의 면접에서는 질문 미리보기가 제공되지 않습니다.`}
                   </h3>
                 </div>
 

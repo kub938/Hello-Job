@@ -63,7 +63,7 @@ function TypeSelectPage() {
               <Users className="h-12 w-12 text-primary" />
             </div>
             <h3 className="mb-4 text-center text-xl font-bold">
-              랜덤 문항 면접
+              실전 모의 면접
             </h3>
             <p className="mb-6 text-center text-gray-600">
               실제 면접처럼 여러 질문에 대해 연속적으로 답변해보세요
