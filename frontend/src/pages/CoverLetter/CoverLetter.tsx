@@ -175,7 +175,7 @@ function CoverLetter() {
 
   return (
     <>
-      <div className="flex gap-3 mx-4 items-start ">
+      <div className="flex items-start justify-center gap-3 mx-4  ">
         <div className="bg-white w-[50rem] border-t-4 border-t-primary rounded-xl px-4 py-4 ">
           <div className="relative">
             <div

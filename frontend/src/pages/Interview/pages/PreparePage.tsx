@@ -186,7 +186,7 @@ function PreparePage() {
   const animationFrameRef = useRef<number | null>(null); // requestAnimationFrame ID 저장용 참조
 
   // 면접 시작 훅
-  //location 완전 모의면접/ 단일 문항 연습 구분 한 뒤에 다음 버튼 눌렀을 때 훅 부를지 말지 선택
+  //location 완전 모의면접/ 선택 문항 연습 구분 한 뒤에 다음 버튼 눌렀을 때 훅 부를지 말지 선택
   const location = useLocation();
   const { selectCategory, selectInterviewType, selectCoverLetterId } =
     useInterviewStore();

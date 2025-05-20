@@ -110,7 +110,7 @@ function SelectQuestionPage() {
     <div className="container mx-auto px-4 py-6 max-w-4xl">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-3 text-secondary-foreground">
-          단일 문항 연습
+          선택 문항 연습
         </h2>
         <p className="text-muted-foreground text-lg">
           연습하고 싶은 질문을 선택해주세요 ({selectQuestions.length}개 선택됨 /

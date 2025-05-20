@@ -104,7 +104,7 @@ function Header({ isMinimize = false }: HeaderProps) {
                     : ""
                 }`}
               >
-                <Link to="/interview/select">모의 면접</Link>
+                <Link to="/interview/select">AI 모의 면접</Link>
               </li>
             </ul>
             <span>
