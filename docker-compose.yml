@@ -57,6 +57,7 @@ services:
       - NAVER_CLIENT_SECRET=${NAVER_CLIENT_SECRET}
       - GMS_KEY=${GMS_KEY}
       - GMS_API_BASE=${GMS_API_BASE}
+      - ENV=${FASTAPI_ENV}
     depends_on:
       mysql:
         condition: service_healthy
