@@ -47,7 +47,7 @@ public class Experience extends BaseTimeEntity {
     @Column(name = "experience_end_date", nullable = false)
     private LocalDate experienceEndDate;
 
-    @OneToMany(mappedBy = "experiences", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "experience", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<CoverLetterExperience> coverLetterExperiences = new ArrayList<>();
 
     @Builder
