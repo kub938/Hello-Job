@@ -3,13 +3,11 @@ package com.ssafy.hellojob.global.exception.handler;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -206,15 +204,4 @@ public class GlobalExceptionHandler {
         return true;
     }
 
-    // SSE 스트리밍 응답 시작 후 인증/인가 에러 발생한 경우
-    @ExceptionHandler(AccessDeniedException.class)
-    public void handlerAccessDeniedException(HttpServletRequest request, AccessDeniedException ex) {
-        String accept = request.getHeader("Accept");
-        if (accept != null && accept.contains("text/event-stream")) {
-            // sse 에러인 경우 에러 무시
-            log.warn("SSE 요청에서 AccessDenied 발생 {}", ex.getMessage());
-            return;
-        }
-        throw ex; // 다른 에러이면 다시 던짐
-    }
 }
