@@ -42,7 +42,7 @@ public class SSEService {
             emitters.remove(userId);
         });
         emitter.onError(e -> {
-            log.warn("SSE 연결 중 에러 발생", e);
+            log.debug("SSE 연결 중 에러 발생 {} ", e.getMessage());
             emitters.remove(userId);
         });
     }
