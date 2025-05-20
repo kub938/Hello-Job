@@ -37,39 +37,45 @@ public class S3UploadService {
         String originalFileName = file.getOriginalFilename();
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 
-        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .contentType(file.getContentType())
-                .build();
+        try {
 
-        int maxRetries = 5;
-        int attempt = 0;
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .contentType(file.getContentType())
+                    .build();
 
-        while (attempt < maxRetries) {
-            try {
-                s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+            int maxRetries = 5;
+            int attempt = 0;
 
-                log.debug("😎 S3 업로드 성공");
+            while (attempt < maxRetries) {
+                try {
+                    s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-                throw new BaseException(TEST_ERROR); // 👈 여기에 예외 던짐
+                    log.debug("😎 S3 업로드 성공");
 
-                // 업로드 성공 시 URL 반환
+                    throw new BaseException(TEST_ERROR); // 👈 여기에 예외 던짐
+
+                    // 업로드 성공 시 URL 반환
 //                return s3Client.utilities()
 //                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
 //                        .toString();
 
-            } catch (IOException e) {
-                attempt++;
-                if (attempt >= maxRetries) {
-                    // 로그를 남기거나 알림을 추가할 수도 있음
-                    log.debug("❌ S3 업로드 실패 - 최대 재시도 횟수 초과: {}", e.getMessage());
-                    break;
-                }
+                } catch (IOException e) {
+                    attempt++;
+                    if (attempt >= maxRetries) {
+                        // 로그를 남기거나 알림을 추가할 수도 있음
+                        log.debug("❌ S3 업로드 실패 - 최대 재시도 횟수 초과: {}", e.getMessage());
+                        break;
+                    }
 
-                // 로그 및 재시도 딜레이 추가 (선택 사항)
-                log.debug("⚠️ S3 업로드 실패 - 재시도 중 ({}/{}): {}", attempt, maxRetries, e.getMessage());
+                    // 로그 및 재시도 딜레이 추가 (선택 사항)
+                    log.debug("⚠️ S3 업로드 실패 - 재시도 중 ({}/{}): {}", attempt, maxRetries, e.getMessage());
+                }
             }
+        } catch(Exception e){
+            log.debug("😱 S3 업로드 저장 도중 에러 발생 !!!!: {}", e);
+            return "";
         }
 
         // 실패 시 빈 문자열 반환
