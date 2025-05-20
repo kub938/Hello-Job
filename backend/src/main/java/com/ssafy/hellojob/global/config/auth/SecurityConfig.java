@@ -63,7 +63,7 @@ public class SecurityConfig {
                 )
                 //JWT 필터가 UsernamePasswordAuthenticationFilter 전에 실행되도록 지정, 비번 검증 전에 토큰의 유효성 검증
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new SseLoggingSuppressFilter(), JwtAuthenticationFilter.class)
+                .addFilterAfter(new SseLoggingSuppressFilter(), JwtAuthenticationFilter.class)
                 // 인증 실패 핸들러 설정
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((request, response, authException) ->
