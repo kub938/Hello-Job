@@ -35,7 +35,7 @@ function QuestionItem({
           </p>
         </div>
 
-        <button
+        {/* <button
           className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-border text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/30 transition-all ml-auto flex-shrink-0"
           onClick={(e) => {
             e.stopPropagation();
@@ -44,7 +44,7 @@ function QuestionItem({
         >
           <StickyNote className="h-4 w-4" />
           메모하기
-        </button>
+        </button> */}
       </div>
     </div>
   );
