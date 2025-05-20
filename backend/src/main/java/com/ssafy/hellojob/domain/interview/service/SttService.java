@@ -16,7 +16,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.STT_TRANSCRIBE_INTERRUPTED;
 import static com.ssafy.hellojob.global.exception.ErrorCode.VIDEO_TOO_LARGE;
 
 @Slf4j
@@ -43,21 +42,23 @@ public class SttService {
 
         log.debug("😎 면접 stt 함수 들어옴");
 
+
         interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
-        Resource audioResource = new ByteArrayResource(fileBytes) {
-            @Override
-            public String getFilename() {
-                return originalFilename;
-            }
-        };
+        try {
+            Resource audioResource = new ByteArrayResource(fileBytes) {
+                @Override
+                public String getFilename() {
+                    return originalFilename;
+                }
+            };
 
-        int maxRetries = 5;
-        int attempt = 0;
+            int maxRetries = 5;
+            int attempt = 0;
 
-        while (attempt < maxRetries) {
-            try {
-                RestTemplate restTemplate = new RestTemplate();
+            while (attempt < maxRetries) {
+                try {
+                    RestTemplate restTemplate = new RestTemplate();
 
 //                String prompt = "";
 //                switch(interviewAnswer.getInterviewQuestionCategory().name()){
@@ -71,55 +72,58 @@ public class SttService {
 //                        prompt = interviewAnswer.getInterviewQuestionCategory().name() + "면접 답변임";
 //                }
 
-                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-                body.add("file", audioResource);
-                body.add("model", "gpt-4o-transcribe");
-                body.add("language", "ko");
+                    MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+                    body.add("file", audioResource);
+                    body.add("model", "gpt-4o-transcribe");
+                    body.add("language", "ko");
 //                body.add("prompt", prompt);
 
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-                headers.setBearerAuth(openAiKey);
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+                    headers.setBearerAuth(openAiKey);
 
-                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+                    HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
 
-                ResponseEntity<String> response = restTemplate.exchange(
-                        openAiUrl,
-                        HttpMethod.POST,
-                        requestEntity,
-                        String.class
-                );
+                    ResponseEntity<String> response = restTemplate.exchange(
+                            openAiUrl,
+                            HttpMethod.POST,
+                            requestEntity,
+                            String.class
+                    );
 
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    log.debug("😎 stt 변환 성공");
-                    String result = objectMapper.readTree(response.getBody()).get("text").asText();
-                    log.debug("😎 stt 변환 결과값 : {}", result);
+                    if (response.getStatusCode().is2xxSuccessful()) {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        log.debug("😎 stt 변환 성공");
+                        String result = objectMapper.readTree(response.getBody()).get("text").asText();
+                        log.debug("😎 stt 변환 결과값 : {}", result);
 
-                    return CompletableFuture.completedFuture(result);
-                } else {
-                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
-                }
+                        return CompletableFuture.completedFuture(result);
+                    } else {
+                        throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
+                    }
 
-            } catch (Exception e) {
-                attempt++;
-                if (attempt >= maxRetries) {
-                    log.debug("😱 삐상 !!!!!!!! stt에서 오류 발생 !!!!!!: {}", e);
-                    return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
-                }
+                } catch (Exception e) {
+                    attempt++;
+                    if (attempt >= maxRetries) {
+                        log.debug("😱 삐상 !!!!!!!! stt에서 오류 발생 !!!!!!: {}", e);
+                        return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
+                    }
 
-                log.warn("⚠️ STT 변환 실패 - 재시도 중 ({}/{}): {}", attempt, maxRetries, e.getMessage());
+                    log.warn("⚠️ STT 변환 실패 - 재시도 중 ({}/{}): {}", attempt, maxRetries, e.getMessage());
 
-                try {
-                    Thread.sleep(1000L * attempt); // 점진적 대기: 1s, 2s, ...
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new BaseException(STT_TRANSCRIBE_INTERRUPTED);
+                    try {
+                        Thread.sleep(1000L * attempt); // 점진적 대기: 1s, 2s, ...
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
+                    }
                 }
             }
+        } catch (Exception e) {
+            log.debug("😱 삐상 !!!!! stt 변환 도중 오류 발생 !!!!");
         }
-
         return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
+
     }
 
 
