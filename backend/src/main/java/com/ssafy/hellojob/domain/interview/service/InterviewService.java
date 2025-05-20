@@ -915,8 +915,9 @@ public class InterviewService {
         // 한 번의 쿼리로 모든 InterviewVideo 조회 (Join 활용, 날짜 기준 내림차순 정렬)
         List<InterviewVideo> interviewVideos = interviewVideoRepository.findAllByUser(user);
 
-        // 모든 InterviewVideo ID를 수집
+        // 모든 InterviewVideo ID를 수집(단, title이 null인 값은 제외)
         List<Integer> videoIds = interviewVideos.stream()
+                .filter(video -> video.getInterviewTitle() != null)
                 .map(InterviewVideo::getInterviewVideoId)
                 .toList();
 
