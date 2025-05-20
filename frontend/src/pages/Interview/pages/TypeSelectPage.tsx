@@ -75,7 +75,7 @@ function TypeSelectPage() {
               onClick={() => handleOpenSelectQuestionModal("practice")}
               className="h-12"
             >
-              랜덤 문항 연습
+              실전 모의 면접 연습
             </Button>
           </div>
         </div>

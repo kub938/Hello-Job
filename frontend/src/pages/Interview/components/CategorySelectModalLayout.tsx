@@ -50,13 +50,10 @@ function CategorySelectModalLayout({
             <p className="text-muted-foreground mb-4">
               면접에 사용할 자기소개서를 선택해 주세요!
             </p>
-
-            <div className=" overflow-hidden">
-              <CoverLetterSelectionPanel
-                selectedCoverLetterId={selectedCoverLetterId}
-                onSelectCoverLetter={handleSelectCoverLetter}
-              />
-            </div>
+            <CoverLetterSelectionPanel
+              selectedCoverLetterId={selectedCoverLetterId}
+              onSelectCoverLetter={handleSelectCoverLetter}
+            />
           </div>
 
           {/* 푸터 */}
