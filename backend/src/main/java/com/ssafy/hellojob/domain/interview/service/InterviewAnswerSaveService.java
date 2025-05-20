@@ -87,6 +87,10 @@ public class InterviewAnswerSaveService {
 
         validateUserOwnership(userId, interviewAnswer, interviewVideo);
 
+        if(answer == null || answer.equals("")){
+            answer = "stt 변환에 실패했습니다";
+        }
+
         try{
             interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
         } catch(Exception e){
