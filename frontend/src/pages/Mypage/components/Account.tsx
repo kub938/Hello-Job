@@ -2,7 +2,7 @@ import MypageHeader from "./MypageHeader";
 
 function Account() {
   return (
-    <div className="flex-1 p-4 md:p-6 md:ml-56 transition-all duration-300">
+    <div className="flex-1 p-4 md:p-6 md:ml-58 transition-all duration-300">
       <MypageHeader title="계정 설정" />
       <div className="bg-white rounded-lg shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">계정 설정</h2>
