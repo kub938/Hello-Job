@@ -40,7 +40,9 @@ public class InterviewAnswerContentSaveService {
             log.debug("😱 id: {} 삐상 !!!!!!!!!!! 답변 db에 저장 중 에러 발생 !!!!!!!!!!!!!!!!!!!!!!!", interviewAnswer.getInterviewAnswerId());
         }
 
-        log.debug("💾 저장 직후 DB에서 해당 ID 조회: {}", interviewAnswerRepository.findById(interviewAnswer.getInterviewAnswerId()));
+        InterviewAnswer answer1 = interviewAnswerRepository.findById(interviewAnswer.getInterviewAnswerId())
+                .orElseThrow();
+        log.debug("💾 저장 직후 DB에서 해당 ID 조회: {}", answer1.getInterviewAnswer());
 
     }
 
