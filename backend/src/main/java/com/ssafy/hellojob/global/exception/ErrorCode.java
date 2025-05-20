@@ -90,7 +90,9 @@ public enum ErrorCode {
     // S3
     S3_DELETE_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 파일 삭제에 실패했습니다."),
     S3_URL_INVALID(HttpStatus.BAD_REQUEST, "유효하지 않은 S3 URL입니다."),
-    S3_KEY_EXTRACTION_FAILED(HttpStatus.BAD_REQUEST, "S3 URL에서 키를 추출할 수 없습니다.")
+    S3_KEY_EXTRACTION_FAILED(HttpStatus.BAD_REQUEST, "S3 URL에서 키를 추출할 수 없습니다."),
+    
+    TEST_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "이거 터져도 저장 되어야함")
 
     /**
      Response의 에러 코드에 맞춰 HttpStatus를 설정해주시기 바랍니다.
