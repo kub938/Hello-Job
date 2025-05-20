@@ -33,22 +33,33 @@ public class SttWorker implements InitializingBean {
             log.info("🧵 STT 워커 스레드 시작됨");
             while (true) {
                 try {
-                    SttRequest request = sttRequestQueue.take(); // 큐에서 하나 꺼냄
+                    SttRequest request = sttRequestQueue.take();
                     log.info("📥 STT 요청 처리 시작: {}", request.getInterviewAnswerId());
 
-                    String result = sttService.transcribeAudioSync(
-                            request.getInterviewAnswerId(),
-                            request.getFileBytes(),
-                            request.getOriginalFilename()
-                    );
+                    String result;
+                    try {
+                        result = sttService.transcribeAudioSync(
+                                request.getInterviewAnswerId(),
+                                request.getFileBytes(),
+                                request.getOriginalFilename()
+                        );
+                    } catch (Exception sttException) {
+                        log.error("❌ STT 변환 중 내부 예외", sttException);
+                        result = "stt 변환에 실패했습니다";  // 실패 메시지 fallback
+                    }
 
-                    interviewAnswerSaveService.saveInterviewAnswer(
-                            request.getUserId(), result, request.getInterviewAnswerId());
+                    try {
+                        interviewAnswerSaveService.saveInterviewAnswer(
+                                request.getUserId(), result, request.getInterviewAnswerId());
+                    } catch (Exception saveException) {
+                        log.error("❌ 답변 저장 중 예외 발생", saveException);
+                    }
 
                 } catch (Exception e) {
-                    log.error("❌ STT 처리 중 오류 발생", e);
-                    // 실패 시 처리 전략: 무시/재시도/데이터 저장 등
+                    log.error("❌ 큐에서 요청 take 실패", e);
+                    // request 객체가 없으므로 여기선 save 못 함
                 }
+
             }
         });
 
