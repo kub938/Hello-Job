@@ -8,3 +8,4 @@ openai-agents
 mcp
 pytest 
 pytest-asyncio
+google-api-python-client

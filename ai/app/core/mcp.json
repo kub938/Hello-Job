@@ -23,6 +23,18 @@
             "env": {
                 "NODE_OPTIONS": "--max-http-header-size=16384"
             }
+        },
+        "swot-analysis": {
+            "command": "python",
+            "args": [
+                "/root/hellojob/app/mcp/swot_analysis/server.py"
+            ]
+        },
+        "google-search": {
+            "command": "python",
+            "args": [
+                "/root/hellojob/app/mcp/google_search_mcp/google_search_mcp_server.py"
+            ]
         }
     }
 }

@@ -25,7 +25,7 @@ async def setup_mcp_servers():
     
     try:
         # mcp.json 파일에서 설정 읽기
-        with open('app/services/mcp.json', 'r') as f:
+        with open('app/core/mcp.json', 'r') as f:
             config = json.load(f)
         
         # 구성된 MCP 서버들을 순회
