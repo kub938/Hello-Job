@@ -105,7 +105,7 @@ function ReadCoverLetter({ onClose, id, page }: ReadCoverLetterProps) {
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={handleConfirmDelete}
-        title="프로젝트 삭제"
+        title="자기소개서 삭제"
         warning={true}
       >
         <p>정말 삭제하시겠습니까?</p>

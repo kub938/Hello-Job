@@ -111,7 +111,7 @@ const router = createBrowserRouter([
             element: <LazyComponent component={InterviewPage} />,
             children: [
               {
-                path: "result",
+                path: "result/:id",
                 element: <ResultPage />,
               },
               {

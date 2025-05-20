@@ -88,17 +88,23 @@ function Header({ isMinimize = false }: HeaderProps) {
                 <Link to="/corporate-search">기업/직무분석</Link>
               </li>
 
-              <li className={`${nowPath === pathName[1] && "text-accent "}`}>
+              <li
+                className={`${
+                  nowPath === pathName[1] || nowPath.includes("/cover-letter")
+                    ? "text-accent"
+                    : ""
+                }`}
+              >
                 <Link to="/cover-letter">자기소개서</Link>
               </li>
               <li
-                onClick={() => {
-                  alert("ai 모의면접은 2차 배포때 오픈됩니다!");
-                }}
-                className={`${nowPath === pathName[2] && "text-accent "}`}
+                className={`${
+                  nowPath === pathName[2] || nowPath.includes("/interview")
+                    ? "text-accent"
+                    : ""
+                }`}
               >
-                <button>면접</button>
-                {/* <Link to="/interview/select">면접</Link> */}
+                <Link to="/interview/select">모의 면접</Link>
               </li>
             </ul>
             <span>
@@ -107,7 +113,7 @@ function Header({ isMinimize = false }: HeaderProps) {
                   className="shadow-xs border  rounded-full px-4 py-1.5 text-sm mr-5 bg-white"
                   to="/mypage"
                 >
-                  {userName}님
+                  {userName}님 정보
                 </Link>
               ) : (
                 <Link

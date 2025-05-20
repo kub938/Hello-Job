@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
 import { usePostProject } from "@/hooks/projectHooks";
 import { PostProjectRequest } from "@/types/projectApiTypes";
+import { X } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 interface ProjectFormProps {
@@ -22,7 +23,7 @@ function ProjectForm({ onClose }: ProjectFormProps) {
 
   const mutation = usePostProject();
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClickCloseButton = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
@@ -50,8 +51,12 @@ function ProjectForm({ onClose }: ProjectFormProps) {
 
   return (
     <>
-      <div className="modal-overlay" onClick={handleOverlayClick}>
-        <div className="modal-container h-[80%]">
+      <div className="modal-overlay">
+        <div className="modal-container relative h-[80%] ">
+          <X
+            className="cursor-pointer absolute right-7 top-7"
+            onClick={handleClickCloseButton}
+          ></X>
           <div className="border-b pb-3 mb-5">
             <div className="text-2xl font-bold pb-1">프로젝트 추가</div>
             <div className="text-muted-foreground text-sm">

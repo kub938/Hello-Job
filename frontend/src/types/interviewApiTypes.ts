@@ -5,6 +5,20 @@ export interface QuestionResponse {
   question: string;
 }
 
+export interface QuestionCSResponse {
+  category:
+    | ""
+    | "네트워크"
+    | "운영체제"
+    | "컴퓨터구조"
+    | "데이터베이스"
+    | "알고리즘"
+    | "보안"
+    | "자료구조"
+    | "기타";
+  questionBankId: number;
+  question: string;
+}
 export interface StartQuestionInterviewResponse {
   interviewId: number;
   interviewVideoId: number;

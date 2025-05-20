@@ -1,7 +1,7 @@
 import Interviewer from "../../../assets/interview/Interviewer.webp";
 import VideoDisplay from "../components/VideoDisplay";
 import { useCameraDeviceStore, useAudioDeviceStore } from "@/store/deviceStore";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useCameraStream } from "../hooks/cameraStream";
 import { useAudioStream } from "../hooks/useAudioStream";
 import { Button } from "@/components/Button";
@@ -227,10 +227,17 @@ function PracticeInterviewPage() {
       );
 
       completeQuestionMutation.mutate({
+        type: "audio",
+        interviewAnswerId:
+          interviewData.questionList[nowQuestionNumber].interviewAnswerId, // 실제 인터뷰 정보 ID로 변경 필요
+        audioFile,
+      });
+
+      completeQuestionMutation.mutate({
+        type: "video",
         interviewAnswerId:
           interviewData.questionList[nowQuestionNumber].interviewAnswerId, // 실제 인터뷰 정보 ID로 변경 필요
         videoFile,
-        audioFile,
       });
     } catch (error) {
       console.error("API 제출 중 오류 발생:", error);
@@ -238,6 +245,10 @@ function PracticeInterviewPage() {
       throw error; // 상위 함수에서 처리할 수 있도록 에러 전파
     }
   };
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   return (
     <>
