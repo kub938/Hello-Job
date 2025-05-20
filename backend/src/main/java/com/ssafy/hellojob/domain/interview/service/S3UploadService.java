@@ -51,20 +51,20 @@ public class S3UploadService {
                 s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
                 log.debug("😎 S3 업로드 성공");
-                
+
+                throw new BaseException(TEST_ERROR); // 👈 여기에 예외 던짐
+
                 // 업로드 성공 시 URL 반환
-                return s3Client.utilities()
-                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
-                        .toString();
+//                return s3Client.utilities()
+//                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
+//                        .toString();
 
             } catch (IOException e) {
                 attempt++;
                 if (attempt >= maxRetries) {
                     // 로그를 남기거나 알림을 추가할 수도 있음
                     log.debug("❌ S3 업로드 실패 - 최대 재시도 횟수 초과: {}", e.getMessage());
-//                    break;
-                    throw new BaseException(TEST_ERROR); // 👈 여기에 예외 던짐
-
+                    break;
                 }
 
                 // 로그 및 재시도 딜레이 추가 (선택 사항)
