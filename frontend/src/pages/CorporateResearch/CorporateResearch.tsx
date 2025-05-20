@@ -203,7 +203,10 @@ function CorporateResearch({
       )}
 
       {isModalOpen && (
-        <DetailModal isOpen={isModalOpen} onClose={closeModal}>
+        <DetailModal
+          isOpen={isModalOpen}
+          onClose={modalView === "create" ? () => {} : closeModal}
+        >
           {modalView === "create" ? (
             <CreateCorporate
               onClose={closeModal}
