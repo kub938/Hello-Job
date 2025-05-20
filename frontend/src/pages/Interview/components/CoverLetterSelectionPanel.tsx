@@ -68,12 +68,12 @@ function CoverLetterSelectionPanel({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-border p-5">
+    <div className="bg-white h-[55vh] overflow-auto   rounded-xl shadow-sm border border-border p-5">
       <h2 className="text-xl font-bold mb-4 flex items-center">
         <FileText className="w-5 h-5 text-primary mr-2" />내 자기소개서
       </h2>
 
-      <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+      <div className="space-y-3  pr-2">
         {status === "pending" ? (
           <div className="py-4 flex justify-center">
             <RefreshCw className="w-5 h-5 animate-spin text-primary" />
@@ -135,7 +135,7 @@ function CoverLetterSelectionPanel({
 
         {/* 더 이상 데이터가 없을 때 */}
         {!hasNextPage && coverLetters.length > 0 && (
-          <div className="py-4 text-center text-sm text-muted-foreground">
+          <div className="pb-2 text-center text-sm text-muted-foreground">
             모든 자기소개서를 불러왔습니다.
           </div>
         )}

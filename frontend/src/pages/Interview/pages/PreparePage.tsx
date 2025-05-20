@@ -11,6 +11,7 @@ import { useStartInterview } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
+import Loading from "@/components/Loading/Loading";
 
 // MediaDevice 관련 타입 정의 - 미디어 장치(카메라, 마이크)의 정보를 저장하는 인터페이스
 interface MediaDeviceInfo {
@@ -422,6 +423,17 @@ function PreparePage() {
 
   return (
     <>
+      {startInterviewMutation.isPending && (
+        <>
+          <div className="modal-overlay">
+            <div className="modal-container h-50 w-100 flex flex-col justify-center items-center">
+              <Loading />
+              <div className="mt-3">자기소개서 기반 질문을 생성중 입니다</div>
+              <div>잠시만 기다려 주세요!</div>
+            </div>
+          </div>
+        </>
+      )}
       {/* 페이지 제목 및 안내 텍스트 */}
       <div className="mb-8 text-center">
         <h2 className="mb-2 text-2xl font-bold">면접 준비</h2>
