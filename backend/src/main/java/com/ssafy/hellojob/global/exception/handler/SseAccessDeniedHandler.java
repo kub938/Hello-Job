@@ -19,9 +19,16 @@ public class SseAccessDeniedHandler implements AccessDeniedHandler {
         if (accept != null && accept.contains("text/event-stream")) {
             // sse 에러인 경우 에러 무시
             log.debug("SSE 요청에서 AccessDenied 발생");
+            // 커밋된 상태면 아무것도 안 함
+            if (!response.isCommitted()) {
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            }
             return;
         }
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+        // 일반 요청 처리
+        if (!response.isCommitted()) {
+            response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
+        }
     }
 
 }

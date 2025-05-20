@@ -38,7 +38,7 @@ public class S3UploadService {
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName + ".")
+                .bucket(bucketName)
                 .key(key)
                 .contentType(file.getContentType())
                 .build();
@@ -54,7 +54,7 @@ public class S3UploadService {
                 
                 // 업로드 성공 시 URL 반환
                 return s3Client.utilities()
-                        .getUrl(GetUrlRequest.builder().bucket(bucketName + ".").key(key).build())
+                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
                         .toString();
 
             } catch (IOException e) {
