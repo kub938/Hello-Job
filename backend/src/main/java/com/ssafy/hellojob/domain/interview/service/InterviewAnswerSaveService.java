@@ -33,7 +33,7 @@ public class InterviewAnswerSaveService {
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final UserReadService userReadService;
     private final InterviewReadService interviewReadService;
-
+    private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
 
     @Value("${FFPROBE_PATH}")
     private String ffprobePath;
@@ -82,14 +82,25 @@ public class InterviewAnswerSaveService {
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
 
-        interviewAnswer.addInterviewAnswer(answer);
-        interviewAnswer.addInterviewVideoUrl(url);
-        interviewAnswer.addVideoLength(videoLength);
+        try{
+            interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", e);
+        }
+
+        try{
+            interviewAnswerContentSaveService.saveUrl(url, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 영상 url 저장 중 에러 발생 !!!: {}", e);
+        }
+
+        try{
+            interviewAnswerContentSaveService.saveTime(videoLength, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
+        }
 
         interviewAnswerRepository.flush();
-
-        log.debug("🧪 저장 직전 answer: {}", answer);
-        log.debug("🧪 저장 인터뷰 답변 ID: {}, 값: {}", interviewAnswer.getInterviewAnswerId(), interviewAnswer.getInterviewAnswer());
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
