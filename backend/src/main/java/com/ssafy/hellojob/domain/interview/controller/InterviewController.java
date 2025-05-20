@@ -195,7 +195,7 @@ public class InterviewController {
                                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
 
         interviewFeedbackSaveService.saveTitle(videoInfo.getInterviewVideoId(), videoInfo.getInterviewTitle());
-        Thread.sleep(60 * 1000);
+        Thread.sleep(30 * 1000);
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
 
