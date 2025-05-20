@@ -19,11 +19,11 @@ public class CoverLetterExperience {
     @Column(name = "cover_letter_experience")
     private Integer coverLetterExperienceId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn (name = "experience_id")
     private Experience experience;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
     private Project project;
 

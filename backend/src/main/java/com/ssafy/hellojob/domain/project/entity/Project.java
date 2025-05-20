@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.project.entity;
 
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterExperience;
 import com.ssafy.hellojob.domain.project.dto.request.ProjectRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
@@ -10,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -48,6 +51,9 @@ public class Project extends BaseTimeEntity {
 
     @Column(name = "project_end_date")
     private LocalDate projectEndDate;
+
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CoverLetterExperience> coverLetterExperiences = new ArrayList<>();
 
     @Builder
     public Project(User user,
