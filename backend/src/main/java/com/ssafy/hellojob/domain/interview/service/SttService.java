@@ -60,7 +60,9 @@ public class SttService {
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                return objectMapper.readTree(response.getBody()).get("text").asText();
+                String text = objectMapper.readTree(response.getBody()).get("text").asText();
+                log.debug("😎 stt 변환 결과: {}", text);
+                return text;
             } else {
                 return "stt 변환에 실패했습니다";
             }
@@ -74,7 +76,7 @@ public class SttService {
     private RestTemplate createTimeoutRestTemplate() {
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(3000);  // 연결 시도 최대 3초
-        factory.setReadTimeout(10000);    // 응답 대기 최대 10초
+        factory.setReadTimeout(20000);    // 응답 대기 최대 20초
         return new RestTemplate(factory);
     }
 
