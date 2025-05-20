@@ -227,10 +227,17 @@ function PracticeInterviewPage() {
       );
 
       completeQuestionMutation.mutate({
+        type: "audio",
+        interviewAnswerId:
+          interviewData.questionList[nowQuestionNumber].interviewAnswerId, // 실제 인터뷰 정보 ID로 변경 필요
+        audioFile,
+      });
+
+      completeQuestionMutation.mutate({
+        type: "video",
         interviewAnswerId:
           interviewData.questionList[nowQuestionNumber].interviewAnswerId, // 실제 인터뷰 정보 ID로 변경 필요
         videoFile,
-        audioFile,
       });
     } catch (error) {
       console.error("API 제출 중 오류 발생:", error);
