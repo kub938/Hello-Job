@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.ssafy.hellojob.domain.interview.dto.request.SttRequest;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.InitializingBean;
@@ -17,9 +18,19 @@ public class SttWorker implements InitializingBean {
     private final SttService sttService;
     private final InterviewAnswerSaveService interviewAnswerSaveService;
 
+
+    // SttWorker.java
+    @PostConstruct
+    public void logQueueInstance() {
+        log.info("🧪 SttWorker queue instance: {}", sttRequestQueue);
+    }
+
+
     @Override
     public void afterPropertiesSet() {
+        log.info("🚀 STT 워커 초기화 시작");
         Thread workerThread = new Thread(() -> {
+            log.info("🧵 STT 워커 스레드 시작됨");
             while (true) {
                 try {
                     SttRequest request = sttRequestQueue.take(); // 큐에서 하나 꺼냄
