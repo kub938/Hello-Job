@@ -97,6 +97,9 @@ pipeline {  // 파이프라인 정의 시작
                             mkdir -p certbot/conf
                             mkdir -p certbot/www
                             
+                            echo "🔄 빌드 권한 부여..."
+                            chmod +x backend/gradlew
+                            
                             echo "🔄 Building Docker images..."
                             docker-compose build \
                                 --build-arg DB_URL=$DB_URL \
