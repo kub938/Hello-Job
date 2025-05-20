@@ -38,6 +38,9 @@ interface WeekEvent {
 const Calendar = ({ scheduleList }: CalendarProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [researchId, setResearchId] = useState<number>(1);
+  const [hoveredScheduleId, setHoveredScheduleId] = useState<number | null>(
+    null
+  );
 
   const openReadModal = (id: number) => {
     setResearchId(id);
@@ -275,9 +278,17 @@ const Calendar = ({ scheduleList }: CalendarProps) => {
                   // 클릭하면 자기소개서 상세 페이지 모달
                   <button
                     key={`${event.schedule.scheduleId}-week-${weekIndex}-event-${idx}`}
-                    className={`absolute rounded-lg ${colorClass} text-[11px] text-left px-3 py-1 rounded whitespace-nowrap overflow-hidden text-ellipsis opacity-70 hover:opacity-100 transition-opacity cursor-pointer`}
+                    className={`absolute rounded-lg ${colorClass} text-[11px] text-left px-3 py-1 rounded whitespace-nowrap overflow-hidden text-ellipsis transition-opacity cursor-pointer ${
+                      hoveredScheduleId === event.schedule.scheduleId
+                        ? "opacity-100"
+                        : "opacity-70"
+                    }`}
                     style={{ left, width, top }}
                     title={event.schedule.scheduleMemo ?? ""}
+                    onMouseEnter={() =>
+                      setHoveredScheduleId(event.schedule.scheduleId)
+                    }
+                    onMouseLeave={() => setHoveredScheduleId(null)}
                     onClick={() =>
                       event.schedule.coverLetterId
                         ? openReadModal(event.schedule.coverLetterId)
