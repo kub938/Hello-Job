@@ -165,9 +165,15 @@ public class InterviewController {
         File tempVideoFile = File.createTempFile("video", ".webm");  // 또는 확장자 추출해서 지정
         videoFile.transferTo(tempVideoFile);
 
-        sttService.transcribeAudio(Integer.valueOf(interviewAnswerId), audioBytes, originalFilename).thenAccept(result -> {
-            interviewAnswerSaveService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), tempVideoFile); // 💡 실제 Bean을 통해 호출해야 @Transactional 적용됨
-        });
+        sttService.transcribeAudio(Integer.valueOf(interviewAnswerId), audioBytes, originalFilename)
+                .exceptionally(e -> {
+                    log.warn("❌ STT 변환 중 예외 발생: {}", e.getMessage());
+                    return "stt 변환에 실패했습니다";  // fallback 값
+                })
+                .thenAccept(result -> {
+                    interviewAnswerSaveService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), tempVideoFile);
+                });
+
     }
 
     // fast API 자소서 기반 질문 생성

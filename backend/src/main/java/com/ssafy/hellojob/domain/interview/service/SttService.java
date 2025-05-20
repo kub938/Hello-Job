@@ -1,7 +1,5 @@
 package com.ssafy.hellojob.domain.interview.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.interview.entity.InterviewAnswer;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,8 +15,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.STT_TRANSCRIBE_INTERRUPTED;
-import static com.ssafy.hellojob.global.exception.ErrorCode.VIDEO_TOO_LARGE;
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -44,7 +41,7 @@ public class SttService {
 
         log.debug("😎 면접 stt 함수 들어옴");
 
-        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
+        interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
         Resource audioResource = new ByteArrayResource(fileBytes) {
             @Override
@@ -91,20 +88,23 @@ public class SttService {
                         String.class
                 );
 
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    log.debug("😎 stt 변환 성공");
-                    String result = objectMapper.readTree(response.getBody()).get("text").asText();
-                    log.debug("😎 stt 변환 결과값 : {}", result);
+                throw new BaseException(TEST_ERROR);
 
-                    return CompletableFuture.completedFuture(result);
-                } else {
-                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
-                }
+//                if (response.getStatusCode().is2xxSuccessful()) {
+//                    ObjectMapper objectMapper = new ObjectMapper();
+//                    log.debug("😎 stt 변환 성공");
+//                    String result = objectMapper.readTree(response.getBody()).get("text").asText();
+//                    log.debug("😎 stt 변환 결과값 : {}", result);
+//
+//                    return CompletableFuture.completedFuture(result);
+//                } else {
+//                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
+//                }
 
             } catch (Exception e) {
                 attempt++;
                 if (attempt >= maxRetries) {
+                    log.debug("😱 삐상 !!!!!!!! stt에서 오류 발생 !!!!!!: {}", e);
                     return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
                 }
 

@@ -22,8 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.GET_VIDEO_LENGTH_FAIL;
-import static com.ssafy.hellojob.global.exception.ErrorCode.INVALID_USER;
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -164,6 +163,8 @@ public class InterviewAnswerSaveService {
             String durationStr = reader.readLine();
             ffprobeProcess.waitFor();
 
+
+
             // 파일 삭제
             try {
                 Files.deleteIfExists(webmTempFile.toPath());
@@ -185,14 +186,16 @@ public class InterviewAnswerSaveService {
                 return "";
             }
 
-            int hours = (int) durationInSeconds / 3600;
-            int minutes = ((int) durationInSeconds % 3600) / 60;
-            int seconds = (int) durationInSeconds % 60;
+            throw new BaseException(TEST_ERROR);
 
-            String result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
-            long end = System.nanoTime();
-            log.info("🎥 영상 길이: {} (처리 시간: {} ms)", result, (end - start) / 1_000_000);
-            return result;
+//            int hours = (int) durationInSeconds / 3600;
+//            int minutes = ((int) durationInSeconds % 3600) / 60;
+//            int seconds = (int) durationInSeconds % 60;
+//
+//            String result = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+//            long end = System.nanoTime();
+//            log.info("🎥 영상 길이: {} (처리 시간: {} ms)", result, (end - start) / 1_000_000);
+//            return result;
 
         } catch (Exception e) {
             log.error("❌ 영상 길이 추출 중 예외 발생: {}", e.getMessage(), e);
