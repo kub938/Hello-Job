@@ -40,9 +40,40 @@ public class InterviewAnswerSaveService {
     @Value("${FFMPEG_PATH}")
     private String ffmpegPath;
 
+    // 동영상 저장
+    @Transactional
+    public Map<String, String> saveVideo(Integer userId, String url, Integer interviewAnswerId, File tempVideoFile){
+        userReadService.findUserByIdOrElseThrow(userId);
+        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
+
+        String videoLength = "";
+        try {
+            videoLength = getVideoDurationWithFFprobe(tempVideoFile);
+        } catch (Exception e){
+            log.debug("영상 길이 추출 실패 - Exception: {}", e);
+            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
+        }
+
+        try{
+            interviewAnswerContentSaveService.saveUrl(url, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 영상 url 저장 중 에러 발생 !!!: {}", e);
+        }
+
+        try{
+            interviewAnswerContentSaveService.saveTime(videoLength, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
+        }
+
+        interviewAnswerRepository.flush();
+
+        return Map.of("message", "정상적으로 저장되었습니다.");
+    }
+
     // 한 문항 종료(면접 답변 저장)
     @Transactional
-    public Map<String, String> saveInterviewAnswer(Integer userId, String url, String answer, Integer interviewAnswerId, File tempVideoFile) {
+    public Map<String, String> saveInterviewAnswer(Integer userId, String answer, Integer interviewAnswerId) {
 
         log.debug("😎 면접 답변 저장 함수 들어옴 : {}", interviewAnswerId);
 
@@ -56,30 +87,10 @@ public class InterviewAnswerSaveService {
 
         validateUserOwnership(userId, interviewAnswer, interviewVideo);
 
-        String videoLength = "";
-        try {
-            videoLength = getVideoDurationWithFFprobe(tempVideoFile);
-        } catch (Exception e){
-            log.debug("영상 길이 추출 실패 - Exception: {}", e);
-            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
-        }
-
         try{
             interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
         } catch(Exception e){
             log.debug("😱 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", e);
-        }
-
-        try{
-            interviewAnswerContentSaveService.saveUrl(url, interviewAnswer);
-        } catch(Exception e){
-            log.debug("😱 삐상 !!! 영상 url 저장 중 에러 발생 !!!: {}", e);
-        }
-
-        try{
-            interviewAnswerContentSaveService.saveTime(videoLength, interviewAnswer);
-        } catch(Exception e){
-            log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
         }
 
         interviewAnswerRepository.flush();

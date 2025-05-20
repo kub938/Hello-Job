@@ -147,23 +147,17 @@ public class InterviewController {
         return interviewService.deleteMemo(memoId, userPrincipal.getUserId());
     }
 
-    // 한 문항 종료
+    // 한 문항 종료(stt + 텍스트 저장)
     @PostMapping("/practice/question")
     public void stopVoiceRecoding(@RequestPart("interviewAnswerId") String interviewAnswerId,
-                                  @RequestPart("videoFile") MultipartFile videoFile,
                                   @RequestPart("audioFile") MultipartFile audioFile,
                                   @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException {
 
         log.debug("😎 면접 한 문항 종료 요청 들어옴 : {}", interviewAnswerId);
 
-        String url = s3UploadService.uploadVideo(videoFile);
-
         // Controller에서 미리 byte[] 로 복사
         byte[] audioBytes = audioFile.getBytes();
         String originalFilename = audioFile.getOriginalFilename();
-
-        File tempVideoFile = File.createTempFile("video", ".webm");  // 또는 확장자 추출해서 지정
-        videoFile.transferTo(tempVideoFile);
 
         sttService.transcribeAudio(Integer.valueOf(interviewAnswerId), audioBytes, originalFilename)
                 .exceptionally(e -> {
@@ -171,9 +165,23 @@ public class InterviewController {
                     return "stt 변환에 실패했습니다";  // fallback 값
                 })
                 .thenAccept(result -> {
-                    interviewAnswerSaveService.saveInterviewAnswer(userPrincipal.getUserId(), url, result, Integer.parseInt(interviewAnswerId), tempVideoFile);
+                    interviewAnswerSaveService.saveInterviewAnswer(userPrincipal.getUserId(), result, Integer.parseInt(interviewAnswerId));
                 });
 
+    }
+
+    // 영상 저장(S3 업로드 + 시간 추출 및 저장)
+    @PostMapping("/practice/video")
+    public Map<String, String> saveVideo(@RequestPart("interviewAnswerId") String interviewAnswerId,
+                                         @RequestPart("videoFile") MultipartFile videoFile,
+                                         @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException {
+
+        String url = s3UploadService.uploadVideo(videoFile);
+
+        File tempVideoFile = File.createTempFile("video", ".webm");  // 또는 확장자 추출해서 지정
+        videoFile.transferTo(tempVideoFile);
+
+        return interviewAnswerSaveService.saveVideo(userPrincipal.getUserId(), url, Integer.parseInt(interviewAnswerId), tempVideoFile);
     }
 
     // fast API 자소서 기반 질문 생성
