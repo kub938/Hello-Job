@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @Slf4j
 @Service
@@ -25,14 +26,18 @@ public class InterviewAnswerContentSaveService {
         }
 
         try{
+            log.debug("🔍 트랜잭션 활성 여부: {}", TransactionSynchronizationManager.isActualTransactionActive());
+
             interviewAnswer.addInterviewAnswer(answer);
             interviewAnswerRepository.save(interviewAnswer);
-            interviewAnswerRepository.flush();  // 💥 강제로 즉시 반영 시도
+            interviewAnswerRepository.flush();
+
+            log.debug("✅ flush 완료");
 
 
-            log.debug("😎 답변 저장 완");
+            log.debug("😎 id: {} 답변 저장 완", interviewAnswer.getInterviewAnswerId());
         } catch(Exception e){
-            log.debug("😱 삐상 !!!!!!!!!!! 답변 db에 저장 중 에러 발생 !!!!!!!!!!!!!!!!!!!!!!!");
+            log.debug("😱 id: {} 삐상 !!!!!!!!!!! 답변 db에 저장 중 에러 발생 !!!!!!!!!!!!!!!!!!!!!!!", interviewAnswer.getInterviewAnswerId());
         }
 
     }

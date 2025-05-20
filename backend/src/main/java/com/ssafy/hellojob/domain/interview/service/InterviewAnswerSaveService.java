@@ -94,7 +94,7 @@ public class InterviewAnswerSaveService {
         try{
             interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
         } catch(Exception e){
-            log.debug("😱 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", e);
+            log.debug("😱 id:{} 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", interviewAnswerId, e);
         }
 
         interviewAnswerRepository.flush();
