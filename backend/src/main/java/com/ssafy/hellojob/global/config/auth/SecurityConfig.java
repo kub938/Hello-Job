@@ -4,7 +4,7 @@ import com.ssafy.hellojob.global.auth.service.OAuth2UserService;
 import com.ssafy.hellojob.global.auth.service.handler.OAuth2FailureHandler;
 import com.ssafy.hellojob.global.auth.service.handler.OAuth2SuccessHandler;
 import com.ssafy.hellojob.global.auth.token.JwtAuthenticationFilter;
-import com.ssafy.hellojob.global.exception.handler.SseAccessDeniedHandler;
+import com.ssafy.hellojob.global.filter.SseLoggingSuppressFilter;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +32,6 @@ public class SecurityConfig {
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
     private final OAuth2FailureHandler oAuth2FailureHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final SseAccessDeniedHandler sseAccessDeniedHandler;
 
     @Value("${frontend.url}")
     private String frontendUrl;
@@ -64,13 +63,13 @@ public class SecurityConfig {
                 )
                 //JWT 필터가 UsernamePasswordAuthenticationFilter 전에 실행되도록 지정, 비번 검증 전에 토큰의 유효성 검증
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new SseLoggingSuppressFilter(), JwtAuthenticationFilter.class)
                 // 인증 실패 핸들러 설정
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint((request, response, authException) ->
                                 // JWT 인증 실패 시 401 반환
                                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED)
                         )
-                        .accessDeniedHandler(sseAccessDeniedHandler)
                 );
         return http.build();
     }
