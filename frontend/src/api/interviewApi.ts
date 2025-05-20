@@ -8,6 +8,7 @@ import {
   CreateQuestionResponse,
   InterviewCategory,
   InterviewVideoQuestionRequest,
+  QuestionCSResponse,
   QuestionMemoRequest,
   QuestionResponse,
   SaveQuestionRequest,
@@ -24,7 +25,12 @@ export const interviewApi = {
   },
 
   getQuestions: (category: InterviewCategory) => {
-    return authApi.get<QuestionResponse[]>(
+    if (category !== "cs") {
+      return authApi.get<QuestionResponse[]>(
+        `/api/v1/interview/question/${category}`
+      );
+    }
+    return authApi.get<QuestionCSResponse[]>(
       `/api/v1/interview/question/${category}`
     );
   },
