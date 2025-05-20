@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +16,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.concurrent.CompletableFuture;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.*;
+import static com.ssafy.hellojob.global.exception.ErrorCode.STT_TRANSCRIBE_INTERRUPTED;
+import static com.ssafy.hellojob.global.exception.ErrorCode.VIDEO_TOO_LARGE;
 
 @Slf4j
 @Service
@@ -88,18 +90,16 @@ public class SttService {
                         String.class
                 );
 
-                throw new BaseException(TEST_ERROR);
+                if (response.getStatusCode().is2xxSuccessful()) {
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    log.debug("😎 stt 변환 성공");
+                    String result = objectMapper.readTree(response.getBody()).get("text").asText();
+                    log.debug("😎 stt 변환 결과값 : {}", result);
 
-//                if (response.getStatusCode().is2xxSuccessful()) {
-//                    ObjectMapper objectMapper = new ObjectMapper();
-//                    log.debug("😎 stt 변환 성공");
-//                    String result = objectMapper.readTree(response.getBody()).get("text").asText();
-//                    log.debug("😎 stt 변환 결과값 : {}", result);
-//
-//                    return CompletableFuture.completedFuture(result);
-//                } else {
-//                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
-//                }
+                    return CompletableFuture.completedFuture(result);
+                } else {
+                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
+                }
 
             } catch (Exception e) {
                 attempt++;
