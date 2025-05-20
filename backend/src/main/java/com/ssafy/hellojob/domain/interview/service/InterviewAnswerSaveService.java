@@ -10,7 +10,9 @@ import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.BufferedReader;
@@ -33,6 +35,8 @@ public class InterviewAnswerSaveService {
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final UserReadService userReadService;
     private final InterviewReadService interviewReadService;
+    @Lazy
+    private final InterviewAnswerSaveService self;
 
 
     @Value("${FFPROBE_PATH}")
@@ -40,6 +44,22 @@ public class InterviewAnswerSaveService {
 
     @Value("${FFMPEG_PATH}")
     private String ffmpegPath;
+
+    // 저장 함수
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveAnswer(String answer, InterviewAnswer interviewAnswer){
+        interviewAnswer.addInterviewAnswer(answer);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveUrl(String url, InterviewAnswer interviewAnswer){
+        interviewAnswer.addInterviewAnswer(url);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void saveTime(String time, InterviewAnswer interviewAnswer){
+        interviewAnswer.addInterviewAnswer(time);
+    }
 
     // 한 문항 종료(면접 답변 저장)
     @Transactional
@@ -82,14 +102,25 @@ public class InterviewAnswerSaveService {
             throw new BaseException(GET_VIDEO_LENGTH_FAIL);
         }
 
-        interviewAnswer.addInterviewAnswer(answer);
-        interviewAnswer.addInterviewVideoUrl(url);
-        interviewAnswer.addVideoLength(videoLength);
+        try{
+            self.saveAnswer(answer, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", e);
+        }
+
+        try{
+            self.saveUrl(url, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 영상 url 저장 중 에러 발생 !!!: {}", e);
+        }
+
+        try{
+            self.saveTime(videoLength, interviewAnswer);
+        } catch(Exception e){
+            log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
+        }
 
         interviewAnswerRepository.flush();
-
-        log.debug("🧪 저장 직전 answer: {}", answer);
-        log.debug("🧪 저장 인터뷰 답변 ID: {}, 값: {}", interviewAnswer.getInterviewAnswerId(), interviewAnswer.getInterviewAnswer());
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
