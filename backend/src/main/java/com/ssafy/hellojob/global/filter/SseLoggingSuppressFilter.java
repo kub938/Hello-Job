@@ -14,21 +14,19 @@ import java.io.IOException;
 public class SseLoggingSuppressFilter extends OncePerRequestFilter {
 
     @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return !request.getServletPath().startsWith("/sse");
-    }
-
-    @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-        // 인증 정보가 없을 경우 즉시 종료
-        if (SecurityContextHolder.getContext().getAuthentication() == null) {
-            log.warn("❌ 인증되지 않은 SSE 요청 차단: {}", request.getRequestURI());
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            return;
+        String uri = request.getRequestURI();
+        if (uri.startsWith("/sse")) {
+            // 인증 정보가 없을 경우 즉시 종료
+            if (SecurityContextHolder.getContext().getAuthentication() == null ||
+                    !SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
+                log.warn("❌ 인증되지 않은 SSE 요청 차단: {}", request.getRequestURI());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                return;
+            }
         }
-
         filterChain.doFilter(request, response);
     }
 
