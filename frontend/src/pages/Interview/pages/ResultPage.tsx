@@ -219,7 +219,7 @@ function ResultPage() {
           )}
           <div className="flex justify-end">
             <Button variant="default">
-              <Link to="/" className="text-base">
+              <Link to="/mypage/interviews-videos" className="text-base">
                 모의 면접 목록
               </Link>
             </Button>

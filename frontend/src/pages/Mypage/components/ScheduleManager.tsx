@@ -129,7 +129,7 @@ function ScheduleManager() {
 
   return (
     <DndProvider backend={HTML5Backend}>
-      <div className="w-full p-4 md:p-6 md:ml-56 transition-all duration-300">
+      <div className="w-full p-4 md:p-6 md:ml-58 transition-all duration-300">
         <div className="flex flex-row justify-between ">
           <div className="flex flex-row">
             <MypageHeader title="일정 관리" />
