@@ -43,6 +43,7 @@ public class InterviewFeedbackSaveService {
 
         // 꼬리 질문 json 직렬화
         interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
+        interviewVideo.feedbackEnd(true);
         interviewVideoRepository.save(interviewVideo);
 
         for (SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback : fastAPIResponseDto.getSingle_feedbacks()) {
@@ -60,8 +61,6 @@ public class InterviewFeedbackSaveService {
             }
 
             log.debug("jsonFeedbacks: {}", jsonFeedbacks);
-
-
 
             targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
             targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
