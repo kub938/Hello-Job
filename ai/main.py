@@ -1,9 +1,19 @@
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI
+
 from app.api.v1.endpoints import company_analysis, cover_letter, interview, tests
 from app.core.request_queue import init_request_queue, cleanup_request_queue
 from app.core.mcp_core import init_mcp_servers, cleanup_mcp_servers, get_mcp_servers
 
-app = FastAPI()
+load_dotenv()
+
+ENV = os.getenv("ENV", "PROD")
+
+if ENV.upper() == "DEV":
+    app = FastAPI()
+else:
+    app = FastAPI(docs_url=None, redoc_url=None)
 
 API_V1_STR = "/api/v1/ai"
 
