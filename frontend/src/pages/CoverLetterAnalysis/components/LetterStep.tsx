@@ -10,7 +10,7 @@ function LetterStep({ nowStep }: LetterStepProps) {
     "2. 기업분석 선택",
     "3. 직무분석 선택",
     "4. 문항 입력",
-    "5. 초안 생성",
+    "5. 초안 생성 및 수정",
   ];
 
   const stepStyle = (select: boolean) => {
