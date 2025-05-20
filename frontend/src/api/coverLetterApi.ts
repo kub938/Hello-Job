@@ -38,6 +38,10 @@ export const coverLetterApi = {
     );
   },
 
+  completeCoverLetter: (coverLetterId: number) => {
+    return authApi.patch(`/api/v1/cover-letter/${coverLetterId}`);
+  },
+
   sendMessage: (message: sendMessageRequest) => {
     return authApi.post(
       `/api/v1/cover-letter-content/${message.contentId}/chat`,

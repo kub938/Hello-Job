@@ -1,6 +1,18 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router";
 import { useState, useEffect } from "react";
-import { FaBars, FaChevronLeft } from "react-icons/fa";
+import {
+  FaBars,
+  FaChevronLeft,
+  FaCalendarAlt,
+  FaFileAlt,
+  FaBookmark,
+  FaBuilding,
+  FaBriefcase,
+  FaProjectDiagram,
+  FaUserTie,
+  FaVideo,
+  FaUserCog,
+} from "react-icons/fa";
 import { userAuthApi } from "@/api/userAuth";
 import { useAuthStore } from "@/store/userStore";
 
@@ -29,16 +41,24 @@ function Mypage() {
 
   // 네비게이션 아이템 정의
   const navItems = [
-    { path: "schedule", label: "일정 관리" },
-    { path: "cover-letter-list", label: "자기소개서 목록" },
-    { path: "bookmarks/companies", label: "기업 분석 즐겨찾기" },
-    { path: "bookmarks/jobs", label: "직무 분석 즐겨찾기" },
-    { path: "my-companies", label: "나의 기업 분석" },
-    { path: "my-jobs", label: "나의 직무 분석" },
-    { path: "my-project", label: "나의 프로젝트" },
-    { path: "my-experience", label: "나의 경험" },
-    { path: "interviews-videos", label: "모의 면접 영상" },
-    { path: "account", label: "계정 설정" },
+    { path: "schedule", label: "일정 관리", icon: <FaCalendarAlt /> },
+    {
+      path: "cover-letter-list",
+      label: "자기소개서 목록",
+      icon: <FaFileAlt />,
+    },
+    {
+      path: "bookmarks/companies",
+      label: "기업 분석 북마크",
+      icon: <FaBookmark />,
+    },
+    { path: "bookmarks/jobs", label: "직무 분석 북마크", icon: <FaBookmark /> },
+    { path: "my-companies", label: "나의 기업 분석", icon: <FaBuilding /> },
+    { path: "my-jobs", label: "나의 직무 분석", icon: <FaBriefcase /> },
+    { path: "my-project", label: "나의 프로젝트", icon: <FaProjectDiagram /> },
+    { path: "my-experience", label: "나의 경험", icon: <FaUserTie /> },
+    { path: "interviews-videos", label: "모의 면접 영상", icon: <FaVideo /> },
+    { path: "account", label: "계정 설정", icon: <FaUserCog /> },
   ];
 
   // 로그아웃 처리 함수
@@ -76,7 +96,7 @@ function Mypage() {
           md:translate-x-0
           transition-transform duration-300 ease-in-out
           fixed z-10
-          w-56 h-full bg-white flex flex-col items-center justify-between 
+          w-58 h-full bg-white flex flex-col items-center justify-between 
           p-5 border-r border-[#E4E8F0] shadow-md
         `}
       >
@@ -104,7 +124,21 @@ function Mypage() {
                       : "hover:bg-gray-100"
                   }`}
                 >
-                  {item.label}
+                  <div className="flex items-center">
+                    <span
+                      className={`mr-3 ${
+                        location.pathname === "/mypage" &&
+                        item.label === "일정 관리"
+                          ? ""
+                          : location.pathname === `/mypage/${item.path}`
+                          ? ""
+                          : "text-gray-500"
+                      }`}
+                    >
+                      {item.icon}
+                    </span>
+                    <span>{item.label}</span>
+                  </div>
                 </Link>
               </li>
             ))}

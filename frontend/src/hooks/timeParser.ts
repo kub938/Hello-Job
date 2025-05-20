@@ -18,11 +18,21 @@ export const timeParser = (time: string): string => {
     return `${diffInMinutes}분 전`;
   }
 
-  // 하루 이내: 'HH:MM' 형식
+  // 하루 이내: 'n시간 전전' 형식
   if (diffInDays < 1) {
-    const hours = targetTime.getHours().toString().padStart(2, "0");
-    const minutes = targetTime.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
+    return `${diffInHours}시간 전`;
+  }
+
+  // 어제 표기
+  if (diffInDays < 2) {
+    const target_month = targetTime.getMonth();
+    const current_month = currentTime.getMonth();
+    const target_day = targetTime.getDay();
+    const current_day = currentTime.getDay();
+
+    if (target_month > current_month || target_day < current_day) {
+      return "어제";
+    }
   }
 
   // 하루 이상: 'YYYY. MM. DD.' 형식 (toLocaleDateString 사용)

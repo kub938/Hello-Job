@@ -4,7 +4,7 @@ import {
   CoverLetterPostRequest,
   getCoverLetterContentIdsResponse,
 } from "@/types/coverLetterTypes";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
@@ -112,20 +112,35 @@ export const useGetContentStatus = (coverLetterId: number) => {
       console.log(response.data);
       return response.data;
     },
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
   });
 };
 
 export const useSaveCoverLetter = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationKey: ["save-cover-letter-question"],
     mutationFn: async (saveData: SaveCoverLetterRequest) => {
       const response = await coverLetterApi.saveCoverLetter(saveData);
       return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cover-letter-status"] });
+    },
+  });
+};
+
+export const useCompleteCoverLetter = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationKey: ["complete-cover-letter"],
+    mutationFn: async (coverLetterId: number) => {
+      const response = await coverLetterApi.completeCoverLetter(coverLetterId);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cover-letter-status"] });
     },
   });
 };

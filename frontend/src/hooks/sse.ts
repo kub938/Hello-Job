@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { useNavigate } from "react-router";
+import { data, useNavigate } from "react-router";
+import { sseAckHandler } from "@/utils/sseAckHandler";
 
 export default function useSSE(isLoggedIn: boolean) {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function useSSE(isLoggedIn: boolean) {
     // 기업 분석 완료 이벤트 수신
     eventSource.addEventListener(
       "company-analysis-completed",
-      (e: MessageEvent) => {
+      async (e: MessageEvent) => {
         const data = JSON.parse(e.data);
         // console.log("기업 분석 완료 이벤트:", data);
         const { companyId, companyAnalysisId } = data;
@@ -34,14 +35,16 @@ export default function useSSE(isLoggedIn: boolean) {
               ),
           },
         });
+        await sseAckHandler("company-analysis-completed", data);
       }
     );
 
     // 기업 분석 실패 이벤트 수신
     eventSource.addEventListener(
       "company-analysis-failed",
-      (e: MessageEvent) => {
-        const companyId = JSON.parse(e.data);
+      async (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
+        const { companyId } = data;
         // console.log("기업 분석 실패 이벤트:", companyId);
         toast("기업 분석이 실패했습니다!", {
           description: "잠시 후 다시 시도해주세요",
@@ -50,33 +53,14 @@ export default function useSSE(isLoggedIn: boolean) {
             onClick: () => navigate(`/corporate-research/${companyId}`),
           },
         });
-      }
-    );
-
-    // 기업 분석 완료 이벤트 수신
-    eventSource.addEventListener(
-      "company-analysis-completed",
-      (e: MessageEvent) => {
-        const data = JSON.parse(e.data);
-        // console.log("기업 분석 완료 이벤트:", data);
-        const { companyId, companyAnalysisId } = data;
-        toast("기업 분석이 완료되었습니다!", {
-          description: "결과를 확인하려면 클릭하세요",
-          action: {
-            label: "보러가기",
-            onClick: () =>
-              navigate(
-                `/corporate-research/${companyId}?openId=${companyAnalysisId}`
-              ),
-          },
-        });
+        await sseAckHandler("company-analysis-failed", data);
       }
     );
 
     // 인터뷰 결과 분석 완료 이벤트 수신
     eventSource.addEventListener(
       "interview-feedback-completed",
-      (_e: MessageEvent) => {
+      async (_e: MessageEvent) => {
         // const interviewResultId = JSON.parse(e.data);
         // console.log("인터뷰 결과 분석 완료 이벤트:", interviewResultId);
         toast("인터뷰 결과 분석이 완료되었습니다!", {
@@ -86,13 +70,15 @@ export default function useSSE(isLoggedIn: boolean) {
             onClick: () => navigate(`/mypage/interviews-videos`),
           },
         });
+        await sseAckHandler("interview-feedback-completed", data);
       }
     );
 
     // 인터뷰 결과 분석 실패 이벤트 수신
     eventSource.addEventListener(
       "interview-feedback-failed",
-      (_e: MessageEvent) => {
+      async (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
         // const interviewResultId = JSON.parse(e.data);
         // console.log("인터뷰 결과 분석 실패 이벤트:", interviewResultId);
         toast("인터뷰 결과 분석이 실패했습니다!", {
@@ -102,6 +88,7 @@ export default function useSSE(isLoggedIn: boolean) {
             onClick: () => navigate(`/mypage/interviews-videos`),
           },
         });
+        await sseAckHandler("interview-feedback-failed", data);
       }
     );
 

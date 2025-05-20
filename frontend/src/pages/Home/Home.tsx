@@ -41,12 +41,12 @@ export default function Home() {
         </div>
         <div className="flex justify-between mt-[10vh]">
           <div
-            onClick={() => openModal({ title: "인적사항 입력 기능 준비 중!" })}
+            onClick={() => openModal({ title: "인적사항 관리 기능 준비 중!" })}
           >
             <LocateBtn
               to="/"
               iconComponent={<HiOutlineDocumentText className="w-10 h-10" />}
-              title="인적사항 입력"
+              title="인적사항 관리"
               description="인적 사항을 이곳에 저장해두고 자동 입력 기능을 사용하세요!"
               disabled={true}
             />
@@ -61,17 +61,14 @@ export default function Home() {
             to="/cover-letter"
             iconComponent={<PiNotePencilBold className="w-10 h-10" />}
             title="자기소개서 작성"
-            description="AI를 활용해 자기소개서 초안을 작성하거나 첨삭을 받아보세요!"
+            description="AI를 활용해 자기소개서 초안을 작성하고 첨삭을 받아보세요!"
           />
-          <div onClick={() => openModal({ title: "모의 면접 기능 준비 중!" })}>
-            <LocateBtn
-              to="/"
-              iconComponent={<MdPeopleAlt className="w-10 h-10" />}
-              title="모의 면접"
-              description="예상 질문을 확인하고 모의 면접을 통해 자신감을 키워보세요!"
-              disabled={true}
-            />
-          </div>
+          <LocateBtn
+            to="/interview/select"
+            iconComponent={<MdPeopleAlt className="w-10 h-10" />}
+            title="AI 모의 면접"
+            description="면접관의 시선으로 본 당신의 답변, 지금 확인하세요"
+          />
         </div>
       </main>
       <Modal

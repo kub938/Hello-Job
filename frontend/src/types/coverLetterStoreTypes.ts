@@ -23,6 +23,7 @@ export interface SelectCompanyState {
   company: CompanyState;
 
   setSelectCompany: (company: CompanyState) => void;
+  resetSelectCompany: () => void;
 }
 
 export interface CoverLetterInputStoreType {
@@ -48,4 +49,5 @@ export interface CoverLetterInputStoreType {
     contentIndex: number,
     updatedData: Partial<CoverLetterRequestContent>
   ) => void;
+  resetAllInputs: () => void;
 }

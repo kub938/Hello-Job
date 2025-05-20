@@ -1,13 +1,14 @@
 import {
   DeleteInterviewResultResponse,
+  InterviewResult,
   InterviewResultDetailResponse,
-  InterviewResultListResponse,
 } from "@/types/interviewResult";
 import { authApi } from "./instance";
 import {
   CreateQuestionResponse,
   InterviewCategory,
   InterviewVideoQuestionRequest,
+  QuestionCSResponse,
   QuestionMemoRequest,
   QuestionResponse,
   SaveQuestionRequest,
@@ -24,7 +25,12 @@ export const interviewApi = {
   },
 
   getQuestions: (category: InterviewCategory) => {
-    return authApi.get<QuestionResponse[]>(
+    if (category !== "cs") {
+      return authApi.get<QuestionResponse[]>(
+        `/api/v1/interview/question/${category}`
+      );
+    }
+    return authApi.get<QuestionCSResponse[]>(
       `/api/v1/interview/question/${category}`
     );
   },
@@ -82,27 +88,32 @@ export const interviewApi = {
 
   // 미디어 저장 API - 통합 방식
   completeQuestion: (
+    type: "video" | "audio",
     interviewAnswerId: number,
-    videoFile: File,
-    audioFile: File
+    videoFile?: File,
+    audioFile?: File
   ) => {
     const formData = new FormData();
-
-    // interviewAnswerId를 application/json 형식으로 설정
     const jsonBlob = new Blob([JSON.stringify(interviewAnswerId)], {
       type: "application/json",
     });
     formData.append("interviewAnswerId", jsonBlob);
 
-    // 파일 필드는 그대로 추가
-    formData.append("videoFile", videoFile);
-    formData.append("audioFile", audioFile);
-
-    return authApi.post("/api/v1/interview/practice/question", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    if (type === "video" && videoFile) {
+      formData.append("videoFile", videoFile);
+      return authApi.post("/api/v1/interview/practice/video", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } else if (type === "audio" && audioFile) {
+      formData.append("audioFile", audioFile);
+      return authApi.post("/api/v1/interview/practice/question", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    }
   },
 
   // 모의 면접 시작 API - 카테고리를 인자로 받는 통합 방식
@@ -177,11 +188,11 @@ export const interviewApi = {
 
 export const interviewResultApi = {
   getInterviewList: () => {
-    return authApi.get<InterviewResultListResponse>(`/api/v1/interview`);
+    return authApi.get<InterviewResult[]>(`/api/v1/interview`);
   },
   getInterviewDetail: (interviewVideoId: number) => {
     return authApi.get<InterviewResultDetailResponse>(
-      `/api/v1/interview/${interviewVideoId}`
+      `/api/v1/interview/feedback/${interviewVideoId}`
     );
   },
   deleteInterviewResult: (interviewVideoId: number) => {

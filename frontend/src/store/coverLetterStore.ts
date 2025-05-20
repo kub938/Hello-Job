@@ -58,7 +58,25 @@ export const useCoverLetterInputStore = create<CoverLetterInputStoreType>(
         },
       ],
     },
-
+    resetAllInputs: () => {
+      set({
+        inputData: {
+          companyAnalysisId: null,
+          jobRoleAnalysisId: null,
+          coverLetterTitle: "",
+          contents: [
+            {
+              contentQuestion: "",
+              contentNumber: 1,
+              contentExperienceIds: [],
+              contentProjectIds: [],
+              contentLength: 0,
+              contentFirstPrompt: "",
+            },
+          ],
+        },
+      });
+    },
     setCoverLetterTitle: (title: string) => {
       set((state) => ({
         inputData: {

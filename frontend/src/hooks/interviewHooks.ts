@@ -133,20 +133,23 @@ export const useCompleteQuestion = () => {
   return useMutation({
     mutationKey: ["complete-question"],
     mutationFn: async ({
+      type,
       interviewAnswerId,
       videoFile,
       audioFile,
     }: {
+      type: "audio" | "video";
       interviewAnswerId: number;
-      videoFile: File;
-      audioFile: File;
+      videoFile?: File;
+      audioFile?: File;
     }) => {
       const response = await interviewApi.completeQuestion(
+        type,
         interviewAnswerId,
         videoFile,
         audioFile
       );
-      return response.data;
+      return response?.data;
     },
     onSuccess: () => {
       toast.success("답변이 성공적으로 제출되었습니다!");
