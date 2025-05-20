@@ -318,7 +318,7 @@ public class InterviewService {
             throw new BaseException(INVALID_USER);
         }
 
-        // 면접이 없을 경우(처음 시도한느 유저)
+        // 면접이 없을 경우(처음 시도하는 유저)
         CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
                     CoverLetterInterview newInterview = CoverLetterInterview.of(user, coverLetter); 
@@ -329,14 +329,19 @@ public class InterviewService {
         InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
-        // 질문 랜덤하게 가져오기
-        List<CoverLetterQuestionBank> all = coverLetterQuestionBankRepository.findByCoverLetterInterview(interview);
-        Collections.shuffle(all); // Java 내부에서 무작위 섞기
-        List<CoverLetterQuestionBank> selectedQuestion = all.stream()
-                .limit(QUESTION_SIZE)
-                .toList();
+        CoverLetterIdRequestDto requestDto = CoverLetterIdRequestDto.builder()
+                .coverLetterId(coverLetterId)
+                .build();
 
-        List<QuestionAndAnswerListResponseDto> questionList = selectedQuestion.stream()
+        CreateCoverLetterQuestionResponseDto responseDto = createCoverLetterQuestion(userId, requestDto);
+        List<CoverLetterQuestionBank> newQuestions = new ArrayList<>();
+
+        for(String s:responseDto.getCoverLetterQuestion()){
+            CoverLetterQuestionBank qs = CoverLetterQuestionBank.of(interview, s);
+            newQuestions.add(qs);
+        }
+
+        List<QuestionAndAnswerListResponseDto> questionList = newQuestions.stream()
                 .map(q -> {
                     InterviewAnswer answer = InterviewAnswer.of(video, q.getCoverLetterQuestion(), InterviewQuestionCategory.valueOf("자기소개서면접"));
                     interviewAnswerRepository.save(answer);
