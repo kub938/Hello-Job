@@ -1,5 +1,6 @@
 import { Button } from "@/components/Button";
 import { Link } from "react-router";
+import googleIconUrl from "@/assets/google-icon.svg";
 
 function Login() {
   const handleGoogleLogin = () => {
@@ -71,8 +72,8 @@ function Login() {
                 onClick={handleGoogleLogin}
               >
                 <img
-                  src="../../src/assets/google-icon.svg"
-                  alt="구글 로고"
+                  src={googleIconUrl}
+                  alt="Google 로고"
                   className="h-4 w-4"
                 />
                 Google 로그인
