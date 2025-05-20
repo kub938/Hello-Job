@@ -54,12 +54,10 @@ public class S3UploadService {
 
                     log.debug("😎 S3 업로드 성공");
 
-                    throw new BaseException(TEST_ERROR); // 👈 여기에 예외 던짐
-
                     // 업로드 성공 시 URL 반환
-//                return s3Client.utilities()
-//                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
-//                        .toString();
+                return s3Client.utilities()
+                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
+                        .toString();
 
                 } catch (IOException e) {
                     attempt++;
@@ -74,7 +72,7 @@ public class S3UploadService {
                 }
             }
         } catch(Exception e){
-            log.debug("😱 S3 업로드 저장 도중 에러 발생 !!!!: {}", e);
+            log.debug("😱 삐상 !!!!! S3 업로드 저장 도중 에러 발생 !!!!: {}", e);
             return "";
         }
 
