@@ -88,7 +88,8 @@ pipeline {  // 파이프라인 정의 시작
                         string(credentialsId: 'GMS_KEY', variable: 'GMS_KEY'),
                         string(credentialsId: 'GMS_API_BASE', variable: 'GMS_API_BASE'),
                         string(credentialsId: 'FFPROBE_PATH', variable: 'FFPROBE_PATH'),
-                        string(credentialsId: 'FFMPEG_PATH', variable: 'FFMPEG_PATH')
+                        string(credentialsId: 'FFMPEG_PATH', variable: 'FFMPEG_PATH'),
+                        string(credentialsId: 'FASTAPI_ENV', variable: 'FASTAPI_ENV')
                     ]) {
                         sh '''
                             echo "🔄 Stopping existing containers..."
