@@ -24,6 +24,5 @@ public class SseAccessDeniedHandler implements AccessDeniedHandler {
         response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied");
     }
 
-    ;
 }
 
