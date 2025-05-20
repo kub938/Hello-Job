@@ -18,17 +18,20 @@ public class InterviewAnswerContentSaveService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveAnswer(String answer, InterviewAnswer interviewAnswer){
         interviewAnswer.addInterviewAnswer(answer);
+        log.debug("😎 답변 저장 완");
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveUrl(String url, InterviewAnswer interviewAnswer){
         throw new BaseException(ErrorCode.TEST_ERROR);
-//        interviewAnswer.addInterviewAnswer(url);
+//        interviewAnswer.addInterviewVideoUrl(url);
+//        log.debug("😎 영상 저장 완");
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void saveTime(String time, InterviewAnswer interviewAnswer){
-        interviewAnswer.addInterviewAnswer(time);
+        interviewAnswer.addVideoLength(time);
+        log.debug("😎 시간 저장 완");
     }
 
 }
