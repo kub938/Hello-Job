@@ -2,9 +2,11 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { data, useNavigate } from "react-router";
 import { sseAckHandler } from "@/utils/sseAckHandler";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function useSSE(isLoggedIn: boolean) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -63,6 +65,8 @@ export default function useSSE(isLoggedIn: boolean) {
       async (_e: MessageEvent) => {
         // const interviewResultId = JSON.parse(e.data);
         // console.log("인터뷰 결과 분석 완료 이벤트:", interviewResultId);
+        queryClient.invalidateQueries({ queryKey: ["interviewResultList"] });
+
         toast("인터뷰 결과 분석이 완료되었습니다!", {
           description: "결과를 확인하려면 클릭하세요",
           action: {
@@ -81,6 +85,8 @@ export default function useSSE(isLoggedIn: boolean) {
         const data = JSON.parse(e.data);
         // const interviewResultId = JSON.parse(e.data);
         // console.log("인터뷰 결과 분석 실패 이벤트:", interviewResultId);
+        queryClient.invalidateQueries({ queryKey: ["interviewResultList"] });
+
         toast("인터뷰 결과 분석이 실패했습니다!", {
           description: "잠시 후 다시 시도해주세요",
           action: {
