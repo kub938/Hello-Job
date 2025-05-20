@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -72,11 +72,12 @@ public class SttService {
     }
 
     private RestTemplate createTimeoutRestTemplate() {
-        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
-        factory.setConnectTimeout(3000); // 연결 타임아웃 (ms)
-        factory.setReadTimeout(10000);   // 응답 대기 타임아웃 (ms)
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(3000);  // 연결 시도 최대 3초
+        factory.setReadTimeout(10000);    // 응답 대기 최대 10초
         return new RestTemplate(factory);
     }
+
 
 
 }
