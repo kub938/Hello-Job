@@ -1,16 +1,31 @@
-# Node.js 경량 이미지
-FROM node:22.3.0-alpine
-# 작업 디렉토리
+# 빌드 스테이지
+FROM node:22.3.0-alpine AS build
+
+# 작업 디렉토리 설정
 WORKDIR /app
-# package.json 파일 복사
+
+# 의존성 파일 복사 및 설치
 COPY package*.json ./
-# 의존성 설치
 RUN npm install --legacy-peer-deps
+
 # 소스 코드 복사
 COPY . .
-# 프로젝트 빌드
+
+# 빌드 실행
 RUN npm run build
+
+# 실행 스테이지
+FROM nginx:stable-alpine
+
+# nginx 기본 설정 삭제
+RUN rm -rf /etc/nginx/conf.d/*
+
+# Nginx 설정 추가
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+
 # 포트 설정
 EXPOSE 5173
-# 실행 명령어 수정 - npm start 대신 npm run dev 사용
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
+
+# Nginx 실행
+CMD ["nginx", "-g", "daemon off;"]
