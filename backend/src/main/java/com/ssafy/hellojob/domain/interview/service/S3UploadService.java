@@ -38,7 +38,7 @@ public class S3UploadService {
         String key = "videos/" + UUID.randomUUID() + "_" + originalFileName;
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                .bucket(bucketName + ".")
+                .bucket(bucketName)
                 .key(key)
                 .contentType(file.getContentType())
                 .build();
@@ -54,7 +54,7 @@ public class S3UploadService {
                 
                 // 업로드 성공 시 URL 반환
                 return s3Client.utilities()
-                        .getUrl(GetUrlRequest.builder().bucket(bucketName + ".").key(key).build())
+                        .getUrl(GetUrlRequest.builder().bucket(bucketName).key(key).build())
                         .toString();
 
             } catch (IOException e) {
@@ -62,7 +62,9 @@ public class S3UploadService {
                 if (attempt >= maxRetries) {
                     // 로그를 남기거나 알림을 추가할 수도 있음
                     log.debug("❌ S3 업로드 실패 - 최대 재시도 횟수 초과: {}", e.getMessage());
-                    break;
+//                    break;
+                    throw new BaseException(TEST_ERROR); // 👈 여기에 예외 던짐
+
                 }
 
                 // 로그 및 재시도 딜레이 추가 (선택 사항)
