@@ -22,8 +22,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.GET_VIDEO_LENGTH_FAIL;
-import static com.ssafy.hellojob.global.exception.ErrorCode.INVALID_USER;
+import static com.ssafy.hellojob.global.exception.ErrorCode.*;
 
 @Slf4j
 @Service
@@ -163,6 +162,8 @@ public class InterviewAnswerSaveService {
             BufferedReader reader = new BufferedReader(new InputStreamReader(ffprobeProcess.getInputStream()));
             String durationStr = reader.readLine();
             ffprobeProcess.waitFor();
+
+
 
             // 파일 삭제
             try {

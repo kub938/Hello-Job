@@ -1,7 +1,6 @@
 package com.ssafy.hellojob.domain.interview.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.domain.interview.entity.InterviewAnswer;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,7 +43,7 @@ public class SttService {
 
         log.debug("😎 면접 stt 함수 들어옴");
 
-        InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
+        interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
         Resource audioResource = new ByteArrayResource(fileBytes) {
             @Override
@@ -105,6 +104,7 @@ public class SttService {
             } catch (Exception e) {
                 attempt++;
                 if (attempt >= maxRetries) {
+                    log.debug("😱 삐상 !!!!!!!! stt에서 오류 발생 !!!!!!: {}", e);
                     return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
                 }
 
