@@ -61,13 +61,13 @@ export default function Home() {
             to="/cover-letter"
             iconComponent={<PiNotePencilBold className="w-10 h-10" />}
             title="자기소개서 작성"
-            description="AI를 활용해 자기소개서 초안을 작성하거나 첨삭을 받아보세요!"
+            description="AI를 활용해 자기소개서 초안을 작성하고 첨삭을 받아보세요!"
           />
           <LocateBtn
             to="/interview/select"
             iconComponent={<MdPeopleAlt className="w-10 h-10" />}
-            title="모의 면접"
-            description="예상 질문을 확인하고 모의 면접을 통해 자신감을 키워보세요!"
+            title="AI 모의 면접"
+            description="면접관의 시선으로 본 당신의 답변, 지금 확인하세요"
           />
         </div>
       </main>
