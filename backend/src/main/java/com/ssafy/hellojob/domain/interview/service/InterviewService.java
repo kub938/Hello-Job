@@ -739,7 +739,7 @@ public class InterviewService {
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if (interviewQuestionAndAnswerRequestDto.isEmpty()) {
-            interviewFeedbackSaveService.saveTitle(interviewVideo);
+            return Map.of("message", "전 문항 stt 변환에 실패하여 피드백 요청 없이 결과값 반환합니다.");
         }
 
         // 자소서 조회

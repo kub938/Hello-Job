@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.ssafy.hellojob.global.exception.ErrorCode.SERIALIZATION_FAIL;
 
@@ -26,14 +27,14 @@ public class InterviewFeedbackSaveService {
 
     private final InterviewAnswerRepository interviewAnswerRepository;
     private final InterviewVideoRepository interviewVideoRepository;
+    private final InterviewReadService interviewReadService;
 
     @Transactional
-    public EndInterviewResponseDto saveTitle(InterviewVideo interviewVideo){
-        return EndInterviewResponseDto.builder()
-                .interviewVideoId(interviewVideo.getInterviewVideoId())
-                .build();
+    public Map<String, String> saveTitle(Integer videoId, String title){
+        InterviewVideo video = interviewReadService.findInterviewVideoByIdOrElseThrow(videoId);
+        video.addTitle(title);
+        return Map.of("message", "정상적으로 저장되었습니다.");
     }
-
 
     @Transactional
     public EndInterviewResponseDto saveFeedback(InterviewFeedbackFastAPIResponseDto fastAPIResponseDto, List<InterviewAnswer> interviewAnswers, InterviewVideo interviewVideo){
