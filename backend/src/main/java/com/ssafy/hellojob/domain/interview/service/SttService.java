@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +61,10 @@ public class SttService {
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 ObjectMapper objectMapper = new ObjectMapper();
-                String text = objectMapper.readTree(response.getBody()).get("text").asText();
+                JsonNode root = objectMapper.readTree(response.getBody());
+                String text = root.has("text") && !root.get("text").isNull()
+                        ? root.get("text").asText()
+                        : "stt 변환에 실패했습니다";
                 log.debug("😎 stt 변환 결과: {}", text);
                 return text;
             } else {

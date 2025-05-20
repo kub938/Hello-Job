@@ -154,17 +154,27 @@ public class InterviewController {
 
         log.debug("😎 면접 한 문항 종료 요청 들어옴 : {}", interviewAnswerId);
 
-        byte[] audioBytes = audioFile.getBytes();
-        String originalFilename = audioFile.getOriginalFilename();
+        try{
+            byte[] audioBytes = audioFile.getBytes();
+            String originalFilename = audioFile.getOriginalFilename();
 
-        SttRequest request = new SttRequest(
-                Integer.valueOf(interviewAnswerId),
-                audioBytes,
-                originalFilename,
-                userPrincipal.getUserId()
-        );
+            SttRequest request = new SttRequest(
+                    Integer.valueOf(interviewAnswerId),
+                    audioBytes,
+                    originalFilename,
+                    userPrincipal.getUserId()
+            );
 
-        sttQueueService.submitRequest(request);
+            sttQueueService.submitRequest(request);
+        } catch(Exception e){
+            log.error("😱 MultipartFile 변환 실패", e);
+            interviewAnswerSaveService.saveInterviewAnswer(
+                    userPrincipal.getUserId(),
+                    "stt 변환에 실패했습니다",
+                    Integer.valueOf(interviewAnswerId)
+            );
+        }
+
     }
 
 
