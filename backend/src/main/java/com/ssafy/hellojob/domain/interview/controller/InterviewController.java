@@ -26,6 +26,7 @@ public class InterviewController {
     private final SttService sttService;
     private final InterviewAnswerSaveService interviewAnswerSaveService;
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
+    private final SttQueueService sttQueueService;
 
     // cs 질문 목록 조회
     @GetMapping("/question/cs")
@@ -153,20 +154,19 @@ public class InterviewController {
 
         log.debug("😎 면접 한 문항 종료 요청 들어옴 : {}", interviewAnswerId);
 
-        // Controller에서 미리 byte[] 로 복사
         byte[] audioBytes = audioFile.getBytes();
         String originalFilename = audioFile.getOriginalFilename();
 
-        sttService.transcribeAudio(Integer.valueOf(interviewAnswerId), audioBytes, originalFilename)
-                .exceptionally(e -> {
-                    log.warn("❌ STT 변환 중 예외 발생: {}", e.getMessage());
-                    return "stt 변환에 실패했습니다";  // fallback 값
-                })
-                .thenAccept(result -> {
-                    interviewAnswerSaveService.saveInterviewAnswer(userPrincipal.getUserId(), result, Integer.parseInt(interviewAnswerId));
-                });
+        SttRequest request = new SttRequest(
+                Integer.valueOf(interviewAnswerId),
+                audioBytes,
+                originalFilename,
+                userPrincipal.getUserId()
+        );
 
+        sttQueueService.submitRequest(request);
     }
+
 
     // 영상 저장(S3 업로드 + 시간 추출 및 저장)
     @PostMapping("/practice/video")
