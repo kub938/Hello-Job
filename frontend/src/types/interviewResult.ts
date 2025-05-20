@@ -2,6 +2,7 @@ type InterviewCategory = "CS" | "PERSONALITY" | "COVERLETTER";
 
 export interface InterviewResult {
   interviewVideoId: number;
+  feedbackEnd: boolean;
   interviewCategory: InterviewCategory; // CS, PERSONALITY, COVERLETTER
   selectQuestion: boolean; // true면 문항 선택 면접, false면 모의 면접
   interviewTitle: string;
