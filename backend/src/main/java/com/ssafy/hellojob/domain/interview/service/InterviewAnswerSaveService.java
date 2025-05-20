@@ -66,6 +66,15 @@ public class InterviewAnswerSaveService {
             log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
         }
 
+        if(interviewAnswer.getInterviewAnswer() == null || interviewAnswer.getInterviewAnswer().equals("")){
+            try{
+                log.debug("😱 id: {} url 저장할 때까지 답변 저장이 안됨 이슈 발발,,, 강제로 저장해버려,,,", interviewAnswer.getInterviewAnswerId());
+                interviewAnswerContentSaveService.saveAnswer("stt 변환에 실패했습니다", interviewAnswer);
+            } catch(Exception e){
+                log.debug("😱 id: {} url 저장하는 함수에서 답변 강제 저장하는데 여기서도 에러 터짐 !!!!!!!", interviewAnswer.getInterviewAnswerId());
+            }
+        }
+
         interviewAnswerRepository.flush();
 
         return Map.of("message", "정상적으로 저장되었습니다.");
