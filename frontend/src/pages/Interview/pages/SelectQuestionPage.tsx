@@ -8,20 +8,32 @@ import { StickyNote, CheckCircle, Search } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
+import QuestionItem from "../components/QuestionItem";
+
+// CS 카테고리 타입 정의
+type CSCategory =
+  | ""
+  | "네트워크"
+  | "운영체제"
+  | "컴퓨터구조"
+  | "데이터베이스"
+  | "알고리즘"
+  | "보안"
+  | "자료구조"
+  | "기타";
 
 function SelectQuestionPage() {
   const [selectQuestions, setSelectQuestions] = useState<number[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  // const { category } = useParams();
+  const [activeCSCategory, setActiveCSCategory] = useState<CSCategory>(""); // CS 카테고리 필터 상태
   const { selectCategory } = useInterviewStore();
   const navigate = useNavigate();
   const location = useLocation();
 
-  //이거 가지고
   const { interviewId, interviewVideoId } = location.state || {};
   console.log(interviewId, interviewVideoId);
 
-  //react query hooks
+  // react query hooks
   const questionList = useGetQuestions(selectCategory);
   const selectCompleteMutation = useSelectQuestionComplete();
 
@@ -63,7 +75,6 @@ function SelectQuestionPage() {
       }
     );
   };
-  // 검색 필터링
 
   if (!questionList || !questionList.data) {
     return (
@@ -73,9 +84,27 @@ function SelectQuestionPage() {
     );
   }
 
-  const filteredQuestions = questionList.data.filter((question) =>
-    question.question.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // CS 카테고리 목록 추출 (CS 카테고리인 경우만)
+  const csCategories: CSCategory[] =
+    selectCategory === "cs"
+      ? (Array.from(
+          new Set(questionList.data.map((q: any) => q.category))
+        ) as CSCategory[])
+      : [];
+
+  // 검색 필터링 및 카테고리 필터링
+  const filteredQuestions = questionList.data.filter((question: any) => {
+    const matchesSearch = question.question
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    // CS 카테고리인 경우 카테고리 필터링 추가
+    if (selectCategory === "cs" && activeCSCategory) {
+      return matchesSearch && question.category === activeCSCategory;
+    }
+
+    return matchesSearch;
+  });
 
   return (
     <div className="container mx-auto px-4 py-6 max-w-4xl">
@@ -103,6 +132,37 @@ function SelectQuestionPage() {
         </div>
       </div>
 
+      {/* CS 카테고리 탭 추가 (CS 카테고리인 경우만 표시) */}
+      {selectCategory === "cs" && csCategories.length > 0 && (
+        <div className="mb-6 overflow-x-auto">
+          <div className="flex space-x-2 pb-2">
+            <button
+              onClick={() => setActiveCSCategory("")}
+              className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
+                activeCSCategory === ""
+                  ? "bg-primary text-white"
+                  : "bg-secondary-light text-secondary-foreground hover:bg-primary/10"
+              }`}
+            >
+              전체
+            </button>
+            {csCategories.map((category) => (
+              <button
+                key={category}
+                onClick={() => setActiveCSCategory(category)}
+                className={`px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap ${
+                  activeCSCategory === category
+                    ? "bg-primary text-white"
+                    : "bg-secondary-light text-secondary-foreground hover:bg-primary/10"
+                }`}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-border p-6">
         <div className="mb-5 flex justify-between items-center">
           <h3 className="text-xl font-bold text-secondary-foreground flex items-center">
@@ -113,6 +173,9 @@ function SelectQuestionPage() {
               (selectCategory === "cs" && "CS") ||
               (selectCategory === "personality" && "인성")}{" "}
             질문 리스트
+            {selectCategory === "cs" &&
+              activeCSCategory &&
+              ` - ${activeCSCategory}`}
           </h3>
           {selectQuestions.length > 0 && (
             <div className="text-sm text-primary font-medium">
@@ -127,52 +190,51 @@ function SelectQuestionPage() {
           </div>
         ) : (
           <div className="space-y-3 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
-            {filteredQuestions.map((question, index) => {
-              const isSelected = selectQuestions.includes(
-                question.questionBankId
-              );
+            {/* CS 카테고리인 경우 카테고리별 그룹화 */}
+            {selectCategory === "cs" && activeCSCategory === ""
+              ? // 전체 카테고리를 보여줄 때는 카테고리별로 그룹화
+                csCategories.map((category) => {
+                  const categoryQuestions = filteredQuestions.filter(
+                    (q: any) => q.category === category
+                  );
 
-              return (
-                <div
-                  onClick={() => handleSelectQuestions(question.questionBankId)}
-                  key={index}
-                  className={`group relative rounded-lg border p-4 transition-all${
-                    isSelected
-                      ? "border-primary bg-secondary-light shadow-sm"
-                      : "border-border bg-white hover:border-primary/30 hover:bg-secondary-light/50"
-                  }`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-3 flex-grow">
-                      <div
-                        className={`flex-shrink-0 rounded-full w-6 h-6 border-2 flex items-center justify-center transition-colors ${
-                          isSelected
-                            ? "border-primary bg-primary text-white"
-                            : "border-muted-foreground"
-                        }`}
-                      >
-                        {isSelected && <CheckCircle className="w-4 h-4" />}
+                  if (categoryQuestions.length === 0) return null;
+
+                  return (
+                    <div key={category} className="mb-6">
+                      <h4 className="font-semibold text-md text-secondary-foreground mb-3 border-l-4 border-primary pl-3">
+                        {category} ({categoryQuestions.length})
+                      </h4>
+                      <div className="space-y-3">
+                        {categoryQuestions.map((question) => (
+                          <QuestionItem
+                            key={question.questionBankId}
+                            question={question}
+                            isSelected={selectQuestions.includes(
+                              question.questionBankId
+                            )}
+                            onSelect={() =>
+                              handleSelectQuestions(question.questionBankId)
+                            }
+                          />
+                        ))}
                       </div>
-
-                      <p className="text-secondary-foreground font-medium">
-                        {question.question}
-                      </p>
                     </div>
-
-                    <button
-                      className="opacity-0 group-hover:opacity-100 flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-border text-sm font-medium text-muted-foreground hover:text-primary hover:border-primary/30 transition-all ml-auto flex-shrink-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // 메모 기능 처리
-                      }}
-                    >
-                      <StickyNote className="h-4 w-4" />
-                      메모하기
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })
+              : // 특정 카테고리나 CS가 아닌 경우 일반 목록
+                filteredQuestions.map((question: any, index: number) => (
+                  <QuestionItem
+                    key={question.questionBankId}
+                    question={question}
+                    isSelected={selectQuestions.includes(
+                      question.questionBankId
+                    )}
+                    onSelect={() =>
+                      handleSelectQuestions(question.questionBankId)
+                    }
+                  />
+                ))}
           </div>
         )}
 
