@@ -22,7 +22,6 @@ import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
-import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -60,9 +59,7 @@ public class InterviewService {
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
 
-
     private static final Integer QUESTION_SIZE = 5;
-
 
     // cs 질문 목록 조회
     @Transactional(readOnly = true)
@@ -126,7 +123,7 @@ public class InterviewService {
     }
 
     // 자소서 기반 질문 목록 조회
-    @Transactional(readOnly = true)
+    @Transactional
     public List<QuestionListResponseDto> getCoverLetterQuestionList(Integer coverLetterId, Integer userId) {
         User user = userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
