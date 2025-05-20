@@ -1,5 +1,6 @@
 package com.ssafy.hellojob.domain.exprience.entity;
 
+import com.ssafy.hellojob.domain.coverlettercontent.entity.CoverLetterExperience;
 import com.ssafy.hellojob.domain.exprience.dto.request.ExperienceRequestDto;
 import com.ssafy.hellojob.domain.user.entity.User;
 import com.ssafy.hellojob.global.common.domain.BaseTimeEntity;
@@ -10,6 +11,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -43,6 +46,9 @@ public class Experience extends BaseTimeEntity {
 
     @Column(name = "experience_end_date", nullable = false)
     private LocalDate experienceEndDate;
+
+    @OneToMany(mappedBy = "experiences", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<CoverLetterExperience> coverLetterExperiences = new ArrayList<>();
 
     @Builder
     public Experience(Integer experienceId, User user, String experienceName, String experienceDetail, String experienceRole, String experienceClient, LocalDate experienceStartDate, LocalDate experienceEndDate) {
