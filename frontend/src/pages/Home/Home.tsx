@@ -41,12 +41,12 @@ export default function Home() {
         </div>
         <div className="flex justify-between mt-[10vh]">
           <div
-            onClick={() => openModal({ title: "인적사항 입력 기능 준비 중!" })}
+            onClick={() => openModal({ title: "인적사항 관리 기능 준비 중!" })}
           >
             <LocateBtn
               to="/"
               iconComponent={<HiOutlineDocumentText className="w-10 h-10" />}
-              title="인적사항 입력"
+              title="인적사항 관리"
               description="인적 사항을 이곳에 저장해두고 자동 입력 기능을 사용하세요!"
               disabled={true}
             />

@@ -174,7 +174,10 @@ function JobResearch({ modalClose, type, companyId }: JobResearchProps) {
       )}
 
       {isModalOpen && (
-        <DetailModal isOpen={isModalOpen} onClose={closeModal}>
+        <DetailModal
+          isOpen={isModalOpen}
+          onClose={modalView === "create" ? () => {} : closeModal}
+        >
           {modalView === "create" ? (
             <CreateJob
               onClose={closeModal}

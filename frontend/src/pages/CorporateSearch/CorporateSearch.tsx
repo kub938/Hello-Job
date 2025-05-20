@@ -84,7 +84,7 @@ function CorporateSearch() {
             onChange={handleSearchChange}
           />
         </div>
-        <h2 className="w-full text-2xl font-bold mb-[2vh]">기업 목록</h2>
+        <h2 className="w-full text-2xl font-bold mb-[2vh]">최근 분석된 기업</h2>
         <div className="flex justify-start gap-4 w-[968px] mx-auto flex-wrap pb-[212px]">
           {isLoading ? (
             <div>로딩 중...</div>
