@@ -936,6 +936,7 @@ public class InterviewService {
         return interviewVideos.stream()
                 .map(video -> InterviewThumbNailResponseDto.builder()
                         .interviewVideoId(video.getInterviewVideoId())
+                        .feedbackEnd(video.isFeedback())
                         .interviewCategory(video.getInterviewCategory())
                         .selectQuestion(video.isSelectQuestion())
                         .interviewTitle(video.getInterviewTitle())

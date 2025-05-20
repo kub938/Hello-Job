@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Getter
 public class InterviewThumbNailResponseDto {
     private Integer interviewVideoId;
+    private boolean feedbackEnd;
     private InterviewCategory interviewCategory;
     private boolean selectQuestion;
     private String interviewTitle;

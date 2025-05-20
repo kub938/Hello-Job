@@ -47,6 +47,9 @@ public class InterviewVideo {
     @Column(name = "interview_title")
     private String interviewTitle;
 
+    @Column(name = "feedback")
+    private boolean feedback = false;
+
     @OneToMany(mappedBy = "interviewVideo", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<InterviewAnswer> interviewAnswers = new ArrayList<>();
 
@@ -70,5 +73,7 @@ public class InterviewVideo {
     }
 
     public void addTitle(String interviewTitle){ this.interviewTitle = interviewTitle; }
+
+    public void feedbackEnd(boolean feedback){ this.feedback = feedback; }
 
 }
