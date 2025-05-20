@@ -4,7 +4,7 @@ import {
   useSelectQuestionComplete,
 } from "@/hooks/interviewHooks";
 import { useInterviewStore } from "@/store/interviewStore";
-import { StickyNote, CheckCircle, Search } from "lucide-react";
+import { StickyNote, Search } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -223,7 +223,7 @@ function SelectQuestionPage() {
                   );
                 })
               : // 특정 카테고리나 CS가 아닌 경우 일반 목록
-                filteredQuestions.map((question: any, index: number) => (
+                filteredQuestions.map((question: any) => (
                   <QuestionItem
                     key={question.questionBankId}
                     question={question}
