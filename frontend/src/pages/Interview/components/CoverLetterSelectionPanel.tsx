@@ -26,12 +26,33 @@ function CoverLetterSelectionPanel({
     useInfiniteQuery({
       queryKey: ["coverLetterList"],
       queryFn: async ({ pageParam = 0 }) => {
-        const response = await getCoverLetterList(Number(pageParam));
-        return response.data;
+        try {
+          const response = await getCoverLetterList(Number(pageParam));
+          console.log("Response status:", response.status);
+
+          // 204 No Content 응답 처리
+          if (response.status === 204) {
+            // 빈 데이터 구조 반환
+            return {
+              content: [],
+              pageable: { pageNumber: pageParam },
+              last: true,
+            };
+          }
+
+          return response.data;
+        } catch (error) {
+          console.error("Error fetching cover letters:", error);
+          throw error;
+        }
       },
+
       getNextPageParam: (lastPage) => {
-        if (lastPage.last) return undefined;
-        return lastPage.pageable.pageNumber + 1;
+        // 페이지가 없거나 마지막 페이지인 경우
+        if (!lastPage || lastPage.last) return undefined;
+
+        console.log("Current page:", lastPage.pageable?.pageNumber);
+        return lastPage.pageable?.pageNumber + 1;
       },
       initialPageParam: 0,
     });
@@ -56,7 +77,7 @@ function CoverLetterSelectionPanel({
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   // 모든 자기소개서 목록을 평탄화
-  const coverLetters = data?.pages.flatMap((page) => page.content) || [];
+  const coverLetters = data?.pages.flatMap((page) => page.content || []) || [];
 
   // 날짜 포맷팅 함수
   const formatDate = (dateString: string) => {
@@ -66,6 +87,9 @@ function CoverLetterSelectionPanel({
       "0"
     )}-${String(date.getDate()).padStart(2, "0")}`;
   };
+
+  // 데이터가 비어있는지 확인 (204 상태 코드의 경우)
+  const isEmptyData = status === "success" && coverLetters.length === 0;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-border p-5">
@@ -82,10 +106,15 @@ function CoverLetterSelectionPanel({
           <div className="text-center py-8 text-red-500">
             데이터를 불러오는 중 오류가 발생했습니다.
           </div>
-        ) : coverLetters.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            자기소개서가 없습니다.
-          </div>
+        ) : isEmptyData ? (
+          <>
+            <div className="text-center pt-8 text-muted-foreground">
+              자기소개서가 없습니다
+            </div>
+            <div className="text-center pb-8 text-muted-foreground">
+              자기소개서 작성을 먼저 진행해 주세요!
+            </div>
+          </>
         ) : (
           <>
             {coverLetters.map((coverLetter: CoverLetter) => (
