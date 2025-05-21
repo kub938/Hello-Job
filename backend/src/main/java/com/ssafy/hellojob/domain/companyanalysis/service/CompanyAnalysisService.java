@@ -102,15 +102,24 @@ public class CompanyAnalysisService {
             Company company,
             CompanyAnalysisRequestDto requestDto,
             CompanyAnalysisFastApiRequestDto fastApiRequestDto) {
+
+        log.debug("🚀 기업 분석 요청 시작 - userId={}, companyId={}", user.getUserId(), company.getCompanyId());
+
         CompletableFuture
-                .supplyAsync(() -> fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto))
+                .supplyAsync(() -> {
+                    log.debug("📡 FastAPI 요청 전송...");
+                    return fastApiClientService.sendJobAnalysisToFastApi(fastApiRequestDto);
+                })
                 .thenApply(fastApiResponseDto -> {
+                    log.debug("📦 FastAPI 응답 수신 성공: {}", fastApiResponseDto);
                     CompanyAnalysisSseResponseDto responseDto = companyAnalysisSaveService.saveCompanyAnalysis(user, company, fastApiResponseDto, requestDto);
+                    log.debug("💾 기업 분석 결과 저장 성공");
                     return responseDto;
                 })
                 .thenAccept(data -> {
                     log.debug("기업 분석 완료됨. sse 송신 시도");
                     sseService.sendToUser(user.getUserId(), "company-analysis-completed", data);
+                    log.debug("✅ SSE 전송 완료");
                 })
                 .exceptionally(e -> {
                     log.error("❌ 기업 분석 실패", e);

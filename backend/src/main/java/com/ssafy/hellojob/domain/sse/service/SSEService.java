@@ -30,21 +30,20 @@ public class SSEService {
     private final JsonUtil jsonUtil;
 
     public void addEmitter(Integer userId, SseEmitter emitter) {
-        emitters.compute(userId, (key, deque) -> {
-            if (deque == null) {
-                deque = new ConcurrentLinkedDeque<>();
-            }
+        emitters.compute(userId, (key, existingDeque ) -> {
+            Deque<SseEmitter> deque = (existingDeque != null) ? existingDeque : new ConcurrentLinkedDeque<>();
 
             while (deque.size() >= MAX_EMITTERS_PER_USER) {
                 SseEmitter old = deque.pollFirst();
                 try {
-                    old.complete(); // 이전 연결 닫기
+                    if (old != null) old.complete(); // 이전 연결 닫기
                 } catch (Exception e) {
                     log.warn("이전 emitter 종료 중 에러: {}", e.getMessage());
                 }
             }
 
             deque.addLast(emitter);
+            log.debug("🧷 emitter 추가됨 - userId={}, 현재 연결 수={}", userId, deque.size());
             return deque;
         });
 
