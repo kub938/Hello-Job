@@ -9,6 +9,10 @@ export default function useSSE(isLoggedIn: boolean) {
   const queryClient = useQueryClient();
 
   useEffect(() => {
+    console.log("📡 useSSE 실행됨 - 탭 ID:", performance.now());
+  }, []);
+
+  useEffect(() => {
     if (!isLoggedIn) return;
 
     let eventSource: EventSource | null = null;
@@ -21,6 +25,7 @@ export default function useSSE(isLoggedIn: boolean) {
       }
 
       eventSource = new EventSource("https://k12b105.p.ssafy.io/sse/subscribe");
+      console.log("SSE 연결됨");
 
       // 핑 이벤트 수신
       eventSource.addEventListener("ping", (_e: MessageEvent) => {
