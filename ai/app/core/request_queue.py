@@ -4,8 +4,9 @@ import logging
 from typing import Dict, Any, Optional, List, Callable, Awaitable, TypeVar, Generic
 from dataclasses import dataclass
 from datetime import datetime, timedelta
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 
 # 제네릭 타입 정의
 T = TypeVar('T')

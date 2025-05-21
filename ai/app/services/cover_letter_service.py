@@ -6,9 +6,11 @@ from app.core.openai_utils import get_rate_limiter
 from app.core.agent_utils import RateLimitedRunner
 from app.core.request_queue import get_request_queue
 from app.core.mcp_core import get_mcp_servers
-import logging
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+
+logger = app_logger
+
 
 async def create_cover_letter(
     content: ContentItem, 

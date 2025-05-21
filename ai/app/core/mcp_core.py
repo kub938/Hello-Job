@@ -9,11 +9,13 @@ import threading
 import signal
 from typing import List, Any
 from agents.mcp import MCPServerStdio
+from app.core.logger import app_logger
+
 
 # Node.js 환경변수 설정 - 메모리 누수 경고 방지
 os.environ["NODE_OPTIONS"] = "--max-http-header-size=16384"
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 
 async def setup_mcp_servers():
     """MCP 서버 설정 및 연결

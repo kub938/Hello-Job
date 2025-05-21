@@ -1,11 +1,11 @@
-import logging
 import asyncio
 import time
 from typing import Any, Optional, List, Dict
 from agents import Agent, Runner
 from app.core.openai_utils import get_rate_limiter
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 
 class RateLimitedAgent:
     """

@@ -6,8 +6,9 @@ from typing import Dict, Any, Optional, List, Callable, TypeVar, Awaitable, Type
 from openai import OpenAI
 from openai.types.chat import ChatCompletion
 from pydantic import BaseModel
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 
 # 제네릭 타입 정의
 T = TypeVar('T')

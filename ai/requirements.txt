@@ -13,3 +13,4 @@ beautifulsoup4
 chardet
 colorama
 markdownify
+pytz

@@ -1,4 +1,3 @@
-import logging
 from typing import List, Dict
 from pydantic import BaseModel, Field
 
@@ -6,8 +5,9 @@ from app.schemas import interview
 from app.prompts.interview_prompts import CREATE_INTERVIEW_QUESTION_PROMPT, INTERVIEW_FEEDBACK_PROMPT
 from app.core.request_queue import get_request_queue
 from app.core.openai_utils import get_rate_limiter
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 
 async def parse_user_info(request: interview.CreateQuestionRequest):
     # 요청에서 데이터 추출
