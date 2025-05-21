@@ -44,7 +44,7 @@ function Header({ isMinimize = false }: HeaderProps) {
     <>
       <header
         className={`${
-          scrolled && "bg-white"
+          scrolled && "bg-white border-b border-b-gray-200"
         }  z-10 sticky top-0 transition-all duration-100 h-13 flex items-center justify-between text-sm`}
       >
         <Link to="/">
@@ -90,7 +90,9 @@ function Header({ isMinimize = false }: HeaderProps) {
 
               <li
                 className={`${
-                  nowPath === pathName[1] || nowPath.includes("/cover-letter")
+                  nowPath === pathName[1] ||
+                  (nowPath.includes("/cover-letter") &&
+                    !nowPath.includes("/interview"))
                     ? "text-accent"
                     : ""
                 }`}
@@ -104,7 +106,7 @@ function Header({ isMinimize = false }: HeaderProps) {
                     : ""
                 }`}
               >
-                <Link to="/interview/select">모의 면접</Link>
+                <Link to="/interview/select">AI 모의 면접</Link>
               </li>
             </ul>
             <span>
