@@ -9,3 +9,7 @@ mcp
 pytest 
 pytest-asyncio
 google-api-python-client
+beautifulsoup4
+chardet
+colorama
+markdownify
