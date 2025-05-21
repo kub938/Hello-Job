@@ -29,7 +29,7 @@ function BookmarkedCompanies() {
   };
 
   return (
-    <div className="flex-1 p-4 md:p-6 md:ml-58 transition-all duration-300">
+    <div className="flex-1 p-4 md:p-6 md:ml-58 md:pr-2 transition-all duration-300">
       <MypageHeader title="기업 분석 북마크" />
       <h2 className="text-xl font-semibold mb-4">
         내가 북마크한 기업 분석을 모아 볼 수 있습니다.

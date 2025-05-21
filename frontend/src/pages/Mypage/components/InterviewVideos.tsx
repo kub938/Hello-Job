@@ -15,7 +15,7 @@ function InterviewVideos() {
   };
 
   return (
-    <div className="flex-1 p-4 md:p-6 md:ml-58 transition-all duration-300">
+    <div className="flex-1 p-4 md:p-6 md:ml-58 md:pr-2 transition-all duration-300">
       <MypageHeader title="면접 결과" />
       {isLoading ? (
         <div className="text-center py-6">로딩 중...</div>
