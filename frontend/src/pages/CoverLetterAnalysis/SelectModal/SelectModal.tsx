@@ -143,9 +143,9 @@ function SelectModal({
                     }
                     `}
               >
-                <span className="font-semibold">{el.name}</span>
-                <span className="text-center"> {el.description}</span>
-                <span className="text-center ml-23">
+                <span className="font-semibold truncate w-35">{el.name}</span>
+                <span className="text-center truncate"> {el.description}</span>
+                <span className="text-center ml-23 truncate">
                   {calculateDaysAgo(el.updatedAt)}
                 </span>
               </div>
