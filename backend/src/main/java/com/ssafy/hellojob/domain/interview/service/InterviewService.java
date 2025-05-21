@@ -741,7 +741,7 @@ public class InterviewService {
             if(i.getInterviewAnswer() == null || i.getInterviewAnswer().equals("stt 변환에 실패했습니다") || i.getInterviewAnswer().equals("")){
                 interviewAnswerContentSaveService.saveAnswer( "stt 변환에 실패했습니다", i);
                 i.addInterviewAnswerFeedback("피드백 생성에 실패했습니다.");
-                i.addInterviewFollowUpQuestion("꼬리 질문 생성에 실패했습니다.");
+                i.addInterviewFollowUpQuestion("[\"꼬리 질문 생성에 실패했습니다.\"]");
                 interviewAnswerRepository.save(i);
             }
         }
