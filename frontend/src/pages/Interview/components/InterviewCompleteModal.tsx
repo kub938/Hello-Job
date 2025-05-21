@@ -2,6 +2,7 @@ import { Button } from "@/components/Button";
 import Loading from "@/components/Loading/Loading";
 import { useCompleteInterview } from "@/hooks/interviewHooks";
 import { useState } from "react";
+import { toast } from "sonner";
 
 interface InterviewCompleteModalProps {
   interviewVideoId: number;
@@ -15,6 +16,11 @@ function InterviewCompleteModal({
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
 
   const handleCompleteInterview = () => {
+    if (title.trim() === "") {
+      toast.warning("제목을 입력해 주세요!");
+      return;
+    }
+
     setIsOpenInfoModal(true);
 
     completeInterviewMutation.mutate({

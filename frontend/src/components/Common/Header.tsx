@@ -44,7 +44,7 @@ function Header({ isMinimize = false }: HeaderProps) {
     <>
       <header
         className={`${
-          scrolled && "bg-white"
+          scrolled && "bg-white border-b border-b-gray-200"
         }  z-10 sticky top-0 transition-all duration-100 h-13 flex items-center justify-between text-sm`}
       >
         <Link to="/">

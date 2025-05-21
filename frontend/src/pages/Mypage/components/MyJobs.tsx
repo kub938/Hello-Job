@@ -29,7 +29,7 @@ function MyJobs() {
   };
 
   return (
-    <div className="flex-1 p-4 md:p-6 md:ml-58 transition-all duration-300">
+    <div className="flex-1 p-4 md:p-6 md:ml-58 md:pr-2 transition-all duration-300">
       <MypageHeader title="내 직무 분석" />
       <h2 className="text-xl font-semibold mb-4">
         내가 작성한 직무 분석을 모아 볼 수 있습니다.

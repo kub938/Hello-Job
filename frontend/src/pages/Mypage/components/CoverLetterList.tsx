@@ -57,7 +57,7 @@ function CoverLetterList() {
   // };
 
   return (
-    <div className="w-full p-4 md:p-6 md:ml-58 transition-all duration-300">
+    <div className="w-full p-4 md:p-6 md:ml-58 md:pr-2 transition-all duration-300">
       <MypageHeader title="자기소개서 목록" />
 
       <div className="flex justify-between items-center mb-6">
