@@ -2,7 +2,6 @@ import { Button } from "@/components/Button";
 import Loading from "@/components/Loading/Loading";
 import { useCompleteInterview } from "@/hooks/interviewHooks";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
 interface InterviewCompleteModalProps {
   interviewVideoId: number;
@@ -13,7 +12,6 @@ function InterviewCompleteModal({
   const completeInterviewMutation = useCompleteInterview();
 
   const [title, setTitle] = useState("");
-  const navigate = useNavigate();
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
 
   const handleCompleteInterview = () => {
