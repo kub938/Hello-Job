@@ -785,7 +785,9 @@ public class InterviewService {
                 })
                 .exceptionally(e -> {
                     log.error("❌ 면접 피드백 생성 실패", e.getMessage());
-                    sseService.sendToUser(user.getUserId(), "interview-feedback-failed", interviewVideo.getInterviewVideoId());
+                    // 실패 시 dto로 감싸서 전달
+                    SSEFailDto data = SSEFailDto.builder().interviewVideoId(interviewVideo.getInterviewVideoId()).build();
+                    sseService.sendToUser(user.getUserId(), "interview-feedback-failed", data);
                     return null;
                 });
     }
