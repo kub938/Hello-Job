@@ -90,7 +90,9 @@ function Header({ isMinimize = false }: HeaderProps) {
 
               <li
                 className={`${
-                  nowPath === pathName[1] || nowPath.includes("/cover-letter")
+                  nowPath === pathName[1] ||
+                  (nowPath.includes("/cover-letter") &&
+                    !nowPath.includes("/interview"))
                     ? "text-accent"
                     : ""
                 }`}
