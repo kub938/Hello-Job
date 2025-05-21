@@ -57,9 +57,10 @@ function ToggleInput({
           })}
           checked={isOn}
           disabled={disabled}
-          onChange={(e) => {
+          onChange={() => {
             if (disabled) return;
-            onChange(e.target.checked);
+            // onChange(e.target.checked);
+            onChange(!isOn);
           }}
         />
         <div
