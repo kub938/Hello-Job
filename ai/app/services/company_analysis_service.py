@@ -369,7 +369,7 @@ swot_analysis MCP를 활용하여 사용자의 요청 사항을 반영하는 SWO
         swot_agent = Agent(
             name=f"Company SWOT Analyzer: {company_name}",
             instructions=instructions,
-            model="gpt-4.1",
+            model="gpt-4.1-mini",
             output_type=SimpleSwot,
             mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
         )
