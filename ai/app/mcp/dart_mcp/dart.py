@@ -744,13 +744,19 @@ def adjust_end_date(end_date: str) -> Tuple[str, bool]:
         # 입력된 end_date를 datetime 객체로 변환
         end_date_obj = datetime.strptime(end_date, "%Y%m%d")
         
-        # 95일 추가
-        adjusted_end_date_obj = end_date_obj + timedelta(days=95)
-        
-        # 현재 날짜보다 미래인 경우 현재 날짜로 조정
+        # 현재 날짜 가져오기
         current_date = datetime.now()
-        if adjusted_end_date_obj > current_date:
+        
+        # end_date가 오늘 날짜보다 과거인 경우 오늘 날짜로 설정
+        if end_date_obj < current_date:
             adjusted_end_date_obj = current_date
+        else:
+            # 95일 추가
+            adjusted_end_date_obj = end_date_obj + timedelta(days=95)
+            
+            # 조정된 날짜가 현재 날짜보다 미래인 경우 현재 날짜로 재조정
+            if adjusted_end_date_obj > current_date:
+                adjusted_end_date_obj = current_date
         
         # 포맷 변환하여 문자열로 반환
         adjusted_end_date = adjusted_end_date_obj.strftime("%Y%m%d")
