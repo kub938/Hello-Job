@@ -177,7 +177,7 @@ function MyProject() {
         </DetailModal>
       )}
       {isPostModalOpen && (
-        <ProjectForm onClose={() => setIsPostModalOpen(false)} />
+        <ProjectForm onClose={() => setIsPostModalOpen(false)} page={page} />
       )}
     </div>
   );

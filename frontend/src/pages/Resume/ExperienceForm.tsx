@@ -2,14 +2,16 @@ import { PostExperienceRequest } from "@/api/experienceApi";
 import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
 import { usePostExperience } from "@/hooks/experienceHooks";
+import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 interface ExperienceFormProps {
+  page?: number;
   onClose: () => void;
 }
 
-function ExperienceForm({ onClose }: ExperienceFormProps) {
+function ExperienceForm({ onClose, page }: ExperienceFormProps) {
   const [formData, setFormData] = useState<PostExperienceRequest>({
     experienceName: "",
     experienceDetail: "",
@@ -19,6 +21,7 @@ function ExperienceForm({ onClose }: ExperienceFormProps) {
     experienceClient: "",
   });
 
+  const queryClient = useQueryClient();
   const mutation = usePostExperience();
 
   const handleClickCloseButton = (e: React.MouseEvent) => {
@@ -39,6 +42,8 @@ function ExperienceForm({ onClose }: ExperienceFormProps) {
     e.preventDefault();
     mutation.mutate(formData, {
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["myExperienceList", page] });
+
         onClose();
       },
       onError: (error) => {
