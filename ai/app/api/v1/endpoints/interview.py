@@ -50,9 +50,5 @@ async def create_interview_question_from_cover_letter_gms(request: interview.Cre
 async def feedback_interview_gms(request: interview.FeedbackInterviewRequest)->interview.FeedbackInterviewResponse:
     
     result = await gms_interview_service.feedback_interview(request)
-    response = interview.FeedbackInterviewResponse(
-        cover_letter_id=request.cover_letter.cover_letter_id,
-        feedback=result
-    )
-    logger.info(f"FeedbackInterviewGMSResponse: {response}")
-    return response
+    logger.info(f"FeedbackInterviewGMSResponse: {result}")
+    return result
