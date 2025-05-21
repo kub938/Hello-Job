@@ -156,7 +156,7 @@ public class InterviewAnswerSaveService {
             if (!ffmpegFinished) {
                 ffmpegProcess.destroyForcibly();
                 log.error("❌ ffmpeg 시간 초과로 강제 종료됨");
-                return "";
+                return "00:00:00";
             }
 
             // ffprobe 실행
@@ -184,7 +184,7 @@ public class InterviewAnswerSaveService {
 
             if (durationStr == null || durationStr.trim().isEmpty() || durationStr.trim().equalsIgnoreCase("N/A")) {
                 log.warn("⚠️ ffprobe 결과로부터 duration 추출 실패: '{}'", durationStr);
-                return "";
+                return "00:00:00";
             }
 
             double durationInSeconds;
@@ -192,7 +192,7 @@ public class InterviewAnswerSaveService {
                 durationInSeconds = Double.parseDouble(durationStr.trim());
             } catch (NumberFormatException e) {
                 log.error("❌ duration 값이 유효하지 않음: '{}'", durationStr);
-                return "";
+                return "00:00:00";
             }
 
             int hours = (int) durationInSeconds / 3600;
@@ -206,7 +206,7 @@ public class InterviewAnswerSaveService {
 
         } catch (Exception e) {
             log.error("❌ 영상 길이 추출 중 예외 발생: {}", e.getMessage(), e);
-            return "";
+            return "00:00:00";
         }
     }
 
