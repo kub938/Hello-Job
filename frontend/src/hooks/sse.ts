@@ -25,7 +25,6 @@ export default function useSSE(isLoggedIn: boolean) {
       "company-analysis-completed",
       async (e: MessageEvent) => {
         const data = JSON.parse(e.data);
-        // console.log("기업 분석 완료 이벤트:", data);
         const { companyId, companyAnalysisId } = data;
         toast("기업 분석이 완료되었습니다!", {
           description: "결과를 확인하려면 클릭하세요",
@@ -47,7 +46,6 @@ export default function useSSE(isLoggedIn: boolean) {
       async (e: MessageEvent) => {
         const data = JSON.parse(e.data);
         const { companyId } = data;
-        // console.log("기업 분석 실패 이벤트:", companyId);
         toast("기업 분석이 실패했습니다!", {
           description: "잠시 후 다시 시도해주세요",
           action: {
@@ -62,9 +60,8 @@ export default function useSSE(isLoggedIn: boolean) {
     // 인터뷰 결과 분석 완료 이벤트 수신
     eventSource.addEventListener(
       "interview-feedback-completed",
-      async (_e: MessageEvent) => {
-        // const interviewResultId = JSON.parse(e.data);
-        // console.log("인터뷰 결과 분석 완료 이벤트:", interviewResultId);
+      async (e: MessageEvent) => {
+        const data = JSON.parse(e.data);
         queryClient.invalidateQueries({ queryKey: ["interviewResultList"] });
 
         toast("인터뷰 결과 분석이 완료되었습니다!", {
@@ -83,8 +80,6 @@ export default function useSSE(isLoggedIn: boolean) {
       "interview-feedback-failed",
       async (e: MessageEvent) => {
         const data = JSON.parse(e.data);
-        // const interviewResultId = JSON.parse(e.data);
-        // console.log("인터뷰 결과 분석 실패 이벤트:", interviewResultId);
         queryClient.invalidateQueries({ queryKey: ["interviewResultList"] });
 
         toast("인터뷰 결과 분석이 실패했습니다!", {
