@@ -61,6 +61,8 @@ public class CoverLetterContentService {
                     .contentFirstPrompt(content.getContentFirstPrompt())
                     .build();
 
+            log.debug("자기소개서 입력 경험 아이디: {} 프로젝트 아이디: {}", content.getContentExperienceIds(), content.getContentProjectIds());
+
             coverLetterContentRepository.save(newCoverLetterContent);
             coverLetterExperienceService.saveCoverLetterExperience(content.getContentExperienceIds(), user, newCoverLetterContent);
             coverLetterExperienceService.saveCoverLetterProject(content.getContentProjectIds(), user, newCoverLetterContent);
