@@ -262,7 +262,7 @@ function QuestionItem({
                 <div className="flex flex-col gap-2.5 border p-3 rounded-b-xl">
                   {selectedExperience.map((exp) => (
                     <div
-                      onClick={handleProjectModalOpen}
+                      onClick={handleExperienceModalOpen}
                       className="cursor-pointer border border-l-4 border-l-accent py-3 truncate px-5 rounded-lg"
                     >
                       {exp.experienceName}
