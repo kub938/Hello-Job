@@ -85,6 +85,10 @@ public class CompanyAnalysisService {
                 .build();
 
         log.debug("fast API로 요청 보냄 !!!");
+        log.debug("isBasic: {}", requestDto.isBasic());
+        log.debug("isPlus: {}", requestDto.isPlus());
+        log.debug("isFinancial: {}", requestDto.isFinancial());
+        log.debug("isSwot: {}", requestDto.isSwot());
 
         // FastAPI 호출
         requestCompanyAnalysisAsync(user, company, requestDto, fastApiRequestDto);
