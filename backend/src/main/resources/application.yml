@@ -27,7 +27,3 @@ logging:
   level:
     org.springframework.security: DEBUG
     com.ssafy: DEBUG
-
-cholog:
-  logger:
-    api-key: ${CHOLOG_API_KEY}
