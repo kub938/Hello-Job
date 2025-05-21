@@ -12,7 +12,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
+  const [modalTitle, _] = useState("");
 
   console.log(`
     ██╗  ██╗███████╗██╗     ██╗      ██████╗      ██╗ ██████╗ ██████╗ 
