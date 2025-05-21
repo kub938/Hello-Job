@@ -17,6 +17,7 @@ import ReactMarkdown from "react-markdown";
 import chatbot from "../../assets/character/favicon-96x96.png";
 import { toast } from "sonner";
 import Loading from "@/components/Loading/Loading";
+import { allContentDataType } from "@/types/coverLetterTypes";
 
 function CoverLetter() {
   // 모든 훅을 컴포넌트 최상단에 배치
@@ -34,7 +35,9 @@ function CoverLetter() {
   const [contentDetail, setContentDetail] = useState("");
   const [nowContentLength, setNowContentLength] = useState(0);
   const sendLoading = useIsMutating({ mutationKey: ["send-message"] });
-
+  const [allContentData, setAllContentData] = useState<allContentDataType[]>(
+    []
+  );
   // API 호출 관련 훅
 
   const { data: coverLetter, isLoading } = useGetFirstCoverLetter(
@@ -65,8 +68,40 @@ function CoverLetter() {
 
   const onChangeContentDetail = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newValue = e.target.value;
+    handleAllContentData(selectQuestionId, newValue);
     setContentDetail(newValue);
     setNowContentLength(newValue.length);
+  };
+
+  const handleAllContentData = (
+    selectQuestionId: number,
+    contentDetail: string
+  ) => {
+    // 이미 존재하는 contentId인지 확인
+    const existingIndex = allContentData.findIndex(
+      (item: any) => item.contentId === selectQuestionId
+    );
+
+    if (existingIndex !== -1) {
+      // 이미 존재하는 경우 해당 항목의 contentDetail 업데이트
+      const updatedData = [...allContentData];
+      updatedData[existingIndex] = {
+        ...updatedData[existingIndex],
+        contentDetail: contentDetail,
+      };
+      setAllContentData(updatedData);
+    } else {
+      // 존재하지 않는 경우 새 항목 추가
+      setAllContentData([
+        ...allContentData,
+        {
+          contentId: selectQuestionId,
+          contentDetail: contentDetail,
+        },
+      ]);
+    }
+
+    console.log(allContentData);
   };
 
   const handleSelectQuestion = (selectId: number, selectNum: number) => {
@@ -231,6 +266,7 @@ function CoverLetter() {
         </div>
 
         <CoverLetterEditor
+          allContentData={allContentData}
           onSaveContent={onSaveContent}
           CoverLetterData={coverLetter}
           onChangeContentDetail={onChangeContentDetail}
