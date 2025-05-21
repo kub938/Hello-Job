@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { data, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { sseAckHandler } from "@/utils/sseAckHandler";
 import { useQueryClient } from "@tanstack/react-query";
 
