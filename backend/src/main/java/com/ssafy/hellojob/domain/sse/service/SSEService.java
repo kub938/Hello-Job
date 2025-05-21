@@ -28,8 +28,6 @@ public class SSEService {
     private final JsonUtil jsonUtil;
 
     public void addEmitter(Integer userId, SseEmitter emitter) {
-        userReadService.findUserByIdOrElseThrow(userId);
-
         emitters.put(userId, emitter);
 
         // 연결 종료 시 emitter 제거
@@ -103,7 +101,7 @@ public class SSEService {
     }
 
     // 주기적으로 ping 전송(sse 연결 끊기지 않도록)
-    @Scheduled(fixedRate = 60_000) // 1분마다
+    @Scheduled(fixedRate = 15_000) // 1분마다
     public void sendPingToAll() {
         emitters.forEach((userId, emitter) -> {
             try {
