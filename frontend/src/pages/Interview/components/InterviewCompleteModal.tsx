@@ -2,7 +2,7 @@ import { Button } from "@/components/Button";
 import Loading from "@/components/Loading/Loading";
 import { useCompleteInterview } from "@/hooks/interviewHooks";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 interface InterviewCompleteModalProps {
   interviewVideoId: number;
@@ -13,24 +13,20 @@ function InterviewCompleteModal({
   const completeInterviewMutation = useCompleteInterview();
 
   const [title, setTitle] = useState("");
-  const navigate = useNavigate();
   const [isOpenInfoModal, setIsOpenInfoModal] = useState(false);
 
   const handleCompleteInterview = () => {
+    if (title.trim() === "") {
+      toast.warning("제목을 입력해 주세요!");
+      return;
+    }
+
     setIsOpenInfoModal(true);
 
-    completeInterviewMutation.mutate(
-      {
-        interviewVideoId: interviewVideoId,
-        interviewTitle: title,
-      },
-      {
-        onSuccess: () => {
-          // toast.info("저장에 성공했습니다.");
-          // navigate("/interview/result");
-        },
-      }
-    );
+    completeInterviewMutation.mutate({
+      interviewVideoId: interviewVideoId,
+      interviewTitle: title,
+    });
   };
   return (
     <div className="modal-overlay bg-black/90">
@@ -48,13 +44,13 @@ function InterviewCompleteModal({
             <div className="w-full flex justify-end gap-3">
               <Button
                 variant={"white"}
-                onClick={() => navigate("/", { replace: true })}
+                onClick={() => window.location.replace("/")}
               >
                 홈으로
               </Button>
               <Button
                 onClick={() =>
-                  navigate("/mypage/interviews-videos", { replace: true })
+                  window.location.replace("/mypage/interviews-videos")
                 }
               >
                 마이페이지로
