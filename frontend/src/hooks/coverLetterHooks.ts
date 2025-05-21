@@ -1,6 +1,7 @@
 import { coverLetterApi } from "@/api/coverLetterApi";
 import { SaveCoverLetterRequest } from "@/types/coverLetterApiType";
 import {
+  allContentDataType,
   CoverLetterPostRequest,
   getCoverLetterContentIdsResponse,
 } from "@/types/coverLetterTypes";
@@ -135,8 +136,17 @@ export const useCompleteCoverLetter = () => {
 
   return useMutation({
     mutationKey: ["complete-cover-letter"],
-    mutationFn: async (coverLetterId: number) => {
-      const response = await coverLetterApi.completeCoverLetter(coverLetterId);
+    mutationFn: async ({
+      coverLetterId,
+      allContentData,
+    }: {
+      coverLetterId: number;
+      allContentData: allContentDataType[];
+    }) => {
+      const response = await coverLetterApi.completeCoverLetter(
+        coverLetterId,
+        allContentData
+      );
       return response.data;
     },
     onSuccess: () => {
