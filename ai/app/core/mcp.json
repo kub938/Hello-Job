@@ -1,0 +1,26 @@
+{
+    "mcpServers": {
+        "sequential-thinking": {
+            "command": "/usr/bin/node",
+            "args": [
+                "/root/hellojob/app/mcp/sequentialthinking/dist/index.js"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--max-http-header-size=16384"
+            }
+        },
+        "company-analysis": {
+            "command": "python",
+            "args": [
+                "/root/hellojob/app/mcp/company-analysis-mcp-server/company_analysis_mcp_server.py"
+            ],
+            "env": {
+                "NAVER_CLIENT_ID": "YOUR_NAVER_CLIENT_ID_IN_DOTENV",
+                "NAVER_CLIENT_SECRET": "YOUR_NAVER_CLIENT_SECRET_IN_DOTENV",
+                "GOOGLE_API_KEY": "YOUR_GOOGLE_API_KEY_IN_DOTENV",
+                "GOOGLE_CSE_ID": "YOUR_GOOGLE_CSE_ID_IN_DOTENV",
+                "DART_API_KEY": "YOUR_DART_API_KEY_IN_DOTENV"
+            }
+        }
+    }
+}
