@@ -2,14 +2,16 @@ import { Button } from "@/components/Button";
 import FormInput from "@/components/Common/FormInput";
 import { usePostProject } from "@/hooks/projectHooks";
 import { PostProjectRequest } from "@/types/projectApiTypes";
+import { useQueryClient } from "@tanstack/react-query";
 import { X } from "lucide-react";
 import { FormEvent, useState } from "react";
 
 interface ProjectFormProps {
   onClose: () => void;
+  page?: number;
 }
 
-function ProjectForm({ onClose }: ProjectFormProps) {
+function ProjectForm({ onClose, page }: ProjectFormProps) {
   const [formData, setFormData] = useState<PostProjectRequest>({
     projectName: "",
     projectIntro: "",
@@ -21,6 +23,7 @@ function ProjectForm({ onClose }: ProjectFormProps) {
     projectClient: "",
   });
 
+  const queryClient = useQueryClient();
   const mutation = usePostProject();
 
   const handleClickCloseButton = (e: React.MouseEvent) => {
@@ -41,6 +44,8 @@ function ProjectForm({ onClose }: ProjectFormProps) {
     e.preventDefault();
     mutation.mutate(formData, {
       onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["myProjectList", page] });
+
         onClose();
       },
       onError: (error) => {

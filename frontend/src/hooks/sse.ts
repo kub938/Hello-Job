@@ -26,6 +26,9 @@ export default function useSSE(isLoggedIn: boolean) {
       async (e: MessageEvent) => {
         const data = JSON.parse(e.data);
         const { companyId, companyAnalysisId } = data;
+        queryClient.invalidateQueries({
+          queryKey: ["corporateReportList", String(companyId)],
+        });
         toast("기업 분석이 완료되었습니다!", {
           description: "결과를 확인하려면 클릭하세요",
           action: {

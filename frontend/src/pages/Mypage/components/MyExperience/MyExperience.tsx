@@ -177,7 +177,7 @@ function MyExperience() {
         </DetailModal>
       )}
       {isPostModalOpen && (
-        <ExperienceForm onClose={() => setIsPostModalOpen(false)} />
+        <ExperienceForm onClose={() => setIsPostModalOpen(false)} page={page} />
       )}
     </div>
   );
