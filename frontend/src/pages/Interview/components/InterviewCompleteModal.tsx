@@ -19,18 +19,10 @@ function InterviewCompleteModal({
   const handleCompleteInterview = () => {
     setIsOpenInfoModal(true);
 
-    completeInterviewMutation.mutate(
-      {
-        interviewVideoId: interviewVideoId,
-        interviewTitle: title,
-      },
-      {
-        onSuccess: () => {
-          // toast.info("저장에 성공했습니다.");
-          // navigate("/interview/result");
-        },
-      }
-    );
+    completeInterviewMutation.mutate({
+      interviewVideoId: interviewVideoId,
+      interviewTitle: title,
+    });
   };
   return (
     <div className="modal-overlay bg-black/90">
@@ -48,13 +40,13 @@ function InterviewCompleteModal({
             <div className="w-full flex justify-end gap-3">
               <Button
                 variant={"white"}
-                onClick={() => navigate("/", { replace: true })}
+                onClick={() => window.location.replace("/")}
               >
                 홈으로
               </Button>
               <Button
                 onClick={() =>
-                  navigate("/mypage/interviews-videos", { replace: true })
+                  window.location.replace("/mypage/interviews-videos")
                 }
               >
                 마이페이지로
