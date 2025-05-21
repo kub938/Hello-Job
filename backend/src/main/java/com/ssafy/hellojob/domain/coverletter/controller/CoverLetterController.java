@@ -1,6 +1,7 @@
 package com.ssafy.hellojob.domain.coverletter.controller;
 
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterSaveRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterCreateResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterStatusesDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.CoverLetterSummaryDto;
@@ -12,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -53,10 +55,11 @@ public class CoverLetterController {
     @PatchMapping("/{coverLetterId}")
     public Map<String, String> saveAll(
             @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable Integer coverLetterId
+            @PathVariable Integer coverLetterId,
+            @RequestBody List<CoverLetterSaveRequestDto> requestDto
     ) {
         Integer userId = principal.getUserId();
-        return coverLetterService.saveAll(userId, coverLetterId);
+        return coverLetterService.saveAll(userId, coverLetterId, requestDto);
     }
 
     @DeleteMapping("/{coverLetterId}")
