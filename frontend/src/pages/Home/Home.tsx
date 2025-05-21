@@ -1,9 +1,10 @@
 import Header from "@/components/Common/Header";
 import WaveAnimation from "@/components/WaveAnimation";
 import { FaRegBuilding } from "react-icons/fa";
-import { HiOutlineDocumentText } from "react-icons/hi";
+// import { HiOutlineDocumentText } from "react-icons/hi";
 import { PiNotePencilBold } from "react-icons/pi";
 import { MdPeopleAlt } from "react-icons/md";
+import { BsCalendar } from "react-icons/bs";
 
 import LocateBtn from "./components/LocateBtn";
 import Modal from "@/components/Modal";
@@ -40,7 +41,7 @@ export default function Home() {
           <h2 className="text-4xl font-semibold">취업 준비 A부터 Z까지</h2>
         </div>
         <div className="flex justify-between mt-[10vh]">
-          <div
+          {/* <div
             onClick={() => openModal({ title: "인적사항 관리 기능 준비 중!" })}
           >
             <LocateBtn
@@ -50,7 +51,8 @@ export default function Home() {
               description="인적 사항을 이곳에 저장해두고 자동 입력 기능을 사용하세요!"
               disabled={true}
             />
-          </div>
+          </div> */}
+
           <LocateBtn
             to="/corporate-search"
             iconComponent={<FaRegBuilding className="w-9 h-9" />}
@@ -68,6 +70,12 @@ export default function Home() {
             iconComponent={<MdPeopleAlt className="w-10 h-10" />}
             title="AI 모의 면접"
             description="면접관의 시선으로 본 당신의 답변, 지금 확인하세요"
+          />
+          <LocateBtn
+            to="/mypage"
+            iconComponent={<BsCalendar className="w-10 h-10" />}
+            title="일정 관리"
+            description="채용 일정을 관리하고, 자기소개서와 일정을 연동하세요!"
           />
         </div>
       </main>
