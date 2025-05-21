@@ -423,17 +423,18 @@ function PreparePage() {
 
   return (
     <>
-      {startInterviewMutation.isPending && (
-        <>
-          <div className="modal-overlay">
-            <div className="modal-container h-50 w-100 flex flex-col justify-center items-center">
-              <Loading />
-              <div className="mt-3">자기소개서 기반 질문을 생성중 입니다</div>
-              <div>잠시만 기다려 주세요!</div>
+      {startInterviewMutation.isPending &&
+        selectCategory === "cover-letter" && (
+          <>
+            <div className="modal-overlay">
+              <div className="modal-container h-50 w-100 flex flex-col justify-center items-center">
+                <Loading />
+                <div className="mt-3">자기소개서 기반 질문을 생성중 입니다</div>
+                <div>잠시만 기다려 주세요!</div>
+              </div>
             </div>
-          </div>
-        </>
-      )}
+          </>
+        )}
       {/* 페이지 제목 및 안내 텍스트 */}
       <div className="mb-8 text-center">
         <h2 className="mb-2 text-2xl font-bold">면접 준비</h2>
