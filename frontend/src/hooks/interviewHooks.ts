@@ -151,9 +151,7 @@ export const useCompleteQuestion = () => {
       );
       return response?.data;
     },
-    onSuccess: () => {
-      toast.success("답변이 성공적으로 제출되었습니다!");
-    },
+
     onError: () => {
       toast.error("답변 제출에 실패했습니다.");
     },
