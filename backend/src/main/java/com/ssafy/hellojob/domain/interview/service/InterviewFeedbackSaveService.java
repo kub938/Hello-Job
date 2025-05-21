@@ -58,6 +58,7 @@ public class InterviewFeedbackSaveService {
             try {
                 jsonFeedbacks = new ObjectMapper().writeValueAsString(singleInterviewFeedback.getFollow_up_questions());
             } catch (JsonProcessingException e) {
+                log.debug("😱 삐상 !!!!!! interviewFeedback 저장 로직에서 json 파싱 에러 뜸 !!!!!: {}", e);
                 throw new BaseException(SERIALIZATION_FAIL);
             }
 
