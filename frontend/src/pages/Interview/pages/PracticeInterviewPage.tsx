@@ -265,8 +265,7 @@ function PracticeInterviewPage() {
           type={selectInterviewType}
         />
       )}
-      <div className="relative h-full w-full">
-        {/* 문항 및 버튼 헤더 */}
+      <div className="relative h-full w-full flex flex-col">
         <div className="border border-l-4 mb-1 border-l-primary rounded w-full flex px-5 py-4 items-center justify-between">
           <div className="mb-2 md:mb-0">
             <div className="text-sm">
@@ -282,9 +281,9 @@ function PracticeInterviewPage() {
         </div>
 
         {/* 면접 화면 영역 - 상대적 컨테이너 */}
-        <div className="relative flex h-[70vh] md:h-[80vh] lg:h-[85vh] w-full bg-gray-100 overflow-hidden">
+        <div className="flex h-[72vh] w-full bg-gray-100 overflow-hidden">
           {/* 메인 면접관 이미지 - 이미지를 컨테이너 크기에 맞게 조절 */}
-          <div className="absolute left-0 top-0 w-full h-full flex items-center justify-center">
+          <div className="w-full h-full flex items-center justify-center">
             <img
               src={Interviewer}
               className="max-w-full max-h-full object-cover h-full w-full rounded"
@@ -293,7 +292,7 @@ function PracticeInterviewPage() {
           </div>
 
           {/* 오른쪽 컨트롤 영역 - 데스크톱에서는 오른쪽에, 바일에서는 하단에 배치 */}
-          <div className="absolute lg:top-0 lg:right-0 lg:w-[30%] lg:h-full bottom-0 lg:bottom-auto w-full lg:bg-opacity-20  rounded-t-lg lg:rounded-none p-4 flex flex-col  lg:items-end justify-between z-10">
+          <div className=" flex flex-col items-center justify-between ml-2">
             <div className="flex size-60  mb-4">
               <Timer
                 isComplete={questions.length + 1 === nowQuestionNumber}
