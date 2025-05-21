@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.coverletter.dto.ai.request.JobRoleAnalysisDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.ProjectDto;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.ContentsDto;
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterSaveRequestDto;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
 import com.ssafy.hellojob.domain.coverletter.service.CoverLetterSwotService;
@@ -126,11 +127,16 @@ public class CoverLetterContentService {
         return result;
     }
 
-    @Transactional
-    public void saveAllContents(CoverLetter coverLetter) {
+    public void saveAllContents(CoverLetter coverLetter, List<CoverLetterSaveRequestDto> requestDto) {
         List<CoverLetterContent> contents = coverLetterContentRepository.findByCoverLetter(coverLetter);
         for (CoverLetterContent content : contents) {
+            CoverLetterSaveRequestDto matchedDto = requestDto.stream()
+                    .filter(dto -> dto.getContentId().equals(content.getContentId()))
+                    .findFirst()
+                    .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_MATCHED_COVER_LETTER));
+
             content.updateContentStatus(CoverLetterContentStatus.COMPLETED);
+            content.updateContentDetail(matchedDto.getContentDetail());
         }
     }
 

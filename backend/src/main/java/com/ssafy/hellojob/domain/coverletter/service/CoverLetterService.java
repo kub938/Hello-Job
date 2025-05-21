@@ -5,6 +5,7 @@ import com.ssafy.hellojob.domain.companyanalysis.repository.CompanyAnalysisRepos
 import com.ssafy.hellojob.domain.coverletter.dto.ai.request.*;
 import com.ssafy.hellojob.domain.coverletter.dto.ai.response.AICoverLetterResponseDto;
 import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterRequestDto;
+import com.ssafy.hellojob.domain.coverletter.dto.request.CoverLetterSaveRequestDto;
 import com.ssafy.hellojob.domain.coverletter.dto.response.*;
 import com.ssafy.hellojob.domain.coverletter.entity.CoverLetter;
 import com.ssafy.hellojob.domain.coverletter.repository.CoverLetterRepository;
@@ -181,13 +182,14 @@ public class CoverLetterService {
                 .build();
     }
 
-    public Map<String, String> saveAll(Integer userId, Integer coverLetterId) {
+    @Transactional
+    public Map<String, String> saveAll(Integer userId, Integer coverLetterId, List<CoverLetterSaveRequestDto> requestDto) {
 
         userReadService.findUserByIdOrElseThrow(userId);
         CoverLetter coverLetter = coverLetterReadService.findCoverLetterByIdOrElseThrow(coverLetterId);
         coverLetterReadService.checkCoverLetterValidation(userId, coverLetter);
 
-        coverLetterContentService.saveAllContents(coverLetter);
+        coverLetterContentService.saveAllContents(coverLetter, requestDto);
         coverLetter.updateFinish(true);
 
         return Map.of("message", "자기소개서가 전체 저장되었습니다.");
