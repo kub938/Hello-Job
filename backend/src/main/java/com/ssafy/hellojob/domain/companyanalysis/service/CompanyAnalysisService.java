@@ -113,7 +113,7 @@ public class CompanyAnalysisService {
                     sseService.sendToUser(user.getUserId(), "company-analysis-completed", data);
                 })
                 .exceptionally(e -> {
-                    log.error("❌ 기업 분석 실패", e.getMessage());
+                    log.error("❌ 기업 분석 실패", e);
                     sseService.sendToUser(user.getUserId(), "company-analysis-failed", company.getCompanyId());
                     user.increaseToken(1);
                     userRepository.save(user);
