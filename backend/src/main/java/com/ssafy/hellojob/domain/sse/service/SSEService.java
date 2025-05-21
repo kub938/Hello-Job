@@ -43,7 +43,7 @@ public class SSEService {
             }
 
             deque.addLast(emitter);
-            log.debug("🧷 emitter 추가됨 - userId={}, 현재 연결 수={}", userId, emitters.get(userId).size());
+            log.debug("🧷 emitter 추가됨 - userId={}, 현재 연결 수={}", userId, deque.size());
             return deque;
         });
 
