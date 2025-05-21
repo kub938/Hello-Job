@@ -58,6 +58,7 @@ public class InterviewService {
     private final S3UploadService s3UploadService;
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
+    private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
 
     private static final Integer QUESTION_SIZE = 5;
 
@@ -736,6 +737,14 @@ public class InterviewService {
                         .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
                         .toList();
 
+        for(InterviewAnswer i:interviewAnswers){
+            if(i.getInterviewAnswer() == null || i.getInterviewAnswer().equals("stt 변환에 실패했습니다") || i.getInterviewAnswer().equals("")){
+                interviewAnswerContentSaveService.saveAnswer( "stt 변환에 실패했습니다", i);
+                i.addInterviewAnswerFeedback("피드백 생성에 실패했습니다.");
+                i.addInterviewFollowUpQuestion("꼬리 질문 생성에 실패했습니다.");
+                interviewAnswerRepository.save(i);
+            }
+        }
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if (interviewQuestionAndAnswerRequestDto.isEmpty()) {

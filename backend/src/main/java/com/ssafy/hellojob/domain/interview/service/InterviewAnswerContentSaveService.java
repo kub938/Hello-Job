@@ -48,10 +48,9 @@ public class InterviewAnswerContentSaveService {
     }
 
     @Transactional
-    public void saveAllAnswerData(String url, String videoLength, String answer, InterviewAnswer interviewAnswer) {
+    public void saveAllAnswerData(String url, String videoLength, InterviewAnswer interviewAnswer) {
         interviewAnswer.addInterviewVideoUrl(url);
         interviewAnswer.addVideoLength(videoLength);
-        interviewAnswerRepository.save(interviewAnswer);
         interviewAnswerRepository.flush();
     }
 
