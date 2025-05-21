@@ -1,23 +1,18 @@
 package com.ssafy.hellojob.domain.interview.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
-import org.springframework.scheduling.annotation.Async;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.concurrent.CompletableFuture;
-
-import static com.ssafy.hellojob.global.exception.ErrorCode.STT_TRANSCRIBE_INTERRUPTED;
-import static com.ssafy.hellojob.global.exception.ErrorCode.VIDEO_TOO_LARGE;
 
 @Slf4j
 @Service
@@ -33,93 +28,60 @@ public class SttService {
     @Value("${OPENAI_API_KEY}")
     private String openAiKey;
 
-    // stt
-    @Async("taskExecutor")
-    public CompletableFuture<String> transcribeAudio(Integer interviewAnswerId, byte[] fileBytes, String originalFilename) {
-
-        if (fileBytes.length > 25 * 1024 * 1024) {
-            throw new BaseException(VIDEO_TOO_LARGE);
-        }
-
-        log.debug("😎 면접 stt 함수 들어옴");
-
-        interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
-
-        Resource audioResource = new ByteArrayResource(fileBytes) {
-            @Override
-            public String getFilename() {
-                return originalFilename;
+    public String transcribeAudioSync(Integer interviewAnswerId, byte[] fileBytes, String originalFilename) {
+        try {
+            if (fileBytes.length > 25 * 1024 * 1024) {
+                return "stt 변환에 실패했습니다";
             }
-        };
 
-        int maxRetries = 5;
-        int attempt = 0;
+            interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
-        while (attempt < maxRetries) {
-            try {
-                RestTemplate restTemplate = new RestTemplate();
-
-//                String prompt = "";
-//                switch(interviewAnswer.getInterviewQuestionCategory().name()){
-//                    case "인성면접":
-//                        prompt = "인성 면접 답변임";
-//                        break;
-//                    case "자기소개서면접":
-//                        prompt = "자기소개서면접 면접 답변임";
-//                        break;
-//                    default:
-//                        prompt = interviewAnswer.getInterviewQuestionCategory().name() + "면접 답변임";
-//                }
-
-                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-                body.add("file", audioResource);
-                body.add("model", "gpt-4o-transcribe");
-                body.add("language", "ko");
-//                body.add("prompt", prompt);
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-                headers.setBearerAuth(openAiKey);
-
-                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
-
-                ResponseEntity<String> response = restTemplate.exchange(
-                        openAiUrl,
-                        HttpMethod.POST,
-                        requestEntity,
-                        String.class
-                );
-
-                if (response.getStatusCode().is2xxSuccessful()) {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    log.debug("😎 stt 변환 성공");
-                    String result = objectMapper.readTree(response.getBody()).get("text").asText();
-                    log.debug("😎 stt 변환 결과값 : {}", result);
-
-                    return CompletableFuture.completedFuture(result);
-                } else {
-                    throw new RuntimeException("😱 Whisper STT 응답 실패: " + response.getStatusCode());
+            Resource audioResource = new ByteArrayResource(fileBytes) {
+                @Override
+                public String getFilename() {
+                    return originalFilename;
                 }
+            };
 
-            } catch (Exception e) {
-                attempt++;
-                if (attempt >= maxRetries) {
-                    log.debug("😱 삐상 !!!!!!!! stt에서 오류 발생 !!!!!!: {}", e);
-                    return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
-                }
+            RestTemplate restTemplate = createTimeoutRestTemplate();
 
-                log.warn("⚠️ STT 변환 실패 - 재시도 중 ({}/{}): {}", attempt, maxRetries, e.getMessage());
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("file", audioResource);
+            body.add("model", "gpt-4o-transcribe");
+            body.add("language", "ko");
 
-                try {
-                    Thread.sleep(1000L * attempt); // 점진적 대기: 1s, 2s, ...
-                } catch (InterruptedException ie) {
-                    Thread.currentThread().interrupt();
-                    throw new BaseException(STT_TRANSCRIBE_INTERRUPTED);
-                }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+            headers.setBearerAuth(openAiKey);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    openAiUrl, HttpMethod.POST, requestEntity, String.class);
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                JsonNode root = objectMapper.readTree(response.getBody());
+                String text = root.has("text") && !root.get("text").isNull()
+                        ? root.get("text").asText()
+                        : "stt 변환에 실패했습니다";
+                log.debug("😎 stt 변환 결과: {}", text);
+                return text;
+            } else {
+                return "stt 변환에 실패했습니다";
             }
-        }
 
-        return CompletableFuture.completedFuture("stt 변환에 실패했습니다");
+        } catch (Exception e) {
+            log.warn("❗ STT 처리 실패", e);
+            return "stt 변환에 실패했습니다";
+        }
+    }
+
+    private RestTemplate createTimeoutRestTemplate() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(3000);  // 연결 시도 최대 3초
+        factory.setReadTimeout(20000);    // 응답 대기 최대 20초
+        return new RestTemplate(factory);
     }
 
 

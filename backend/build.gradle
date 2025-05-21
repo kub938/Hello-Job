@@ -67,7 +67,6 @@ dependencies {
 	implementation 'software.amazon.awssdk:auth:2.25.12'
 	implementation 'software.amazon.awssdk:regions:2.25.12'
 
-
 }
 
 tasks.named('test') {

@@ -2,10 +2,7 @@ package com.ssafy.hellojob.domain.interview.controller;
 
 import com.ssafy.hellojob.domain.interview.dto.request.*;
 import com.ssafy.hellojob.domain.interview.dto.response.*;
-import com.ssafy.hellojob.domain.interview.service.InterviewAnswerSaveService;
-import com.ssafy.hellojob.domain.interview.service.InterviewService;
-import com.ssafy.hellojob.domain.interview.service.S3UploadService;
-import com.ssafy.hellojob.domain.interview.service.SttService;
+import com.ssafy.hellojob.domain.interview.service.*;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +25,8 @@ public class InterviewController {
     private final S3UploadService s3UploadService;
     private final SttService sttService;
     private final InterviewAnswerSaveService interviewAnswerSaveService;
+    private final InterviewFeedbackSaveService interviewFeedbackSaveService;
+    private final SttQueueService sttQueueService;
 
     // cs 질문 목록 조회
     @GetMapping("/question/cs")
@@ -155,20 +154,29 @@ public class InterviewController {
 
         log.debug("😎 면접 한 문항 종료 요청 들어옴 : {}", interviewAnswerId);
 
-        // Controller에서 미리 byte[] 로 복사
-        byte[] audioBytes = audioFile.getBytes();
-        String originalFilename = audioFile.getOriginalFilename();
+        try{
+            byte[] audioBytes = audioFile.getBytes();
+            String originalFilename = audioFile.getOriginalFilename();
 
-        sttService.transcribeAudio(Integer.valueOf(interviewAnswerId), audioBytes, originalFilename)
-                .exceptionally(e -> {
-                    log.warn("❌ STT 변환 중 예외 발생: {}", e.getMessage());
-                    return "stt 변환에 실패했습니다";  // fallback 값
-                })
-                .thenAccept(result -> {
-                    interviewAnswerSaveService.saveInterviewAnswer(userPrincipal.getUserId(), result, Integer.parseInt(interviewAnswerId));
-                });
+            SttRequest request = new SttRequest(
+                    Integer.valueOf(interviewAnswerId),
+                    audioBytes,
+                    originalFilename,
+                    userPrincipal.getUserId()
+            );
+
+            sttQueueService.submitRequest(request);
+        } catch(Exception e){
+            log.error("😱 MultipartFile 변환 실패", e);
+            interviewAnswerSaveService.saveInterviewAnswer(
+                    userPrincipal.getUserId(),
+                    "stt 변환에 실패했습니다",
+                    Integer.valueOf(interviewAnswerId)
+            );
+        }
 
     }
+
 
     // 영상 저장(S3 업로드 + 시간 추출 및 저장)
     @PostMapping("/practice/video")
@@ -195,7 +203,9 @@ public class InterviewController {
     @PostMapping("/practice/end")
     public Map<String, String> endInterview(@RequestBody EndInterviewRequestDto videoInfo,
                                             @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
-        Thread.sleep(60 * 1000);
+
+        interviewFeedbackSaveService.saveTitle(videoInfo.getInterviewVideoId(), videoInfo.getInterviewTitle());
+        Thread.sleep(30 * 1000);
         return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
     }
 

@@ -58,6 +58,7 @@ public class InterviewService {
     private final S3UploadService s3UploadService;
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
+    private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
 
     private static final Integer QUESTION_SIZE = 5;
 
@@ -318,6 +319,8 @@ public class InterviewService {
             throw new BaseException(INVALID_USER);
         }
 
+        log.debug("😎 자소서 기반 모의 면접 시작 함수 들어옴 !!!");
+
         // 면접이 없을 경우(처음 시도하는 유저)
         CoverLetterInterview interview = coverLetterInterviewRepository.findByUserAndCoverLetter(user, coverLetter)
                 .orElseGet(() -> {
@@ -329,6 +332,7 @@ public class InterviewService {
         InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
+        // fast API에 자소서 기반 질문 생성 요청
         CoverLetterIdRequestDto requestDto = CoverLetterIdRequestDto.builder()
                 .coverLetterId(coverLetterId)
                 .build();
@@ -338,6 +342,7 @@ public class InterviewService {
 
         for(String s:responseDto.getCoverLetterQuestion()){
             CoverLetterQuestionBank qs = CoverLetterQuestionBank.of(interview, s);
+            coverLetterQuestionBankRepository.save(qs);
             newQuestions.add(qs);
         }
 
@@ -677,8 +682,12 @@ public class InterviewService {
                 .projects(projects)
                 .build();
 
+        log.debug("😎 fast API에 자소서 기반 질문 생성 요청 보냄 !!!");
+        
         // fast API 요청 전송
         CreateCoverLetterFastAPIResponseDto fastAPIResponseDto = fastApiClientService.sendCoverLetterToFastApi(createCoverLetterFastAPIRequestDto);
+
+        log.debug("😎 fast API에서 자소서 기반 질문 날아옴 !!!");
 
         return CreateCoverLetterQuestionResponseDto.builder()
                 .coverLetterId(coverLetter.getCoverLetterId())
@@ -728,10 +737,18 @@ public class InterviewService {
                         .filter(dto -> dto.getInterview_answer() != null && !dto.getInterview_answer().equals("stt 변환에 실패했습니다"))
                         .toList();
 
+        for(InterviewAnswer i:interviewAnswers){
+            if(i.getInterviewAnswer() == null || i.getInterviewAnswer().equals("stt 변환에 실패했습니다") || i.getInterviewAnswer().equals("")){
+                interviewAnswerContentSaveService.saveAnswer( "stt 변환에 실패했습니다", i);
+                i.addInterviewAnswerFeedback("피드백 생성에 실패했습니다.");
+                i.addInterviewFollowUpQuestion("[\"꼬리 질문 생성에 실패했습니다.\"]");
+                interviewAnswerRepository.save(i);
+            }
+        }
 
         // 모든 항목의 답변이 stt변환에 실패했을 때
         if (interviewQuestionAndAnswerRequestDto.isEmpty()) {
-            interviewFeedbackSaveService.saveTitle(interviewVideo);
+            return Map.of("message", "전 문항 stt 변환에 실패하여 피드백 요청 없이 결과값 반환합니다.");
         }
 
         // 자소서 조회
@@ -920,9 +937,8 @@ public class InterviewService {
         // 한 번의 쿼리로 모든 InterviewVideo 조회 (Join 활용, 날짜 기준 내림차순 정렬)
         List<InterviewVideo> interviewVideos = interviewVideoRepository.findAllByUser(user);
 
-        // 모든 InterviewVideo ID를 수집(단, title이 null인 값은 제외)
+        // 모든 InterviewVideo ID를 수집
         List<Integer> videoIds = interviewVideos.stream()
-                .filter(video -> video.getInterviewTitle() != null)
                 .map(InterviewVideo::getInterviewVideoId)
                 .toList();
 
@@ -939,6 +955,7 @@ public class InterviewService {
 
         // DTO 구성
         return interviewVideos.stream()
+                .filter(video -> video.getInterviewTitle() != null)
                 .map(video -> InterviewThumbNailResponseDto.builder()
                         .interviewVideoId(video.getInterviewVideoId())
                         .feedbackEnd(video.isFeedback())

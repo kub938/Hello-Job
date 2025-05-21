@@ -35,6 +35,14 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    # HikariCP 풀 설정
+    hikari:
+      minimum-idle: 30            # 유휴 상태로 유지할 커넥션의 최소 수 - 기본값과 동일
+      maximum-pool-size: 100       # 최대 커넥션 수(풀의 크기) - 10(기본값) > 30으로 증가
+      idle-timeout: 30000         # 유휴 상태 커넥션을 제거하기까지 대기하는 시간 - 10분( > 3초
+      max-lifetime: 600000        # 커넥션의 최대 생존 시간 - 30분 > 10분
+      connection-timeout: 30000   # 커넥션 풀에서 커넥션을 얻기 위해 기다리는 최대 시간 - 30초(기본값)
+
 
   jpa:
     database: mysql

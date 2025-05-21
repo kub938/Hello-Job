@@ -24,7 +24,7 @@ public class InterviewDeleteScheduler {
 
     // 매일 자정에 실행
     @Transactional
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 4 * * ?")
     public void deleteInterviewVideo() {
         log.debug("{}시 면접 삭제 시작", LocalTime.now());
 
