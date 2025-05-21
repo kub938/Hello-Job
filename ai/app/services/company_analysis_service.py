@@ -4,14 +4,14 @@ import hashlib
 from pydantic import BaseModel, create_model
 from typing import List, Optional, Any, Dict, Tuple
 from agents import Agent, WebSearchTool
-import logging
 
 from app.schemas import company
 from app.core.agent_utils import RateLimitedRunner
 from app.core.request_queue import get_request_queue
 from app.core.mcp_core import get_mcp_servers
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 
 
 # 기업 분석 결과 포맷팅 
@@ -103,7 +103,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
     Returns:
         dict: 기업 분석 및 뉴스 분석 결과를 포함한 딕셔너리
     """
-    logger.info(f"company_analysis_all 함수 호출: company_name={company_name}, base={base}, plus={plus}, fin={fin}, user_prompt={user_prompt}")
+    logger.info(f"company_analysis_all 함수 호출: company_name={company_name}, base={base}, plus={plus}, fin={fin}, swot={swot}, user_prompt={user_prompt}")
     
     # 요청 큐 가져오기
     request_queue = get_request_queue()
@@ -112,7 +112,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
     mcp_servers = get_mcp_servers()
     
     # 캐시 키 생성 (company_name + 옵션 조합)
-    options_hash = hashlib.md5(f"{base}_{plus}_{fin}".encode()).hexdigest()
+    options_hash = hashlib.md5(f"{base}_{plus}_{fin}_{swot}".encode()).hexdigest()
     cache_key_base = f"company_analysis_{company_name}_{options_hash}"
     
     

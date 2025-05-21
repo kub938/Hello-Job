@@ -4,8 +4,9 @@ import logging
 
 from app.schemas import company
 from app.services.company_analysis_service import company_analysis_all
+from app.core.logger import app_logger
 
-logger = logging.getLogger(__name__)
+logger = app_logger
 router = APIRouter(prefix="/company-analysis", tags=["company-analysis"])
 
 
@@ -44,4 +45,5 @@ async def company_analysis(request: company.CompanyAnalysisRequest):
         "swot": result["swot"]
         
     }
+    logger.info(f"CompanyAnalysisResponse: {response}")
     return response
