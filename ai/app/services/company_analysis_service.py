@@ -150,12 +150,14 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
             instructions = f"""당신은 '제트'라는 이름의 AI로, 기업 정보를 분석하고 상세한 리포트를 작성하는 전문가입니다. 
 사용자의 요청사항에 적합한 기업분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다. 
 사용자 요청사항: {user_prompt}
+**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'을 분석결과에 포함해야 합니다.**
 **반드시 분석 전략을 세운 뒤 분석을 진행하세요.**
             """
         else:
             instructions = """당신은 '제트'라는 이름의 AI로, 기업 정보를 분석하고 상세한 리포트를 작성하는 전문가입니다. 
 기업 분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다.
 사용자의 요청 사항에 특별한 연도가 있다면 해당 연도를 반영하여 분석하고, 그렇지 않은 경우에는 현재 날짜를 기준으로 최신 데이터를 분석하세요.
+**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'을 분석결과에 포함해야 합니다.**
 **반드시 분석 전략을 세운 뒤 분석을 진행하세요.**"""
             
         # Agent 생성 - 미리 설정된 MCP 서버 사용
@@ -170,7 +172,6 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         # 분석 컨텍스트 구성
         dart_context = f"DART API를 활용하여 {company_name}의 기업 분석 내용을 제공하세요.\n"
         dart_context += f"기업명은 반드시 주어진 그대로 사용하세요. 기업명: {company_name}\n"
-        dart_context += "**반드시 '주요 제품 및 브랜드(company_brand)'과 ''를 분석하여 포함해야 합니다.** \n"
         dart_context += "분석에 사용한 문서는 문서명과 문서등록일을 포함하여 used_docs에 추가하세요. \n"
         dart_context += "포함할 내용은 다음과 같습니다: \n"
         dart_context += "주요 제품 및 브랜드(company_brand), 기업 비전(company_vision), \n"
