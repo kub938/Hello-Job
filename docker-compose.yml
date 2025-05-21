@@ -58,6 +58,8 @@ services:
       - GMS_KEY=${GMS_KEY}
       - GMS_API_BASE=${GMS_API_BASE}
       - ENV=${FASTAPI_ENV}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
     depends_on:
       mysql:
         condition: service_healthy
