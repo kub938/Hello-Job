@@ -46,16 +46,13 @@ public class InterviewAnswerContentSaveService {
 
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveUrl(String url, InterviewAnswer interviewAnswer){
+    @Transactional
+    public void saveAllAnswerData(String url, String videoLength, String answer, InterviewAnswer interviewAnswer) {
         interviewAnswer.addInterviewVideoUrl(url);
-        log.debug("😎 영상 저장 완");
+        interviewAnswer.addVideoLength(videoLength);
+        interviewAnswerRepository.save(interviewAnswer);
+        interviewAnswerRepository.flush();
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveTime(String time, InterviewAnswer interviewAnswer){
-        interviewAnswer.addVideoLength(time);
-        log.debug("😎 시간 저장 완");
-    }
 
 }

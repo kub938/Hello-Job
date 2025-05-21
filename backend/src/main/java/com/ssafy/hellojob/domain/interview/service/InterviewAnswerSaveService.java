@@ -55,13 +55,7 @@ public class InterviewAnswerSaveService {
         }
 
         try{
-            interviewAnswerContentSaveService.saveUrl(url, interviewAnswer);
-        } catch(Exception e){
-            log.debug("😱 삐상 !!! 영상 url 저장 중 에러 발생 !!!: {}", e);
-        }
-
-        try{
-            interviewAnswerContentSaveService.saveTime(videoLength, interviewAnswer);
+            interviewAnswerContentSaveService.saveAllAnswerData(url, videoLength, interviewAnswer.getInterviewAnswer(), interviewAnswer);
         } catch(Exception e){
             log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
         }
