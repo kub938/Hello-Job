@@ -43,7 +43,7 @@ public class CompanyAnalysisSaveService {
             Company company,
             CompanyAnalysisFastApiResponseDto responseDto,
             CompanyAnalysisRequestDto requestDto) {
-        log.debug("fast API에서 응답 받음 !!!");
+        log.debug("😎 여기 save 함수임 !!!! fast API에서 응답 받음 !!!");
         log.debug("기업 분석 : {}", responseDto.getCompany_analysis());
 
         // dart 정보 저장
