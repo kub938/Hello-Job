@@ -1,4 +1,5 @@
 import {
+  allContentDataType,
   CoverLetterPostRequest,
   getCoverLetterContentIdsResponse,
 } from "@/types/coverLetterTypes";
@@ -38,8 +39,14 @@ export const coverLetterApi = {
     );
   },
 
-  completeCoverLetter: (coverLetterId: number) => {
-    return authApi.patch(`/api/v1/cover-letter/${coverLetterId}`);
+  completeCoverLetter: (
+    coverLetterId: number,
+    allContentData: allContentDataType[]
+  ) => {
+    return authApi.patch(
+      `/api/v1/cover-letter/${coverLetterId}`,
+      allContentData
+    );
   },
 
   sendMessage: (message: sendMessageRequest) => {

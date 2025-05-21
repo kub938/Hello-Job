@@ -1,22 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/Button";
-import { getCoverLetterResponse } from "@/types/coverLetterApiType";
 import Modal from "@/components/Modal";
 import { useCompleteCoverLetter } from "@/hooks/coverLetterHooks";
 import { toast } from "sonner";
 import { useNavigate } from "react-router";
-
-export interface CoverLetterEditorProps {
-  onSaveContent: (type: "changeStep" | "draft" | "save") => void;
-  CoverLetterData: getCoverLetterResponse;
-  onChangeContentDetail: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
-  nowContentLength: number;
-  totalContentLength: number;
-  nowSelectContentNumber: number;
-  coverLetterId: number;
-}
+import { CoverLetterEditorProps } from "@/types/coverLetterTypes";
 
 function CoverLetterEditor({
+  allContentData,
   onSaveContent,
   CoverLetterData,
   onChangeContentDetail,
@@ -55,12 +46,15 @@ function CoverLetterEditor({
   };
 
   const onCompleteCreateCoverLetter = (coverLetterId: number) => {
-    completeCoverLetterMutation.mutate(coverLetterId, {
-      onSuccess: () => {
-        toast.info("자기소개서 작성이 완료되었습니다");
-        navigate("/mypage/cover-letter-list");
-      },
-    });
+    completeCoverLetterMutation.mutate(
+      { coverLetterId, allContentData },
+      {
+        onSuccess: () => {
+          toast.info("자기소개서 작성이 완료되었습니다");
+          navigate("/mypage/cover-letter-list");
+        },
+      }
+    );
   };
   return (
     <>
