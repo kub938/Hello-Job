@@ -124,6 +124,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         instructions = """당신은 '제트'라는 이름의 AI로, 최신의 기업 정보 검색도구를 찾아 반환합니다.
 검색도구: search-webkr, google-search
 반환할 기본 정보는 '주요 제품 및 브랜드(서비스)'와 '기업 비전(핵심가치)' 입니다. 
+두 정보에 대한 내용을 찾을 때 까지 적절한 도구를 활용하여 검색하세요.
 """
         default_info_agent = Agent(
             name=f"Company Default Info Searcher: {company_name}",
