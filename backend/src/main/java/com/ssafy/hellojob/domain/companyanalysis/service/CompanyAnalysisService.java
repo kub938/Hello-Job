@@ -85,6 +85,10 @@ public class CompanyAnalysisService {
                 .build();
 
         log.debug("fast API로 요청 보냄 !!!");
+        log.debug("isBasic: {}", requestDto.isBasic());
+        log.debug("isPlus: {}", requestDto.isPlus());
+        log.debug("isFinancial: {}", requestDto.isFinancial());
+        log.debug("isSwot: {}", requestDto.isSwot());
 
         // FastAPI 호출
         requestCompanyAnalysisAsync(user, company, requestDto, fastApiRequestDto);
@@ -109,7 +113,7 @@ public class CompanyAnalysisService {
                     sseService.sendToUser(user.getUserId(), "company-analysis-completed", data);
                 })
                 .exceptionally(e -> {
-                    log.error("❌ 기업 분석 실패", e.getMessage());
+                    log.error("❌ 기업 분석 실패", e);
                     sseService.sendToUser(user.getUserId(), "company-analysis-failed", company.getCompanyId());
                     user.increaseToken(1);
                     userRepository.save(user);

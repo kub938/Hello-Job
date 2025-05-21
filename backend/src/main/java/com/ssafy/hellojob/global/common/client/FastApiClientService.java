@@ -40,6 +40,7 @@ public class FastApiClientService {
                 .block();
 
         if (response == null) {
+            log.debug("😱 삐상!!!! 기업 분석 fast API service에서 null 반환됨!!!!!! ");
             throw new BaseException(ErrorCode.FAST_API_RESPONSE_NULL);
         }
 

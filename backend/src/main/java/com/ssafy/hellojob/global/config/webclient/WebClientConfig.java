@@ -37,7 +37,7 @@ public class WebClientConfig {
 
         HttpClient httpClient = HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 10_000) // 연결 타임아웃 (10초)
-                .responseTimeout(Duration.ofMinutes(3))               // 응답 타임아웃 (3분)
+                .responseTimeout(Duration.ofMinutes(5))               // 응답 타임아웃 (3분)
                 .doOnConnected(conn -> conn
                         .addHandlerLast(new ReadTimeoutHandler(180, TimeUnit.SECONDS))
                         .addHandlerLast(new WriteTimeoutHandler(180, TimeUnit.SECONDS)));
