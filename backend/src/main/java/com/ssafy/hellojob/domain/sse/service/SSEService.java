@@ -1,7 +1,6 @@
 package com.ssafy.hellojob.domain.sse.service;
 
 import com.ssafy.hellojob.domain.sse.dto.AckRequestDto;
-import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.util.JsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.Deque;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,50 +21,79 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 @RequiredArgsConstructor
 public class SSEService {
 
-    public record SseEventWrapper(String eventName, String dataJson) {}
-    private final Map<Integer, SseEmitter> emitters = new ConcurrentHashMap<>();
-    private final Map<Integer, Queue<SseEventWrapper>> retryQueue = new ConcurrentHashMap<>();
+    public record SseEventWrapper(String eventName, String dataJson) {
+    }
 
-    private final UserReadService userReadService;
+    private final Map<Integer, Deque<SseEmitter>> emitters = new ConcurrentHashMap<>();
+    private final int MAX_EMITTERS_PER_USER = 3;
+    private final Map<Integer, Queue<SseEventWrapper>> retryQueue = new ConcurrentHashMap<>();
     private final JsonUtil jsonUtil;
 
     public void addEmitter(Integer userId, SseEmitter emitter) {
-        emitters.put(userId, emitter);
+        emitters.compute(userId, (key, deque) -> {
+            if (deque == null) {
+                deque = new ConcurrentLinkedDeque<>();
+            }
+
+            while (deque.size() >= MAX_EMITTERS_PER_USER) {
+                SseEmitter old = deque.pollFirst();
+                try {
+                    old.complete(); // 이전 연결 닫기
+                } catch (Exception e) {
+                    log.warn("이전 emitter 종료 중 에러: {}", e.getMessage());
+                }
+            }
+
+            deque.addLast(emitter);
+            return deque;
+        });
 
         // 연결 종료 시 emitter 제거
         emitter.onCompletion(() -> {
             log.debug("SSE 연결 정상 종료");
-            emitters.remove(userId);
+            removeEmitter(userId, emitter);
         });
         emitter.onTimeout(() -> {
             log.debug("SSE 타임아웃으로 연결 종료");
-            emitters.remove(userId);
+            removeEmitter(userId, emitter);
         });
         emitter.onError(e -> {
-            log.debug("SSE 연결 중 에러 발생 {} ", e.getMessage());
-            emitters.remove(userId);
+            log.debug("SSE 연결 중 에러 발생 userId: {} | {} ", userId, e.getMessage());
+            removeEmitter(userId, emitter);
         });
     }
 
-    public SseEmitter getEmitter(Integer userId) {
+    private void removeEmitter(Integer userId, SseEmitter emitter) {
+        Deque<SseEmitter> deque = emitters.get(userId);
+        if (deque != null) {
+            deque.remove(emitter);
+            if (deque.isEmpty())
+                emitters.remove(userId);
+        }
+    }
+
+    public Deque<SseEmitter> getEmitters(Integer userId) {
         return emitters.get(userId);
     }
 
     public void sendToUser(Integer userId, String eventName, Object data) {
-        userReadService.findUserByIdOrElseThrow(userId);
         // 일단 큐에 넣음
         queueEvent(userId, eventName, data);
-        SseEmitter emitter = getEmitter(userId);
-        if(emitter != null) {
-            try {
-                emitter.send(SseEmitter.event()
-                        .name(eventName)
-                        .data(data));
-            } catch (IOException e) {
-                // 연결이 끊긴 경우
-                log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
-                emitter.completeWithError(e);
-                emitters.remove(userId);
+        Deque<SseEmitter> emittersDeque = getEmitters(userId);
+        if (emittersDeque != null) {
+            Iterator<SseEmitter> iterator = emittersDeque.iterator();
+            while (iterator.hasNext()) {
+                SseEmitter emitter = iterator.next();
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name(eventName)
+                            .data(data));
+                } catch (IOException e) {
+                    // 연결이 끊긴 경우
+                    log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
+                    emitter.completeWithError(e);
+                    removeEmitter(userId, emitter);
+                }
             }
         } else {
             log.debug("🔇 연결 없음 - userId = {}, 큐에 보관", userId);
@@ -82,7 +112,7 @@ public class SSEService {
         Queue<SseEventWrapper> queue = retryQueue.get(userId);
 
         if (queue != null && !queue.isEmpty()) {
-        log.debug("▶️ userId={}, 큐 크기={}", userId, queue.size());
+            log.debug("▶️ userId={}, 큐 크기={}", userId, queue.size());
             while (!queue.isEmpty()) {
                 SseEventWrapper event = queue.peek();
                 try {
@@ -93,7 +123,9 @@ public class SSEService {
                 } catch (IOException e) {
                     log.warn("❌ SSE 연결 재실패 - 중단");
                     emitter.completeWithError(e);
-                    emitters.remove(userId);
+                    if (emitters.get(userId) != null && emitters.get(userId).contains(emitter)) {
+                        removeEmitter(userId, emitter);
+                    }
                     break;
                 }
             }
@@ -101,17 +133,21 @@ public class SSEService {
     }
 
     // 주기적으로 ping 전송(sse 연결 끊기지 않도록)
-    @Scheduled(fixedRate = 15_000) // 1분마다
+    @Scheduled(fixedRate = 15_000) // 15초마다
     public void sendPingToAll() {
-        emitters.forEach((userId, emitter) -> {
-            try {
-                emitter.send(SseEmitter.event()
-                        .name("ping")
-                        .data("keep-alive"));
-            } catch (IOException e) {
-                log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
-                emitter.completeWithError(e);
-                emitters.remove(userId);
+        emitters.forEach((userId, deque) -> {
+            Iterator<SseEmitter> iterator = deque.iterator();
+            while (iterator.hasNext()) {
+                SseEmitter emitter = iterator.next();
+                try {
+                    emitter.send(SseEmitter.event()
+                            .name("ping")
+                            .data("keep-alive"));
+                } catch (IOException e) {
+                    log.warn("❌ SSE 연결 실패 - userId={}, 원인={}", userId, e.getMessage());
+                    emitter.completeWithError(e);
+                    removeEmitter(userId, emitter);
+                }
             }
         });
     }
@@ -129,4 +165,5 @@ public class SSEService {
             }
         }
     }
+
 }
