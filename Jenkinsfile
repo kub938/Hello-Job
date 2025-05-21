@@ -91,7 +91,8 @@ pipeline {  // 파이프라인 정의 시작
                         string(credentialsId: 'FFMPEG_PATH', variable: 'FFMPEG_PATH'),
                         string(credentialsId: 'FASTAPI_ENV', variable: 'FASTAPI_ENV'),
                         string(credentialsId: 'GOOGLE_API_KEY', variable: 'GOOGLE_API_KEY'),
-                        string(credentialsId: 'GOOGLE_CSE_ID', variable: 'GOOGLE_CSE_ID')
+                        string(credentialsId: 'GOOGLE_CSE_ID', variable: 'GOOGLE_CSE_ID'),
+                        string(credentialsId: 'CHOLOG_API_KEY', variable: 'CHOLOG_API_KEY')
                     ]) {
                         sh '''
                             echo "🔄 Stopping existing containers..."
@@ -132,7 +133,8 @@ pipeline {  // 파이프라인 정의 시작
                                 --build-arg FFPROBE_PATH=$FFPROBE_PATH \
                                 --build-arg FFMPEG_PATH=$FFMPEG_PATH \
                                 --build-arg GOOGLE_API_KEY=$GOOGLE_API_KEY \
-                                --build-arg GOOGLE_CSE_ID=$GOOGLE_CSE_ID
+                                --build-arg GOOGLE_CSE_ID=$GOOGLE_CSE_ID \
+                                --build-arg CHOLOG_API_KEY=$CHOLOG_API_KEY
 
                             echo "🧹 Removing local Docker images..."
                             docker rmi workspace-backend || true

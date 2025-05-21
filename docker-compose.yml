@@ -26,6 +26,7 @@ services:
       - S3_SECRET_KEY=${S3_SECRET_KEY}
       - FFPROBE_PATH=${FFPROBE_PATH}
       - FFMPEG_PATH=${FFMPEG_PATH}
+      - CHOLOG_API_KEY=${CHOLOG_API_KEY}
     depends_on:          # 의존성 설정
       mysql:
         condition: service_healthy
