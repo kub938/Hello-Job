@@ -38,6 +38,7 @@ public class InterviewAnswerContentSaveService {
             log.debug("😎 id: {} 답변 저장 완", interviewAnswer.getInterviewAnswerId());
         } catch(Exception e){
             log.debug("😱 id: {} 삐상 !!!!!!!!!!! 답변 db에 저장 중 에러 발생 !!!!!!!!!!!!!!!!!!!!!!!", interviewAnswer.getInterviewAnswerId());
+            log.debug("{}", e);
         }
 
         InterviewAnswer answer1 = interviewAnswerRepository.findById(interviewAnswer.getInterviewAnswerId())
