@@ -29,6 +29,7 @@ sonar {
 
 repositories {
 	mavenCentral()
+	maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -39,6 +40,7 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	implementation 'com.ssafy.lab.s12-final:S12P31B207:v1.1.0'
 
 	// oauth
 	implementation 'org.springframework.security:spring-security-oauth2-client'
