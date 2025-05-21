@@ -121,7 +121,8 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
     
     # 기업 기본 정보 검색 (주요 제품 및 브랜드, 비전)
     async def perform_default_info_search():
-        instructions = """당신은 '제트'라는 이름의 AI로, 최신의 기업 정보를 찾아 반환합니다.
+        instructions = """당신은 '제트'라는 이름의 AI로, 최신의 기업 정보 검색도구를 찾아 반환합니다.
+검색도구: search-webkr, google-search
 반환할 기본 정보는 '주요 제품 및 브랜드(서비스)'와 '기업 비전(핵심가치)' 입니다. 
 """
         default_info_agent = Agent(
