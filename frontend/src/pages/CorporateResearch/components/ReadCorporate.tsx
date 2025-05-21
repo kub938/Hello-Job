@@ -179,8 +179,13 @@ function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
             )}
           </>
         )}
+        <footer className="flex gap-2 w-full justify-end">
+          <Button className="px-6" variant={"default"} onClick={onClose}>
+            확인
+          </Button>
+        </footer>
       </div>
-      <div className="h-[80vh] mb-[10vh] w-[280px] flex flex-col justify-between bg-white rounded-xl border-t-6 border-[#AF9BFF] p-6">
+      {/* <div className="h-[80vh] mb-[10vh] w-[280px] flex flex-col justify-between bg-white rounded-xl border-t-6 border-[#AF9BFF] p-6">
         <header>
           <h1 className="text-xl font-bold">분석 결과 필터</h1>
         </header>
@@ -199,7 +204,7 @@ function ReadCorporate({ onClose, id, companyId }: ReadCorporateProps) {
             확인
           </Button>
         </footer>
-      </div>
+      </div> */}
     </>
   );
 }

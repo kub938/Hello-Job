@@ -71,17 +71,58 @@ function CreateCorporate({ onClose, corporateId, dart }: CreateCorporateProps) {
 
   const onValidSubmit = async (data: IForm, e?: React.BaseSyntheticEvent) => {
     e?.preventDefault();
-    console.log(data);
+    console.log(
+      "companyId:",
+      corporateId,
+      "isPublic:",
+      isPublic,
+      "basic:",
+      isBasic,
+      "plus:",
+      isPlus,
+      "financial:",
+      isFinancial,
+      "swot:",
+      isSWOT,
+      "userPrompt:",
+      data.userPrompt,
+      "companyAnalysisTitle:",
+      data.companyAnalysisTitle
+    );
 
+    toast.success(
+      <div>
+        분석 요청을 보냈습니다.
+        <br />
+        완료 시 알림을 보내드립니다.
+      </div>
+    );
+    // 토글 비동기 오류나는 코드드
+    // try {
+    //   // 1) api 호출
+    //   mutation.mutate({
+    //     companyId: corporateId,
+    //     isPublic: data.isPublic,
+    //     basic: data.basic,
+    //     plus: data.plus,
+    //     financial: data.financial,
+    //     swot: data.swot,
+    //     userPrompt: data.userPrompt,
+    //     companyAnalysisTitle: data.companyAnalysisTitle,
+    //   });
+    // } catch (error) {
+    //   // 에러 처리
+    //   console.error(error);
+    // }
     try {
       // 1) api 호출
       mutation.mutate({
         companyId: corporateId,
-        isPublic: data.isPublic,
-        basic: data.basic,
-        plus: data.plus,
-        financial: data.financial,
-        swot: data.swot,
+        isPublic: isPublic,
+        basic: isBasic,
+        plus: isPlus,
+        financial: isFinancial,
+        swot: isSWOT,
         userPrompt: data.userPrompt,
         companyAnalysisTitle: data.companyAnalysisTitle,
       });
@@ -104,13 +145,7 @@ function CreateCorporate({ onClose, corporateId, dart }: CreateCorporateProps) {
   const onSubmitClicked = (e: React.BaseSyntheticEvent) => {
     e?.preventDefault();
     if (isSubmitting) return; // 연속 클릭 방지
-    toast.success(
-      <div>
-        분석 요청을 보냈습니다.
-        <br />
-        완료 시 알림을 보내드립니다.
-      </div>
-    );
+
     setIsSubmitting(true);
     handleSubmit(onValidSubmit, onInvalidSubmit)();
   };
