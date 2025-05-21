@@ -115,6 +115,31 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
     options_hash = hashlib.md5(f"{base}_{plus}_{fin}".encode()).hexdigest()
     cache_key_base = f"company_analysis_{company_name}_{options_hash}"
     
+    
+    # 0. 기업 기본 정보 검색 (주요 제품 및 브랜드, 비전)
+    default_info_cache_key = f"{cache_key_base}_default_info"
+    
+    # 기업 기본 정보 검색 (주요 제품 및 브랜드, 비전)
+    async def perform_default_info_search():
+        instructions = """당신은 '제트'라는 이름의 AI로, 최신의 기업 정보를 찾아 반환합니다.
+반환할 기본 정보는 '주요 제품 및 브랜드(서비스)'와 '기업 비전(핵심가치)' 입니다. 
+"""
+        default_info_agent = Agent(
+            name=f"Company Default Info Searcher: {company_name}",
+            instructions=instructions,
+            model="gpt-4.1-mini",
+            output_type=company.CompanyAnalysisDefault,
+            mcp_servers=mcp_servers  # 기존에 설정된 MCP 서버 사용
+        )
+        
+        default_info_result = await RateLimitedRunner.run(
+            starting_agent=default_info_agent,
+            input=f"최신 정보를 활용하여 {company_name} 기업의 기본 정보를 찾아 반환하세요.",
+            max_turns=30
+        )
+        
+        return default_info_result.final_output
+    
     # 1. DART 기업 분석 수행 (우선순위 높음)
     dart_cache_key = f"{cache_key_base}_dart"
     
@@ -132,7 +157,6 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         # Pydantic 모델 필드 정의
         model_fields = {
             "used_docs": (List[str], ...),
-            "default": (Optional[company.CompanyAnalysisDefault], None),
         }
         
         if "base" in analysis_types:
@@ -150,14 +174,12 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
             instructions = f"""당신은 '제트'라는 이름의 AI로, 기업 정보를 분석하고 상세한 리포트를 작성하는 전문가입니다. 
 사용자의 요청사항에 적합한 기업분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다. 
 사용자 요청사항: {user_prompt}
-**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'을 분석결과에 포함해야 합니다.**
 **반드시 분석 전략을 세운 뒤 분석을 진행하세요.**
             """
         else:
             instructions = """당신은 '제트'라는 이름의 AI로, 기업 정보를 분석하고 상세한 리포트를 작성하는 전문가입니다. 
 기업 분석을 제공하기 위한 전략(sequential-thinking)을 세우고, 다양한 MCP를 활용하여 기업 분석 결과 데이터를 반환합니다.
 사용자의 요청 사항에 특별한 연도가 있다면 해당 연도를 반영하여 분석하고, 그렇지 않은 경우에는 현재 날짜를 기준으로 최신 데이터를 분석하세요.
-**반드시 '주요 제품 및 브랜드(company_brand)'과 '기업 비전(company_vision)'을 분석결과에 포함해야 합니다.**
 **반드시 분석 전략을 세운 뒤 분석을 진행하세요.**"""
             
         # Agent 생성 - 미리 설정된 MCP 서버 사용
@@ -174,7 +196,6 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
         dart_context += f"기업명은 반드시 주어진 그대로 사용하세요. 기업명: {company_name}\n"
         dart_context += "분석에 사용한 문서는 문서명과 문서등록일을 포함하여 used_docs에 추가하세요. \n"
         dart_context += "포함할 내용은 다음과 같습니다: \n"
-        dart_context += "주요 제품 및 브랜드(company_brand), 기업 비전(company_vision), \n"
         
         if "base" in analysis_types:
             dart_context += "사업의 개요(business_overview), 주요 제품 및 서비스(main_products_services), 주요계약 및 연구개발활동(major_contracts_rd_activities), 기타 참고사항(other_references), \n"
@@ -188,7 +209,7 @@ async def company_analysis_all(company_name, base, plus, fin, swot, user_prompt)
             dart_context += "영업활동 현금흐름(operating_cash_flow), 투자활동 현금흐름(investing_cash_flow), 재무활동 현금흐름(financing_cash_flow) \n\n" 
 
         # 정보 부재 시 처리 방법 추가
-        dart_context += "또한, DART 문서에 명시적으로 포함되지 않은 항목(주요 제품 및 브랜드, 기업 비전)은 웹 검색(Search MCP)을 활용하여 정보를 찾아서 포함하고, 적당한 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요.\n\n"
+        dart_context += "해당 정보가 없다면 '정보 없음'이라고 명시적으로 값에 포함하여 출력하세요.\n\n"
         
         # DART 분석 실행
         dart_result = await RateLimitedRunner.run(
@@ -411,7 +432,14 @@ swot_analysis MCP를 활용하여 사용자의 요청 사항을 반영하는 SWO
     
     # 3. 큐를 통해 분석 작업 실행 (DART 분석 우선순위 높게)
     try:
-        # 두 작업을 큐에 넣고 실행
+        # 세 작업을 큐에 넣고 실행
+        default_info_result_task = request_queue.enqueue(
+            perform_default_info_search,
+            priority=1,  # 낮은 숫자 = 높은 우선순위
+            estimated_tokens=10000,
+            cache_key=default_info_cache_key
+        )
+        
         dart_result_task = request_queue.enqueue(
             perform_dart_analysis,
             priority=5,  # 낮은 숫자 = 높은 우선순위
@@ -435,7 +463,10 @@ swot_analysis MCP를 활용하여 사용자의 요청 사항을 반영하는 SWO
         
         
         # 모든 작업 완료 대기
+        default_info_result = await default_info_result_task
         dart_result = await dart_result_task
+        dart_result["company_brand"] = default_info_result.company_brand
+        dart_result["company_vision"] = default_info_result.company_vision
         news_result = await news_result_task
         if swot:
             swot_result = await swot_result_task
@@ -463,6 +494,7 @@ swot_analysis MCP를 활용하여 사용자의 요청 사항을 반영하는 SWO
             
         # 4. 결과 합치기
         response = {
+            "default": default_info_result,
             **dart_result,
             "news_summary": news_result["summary"],
             "news_urls": news_result["urls"],
