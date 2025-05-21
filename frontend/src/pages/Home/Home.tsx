@@ -12,7 +12,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("");
+  const [modalTitle, _] = useState("");
 
   console.log(`
     ██╗  ██╗███████╗██╗     ██╗      ██████╗      ██╗ ██████╗ ██████╗ 
@@ -23,10 +23,10 @@ export default function Home() {
     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝ ╚═════╝  ╚════╝  ╚═════╝ ╚═════╝ 
     `);
 
-  const openModal = ({ title }: { title: string }) => {
-    setModalTitle(title);
-    setIsModalOpen(true);
-  };
+  // const openModal = ({ title }: { title: string }) => {
+  //   setModalTitle(title);
+  //   setIsModalOpen(true);
+  // };
 
   return (
     <div className="relative flex flex-col w-full h-screen overflow-hidden">
