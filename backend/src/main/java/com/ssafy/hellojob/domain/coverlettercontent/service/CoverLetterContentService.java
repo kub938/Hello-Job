@@ -27,10 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -131,14 +128,27 @@ public class CoverLetterContentService {
 
     public void saveAllContents(CoverLetter coverLetter, List<CoverLetterSaveRequestDto> requestDto) {
         List<CoverLetterContent> contents = coverLetterContentRepository.findByCoverLetter(coverLetter);
+
+        Set<Integer> validContentId = contents.stream()
+                .map(CoverLetterContent::getContentId)
+                .collect(Collectors.toSet());
+
+        // 자기소개서에 있는 contentId 인지 검사
+        for (CoverLetterSaveRequestDto dto : requestDto) {
+            if (!validContentId.contains(dto.getContentId())) {
+                throw new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_MATCHED_COVER_LETTER);
+            }
+        }
+
+        // 넘어온 애들만 detail 업데이트
         for (CoverLetterContent content : contents) {
-            CoverLetterSaveRequestDto matchedDto = requestDto.stream()
+            requestDto.stream()
                     .filter(dto -> dto.getContentId().equals(content.getContentId()))
                     .findFirst()
-                    .orElseThrow(() -> new BaseException(ErrorCode.COVER_LETTER_CONTENT_NOT_MATCHED_COVER_LETTER));
-
+                    .ifPresent(dto -> {
+                        content.updateContentDetail(dto.getContentDetail());
+                    });
             content.updateContentStatus(CoverLetterContentStatus.COMPLETED);
-            content.updateContentDetail(matchedDto.getContentDetail());
         }
     }
 
