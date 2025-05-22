@@ -22,11 +22,12 @@ import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.client.FastApiClientService;
 import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.exception.ErrorCode;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import jakarta.persistence.EntityManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -725,7 +726,7 @@ public class InterviewService {
         return Map.of("message", "피드백 생성 요청이 정상적으로 처리되었습니다");
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Map<String, String> endInterview(Integer userId, Integer videoId) {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
