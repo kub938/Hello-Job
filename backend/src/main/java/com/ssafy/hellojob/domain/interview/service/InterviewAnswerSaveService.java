@@ -103,7 +103,7 @@ public class InterviewAnswerSaveService {
 //        }
 
         interviewAnswerRepository.flush();
-        applicationEventPublisher.publishEvent(new InterviewAnswerSavedEvent(interviewAnswer));
+        applicationEventPublisher.publishEvent(new InterviewAnswerSavedEvent(interviewAnswer, userId));
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
