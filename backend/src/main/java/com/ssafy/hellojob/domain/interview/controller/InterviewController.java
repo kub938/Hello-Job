@@ -199,14 +199,11 @@ public class InterviewController {
         return interviewService.createCoverLetterQuestion(userPrincipal.getUserId(), coverLetterIdRequestDto);
     }
 
-    // 면접 종료
+    // 면접 종료(제목 + 종료 시간 저장)
     @PostMapping("/practice/end")
     public Map<String, String> endInterview(@RequestBody EndInterviewRequestDto videoInfo,
-                                            @AuthenticationPrincipal UserPrincipal userPrincipal) throws InterruptedException {
-
-        interviewFeedbackSaveService.saveTitle(videoInfo.getInterviewVideoId(), videoInfo.getInterviewTitle());
-        Thread.sleep(30 * 1000);
-        return interviewService.endInterview(userPrincipal.getUserId(), videoInfo);
+                                            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+        return interviewService.saveInterviewTitle(userPrincipal.getUserId(), videoInfo);
     }
 
     // 면접 피드백 상세 조회

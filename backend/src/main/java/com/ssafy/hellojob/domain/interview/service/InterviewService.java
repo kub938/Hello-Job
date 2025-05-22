@@ -334,6 +334,8 @@ public class InterviewService {
         InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
 
+        log.debug("😎 면접 영상 생성 완: {}", video.getInterviewVideoId());
+
         // fast API에 자소서 기반 질문 생성 요청
         CoverLetterIdRequestDto requestDto = CoverLetterIdRequestDto.builder()
                 .coverLetterId(coverLetterId)
@@ -697,12 +699,37 @@ public class InterviewService {
                 .build();
     }
 
-    // 면접 종료
+    // 면접 종료(제목 저장)
     @Transactional
-    public Map<String, String> endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
+    public Map<String, String> saveInterviewTitle(Integer userId, EndInterviewRequestDto videoInfo) {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
+
+        // 인터뷰 유저와 요청한 유저 유효성 검사
+        if (interviewVideo.getCoverLetterInterview() != null) {
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if (!userId.equals(interview.getUser().getUserId())) {
+                throw new BaseException(INVALID_USER);
+            }
+        }
+
+        interviewVideo.addTitle(videoInfo.getInterviewTitle());
+        interviewVideo.addEndTime(LocalDateTime.now());
+
+        return Map.of("message", "피드백 생성 요청이 정상적으로 처리되었습니다");
+    }
+
+    @Transactional
+    public Map<String, String> endInterview(Integer userId, Integer videoId) {
+        // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoId);
         List<InterviewAnswer> interviewAnswers;
 
         log.debug("😎 endInterview 들어옴");
@@ -729,9 +756,6 @@ public class InterviewService {
                 throw new BaseException(INVALID_USER);
             }
         }
-
-        interviewVideo.addTitle(videoInfo.getInterviewTitle());
-        interviewVideo.addEndTime(LocalDateTime.now());
 
         // 여기서부터 fast API 관련 로직
         // 답변 객체 조회(stt 변환에 성공한 경우만)
