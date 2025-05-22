@@ -19,11 +19,20 @@ public class SseLoggingSuppressFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String uri = request.getRequestURI();
         if (uri.startsWith("/sse")) {
-            // 인증 정보가 없을 경우 즉시 종료
-            if (SecurityContextHolder.getContext().getAuthentication() == null ||
-                    !SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
-                log.warn("❌ 인증되지 않은 SSE 요청 차단: {}", request.getRequestURI());
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+
+            // 인증 정보가 없을 경우
+            if (auth == null || !auth.isAuthenticated()) {
+                // 이미 응답이 커밋됐다면 종료
+                if (response.isCommitted()) {
+                    log.debug("🔇 SSE 응답 이미 커밋됨: 무시, uri: {}", uri);
+                    return;
+                }
+                log.debug("❌ 인증되지 않은 SSE 요청 차단: {}", request.getRequestURI());
+                // 클라이언트에게 에러 이벤트 전송
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("event: error\ndata: Unauthorized SSE request\n\n");
+                response.getWriter().flush();
                 return;
             }
         }
