@@ -6,8 +6,9 @@ public class InterviewAnswerSavedEvent {
     private final InterviewAnswer interviewAnswer;
     private Integer userId;
 
-    public InterviewAnswerSavedEvent(InterviewAnswer interviewAnswer) {
+    public InterviewAnswerSavedEvent(InterviewAnswer interviewAnswer, Integer userId) {
         this.interviewAnswer = interviewAnswer;
+        this.userId = userId;
     }
 
     public InterviewAnswer getInterviewAnswer() {
