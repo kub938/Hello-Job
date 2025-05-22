@@ -39,6 +39,7 @@ public class InterviewAnswerSaveService {
     private final InterviewReadService interviewReadService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final InterviewService interviewService;
 
 
     @Value("${FFPROBE_PATH}")
@@ -110,7 +111,21 @@ public class InterviewAnswerSaveService {
     // 2. 트랜잭션이 커밋된 뒤에 리스너가 호출됨
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void afterCommitHandler(InterviewAnswerSavedEvent event) {
-        log.info("✅ 커밋 완료 후 로그: {}", event.getInterviewAnswer().getInterviewAnswer());
+        log.info("✅ 커밋 완료 후 로그 같은 service: {}", event.getInterviewAnswer().getInterviewAnswer());
+    }
+
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void onAnswerSaved(InterviewAnswerSavedEvent event) {
+        InterviewVideo video = event.getInterviewAnswer().getInterviewVideo();
+        Integer videoId = video.getInterviewVideoId();
+
+        int totalQuestions = interviewReadService.countTotalQuestions(videoId); // 예: 5
+        int savedAnswers = interviewReadService.countSavedAnswers(videoId); // null 아닌 답변 수
+
+        if (totalQuestions == savedAnswers && !video.isFeedback()) {
+            log.info("✅ 모든 답변 저장 완료. 자동으로 면접 종료 실행.");
+            interviewService.endInterview(event.getUserId(), videoId);
+        }
     }
 
 
