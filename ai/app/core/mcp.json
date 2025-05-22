@@ -1,0 +1,44 @@
+{
+    "mcpServers": {
+        "dart-mcp": {
+            "command": "python", 
+            "args": ["/root/hellojob/app/mcp/dart_mcp/dart.py"],
+            "env": {
+                "DART_API_KEY": "YOUR_DART_API_KEY_IN_DOTENV"
+            }
+        },
+        "naver-search": {
+            "command": "/usr/bin/node",
+            "args": ["/root/hellojob/app/mcp/naver-search-mcp/dist/src/index.js"],
+            "env": {
+                "NAVER_CLIENT_ID": "YOUR_NAVER_CLIENT_ID_IN_DOTENV",
+                "NAVER_CLIENT_SECRET": "YOUR_NAVER_CLIENT_SECRET_IN_DOTENV"
+            }
+        },
+        "sequential-thinking": {
+            "command": "/usr/bin/node",
+            "args": [
+                "/root/hellojob/app/mcp/sequentialthinking/dist/index.js"
+            ],
+            "env": {
+                "NODE_OPTIONS": "--max-http-header-size=16384"
+            }
+        },
+        "swot-analysis": {
+            "command": "python",
+            "args": [
+                "/root/hellojob/app/mcp/swot_analysis/server.py"
+            ]
+        },
+        "google-search": {
+            "command": "python",
+            "args": [
+                "/root/hellojob/app/mcp/google_search_mcp/google_search_mcp_server.py"
+            ],
+            "env": {
+                "GOOGLE_API_KEY": "YOUR_GOOGLE_API_KEY_IN_DOTENV",
+                "GOOGLE_CSE_ID": "YOUR_GOOGLE_CSE_ID_IN_DOTENV"
+            }
+        }
+    }
+}

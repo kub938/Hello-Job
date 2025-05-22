@@ -1,0 +1,46 @@
+package com.ssafy.hellojob.domain.companyanalysis.dto.response;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Getter
+@Builder
+@AllArgsConstructor
+public class CompanyAnalysisDetailResponseDto {
+
+    private String companyAnalysisTitle;
+    private Integer companyAnalysisId;
+    private String companyName;
+    private String userPrompt;
+    private LocalDateTime createdAt;
+    private Integer companyViewCount;
+    private String companyLocation;
+    private String companySize;
+    private String companyIndustry;
+    private Integer companyAnalysisBookmarkCount;
+    private boolean bookmark;
+    private boolean isPublic;
+    private String newsAnalysisData;
+    private Date newsAnalysisDate;
+    private List<String> newsAnalysisUrl;
+    private String dartBrand;
+    private String dartCompanyAnalysis;
+    private String dartVision;
+    private String dartFinancialSummery;
+    private List<String> dartCategory;
+    private List<String> swotStrengthContent;
+    private List<String> swotStrengthTag;
+    private List<String> swotWeaknessContent;
+    private List<String> swotWeaknessTag;
+    private List<String> swotOpportunityContent;
+    private List<String> swotOpportunityTag;
+    private List<String> swotThreatContent;
+    private List<String> swotThreatTag;
+    private String swotSummary;
+
+}

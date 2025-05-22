@@ -1,0 +1,21 @@
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "mattermost-local"
+
+notification:
+  mattermost:
+    enabled: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: "mattermost-dev"
+
+notification:
+  mattermost:
+    enabled: true
+    webhook-url: ${MATTERMOST_WEBHOOK}
