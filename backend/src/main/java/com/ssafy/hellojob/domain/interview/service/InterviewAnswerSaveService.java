@@ -6,12 +6,16 @@ import com.ssafy.hellojob.domain.interview.entity.InterviewAnswer;
 import com.ssafy.hellojob.domain.interview.entity.InterviewVideo;
 import com.ssafy.hellojob.domain.interview.repository.InterviewAnswerRepository;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
+import com.ssafy.hellojob.global.common.commitevent.entity.InterviewAnswerSavedEvent;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,7 +26,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.*;
+import static com.ssafy.hellojob.global.exception.ErrorCode.GET_VIDEO_LENGTH_FAIL;
+import static com.ssafy.hellojob.global.exception.ErrorCode.INVALID_USER;
 
 @Slf4j
 @Service
@@ -33,6 +38,8 @@ public class InterviewAnswerSaveService {
     private final UserReadService userReadService;
     private final InterviewReadService interviewReadService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
+    private final ApplicationEventPublisher applicationEventPublisher;
+
 
     @Value("${FFPROBE_PATH}")
     private String ffprobePath;
@@ -85,16 +92,27 @@ public class InterviewAnswerSaveService {
             answer = "stt 변환에 실패했습니다";
         }
 
-        try{
-            interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
-        } catch(Exception e){
-            log.debug("😱 id:{} 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", interviewAnswerId, e);
-        }
+        interviewAnswer.addInterviewAnswer(answer);
+        interviewAnswerRepository.save(interviewAnswer);
+
+//        try{
+//            interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
+//        } catch(Exception e){
+//            log.debug("😱 id:{} 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", interviewAnswerId, e);
+//        }
 
         interviewAnswerRepository.flush();
+        applicationEventPublisher.publishEvent(new InterviewAnswerSavedEvent(interviewAnswer));
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
+
+    // 2. 트랜잭션이 커밋된 뒤에 리스너가 호출됨
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    public void afterCommitHandler(InterviewAnswerSavedEvent event) {
+        log.info("✅ 커밋 완료 후 로그: {}", event.getInterviewAnswer().getInterviewAnswer());
+    }
+
 
     private void validateUserOwnership(Integer userId, InterviewAnswer interviewAnswer, InterviewVideo interviewVideo) {
         if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
