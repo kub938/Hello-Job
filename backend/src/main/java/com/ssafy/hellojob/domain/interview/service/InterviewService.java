@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -59,6 +60,7 @@ public class InterviewService {
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
+    private final EntityManager entityManager;
 
     private static final Integer QUESTION_SIZE = 5;
 
@@ -331,6 +333,8 @@ public class InterviewService {
         // 면접 영상 생성
         InterviewVideo video = InterviewVideo.of(interview, null, true, LocalDateTime.now(), InterviewCategory.valueOf("COVERLETTER"));
         interviewVideoRepository.save(video);
+
+        log.debug("😎 면접 영상 생성 완: {}", video.getInterviewVideoId());
 
         // fast API에 자소서 기반 질문 생성 요청
         CoverLetterIdRequestDto requestDto = CoverLetterIdRequestDto.builder()
@@ -695,17 +699,44 @@ public class InterviewService {
                 .build();
     }
 
-    // 면접 종료
+    // 면접 종료(제목 저장)
     @Transactional
-    public Map<String, String> endInterview(Integer userId, EndInterviewRequestDto videoInfo) throws InterruptedException {
+    public Map<String, String> saveInterviewTitle(Integer userId, EndInterviewRequestDto videoInfo) {
         // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
         User user = userReadService.findUserByIdOrElseThrow(userId);
         InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoInfo.getInterviewVideoId());
+
+        // 인터뷰 유저와 요청한 유저 유효성 검사
+        if (interviewVideo.getCoverLetterInterview() != null) {
+            CoverLetterInterview coverLetterInterview = interviewReadService.findCoverLetterInterviewById(interviewVideo.getCoverLetterInterview().getCoverLetterInterviewId());
+            if (!userId.equals(coverLetterInterview.getUser().getUserId())) {
+                throw new BaseException(INVALID_USER);
+            }
+        } else {
+            Interview interview = interviewReadService.findInterviewById(interviewVideo.getInterview().getInterviewId());
+            if (!userId.equals(interview.getUser().getUserId())) {
+                throw new BaseException(INVALID_USER);
+            }
+        }
+
+        interviewVideo.addTitle(videoInfo.getInterviewTitle());
+        interviewVideo.addEndTime(LocalDateTime.now());
+
+        return Map.of("message", "피드백 생성 요청이 정상적으로 처리되었습니다");
+    }
+
+    @Transactional
+    public Map<String, String> endInterview(Integer userId, Integer videoId) {
+        // 유저, 인터뷰 영상, 인터뷰 답변 객체 조회
+        User user = userReadService.findUserByIdOrElseThrow(userId);
+        InterviewVideo interviewVideo = interviewReadService.findInterviewVideoByIdOrElseThrow(videoId);
         List<InterviewAnswer> interviewAnswers;
 
         log.debug("😎 endInterview 들어옴");
 
         // ✅ 캐시 초기화 후 최신 상태로 강제 로드
+        interviewAnswerRepository.flush();
+        entityManager.clear();
         interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
         log.debug("💬 [Polling 후 최종 인터뷰 답변 목록]");
@@ -725,9 +756,6 @@ public class InterviewService {
                 throw new BaseException(INVALID_USER);
             }
         }
-
-        interviewVideo.addTitle(videoInfo.getInterviewTitle());
-        interviewVideo.addEndTime(LocalDateTime.now());
 
         // 여기서부터 fast API 관련 로직
         // 답변 객체 조회(stt 변환에 성공한 경우만)
@@ -785,7 +813,9 @@ public class InterviewService {
                 })
                 .exceptionally(e -> {
                     log.error("❌ 면접 피드백 생성 실패", e.getMessage());
-                    sseService.sendToUser(user.getUserId(), "interview-feedback-failed", interviewVideo.getInterviewVideoId());
+                    // 실패 시 dto로 감싸서 전달
+                    SSEFailDto data = SSEFailDto.builder().interviewVideoId(interviewVideo.getInterviewVideoId()).build();
+                    sseService.sendToUser(user.getUserId(), "interview-feedback-failed", data);
                     return null;
                 });
     }

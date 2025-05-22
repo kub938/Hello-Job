@@ -31,5 +31,10 @@ public interface InterviewVideoRepository extends JpaRepository<InterviewVideo, 
 
     List<InterviewVideo> findAllByStartBeforeAndInterviewTitleIsNull(LocalDateTime cutoff);
 
+    @Query("SELECT COUNT(ia) FROM InterviewAnswer ia WHERE ia.interviewVideo.interviewVideoId = :videoId")
+    Integer countTotalAnswer(@Param("videoId") Integer videoId);
+
+    @Query("SELECT COUNT(ia) FROM InterviewAnswer ia WHERE ia.interviewVideo.interviewVideoId = :videoId AND ia.interviewAnswer IS NOT NULL")
+    Integer countSavedAnswer(@Param("videoId") Integer videoId);
 
 }
