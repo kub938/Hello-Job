@@ -26,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.persistence.EntityManager;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -59,6 +60,7 @@ public class InterviewService {
     private final InterviewFeedbackSaveService interviewFeedbackSaveService;
     private final SSEService sseService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
+    private final EntityManager entityManager;
 
     private static final Integer QUESTION_SIZE = 5;
 
@@ -706,6 +708,8 @@ public class InterviewService {
         log.debug("😎 endInterview 들어옴");
 
         // ✅ 캐시 초기화 후 최신 상태로 강제 로드
+        interviewAnswerRepository.flush();
+        entityManager.clear();
         interviewAnswers = interviewAnswerRepository.findInterviewAnswerByInterviewVideo(interviewVideo);
 
         log.debug("💬 [Polling 후 최종 인터뷰 답변 목록]");
