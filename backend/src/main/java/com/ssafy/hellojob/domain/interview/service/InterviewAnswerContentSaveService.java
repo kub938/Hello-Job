@@ -51,7 +51,10 @@ public class InterviewAnswerContentSaveService {
     public void saveAllAnswerData(String url, String videoLength, InterviewAnswer interviewAnswer) {
         interviewAnswer.addInterviewVideoUrl(url);
         interviewAnswer.addVideoLength(videoLength);
+        interviewAnswerRepository.save(interviewAnswer);
         interviewAnswerRepository.flush();
+
+        log.debug("😎 S3 url db에 저장 완.");
     }
 
 

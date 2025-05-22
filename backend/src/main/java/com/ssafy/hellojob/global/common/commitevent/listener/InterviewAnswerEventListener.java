@@ -35,8 +35,4 @@ public class InterviewAnswerEventListener {
             interviewService.endInterview(event.getUserId(), videoId);
         }
     }
-
-//    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-//    public void afterInterviewAnswerSaved(InterviewAnswerSavedEvent event) {
-//    }
 }
