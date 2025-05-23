@@ -24,7 +24,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import static com.ssafy.hellojob.global.exception.ErrorCode.GET_VIDEO_LENGTH_FAIL;
 import static com.ssafy.hellojob.global.exception.ErrorCode.INVALID_USER;
 
 @Slf4j
@@ -47,19 +46,13 @@ public class InterviewAnswerSaveService {
 
     // 동영상 저장
     @Transactional
-    public Map<String, String> saveVideo(Integer userId, String url, Integer interviewAnswerId, File tempVideoFile){
+    public Map<String, String> saveVideo(Integer userId, String url, String videoLength, Integer interviewAnswerId, File tempVideoFile){
         userReadService.findUserByIdOrElseThrow(userId);
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
         log.debug("😎 S3 url: {}", url);
-
-        String videoLength = "";
-        try {
-            videoLength = getVideoDurationWithFFprobe(tempVideoFile);
-        } catch (Exception e){
-            log.debug("영상 길이 추출 실패 - Exception: {}", e);
-            throw new BaseException(GET_VIDEO_LENGTH_FAIL);
-        }
+        log.debug("😎 영상 시간: {}", videoLength);
+        log.debug("😎 답변: {}", interviewAnswer.getInterviewAnswer());
 
         try{
             interviewAnswer.addInterviewVideoUrl(url);
