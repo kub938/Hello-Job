@@ -21,7 +21,7 @@ public class InterviewVideoSavedEventListener {
     public void handle(InterviewVideoSavedEvent event) {
         tracker.markVideoDone(event.getInterviewVideoId());
 
-        if (tracker.tryMarkAndCheckAllDone(event.getInterviewVideoId())) {
+        if (tracker.tryMarkAndCheckAllDone(event.getInterviewVideoId(), true)) {
             sseService.sendToUser(event.getUserId(), "interview-feedback-completed", Map.of("interviewVideoId", event.getInterviewVideoId()));
         }
     }
