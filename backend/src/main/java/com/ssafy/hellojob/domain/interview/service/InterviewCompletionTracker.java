@@ -20,15 +20,21 @@ public class InterviewCompletionTracker {
         statusMap.computeIfAbsent(interviewInfoId, k -> new CompletionStatus()).setVideoDone(true);
     }
 
-    public boolean isAllDone(Integer interviewInfoId) {
+    public boolean isAllDoneAndNotSent(Integer interviewInfoId) {
         CompletionStatus status = statusMap.get(interviewInfoId);
-        return status != null && status.isFeedbackDone() && status.isVideoDone();
+        return status != null && status.isFeedbackDone() && status.isVideoDone() && !status.isSent();
+    }
+
+    public void markSent(Integer interviewInfoId) {
+        CompletionStatus status = statusMap.get(interviewInfoId);
+        if (status != null) status.setSent(true);
     }
 
     @Data
     public static class CompletionStatus {
         private boolean feedbackDone = false;
         private boolean videoDone = false;
+        private boolean sent = false;
     }
 
 }
