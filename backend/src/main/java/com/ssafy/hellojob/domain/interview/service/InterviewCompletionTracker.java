@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class InterviewCompletionTracker {
@@ -20,15 +21,16 @@ public class InterviewCompletionTracker {
         statusMap.computeIfAbsent(interviewInfoId, k -> new CompletionStatus()).setVideoDone(true);
     }
 
-    public boolean tryMarkAndCheckAllDone(Integer interviewInfoId) {
-        synchronized (this) {
-            CompletionStatus status = statusMap.get(interviewInfoId);
-            if (status != null && status.isFeedbackDone() && status.isVideoDone() && !status.isSent()) {
-                status.setSent(true); // 한번만 true
-                return true;
-            }
-            return false;
+    public synchronized boolean tryMarkAndCheckAllDone(Integer interviewInfoId, boolean isFeedbackDone) {
+        CompletionStatus status = statusMap.computeIfAbsent(interviewInfoId, k -> new CompletionStatus());
+        if (isFeedbackDone) status.setFeedbackDone(true);
+        else status.setVideoDone(true);
+
+        if (status.isFeedbackDone() && status.isVideoDone() && !status.sent.compareAndSet(false, true)) {
+            return true; // 딱 한 번만 true 반환
         }
+
+        return false;
     }
 
 
@@ -38,16 +40,16 @@ public class InterviewCompletionTracker {
 //        return status != null && status.isFeedbackDone() && status.isVideoDone() && !status.isSent();
 //    }
 
-    public void markSent(Integer interviewInfoId) {
-        CompletionStatus status = statusMap.get(interviewInfoId);
-        if (status != null) status.setSent(true);
-    }
+//    public void markSent(Integer interviewInfoId) {
+//        CompletionStatus status = statusMap.get(interviewInfoId);
+//        if (status != null) status.setSent(true);
+//    }
 
     @Data
     public static class CompletionStatus {
         private boolean feedbackDone = false;
         private boolean videoDone = false;
-        private boolean sent = false;
+        private final AtomicBoolean sent = new AtomicBoolean(false);
     }
 
 }
