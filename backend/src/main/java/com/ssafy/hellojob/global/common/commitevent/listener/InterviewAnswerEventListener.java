@@ -22,6 +22,8 @@ public class InterviewAnswerEventListener {
     @EventListener
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onAnswerSaved(InterviewAnswerSavedEvent event) {
+        log.info("✅ 커밋 완료 후 onAnswerSaved 로그: {}", event.getInterviewAnswer().getInterviewAnswer());
+
         InterviewVideo video = event.getInterviewAnswer().getInterviewVideo();
         Integer videoId = video.getInterviewVideoId();
 
@@ -32,10 +34,5 @@ public class InterviewAnswerEventListener {
             log.info("✅ 모든 답변 저장 완료. 자동으로 면접 종료 실행.");
             interviewService.endInterview(event.getUserId(), videoId);
         }
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void afterInterviewAnswerSaved(InterviewAnswerSavedEvent event) {
-        log.info("✅ 커밋 완료 후 로그: {}", event.getInterviewAnswer().getInterviewAnswer());
     }
 }

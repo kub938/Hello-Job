@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -39,7 +37,6 @@ public class InterviewAnswerSaveService {
     private final InterviewReadService interviewReadService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final InterviewService interviewService;
 
 
     @Value("${FFPROBE_PATH}")
@@ -54,6 +51,8 @@ public class InterviewAnswerSaveService {
         userReadService.findUserByIdOrElseThrow(userId);
         InterviewAnswer interviewAnswer = interviewReadService.findInterviewAnswerByIdOrElseThrow(interviewAnswerId);
 
+        log.debug("😎 S3 url: {}", url);
+
         String videoLength = "";
         try {
             videoLength = getVideoDurationWithFFprobe(tempVideoFile);
@@ -63,7 +62,10 @@ public class InterviewAnswerSaveService {
         }
 
         try{
-            interviewAnswerContentSaveService.saveAllAnswerData(url, videoLength, interviewAnswer);
+            interviewAnswer.addInterviewVideoUrl(url);
+            interviewAnswer.addVideoLength(videoLength);
+            interviewAnswerRepository.save(interviewAnswer);
+//            interviewAnswerContentSaveService.saveAllAnswerData(url, videoLength, interviewAnswer);
         } catch(Exception e){
             log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
         }
@@ -96,38 +98,11 @@ public class InterviewAnswerSaveService {
         interviewAnswer.addInterviewAnswer(answer);
         interviewAnswerRepository.save(interviewAnswer);
 
-//        try{
-//            interviewAnswerContentSaveService.saveAnswer(answer, interviewAnswer);
-//        } catch(Exception e){
-//            log.debug("😱 id:{} 삐상 !!! 답변 저장 중 에러 발생 !!!: {}", interviewAnswerId, e);
-//        }
-
         interviewAnswerRepository.flush();
         applicationEventPublisher.publishEvent(new InterviewAnswerSavedEvent(interviewAnswer, userId));
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }
-
-    // 2. 트랜잭션이 커밋된 뒤에 리스너가 호출됨
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void afterCommitHandler(InterviewAnswerSavedEvent event) {
-        log.info("✅ 커밋 완료 후 로그 같은 service: {}", event.getInterviewAnswer().getInterviewAnswer());
-    }
-
-    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
-    public void onAnswerSaved(InterviewAnswerSavedEvent event) {
-        InterviewVideo video = event.getInterviewAnswer().getInterviewVideo();
-        Integer videoId = video.getInterviewVideoId();
-
-        int totalQuestions = interviewReadService.countTotalQuestions(videoId); // 예: 5
-        int savedAnswers = interviewReadService.countSavedAnswers(videoId); // null 아닌 답변 수
-
-        if (totalQuestions == savedAnswers && !video.isFeedback()) {
-            log.info("✅ 모든 답변 저장 완료. 자동으로 면접 종료 실행.");
-            interviewService.endInterview(event.getUserId(), videoId);
-        }
-    }
-
 
     private void validateUserOwnership(Integer userId, InterviewAnswer interviewAnswer, InterviewVideo interviewVideo) {
         if (interviewAnswer.getInterviewQuestionCategory().name().equals("자기소개서면접")) {
