@@ -225,8 +225,6 @@ async def create_cover_letter(
     
 이 모든 지침을 따라 당신은 채용 시장에서 합격 가능성을 높이는 맞춤형이고 전략적인 자기소개서를 작성합니다.
 
-자기소개서 작성을 위해 반드시 **전략(sequential-thinking 사용)**을 세우고, 자기소개서 작성 결과를 반환합니다.
-
 답변은 반드시 자기소개서만 작성합니다. 자기소개서 이외 내용은 포함하면 안됩니다."""
 
     
@@ -238,7 +236,6 @@ async def create_cover_letter(
             name="CoverLetter Draft Assistant",
             instructions=system_prompt,
             model="gpt-4.1",
-            mcp_servers=mcp_servers,
             output_type=CoverLetterItem
         )
         
