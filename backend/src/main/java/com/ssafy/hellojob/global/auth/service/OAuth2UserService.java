@@ -6,6 +6,7 @@ import com.ssafy.hellojob.domain.user.repository.UserRepository;
 import com.ssafy.hellojob.global.auth.entity.Auth;
 import com.ssafy.hellojob.global.auth.repository.AuthRepository;
 import com.ssafy.hellojob.global.auth.token.UserPrincipal;
+import com.ssafy.hellojob.global.exception.BaseException;
 import com.ssafy.hellojob.global.util.AESUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+
+import static com.ssafy.hellojob.global.exception.ErrorCode.INVALID_USER;
 
 @Slf4j
 @Service
@@ -45,6 +48,11 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
 
         User user = userRepository.findByEmail(email)
                 .orElseGet(() -> createUser(email, nickname, provider, providerId));
+
+        // 발표 시연 시 팀원 제외 다른 사람들 로그인 차단
+        if(user.getUserId() > 6) {
+            throw new BaseException(INVALID_USER);
+        }
 
         // 사용자가 있고 탈퇴 상태라면 예외 발생
         if (Boolean.TRUE.equals(user.getWithdraw())) {
