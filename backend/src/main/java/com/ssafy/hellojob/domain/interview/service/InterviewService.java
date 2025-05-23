@@ -807,10 +807,10 @@ public class InterviewService {
                     EndInterviewResponseDto responseDto = interviewFeedbackSaveService.saveFeedback(user.getUserId(), fastAPIResponseDto, interviewAnswers, interviewVideo);
                     return responseDto;
                 })
-                .thenAccept(data -> {
-                    log.debug("피드백 생성 완료됨. sse 송신 시도");
-                    sseService.sendToUser(user.getUserId(), "interview-feedback-completed", data);
-                })
+//                .thenAccept(data -> {
+//                    log.debug("피드백 생성 완료됨. sse 송신 시도");
+//                    sseService.sendToUser(user.getUserId(), "interview-feedback-completed", data);
+//                })
                 .exceptionally(e -> {
                     log.error("❌ 면접 피드백 생성 실패", e.getMessage());
                     // 실패 시 dto로 감싸서 전달
