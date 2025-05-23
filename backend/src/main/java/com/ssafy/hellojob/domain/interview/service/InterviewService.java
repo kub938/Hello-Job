@@ -720,8 +720,7 @@ public class InterviewService {
             }
         }
 
-        interviewVideo.addTitle(videoInfo.getInterviewTitle());
-        interviewVideo.addEndTime(LocalDateTime.now());
+        interviewVideoRepository.saveTitle(interviewVideo.getInterviewVideoId(), videoInfo.getInterviewTitle());
 
         return Map.of("message", "피드백 생성 요청이 정상적으로 처리되었습니다");
     }
