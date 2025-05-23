@@ -6,8 +6,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -21,21 +19,20 @@ public class SseExceptionFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        if (SseUtil.isSseRequest(request)) {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            // 인증 정보가 없을 경우
-            if (auth == null || !auth.isAuthenticated()) {
-                // 이미 응답이 커밋됐다면 종료
+        try {
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            if (SseUtil.isSseRequest(request)) {
                 if (!response.isCommitted()) {
-                    log.debug("❌ 인증되지 않은 SSE 요청 차단: {}", request.getRequestURI());
-                    // 클라이언트에게 에러 이벤트 전송
-                    SseUtil.writeSseError(response, HttpServletResponse.SC_UNAUTHORIZED, "SSE Unauthorized\n\n");
+                    log.debug("❌ SSE 예외 발생 → SSE 응답 형식으로 처리: {}", e.getMessage());
+                    int status = (e instanceof org.springframework.security.access.AccessDeniedException) ?
+                            HttpServletResponse.SC_FORBIDDEN : HttpServletResponse.SC_UNAUTHORIZED;
+                    SseUtil.writeSseError(response, status, "SSE 인증/인가 실패");
+                    return;
                 }
-                return;
             }
-        }
-        filterChain.doFilter(request, response);
+        throw e;
     }
+}
 
 }
