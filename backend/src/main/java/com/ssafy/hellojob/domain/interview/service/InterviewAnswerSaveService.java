@@ -1,12 +1,10 @@
 package com.ssafy.hellojob.domain.interview.service;
 
-import com.ssafy.hellojob.domain.interview.entity.CoverLetterInterview;
-import com.ssafy.hellojob.domain.interview.entity.Interview;
-import com.ssafy.hellojob.domain.interview.entity.InterviewAnswer;
-import com.ssafy.hellojob.domain.interview.entity.InterviewVideo;
+import com.ssafy.hellojob.domain.interview.entity.*;
 import com.ssafy.hellojob.domain.interview.repository.InterviewAnswerRepository;
 import com.ssafy.hellojob.domain.user.service.UserReadService;
 import com.ssafy.hellojob.global.common.commitevent.entity.InterviewAnswerSavedEvent;
+import com.ssafy.hellojob.global.common.commitevent.entity.InterviewVideoSavedEvent;
 import com.ssafy.hellojob.global.exception.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +34,7 @@ public class InterviewAnswerSaveService {
     private final InterviewReadService interviewReadService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final InterviewVideoReadService interviewVideoReadService;
 
 
     @Value("${FFPROBE_PATH}")
@@ -62,6 +61,13 @@ public class InterviewAnswerSaveService {
         }
 
         interviewAnswerRepository.flush();
+
+        if(interviewAnswerRepository.countByInterviewVideoId(interviewAnswer.getInterviewVideo().getInterviewVideoId()) == interviewAnswerRepository.countSavedVideoByInterviewVideoId(interviewAnswer.getInterviewVideo().getInterviewVideoId())){
+            applicationEventPublisher.publishEvent(
+                    new InterviewVideoSavedEvent(userId, interviewAnswer.getInterviewVideo().getInterviewVideoId())
+            );
+
+        }
 
         return Map.of("message", "정상적으로 저장되었습니다.");
     }

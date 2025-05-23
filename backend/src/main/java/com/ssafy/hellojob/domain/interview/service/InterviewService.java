@@ -804,7 +804,7 @@ public class InterviewService {
                 .supplyAsync(() -> fastApiClientService.sendInterviewAnswerToFastApi(fastAPIRequestDto))
                 .thenApply(fastAPIResponseDto -> {
                     log.debug("😎 saveFeedback 들어가기 직전");
-                    EndInterviewResponseDto responseDto = interviewFeedbackSaveService.saveFeedback(fastAPIResponseDto, interviewAnswers, interviewVideo);
+                    EndInterviewResponseDto responseDto = interviewFeedbackSaveService.saveFeedback(user.getUserId(), fastAPIResponseDto, interviewAnswers, interviewVideo);
                     return responseDto;
                 })
                 .thenAccept(data -> {
