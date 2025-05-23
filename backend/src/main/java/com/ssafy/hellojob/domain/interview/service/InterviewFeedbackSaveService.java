@@ -43,9 +43,7 @@ public class InterviewFeedbackSaveService {
         log.debug("😎 fastAPIResponseDto.getOverall_feedback() : {}", fastAPIResponseDto.getOverall_feedback());
 
         // 꼬리 질문 json 직렬화
-        interviewVideo.addInterviewFeedback(fastAPIResponseDto.getOverall_feedback());
-        interviewVideo.feedbackEnd(true);
-        interviewVideoRepository.save(interviewVideo);
+        interviewVideoRepository.saveFeedback(interviewVideo.getInterviewVideoId(), fastAPIResponseDto.getOverall_feedback());
 
         for (SingleInterviewFeedbackFastAPIResponseDto singleInterviewFeedback : fastAPIResponseDto.getSingle_feedbacks()) {
 
@@ -64,9 +62,10 @@ public class InterviewFeedbackSaveService {
 
             log.debug("jsonFeedbacks: {}", jsonFeedbacks);
 
-            targetAnswer.addInterviewAnswerFeedback(singleInterviewFeedback.getFeedback());
-            targetAnswer.addInterviewFollowUpQuestion(jsonFeedbacks);
-            interviewAnswerRepository.save(targetAnswer);
+            interviewAnswerRepository.saveInterviewFeedback(
+                    singleInterviewFeedback.getInterview_answer_id(),
+                    singleInterviewFeedback.getFeedback(),
+                    jsonFeedbacks);
         }
 
         return EndInterviewResponseDto.builder()
