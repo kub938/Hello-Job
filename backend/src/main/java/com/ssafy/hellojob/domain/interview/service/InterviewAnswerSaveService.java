@@ -55,9 +55,7 @@ public class InterviewAnswerSaveService {
         log.debug("😎 답변: {}", interviewAnswer.getInterviewAnswer());
 
         try{
-            interviewAnswer.addInterviewVideoUrl(url);
-            interviewAnswer.addVideoLength(videoLength);
-            interviewAnswerRepository.save(interviewAnswer);
+            interviewAnswerRepository.saveVideoUrl(interviewAnswerId, url, videoLength);
 //            interviewAnswerContentSaveService.saveAllAnswerData(url, videoLength, interviewAnswer);
         } catch(Exception e){
             log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
@@ -88,9 +86,7 @@ public class InterviewAnswerSaveService {
             answer = "stt 변환에 실패했습니다";
         }
 
-        interviewAnswer.addInterviewAnswer(answer);
-        interviewAnswerRepository.save(interviewAnswer);
-
+        interviewAnswerRepository.saveInterviewAnswer(interviewAnswerId, answer);
         interviewAnswerRepository.flush();
         applicationEventPublisher.publishEvent(new InterviewAnswerSavedEvent(interviewAnswer, userId));
 

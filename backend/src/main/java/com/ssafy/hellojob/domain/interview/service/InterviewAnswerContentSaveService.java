@@ -28,8 +28,7 @@ public class InterviewAnswerContentSaveService {
         try{
             log.debug("🔍 트랜잭션 활성 여부: {}", TransactionSynchronizationManager.isActualTransactionActive());
 
-            interviewAnswer.addInterviewAnswer(answer);
-            interviewAnswerRepository.save(interviewAnswer);
+            interviewAnswerRepository.saveInterviewAnswer(interviewAnswer.getInterviewAnswerId(), answer);
             interviewAnswerRepository.flush();
 
             log.debug("✅ flush 완료");
