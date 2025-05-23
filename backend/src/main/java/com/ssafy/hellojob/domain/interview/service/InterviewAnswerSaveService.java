@@ -37,7 +37,6 @@ public class InterviewAnswerSaveService {
     private final InterviewReadService interviewReadService;
     private final InterviewAnswerContentSaveService interviewAnswerContentSaveService;
     private final ApplicationEventPublisher applicationEventPublisher;
-    private final InterviewService interviewService;
 
 
     @Value("${FFPROBE_PATH}")
@@ -63,7 +62,10 @@ public class InterviewAnswerSaveService {
         }
 
         try{
-            interviewAnswerContentSaveService.saveAllAnswerData(url, videoLength, interviewAnswer);
+            interviewAnswer.addInterviewVideoUrl(url);
+            interviewAnswer.addVideoLength(videoLength);
+            interviewAnswerRepository.save(interviewAnswer);
+//            interviewAnswerContentSaveService.saveAllAnswerData(url, videoLength, interviewAnswer);
         } catch(Exception e){
             log.debug("😱 삐상 !!! 영상 시간 저장 중 에러 발생 !!!: {}", e);
         }
