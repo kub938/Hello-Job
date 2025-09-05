@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { AiOutlineSearch } from "react-icons/ai";
 import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
-import JobSearch from "../SearchInputModal/JobSearch";
-import CompanySearch from "../SearchInputModal/CompanySearch";
+import JobSearch from "./Modal/SearchInputModal/JobSearch";
+import CompanySearch from "./Modal/SearchInputModal/CompanySearch";
 import { BsClockHistory } from "react-icons/bs"; // 검색 기록 아이콘
 import { CompanyState } from "@/types/coverLetterStoreTypes";
 import { formatDate } from "@/utils/formatDate";

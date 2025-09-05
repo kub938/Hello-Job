@@ -8,7 +8,7 @@ import {
   ReportListProps,
 } from "@/types/coverLetterTypes";
 import { useState } from "react";
-import AddAnalysisModal from "../AddModal/AddAnalysisModal";
+import AddAnalysisModal from "./Modal/AddModal/AddAnalysisModal";
 import {
   Bookmark,
   Calendar,
