@@ -217,8 +217,17 @@ function CoverLetter() {
               ref={chatContainerRef}
               className="flex flex-col  h-[86vh] grow overflow-y-auto gap-2 mt-2 pb-15"
             >
-              {chatLog.map((chat, index) => (
-                <>
+              {chatLog.map((chat, index) => {
+                const getMessageContent = (message: string) => {
+                  try {
+                    const parsedMessage = JSON.parse(message);
+                    return parsedMessage.ai_message || message;
+                  } catch (error) {
+                    return message;
+                  }
+                };
+
+                return (
                   <div
                     key={index}
                     className={chatStyles[chat.sender].container}
@@ -237,15 +246,17 @@ function CoverLetter() {
                         className={`${chatStyles[chat.sender].chatBubble} mb-2`}
                       >
                         {chat.sender === "ai" ? (
-                          <ReactMarkdown>{chat.message}</ReactMarkdown>
+                          <ReactMarkdown>
+                            {getMessageContent(chat.message)}
+                          </ReactMarkdown>
                         ) : (
                           chat.message
                         )}
                       </div>
                     )}
                   </div>
-                </>
-              ))}
+                );
+              })}
 
               {sendLoading > 0 && (
                 <div className="w-20 h-15 mb-4  border-black">
