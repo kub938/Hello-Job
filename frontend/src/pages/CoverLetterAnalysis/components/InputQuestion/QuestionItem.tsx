@@ -5,7 +5,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { GetProjectsResponse, useGetProjects } from "@/hooks/projectHooks";
 import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import ProjectForm from "@/pages/Resume/ProjectForm";
-import SelectModal, { ModalType } from "../SelectModal/SelectModal";
+import SelectModal, { ModalType } from "../Modal/SelectModal/SelectModal";
 import ExperienceForm from "@/pages/Resume/ExperienceForm";
 import { GetExperienceResponse } from "@/api/experienceApi";
 import { useGetExperiences } from "@/hooks/experienceHooks";
