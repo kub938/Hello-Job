@@ -1,6 +1,6 @@
 @font-face {
   font-family: "LINESeedKR";
-  src: url("/fonts/LINESeedSansKR-Regular.woff2") format("truetype");
+  src: url("/fonts/LINESeedSansKR-Regular.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -8,7 +8,7 @@
 
 @font-face {
   font-family: "NEXONLv1Gothic";
-  src: url("/fonts/NEXONLv1GothicLight.woff2") format("truetype");
+  src: url("/fonts/NEXONLv1GothicLight.woff2") format("woff2");
   font-weight: light;
   font-style: normal;
   font-display: swap;
