@@ -44,9 +44,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          if (id.includes("node_modules")) {
-            return "vendor";
-          }
           if (id.includes("/pages/Interview/")) return "interview";
           if (id.includes("/pages/Mypage/")) return "mypage";
           if (id.includes("/pages/CoverLetter/")) return "cover-letter";
