@@ -4,11 +4,14 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import removeConsole from "vite-plugin-remove-console";
 import { visualizer } from "rollup-plugin-visualizer";
+import Inspector from "vite-plugin-react-inspector";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    // Option+Shift+Click 으로 컴포넌트 소스 바로 열기
+    Inspector(),
     removeConsole({
       external: ["src/pages/Home/Home.tsx"],
     }),
@@ -41,19 +44,56 @@ export default defineConfig({
   },
   build: {
     outDir: "dist",
+    modulePreload: {
+      polyfill: true, // 초기 라우트 청크를 index.js와 병렬로 다운로드
+    },
     rollupOptions: {
       output: {
+        // 너무 작은 청크는 부모 청크에 병합
+        experimentalMinChunkSize: 10000, // 10KB 미만은 병합
         manualChunks: (id) => {
-          if (id.includes("/pages/Interview/")) return "interview";
-          if (id.includes("/pages/Mypage/")) return "mypage";
-          if (id.includes("/pages/CoverLetter/")) return "cover-letter";
-          if (id.includes("/pages/CoverLetterAnalysis/"))
-            return "cover-letter-analysis";
+          // Vendor 분리 (캐싱 효율성)
+          if (id.includes("node_modules")) {
+            // Router
+            if (id.includes("react-router")) return "vendor-router";
+
+            // TanStack Query (상태 관리)
+            if (id.includes("@tanstack")) return "vendor-query";
+
+            // Radix UI (UI 라이브러리)
+            if (id.includes("@radix-ui")) return "vendor-ui";
+
+            // 아이콘 라이브러리 (용량이 크고 자주 변경 안됨)
+            if (id.includes("react-icons")) return "vendor-icons";
+
+            // 나머지 vendor (React 포함)
+            return "vendor";
+          }
+
+          // 공통 UI 컴포넌트를 별도 청크로 분리
           if (
-            id.includes("/pages/CorporateResearch") ||
-            id.includes("/pages/CorporateSearch")
-          )
-            return "corporate";
+            id.includes("/components/Button") ||
+            id.includes("/components/Modal")
+          ) {
+            return "components-common";
+          }
+
+          // 큰 페이지 그룹만 분리 (나머지는 자동 code splitting)
+          // Interview 관련 페이지들은 함께 사용될 가능성이 높음
+          if (id.includes("/pages/Interview/pages/")) {
+            return "pages-interview";
+          }
+
+          // Mypage의 여러 탭들도 함께 사용될 가능성이 높음
+          if (id.includes("/pages/Mypage/components/")) {
+            return "pages-mypage";
+          }
+
+          if (id.includes("/pages/CoverLetterAnalysis/components/")) {
+            return "pages-cover-letter-analysis";
+          }
+
+          // 나머지는 Vite가 자동으로 분리 (dynamic import 기반)
         },
       },
     },
