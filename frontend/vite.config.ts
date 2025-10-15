@@ -4,14 +4,12 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import removeConsole from "vite-plugin-remove-console";
 import { visualizer } from "rollup-plugin-visualizer";
-import Inspector from "vite-plugin-react-inspector";
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
     // Option+Shift+Click 으로 컴포넌트 소스 바로 열기
-    Inspector(),
     removeConsole({
       external: ["src/pages/Home/Home.tsx"],
     }),
