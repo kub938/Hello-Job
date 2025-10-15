@@ -39,22 +39,6 @@
   font-display: swap;
 }
 
-@font-face {
-  font-family: "Pretendard";
-  font-weight: 700;
-  font-display: swap;
-  src: local("Pretendard Bold"),
-    url("/fonts/woff2-subset/Pretendard-Bold.subset.woff2") format("woff2");
-}
-
-@font-face {
-  font-family: "Pretendard";
-  font-weight: 400;
-  font-display: swap;
-  src: local("Pretendard Regular"),
-    url("/fonts/woff2-subset/Pretendard-Regular.subset.woff2") format("woff2");
-}
-
 .font-pretendard {
   font-family: "Pretendard", sans-serif;
 }
