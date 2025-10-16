@@ -47,16 +47,6 @@ export default defineConfig({
       output: {
         experimentalMinChunkSize: 10000,
         manualChunks: (id) => {
-          if (id.includes("node_modules")) {
-            if (id.includes("react-router")) return "vendor-router";
-            if (id.includes("@tanstack")) return "vendor-query";
-            if (id.includes("react-icons")) return "vendor-icons";
-            if (id.includes("framer-motion")) return "vendor-animation";
-            if (id.includes("axios")) return "vendor-axios";
-            if (id.includes("date-fns")) return "vendor-date-fns";
-            return "vendor";
-          }
-
           if (
             id.includes("/components/Button") ||
             id.includes("/components/Modal")
@@ -72,7 +62,7 @@ export default defineConfig({
             return "pages-mypage";
           }
 
-          if (id.includes("/pages/CoverLetterAnalysis/components/")) {
+          if (id.includes("/pages/CoverLetterAnalysis/CoverLetterAnalysis/")) {
             return "pages-cover-letter-analysis";
           }
         },
