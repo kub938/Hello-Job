@@ -1,6 +1,5 @@
 import { Button } from "@/components/Button";
 import { useStepValidation } from "@/hooks/stepValidationHook";
-import { useMultiForm } from "@/utils/useMultiForm";
 
 export interface NavigateButtonProps {
   nowStep: number;
@@ -14,7 +13,6 @@ function NavigateButton({
   handleOpenCreateModal,
 }: NavigateButtonProps) {
   const { validateProceed } = useStepValidation();
-  const { setNowStep } = useMultiForm();
   return (
     <div className="flex justify-end mt-4 gap-5">
       {nowStep !== 0 && (

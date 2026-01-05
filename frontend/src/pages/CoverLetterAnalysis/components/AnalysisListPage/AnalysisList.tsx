@@ -5,7 +5,6 @@ import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import {
   CompanyBookMarkResponse,
   JobBookMarkResponse,
-  ReportListProps,
 } from "@/types/coverLetterTypes";
 import { useState } from "react";
 import {
@@ -21,7 +20,7 @@ import CorporateAnalysisDetail from "@/pages/CorporateResearch/components/Corpor
 import JobAnalysisDetail from "@/pages/JobResearch/components/JobAnalysisDetail";
 import CorporateJobAnalysisSelect from "./CorporateJobAnalysisSelect";
 
-function AnalysisList({ nowStep }: ReportListProps) {
+function AnalysisList({ nowStep }: { nowStep: number }) {
   const reportBlockLayout =
     "px-6 w-full border rounded-2xl h-45 flex justify-center items-center cursor-pointer ";
   const hoverReportBlockLayout =
