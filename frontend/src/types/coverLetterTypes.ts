@@ -38,10 +38,6 @@ export interface CoverLetterRequestContent {
   contentFirstPrompt: string;
 }
 
-export interface ReportListProps {
-  nowStep: number;
-}
-
 // bookMark 타입
 export interface JobBookMarkResponse {
   jobRoleAnalysisId: number;

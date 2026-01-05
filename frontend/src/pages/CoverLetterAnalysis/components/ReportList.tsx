@@ -5,7 +5,6 @@ import { useCoverLetterInputStore } from "@/store/coverLetterStore";
 import {
   CompanyBookMarkResponse,
   JobBookMarkResponse,
-  ReportListProps,
 } from "@/types/coverLetterTypes";
 import { useState } from "react";
 import AddAnalysisModal from "./Modal/AddModal/AddAnalysisModal";
@@ -21,7 +20,7 @@ import { formatDate } from "@/utils/formatDate";
 import ReadCorporate from "@/pages/CorporateResearch/components/ReadCorporate";
 import ReadJob from "@/pages/JobResearch/components/ReadJob";
 
-function ReportList({ nowStep }: ReportListProps) {
+function ReportList({ nowStep }: { nowStep: number }) {
   const reportBlockLayout =
     "px-6 w-full border rounded-2xl h-45 flex justify-center items-center cursor-pointer ";
   const hoverReportBlockLayout =
@@ -51,6 +50,7 @@ function ReportList({ nowStep }: ReportListProps) {
   //data adapt
   const data =
     nowStep === 1 ? companyBookMarksQuery.data : jobBookMarksQuery.data;
+  console.log("-----------------", data);
   const adaptData = (
     data: JobBookMarkResponse[] | CompanyBookMarkResponse[],
     nowStep: number

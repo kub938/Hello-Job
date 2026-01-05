@@ -1,21 +1,14 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import ReportList from "./components/ReportList";
 import CoverLetterAnalysisLayout from "./components/CoverLetterAnalysisLayout";
 import InputQuestion from "./components/InputQuestion/InputQuestion";
 import JobCompanyForm from "./components/JobCompanyForm";
 import NavigateButton from "./components/NavigateButton";
+import { useMultiForm } from "../../utils/useMultiForm";
 
 function CoverLetter() {
-  const [nowStep, setNowStep] = useState(0);
+  const { Step, handleStep, nowStep, MultiForm } = useMultiForm();
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
-  const handleStep = useCallback((type: "next" | "before") => {
-    if (type === "next") {
-      setNowStep((prev) => prev + 1);
-    } else {
-      setNowStep((prev) => prev - 1);
-    }
-  }, []);
 
   const handleOpenCreateModal = () => {
     setCreateModalOpen(true);
@@ -24,14 +17,23 @@ function CoverLetter() {
   return (
     <>
       <CoverLetterAnalysisLayout nowStep={nowStep}>
-        {nowStep === 0 && <JobCompanyForm />}
-        {(nowStep === 2 || nowStep === 1) && <ReportList nowStep={nowStep} />}
-        {nowStep === 3 && (
-          <InputQuestion
-            createModalOpen={createModalOpen}
-            setCreateModalOpen={setCreateModalOpen}
-          />
-        )}
+        <MultiForm>
+          <Step step={0}>
+            <JobCompanyForm />
+          </Step>
+          <Step step={1}>
+            <ReportList nowStep={nowStep} />
+          </Step>
+          <Step step={2}>
+            <ReportList nowStep={nowStep} />
+          </Step>
+          <Step step={3}>
+            <InputQuestion
+              createModalOpen={createModalOpen}
+              setCreateModalOpen={setCreateModalOpen}
+            />
+          </Step>
+        </MultiForm>
         <NavigateButton
           nowStep={nowStep}
           handleStep={handleStep}

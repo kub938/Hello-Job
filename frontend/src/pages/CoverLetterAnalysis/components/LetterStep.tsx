@@ -5,6 +5,7 @@ interface LetterStepProps {
 }
 
 function LetterStep({ nowStep }: LetterStepProps) {
+  console.log(nowStep, "사이드 바의 스텝");
   const stepTitle = [
     "1. 기업/직무 선택",
     "2. 기업분석 선택",
