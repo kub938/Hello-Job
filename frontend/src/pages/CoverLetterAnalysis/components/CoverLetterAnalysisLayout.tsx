@@ -3,8 +3,8 @@ import LetterStep from "./LetterStep";
 import { useSelectCompanyStore } from "@/store/coverLetterAnalysisStore";
 
 interface CoverLetterAnalysisLayoutProps {
-  nowStep: number;
   children: ReactNode;
+  nowStep: number;
 }
 
 function CoverLetterAnalysisLayout({
