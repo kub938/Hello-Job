@@ -12,7 +12,7 @@ COPY src src
 RUN ./gradlew build -x test
 
 # 실행 스테이지
-FROM openjdk:17-slim
+FROM eclipse-temurin:17-jdk-jammy
 WORKDIR /app
 
 RUN apt-get update && \

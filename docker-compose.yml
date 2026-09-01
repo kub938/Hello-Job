@@ -82,7 +82,7 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt
 
   mysql:
-    image: mysql:8.0.4     # MySQL 이미지
+    image: mysql:8.0.39    # MySQL 이미지 (ARM64 호환)
     healthcheck:
       test: ["CMD", "mysql", "--user=${MYSQL_USER}", "--password=${MYSQL_PASSWORD}", "-e", "SELECT 1"]
       interval: 5s    # 5초마다 체크
